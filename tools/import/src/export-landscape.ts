@@ -1,8 +1,9 @@
 // Sanitising Excel -> CSV export of the UID table (D-10, D-11, D-19, D-20).
 // Only cell values leave the workbook: document properties, author fields and storage paths are dropped.
 import { createHash } from 'node:crypto';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { parseArgs } from 'node:util';
 import { stringify } from 'csv-stringify/sync';
 import * as XLSX from 'xlsx';
 
@@ -120,3 +121,46 @@ export function writeExport(outDir: string, result: ExportResult): void {
     writeFileSync(join(outDir, name), content, 'utf8');
   writeFileSync(join(outDir, MANIFEST_FILE), manifestText(result.files), 'utf8');
 }
+
+function main(argv: string[]): number {
+  let xlsx: string | undefined;
+  let out: string | undefined;
+  try {
+    const { values } = parseArgs({
+      args: argv,
+      options: { xlsx: { type: 'string' }, out: { type: 'string' } },
+      allowPositionals: false,
+    });
+    xlsx = values.xlsx;
+    out = values.out;
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+  }
+  if (xlsx === undefined || out === undefined) {
+    console.error(
+      'usage: export-landscape.ts --xlsx <path to UID-table - v1.2.xlsx> --out <directory>',
+    );
+    return 2;
+  }
+  try {
+    const buf = readFileSync(xlsx);
+    const result = exportWorkbook(buf);
+    writeExport(out, result);
+    for (const [name, content] of Object.entries(result.files).sort(([a], [b]) =>
+      a.localeCompare(b),
+    )) {
+      console.log(`${sha256Hex(content)}  ${name}`);
+    }
+    console.log(`links ${result.links}`);
+    console.log(
+      `removed parameters ${result.removedParams.length}${result.removedParams.length > 0 ? ` (${[...result.removedParams].sort().join(', ')})` : ''}`,
+    );
+    console.log(`xlsx sha256 ${sha256Hex(buf)}`);
+    return 0;
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    return 1;
+  }
+}
+
+if (import.meta.main) process.exitCode = main(process.argv.slice(2));

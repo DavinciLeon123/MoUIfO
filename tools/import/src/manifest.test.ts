@@ -142,7 +142,9 @@ describe('committed landscape export', () => {
         expect(text, `${name} CR`).not.toContain('\r');
         expect(text.endsWith('\n') && !text.endsWith('\n\n'), `${name} trailing LF`).toBe(true);
         expect(PERSONAL_PATH_PATTERN.test(text), `${name} personal path marker`).toBe(false);
-        expect(text, `${name} tracking parameter`).not.toMatch(/[?&](utm_[a-z0-9_]+|gclid|gbraid|wbraid|fbclid|msclkid|dclid|_gl|_ga|mc_cid|mc_eid)=/i);
+        expect(text, `${name} tracking parameter`).not.toMatch(
+          /[?&](utm_[a-z0-9_]+|gclid|gbraid|wbraid|fbclid|msclkid|dclid|_gl|_ga|mc_cid|mc_eid)=/i,
+        );
         expect(text, `${name} text fragment`).not.toContain('#:~:');
         const rows = parse(text, { relax_column_count: false }) as string[][];
         expect(new Set(rows.map((r) => r.length)).size, `${name} row widths`).toBe(1);
@@ -161,8 +163,13 @@ describe('committed landscape export', () => {
 
 describe('workbook is never committed', () => {
   test('git ls-files lists no xlsx and the local workbook is ignored (D-12)', () => {
-    const tracked = execFileSync('git', ['ls-files', '--', '*.xlsx'], { cwd: REPO, encoding: 'utf8' });
+    const tracked = execFileSync('git', ['ls-files', '--', '*.xlsx'], {
+      cwd: REPO,
+      encoding: 'utf8',
+    });
     expect(tracked).toBe('');
-    expect(() => execFileSync('git', ['check-ignore', '-q', 'UID-table - v1.2.xlsx'], { cwd: REPO })).not.toThrow();
+    expect(() =>
+      execFileSync('git', ['check-ignore', '-q', 'UID-table - v1.2.xlsx'], { cwd: REPO }),
+    ).not.toThrow();
   });
 });
