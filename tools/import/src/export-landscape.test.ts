@@ -58,7 +58,19 @@ describe('cleanUrl', () => {
   });
 
   test('removes every listed tracking key case-insensitively and drops an empty query', () => {
-    const keys = ['gclid', 'gbraid', 'wbraid', 'fbclid', 'msclkid', 'dclid', '_gl', '_ga', 'mc_cid', 'mc_eid', 'UTM_Medium'];
+    const keys = [
+      'gclid',
+      'gbraid',
+      'wbraid',
+      'fbclid',
+      'msclkid',
+      'dclid',
+      '_gl',
+      '_ga',
+      'mc_cid',
+      'mc_eid',
+      'UTM_Medium',
+    ];
     const raw = `https://example.org/a?${keys.map((k) => `${k}=1`).join('&')}`;
     const r = cleanUrl(raw);
     expect(r.url).toBe('https://example.org/a');
@@ -99,7 +111,9 @@ describe('cellText', () => {
   test('unsupported types and unusual number displays throw with the address', () => {
     expect(() => cellText({ t: 'b', v: true }, 'C3')).toThrow("unsupported cell type 'b' at C3");
     expect(() => cellText({ t: 'e', v: 0x07 }, 'D4')).toThrow("unsupported cell type 'e' at D4");
-    expect(() => cellText({ t: 'd', v: new Date(0) }, 'E5')).toThrow("unsupported cell type 'd' at E5");
+    expect(() => cellText({ t: 'd', v: new Date(0) }, 'E5')).toThrow(
+      "unsupported cell type 'd' at E5",
+    );
     expect(() => cellText({ t: 'n', v: 1e10, w: '1E+10' }, 'B2')).toThrow('B2');
     expect(() => cellText({ t: 'n', v: 5, w: '####' }, 'B3')).toThrow('B3');
   });
@@ -107,7 +121,15 @@ describe('cellText', () => {
 
 describe('exportWorkbook', () => {
   test('yields the two tab CSVs and the links CSV', () => {
-    const r = exportWorkbook(basic([['x', 'y'], ['1', '2']], [['p']]));
+    const r = exportWorkbook(
+      basic(
+        [
+          ['x', 'y'],
+          ['1', '2'],
+        ],
+        [['p']],
+      ),
+    );
     expect(Object.keys(r.files).sort()).toEqual([LINKS_FILE, PERSISTENCE, OVERVIEW].sort());
     expect(r.files[OVERVIEW]).toBe('x,y\n1,2\n');
     expect(r.files[PERSISTENCE]).toBe('p\n');
@@ -117,7 +139,10 @@ describe('exportWorkbook', () => {
 
   test('anchors at A1 when the used range starts at B1', () => {
     // aoa_to_sheet places data at A1:B2; re-address so the data sits at B1:C2.
-    const ws = sheet([['x', 'y'], ['z', 'w']]);
+    const ws = sheet([
+      ['x', 'y'],
+      ['z', 'w'],
+    ]);
     const shifted: XLSX.WorkSheet = {};
     for (const key of Object.keys(ws)) {
       if (key.startsWith('!')) continue;
@@ -162,8 +187,13 @@ describe('exportWorkbook', () => {
   });
 
   test('collects hyperlinks row-major with cleaned urls, including linked empty cells', () => {
-    const overview = sheet([['first', 'plain'], ['', 'second']]);
-    (overview.A1 as XLSX.CellObject).l = { Target: 'https://example.org/p?utm_source=x&id=7#:~:text=foo' };
+    const overview = sheet([
+      ['first', 'plain'],
+      ['', 'second'],
+    ]);
+    (overview.A1 as XLSX.CellObject).l = {
+      Target: 'https://example.org/p?utm_source=x&id=7#:~:text=foo',
+    };
     (overview.B2 as XLSX.CellObject).l = { Target: 'https://example.org/#/route' };
     overview.A2 = { t: 's', v: '', l: { Target: 'https://example.org/empty?gclid=9' } };
     const persistence = sheet([['link']]);
@@ -185,18 +215,24 @@ describe('exportWorkbook', () => {
     const ws = sheet([['a']]);
     ws.B2 = { t: 'b', v: true };
     ws['!ref'] = 'A1:B2';
-    expect(() => exportWorkbook(workbook({ 'Overview UIDs': ws, Persistence: sheet([['b']]) }))).toThrow(/B2/);
+    expect(() =>
+      exportWorkbook(workbook({ 'Overview UIDs': ws, Persistence: sheet([['b']]) })),
+    ).toThrow(/B2/);
   });
 
   test('throws for a number displayed in exponent form', () => {
     const ws = sheet([['a']]);
-    ws.B1 = { t: 'n', v: 1e10, w: '1E+10' };
+    ws.B1 = { t: 'n', v: 1e10, z: '0.00E+00' };
     ws['!ref'] = 'A1:B1';
-    expect(() => exportWorkbook(workbook({ 'Overview UIDs': ws, Persistence: sheet([['b']]) }))).toThrow(/B1/);
+    expect(() =>
+      exportWorkbook(workbook({ 'Overview UIDs': ws, Persistence: sheet([['b']]) })),
+    ).toThrow(/B1/);
   });
 
   test('throws when a tab is missing', () => {
-    expect(() => exportWorkbook(workbook({ 'Overview UIDs': sheet([['a']]) }))).toThrow(/Persistence/);
+    expect(() => exportWorkbook(workbook({ 'Overview UIDs': sheet([['a']]) }))).toThrow(
+      /Persistence/,
+    );
   });
 });
 
@@ -207,7 +243,9 @@ describe('manifestText and writeExport', () => {
   });
 
   test('sha256Hex matches a known vector', () => {
-    expect(sha256Hex('abc')).toBe('ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
+    expect(sha256Hex('abc')).toBe(
+      'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad',
+    );
   });
 
   test('writeExport writes the three CSVs and the manifest, which verifies', () => {
@@ -216,7 +254,9 @@ describe('manifestText and writeExport', () => {
       const out = join(dir, 'nested', 'out');
       const result = exportWorkbook(basic([['a', 'b']], [['c']]));
       writeExport(out, result);
-      expect(readdirSync(out).sort()).toEqual([LINKS_FILE, MANIFEST_FILE, OVERVIEW, PERSISTENCE].sort());
+      expect(readdirSync(out).sort()).toEqual(
+        [LINKS_FILE, MANIFEST_FILE, OVERVIEW, PERSISTENCE].sort(),
+      );
       const manifest = readFileSync(join(out, MANIFEST_FILE), 'utf8');
       expect(manifest).toBe(manifestText(result.files));
       expect(existsSync(join(out, OVERVIEW))).toBe(true);
