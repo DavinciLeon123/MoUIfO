@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { isElfproef, mask, parseAllowlist, scanText } from './scan.ts';
+import { isElfproef, mask, parseAddedLines, parseAllowlist, scanText } from './scan.ts';
 import { firstSyntheticValid, makeSyntheticValid } from './testing.ts';
 
 const PUBLIC_EXAMPLE = '001469630';
@@ -179,5 +179,64 @@ describe('parseAllowlist', () => {
     } catch (error) {
       expect(String(error)).not.toContain(v);
     }
+  });
+});
+
+describe('parseAddedLines', () => {
+  const diff = [
+    'diff --git a/a.txt b/a.txt',
+    'index 1111111..2222222 100644',
+    '--- a/a.txt',
+    '+++ b/a.txt',
+    '@@ -1,2 +5,3 @@',
+    '+one',
+    '-gone',
+    '+two',
+    '\\ No newline at end of file',
+    '@@ -10 +20 @@',
+    '+three',
+    'diff --git a/img.png b/img.png',
+    'index 3333333..4444444 100644',
+    'Binary files a/img.png and b/img.png differ',
+    'diff --git a/del.txt b/del.txt',
+    'deleted file mode 100644',
+    'index 5555555..0000000',
+    '--- a/del.txt',
+    '+++ /dev/null',
+    '@@ -1 +0,0 @@',
+    '-old',
+    'diff --git a/dir/my file.txt b/dir/my file.txt',
+    'new file mode 100644',
+    '--- /dev/null',
+    '+++ b/dir/my file.txt\t',
+    '@@ -0,0 +1 @@',
+    '+spaced',
+    'diff --git a/q.txt b/q.txt',
+    '--- a/q.txt',
+    '+++ "b/we\\tird.txt"',
+    '@@ -0,0 +1,2 @@',
+    '+++ b/looks-like-a-header',
+    '+tail',
+  ].join('\n');
+
+  test('returns added lines with new-file line numbers and ignores everything else', () => {
+    expect(parseAddedLines(diff)).toEqual([
+      { path: 'a.txt', line: 5, text: 'one' },
+      { path: 'a.txt', line: 6, text: 'two' },
+      { path: 'a.txt', line: 20, text: 'three' },
+      { path: 'dir/my file.txt', line: 1, text: 'spaced' },
+      { path: '"we\\tird.txt"', line: 1, text: '++ b/looks-like-a-header' },
+      { path: '"we\\tird.txt"', line: 2, text: 'tail' },
+    ]);
+  });
+
+  test('empty input gives no added lines', () => {
+    expect(parseAddedLines('')).toEqual([]);
+  });
+
+  test('added lines can be scanned for values', () => {
+    const added = parseAddedLines(`+++ b/x.txt\n@@ -0,0 +1 @@\n+id ${v}\n`);
+    expect(added).toEqual([{ path: 'x.txt', line: 1, text: `id ${v}` }]);
+    expect(scanText(added[0]?.text ?? '', NOBODY)).toEqual([{ line: 1, col: 4, value: v }]);
   });
 });

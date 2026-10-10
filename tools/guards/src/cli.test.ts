@@ -1,5 +1,5 @@
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -211,5 +211,118 @@ describe('usage errors', () => {
     const r = guard(makeDir());
     expect(r.code).toBe(2);
     expect(r.stderr).toContain('git repository');
+  });
+});
+
+function commit(dir: string, message: string): string {
+  git(dir, 'add', '-A');
+  git(dir, '-c', 'commit.gpgsign=false', 'commit', '-q', '-m', message);
+  return git(dir, 'rev-parse', 'HEAD').trim();
+}
+
+const short = (sha: string) => sha.slice(0, 7);
+
+describe('range mode', () => {
+  test('a value added in one commit and removed in a later one: tree green, range red', () => {
+    const repo = makeRepo({ 'notes.txt': 'one\n' });
+    const base = git(repo, 'rev-parse', 'HEAD').trim();
+    write(repo, { 'notes.txt': `one\nid ${v}\n` });
+    const added = commit(repo, 'add');
+    write(repo, { 'notes.txt': 'one\n' });
+    const head = commit(repo, 'remove');
+
+    expect(guard(repo).code).toBe(0);
+    const r = guard(repo, '--range', `${base}..HEAD`);
+    expect(r.code).toBe(1);
+    expect(r.stdout).toContain(
+      `::error file=notes.txt,line=2,col=4,title=personal-number guard (commit ${short(added)})::`,
+    );
+    expect(r.stdout).toContain(masked);
+    expect(r.stdout).toContain(
+      `personal-number guard: scanned 2 commits (${short(base)}..${short(head)}), 1 findings`,
+    );
+    expect(r.all).not.toContain(v);
+  });
+
+  test('findings are ordered by commit, oldest first', () => {
+    const repo = makeRepo({ 'a.txt': 'x\n' });
+    const base = git(repo, 'rev-parse', 'HEAD').trim();
+    const w = firstSyntheticValid(String(Number(v.slice(0, 8)) + 1));
+    write(repo, { 'z.txt': `${w}\n` });
+    const first = commit(repo, 'first');
+    write(repo, { 'a.txt': `${v}\n` });
+    const second = commit(repo, 'second');
+    const lines = guard(repo, '--range', `${base}..HEAD`)
+      .stdout.split('\n')
+      .filter((l) => l.startsWith('::error'));
+    expect(lines).toHaveLength(2);
+    expect(lines[0]).toContain(`commit ${short(first)}`);
+    expect(lines[0]).toContain('file=z.txt');
+    expect(lines[1]).toContain(`commit ${short(second)}`);
+  });
+
+  test('an empty range exits 0 with zero commits', () => {
+    const repo = makeRepo({ 'a.txt': 'x\n' });
+    const r = guard(repo, '--range', 'HEAD..HEAD');
+    expect(r.code).toBe(0);
+    expect(r.stdout).toContain('scanned 0 commits');
+  });
+
+  test('an allow-listed value added in the range exits 0', () => {
+    const repo = makeRepo({ 'a.txt': 'x\n' });
+    const base = git(repo, 'rev-parse', 'HEAD').trim();
+    write(repo, { 'a.txt': 'RSIN 001469630\n' });
+    commit(repo, 'public example');
+    expect(guard(repo, '--range', `${base}..HEAD`).code).toBe(0);
+  });
+
+  test('a rename of a file that contains a value is reported', () => {
+    const repo = makeRepo({ 'old.txt': `${v}\n` });
+    const base = git(repo, 'rev-parse', 'HEAD').trim();
+    git(repo, 'mv', 'old.txt', 'new.txt');
+    commit(repo, 'rename');
+    const r = guard(repo, '--range', `${base}..HEAD`);
+    expect(r.code).toBe(1);
+    expect(r.stdout).toContain('file=new.txt');
+    expect(r.all).not.toContain(v);
+  });
+
+  test('merge commits are not scanned themselves', () => {
+    const repo = makeRepo({ 'a.txt': 'x\n' });
+    const base = git(repo, 'rev-parse', 'HEAD').trim();
+    git(repo, 'checkout', '-q', '-b', 'side');
+    write(repo, { 'side.txt': 'side\n' });
+    commit(repo, 'side');
+    git(repo, 'checkout', '-q', '-');
+    write(repo, { 'main.txt': 'main\n' });
+    commit(repo, 'main');
+    git(repo, '-c', 'commit.gpgsign=false', 'merge', '-q', '--no-ff', '-m', 'merge', 'side');
+    const r = guard(repo, '--range', `${base}..HEAD`);
+    expect(r.code).toBe(0);
+    expect(r.stdout).toContain('scanned 2 commits');
+  });
+
+  test.each([
+    ['a leading dash', '-x..HEAD'],
+    ['whitespace', 'HEAD ..HEAD'],
+    ['three dots', 'HEAD...HEAD'],
+    ['no separator', 'HEAD'],
+    ['a missing side', '..HEAD'],
+    ['two separators', 'HEAD..HEAD..HEAD'],
+    ['an unknown ref', 'no-such-ref..HEAD'],
+    ['an unknown head', 'HEAD..no-such-ref'],
+  ])('%s exits 2', (_name, range) => {
+    const repo = makeRepo({ 'a.txt': 'x\n' });
+    const r = guard(repo, '--range', range);
+    expect(r.code).toBe(2);
+    expect(r.stderr).not.toBe('');
+  });
+
+  test('an option-shaped range is rejected without reaching git', () => {
+    const repo = makeRepo({ 'a.txt': 'x\n' });
+    const target = join(makeDir(), 'pwned.txt');
+    const r = guard(repo, '--range', `--output=${target}..HEAD`);
+    expect(r.code).toBe(2);
+    expect(existsSync(target)).toBe(false);
   });
 });
