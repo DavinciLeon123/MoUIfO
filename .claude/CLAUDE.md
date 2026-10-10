@@ -1,3 +1,23 @@
+## Project rules (read first)
+
+- Read `SPEC.md` (English working translation; the Dutch original is `SPEC.nl.md`) and `DECISIONS.md` before any work.
+- `DECISIONS.md` overrides `SPEC.md`, which overrides `SPEC.nl.md`.
+- Ask the owner before any new deviation from `SPEC.md` or `DECISIONS.md`, and record an agreed deviation as a new `DECISIONS.md` row.
+- The generated sections below (between the GSD markers) are regenerated from planning research, predate `DECISIONS.md` and are never edited by hand. Where they differ from `DECISIONS.md`, `DECISIONS.md` wins; the known differences are listed under "Overridden by DECISIONS.md" directly below.
+- `SPEC.md` section 0 refers to `CLAUDE.md`; this file lives at `.claude/CLAUDE.md` (DEC-002).
+- Never commit a personal number: tests build valid-looking 9-digit values at runtime, and only entries of `tools/guards/personal-number-allowlist.txt` (public or synthetic, each with a reason) may appear.
+- `config.yaml` is the only place for the namespace and the npm scope.
+
+### Overridden by DECISIONS.md
+
+These DECISIONS.md rows override the matching text in the generated sections below; follow the DECISIONS.md value.
+
+- DEC-008 (Node engines): `engines.node` is `>=22.18` for the repository root and every `tools/*` workspace (native `.ts` type stripping is unflagged only from Node 22.18.0); the published `packages/engine` and `packages/mcp` keep `>=22.12`; the CI matrix is Node 22 and 24 with pinned majors (adding Node 26 needs a new DECISIONS.md row). Overrides the `engines.node` = `>=22.12` in the Technology Stack section.
+- DEC-006 (MCP SDK): the MCP server uses `@modelcontextprotocol/server` (MCP TypeScript SDK major version 2). Overrides every mention of `@modelcontextprotocol/sdk` in the generated sections (the Project "Tech stack" constraint, the stack flag table, the alternatives table, the fallback variant and the version-compatibility row); the "pending owner OK" wording there is settled.
+- DEC-009 (lint gate): `npm run check` is the single local entry (Biome lint + format check + `tsc`), and Biome runs with `--error-on-warnings` because it otherwise exits 0 on warnings; CI fails on any lint or format issue.
+- DEC-010 (npm scope): the scope is set only in `config.yaml` (`npm_scope`) and package names are derived from it with `npm run config:sync`; try `@uio`, fall back to `@mouifo`. Overrides the stack section's `@moufo/*` fallback and its "root package.json name template + config.yaml" wording.
+- DEC-014 (landscape workbook): the workbook is committed as CSV only and the original xlsx stays local and gitignored; only the Phase 1 export script reads the xlsx, and every later importer reads the committed CSVs. Overrides the stack section's import row that reads the workbook directly.
+
 <!-- GSD:project-start source:PROJECT.md -->
 
 ## Project
