@@ -1,0 +1,16 @@
+{
+  "name": "uio-config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "EUPL-1.2",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "yaml": "2.9.1"
+  }
+}

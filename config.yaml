@@ -1,0 +1,5 @@
+# Single source of truth for names and URLs. Read through tools/config only.
+namespace: "https://w3id.org/uio/"
+npm_scope: "@uio"
+pages_base_path: "/MoUIfO/"
+repository: "DavinciLeon123/MoUIfO"

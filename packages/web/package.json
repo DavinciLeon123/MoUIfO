@@ -1,0 +1,13 @@
+{
+  "name": "@uio/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "EUPL-1.2",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json"
+  }
+}

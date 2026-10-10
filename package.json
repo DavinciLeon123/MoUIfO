@@ -1,0 +1,29 @@
+{
+  "name": "uio-monorepo",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "EUPL-1.2",
+  "workspaces": ["packages/*", "tools/*"],
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "check": "biome check --error-on-warnings . && tsc",
+    "fix": "biome check --write .",
+    "guard": "node tools/guards/src/personal-numbers.ts",
+    "validate": "node --conditions=uio-source tools/validate/src/index.ts",
+    "build:dist": "node --conditions=uio-source tools/build/src/index.ts",
+    "build:packages": "npm run build --workspaces --if-present",
+    "build": "npm run build:dist && npm run build:packages",
+    "test": "vitest run",
+    "config:sync": "node tools/config/src/sync.ts",
+    "export:landscape": "node tools/import/src/export-landscape.ts"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.15",
+    "@types/node": "24.19.1",
+    "typescript": "7.0.2",
+    "vitest": "5.0.3"
+  }
+}

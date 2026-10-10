@@ -1,1 +1,6 @@
 .planning/
+node_modules/
+dist/
+.tsbuild/
+*.tsbuildinfo
+*.xlsx
