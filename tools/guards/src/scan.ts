@@ -57,3 +57,45 @@ export function parseAllowlist(text: string): Set<string> {
   }
   return allowed;
 }
+
+export type AddedLine = { path: string; line: number; text: string };
+
+const HUNK = /^@@ -[0-9]+(?:,[0-9]+)? \+([0-9]+)(?:,[0-9]+)? @@/;
+
+/**
+ * Added lines of a unified diff (`--unified=0`, rename detection off), with new-file line numbers.
+ * Header lines (`+++`) are only recognised outside a hunk, so an added line whose text starts with
+ * `++` is not mistaken for a header.
+ */
+export function parseAddedLines(diff: string): AddedLine[] {
+  const out: AddedLine[] = [];
+  let path: string | null = null;
+  let next = 0;
+  let inHunk = false;
+  for (const line of diff.split('\n')) {
+    if (line.startsWith('diff --git ')) {
+      path = null;
+      inHunk = false;
+    } else if (inHunk && line.startsWith('+')) {
+      if (path !== null) out.push({ path, line: next, text: line.slice(1) });
+      next++;
+    } else if (line.startsWith('@@')) {
+      const m = HUNK.exec(line);
+      if (m?.[1]) {
+        next = Number(m[1]);
+        inHunk = true;
+      }
+    } else if (!inHunk && line.startsWith('+++ ')) {
+      path = headerPath(line.slice(4));
+    }
+  }
+  return out;
+}
+
+function headerPath(raw: string): string | null {
+  const rest = raw.endsWith('\t') ? raw.slice(0, -1) : raw; // git appends a tab after names with spaces
+  if (rest === '/dev/null') return null;
+  if (rest.startsWith('b/')) return rest.slice(2);
+  if (rest.startsWith('"b/')) return `"${rest.slice(3)}`; // C-quoted path, kept as printed
+  return rest;
+}
