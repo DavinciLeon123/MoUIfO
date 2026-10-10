@@ -4,7 +4,10 @@
   "private": true,
   "type": "module",
   "license": "EUPL-1.2",
-  "workspaces": ["packages/*", "tools/*"],
+  "workspaces": [
+    "packages/*",
+    "tools/*"
+  ],
   "engines": {
     "node": ">=22.18"
   },
