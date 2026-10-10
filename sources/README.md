@@ -11,7 +11,7 @@ Code elsewhere in the repository is EUPL-1.2 (`LICENSE`).
 
 | File | Original name | Version | Date | SHA-256 (original) | SHA-256 (repository copy) | Licence | Status |
 |------|---------------|---------|------|--------------------|---------------------------|---------|--------|
-| landscape-v1.2-overview-uids.csv, landscape-v1.2-persistence.csv, landscape-v1.2-links.csv | UID-table - v1.2.xlsx | 1.2 | 2026-07-03 | 9c929660b53d329dfa4f6a23f83cee0770a1819e5b9ef3a12c20d865c6afed03 | see landscape-v1.2.sha256 | CC-BY-4.0 (pending confirmation, DEC-015) | pending licence confirmation (not committed) |
+| landscape-v1.2-overview-uids.csv, landscape-v1.2-persistence.csv, landscape-v1.2-links.csv | UID-table - v1.2.xlsx | 1.2 | 2026-07-03 | 9c929660b53d329dfa4f6a23f83cee0770a1819e5b9ef3a12c20d865c6afed03 | see landscape-v1.2.sha256 | CC-BY-4.0 (confirmed 2026-10-10, DEC-024) | committed |
 | uio-ontology-v0.9.ttl | UIO ontology v0.9.ttl | 0.9 | — | 919e99f270e8ad000e866c4693569019aeb0358d7f6143a5bc4e8d83962c2af7 | 6998c44f229a896b2f05507bbfe4f224c51450134155b60c39c31b7b4cf81c49 | CC-BY-4.0 (LICENSE-model, DEC-013) | committed; line endings normalised to LF (DEC-018) |
 
 The original SHA-256 of the ontology is that of the file with CRLF line endings. The repository copy differs only in
@@ -55,8 +55,7 @@ Credit line for the UID table v1.2 content, as agreed in DEC-016:
 
 > UID table v1.2 — Davinci Conclusion, as produced for the CoE-DSC. Licensed under CC BY 4.0.
 
-The written CC-BY confirmation of Davinci Conclusion (DEC-015) is recorded when the landscape CSVs are committed; until then
-the credit line is the agreed wording, not yet a published licence statement.
+Davinci Conclusion's written CC-BY-4.0 confirmation was given on 2026-10-10 and is recorded in DEC-024 (closing the gate in DEC-015).
 
 ## Ontology
 
