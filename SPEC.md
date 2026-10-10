@@ -321,4 +321,171 @@ interface Step {
 
 `elfproef` (11-proof; weights 9…2 and −1 for the last digit; applies to BSN and RSIN, which therefore cannot be told apart by checksum), `iso7064-mod97-10` (LEI, also the VAT id of sole proprietorships), `gs1-mod10` (GLN), `none`. Each algorithm has its own unit tests with known valid and invalid values. Before use, record which schemes have which algorithm, with a source; see Appendix B.
 
-<!-- gsd:write-continue -->
+## 7. Layer 3 — Access
+
+### 7.1 Website (`packages/web`)
+
+- Static (Vite, no framework requirement; preference: plain TS or Preact). Hosted on GitHub Pages.
+- Three views:
+  1. **"Paste your identifiers"**: one text box, one value per line. Shows recognition, derivations and consistency, each conclusion with an expandable explanation (steps, source, condition, certainty).
+  2. **Schemes**: list and detail page per scheme (`describe`) with applicability per jurisdiction and the relations as a small graph.
+  3. **Relation**: pick two schemes and see the chain (`relate`).
+- Certainty visible with text and colour, not colour alone. Accessible (WCAG 2.1 AA), works on mobile.
+- No cookies, no analytics and no external requests. Fonts and assets are in the bundle.
+- Text under the input field: "Values are processed in your browser only and never stored or sent."
+- UI language: English, with Dutch as second language (simple i18n).
+
+### 7.2 MCP server (`packages/mcp`)
+
+> Amended by DECISIONS.md DEC-006: the MCP server uses `@modelcontextprotocol/server` (MCP TypeScript SDK major version 2) instead of `@modelcontextprotocol/sdk`.
+
+> Amended by DECISIONS.md DEC-010: the package name derives from the npm scope set once in `config.yaml` (`npm_scope`), so `npx @uio/mcp-server` holds only while the scope is `@uio`.
+
+- `@modelcontextprotocol/sdk`, stdio transport, startable with `npx @uio/mcp-server`.
+- Six tools, one per engine function, with the same names and a JSON schema for the input. The output is the full `Result`, including `explanation`.
+- Every tool description ends with: *"Report conclusions with their certainty and source exactly as returned. Do not add facts about identifiers that are not in the result."*
+- One resource `uio://model/summary` with the list of schemes, and a short description per scheme.
+- README section with configuration examples for Claude Desktop and VS Code.
+
+### 7.3 Download
+
+Every release adds `dist/*` as a release asset. The website links to the latest release.
+
+### 7.4 Later, do not build in 0.1
+
+REST API, a dedicated chat with a language model (for example Jev by TypeSafe AI) and a SPARQL endpoint. Keep the engine API such that these can become thin layers.
+
+## 8. Tests and CI
+
+> Amended by DECISIONS.md DEC-009: `npm run check` is the single local entry (Biome lint, format check and `tsc`), and Biome runs with `--error-on-warnings` so CI fails on any lint or format issue.
+
+> Amended by DECISIONS.md DEC-022: a personal-number guard (`tools/guards`) also runs in CI over the tree and over every commit of a pull request.
+
+- **Unit:** checksums, transformations, certainty combination, the five behaviour rules of §6.2.
+- **Model-driven:** generate the tests from all `examples_valid`, `examples_invalid` and rule `examples`.
+- **Acceptance:** the EORI case (§10) as an end-to-end test at engine level, and as a smoke test on MCP and web (Playwright, headless).
+- **`ci.yml` (on a pull request):** install → validate model → build dist → test → build web and mcp.
+- **`release.yml` (on a tag `v*`):** the same, plus deploy to Pages, `npm publish` of engine and mcp, and dist as release asset.
+- Semver for the model: a new scheme or a new rule is minor; a changed meaning or a removal is major. Maintain `CHANGELOG.md`.
+
+## 9. Starter data
+
+> Amended by DECISIONS.md DEC-014: the importer reads the committed CSV exports in `sources/` (with a SHA-256 manifest), never the xlsx.
+
+> Amended by DECISIONS.md DEC-015: `sources/landscape-v1.2*` is committed only after written confirmation from Davinci Conclusion that the UID table content may be published under CC-BY-4.0.
+
+> Amended by DECISIONS.md DEC-016: the confirmation of Davinci Conclusion alone suffices, and the attribution cells of the Overview tab stay in the export as the credit line ("Davinci Conclusion, as produced for the CoE-DSC").
+
+> Amended by DECISIONS.md DEC-020: KBO (Belgium) is the only foreign equivalent in v0.1, as a light scheme with an `equivalent-in` relation to `kvk-number`.
+
+> Amended by DECISIONS.md DEC-023: the workbook is `UID-table - v1.2.xlsx` with tabs `Overview UIDs` and `Persistence`; it has one LEI column, BSN and fi-number columns are present (sparse), and it has 14 scheme columns where this section lists 15 ids.
+
+**Source:** `sources/Analysis of Unique IDs for companies.xlsx` (tab *Overzicht UID* = landscape table, *Persistence*, *KvK in NL en buitenland*). Also deliver a conversion script `tools/import/excel.ts`, or transfer the values by hand. In both cases record `source: landscape-v1.2` per field.
+
+**Starter set of 14 schemes:** `kvk-number`, `kvk-establishment-number` (establishment number), `oin`, `rsin`, `vat` (generic) plus `vat-nl`, `roo`, `peppol-id`, `lei`, `gln`, `euid`, `eori`, `duns`, `bsn`, `fi-number`.
+
+**Known points of attention:**
+- The Excel has **two LEI columns** (partly Dutch). Merge them; put contradictory values (persistence: medium versus low) in `docs/gaps.md`.
+- **ROO** is a register, not an identifier. Use `kind: register`, with a URL as identification.
+- **Peppol-ID** is composite (`<ICD>:<value>`). Use `kind: composite`. The engine recognises the prefix and delegates the value to the underlying scheme.
+- **BSN** and **fi-number** are not in the Excel. Model them minimally (issuer, jurisdiction, format, relation fi-number → RSIN) with a source, or put them in `docs/gaps.md`.
+- **Foreign equivalents** (KBO, Handelsregister HRB/HRA, SIREN/SIRET, RCSL, Companies House, UID-CH, Firmenbuch) come from the tab *KvK in NL en buitenland*. Model them as light schemes with `equivalent-in` to `kvk-number`.
+- The **trust score** (five sub-scores) and **persistence** (six events) come directly from the Excel.
+
+## 10. Acceptance case: EORI
+
+> Amended by DECISIONS.md DEC-003: the Dutch EORI is derived from the RSIN, and VAT to EORI is a two-step chain (VAT number to RSIN, then RSIN to EORI).
+
+> Amended by DECISIONS.md DEC-005: a bare 9-digit value (possibly a BSN) joins `check` only when another supplied value derives it.
+
+**Input:** `derive("NL001469630", "eori")` and `check(["NL001469630", "NL001469630B01", "001469630"])`.
+
+**Expected** (certainty in brackets; the sources follow from the model):
+
+| Conclusion | Certainty |
+|---|---|
+| Issued by Dutch Customs; to be verified via the EU validation of EORI | certain |
+| Associated VAT number `NL001469630B01` (rule `vat-nl-from-eori-nl`) | likely |
+| Associated RSIN `001469630` (via the VAT number; does not apply to sole proprietorships: assumption `entity_form = legal-person`) | likely (weakest link) |
+| Probably designates the top-level legal person (condition: NL) | likely |
+| Can be looked up via the RSIN in the Handelsregister (reference, not a lookup) | certain |
+| `check`: all three pairs `consistent`, with rule and certainty | — |
+
+**Contrast:** `derive("DE123456789012345", "eori")` gives no Dutch VAT number, and as level `declaring-entity` (likely).
+
+`RSIN 001469630` passes the elfproef. Check this in the test; the value comes from the Excel (ABN AMRO Schadeverzekering N.V., public data). In the tests, otherwise use only values from public examples in `sources/`, or synthetic values that pass the checksum.
+
+## 11. Definition of done (v0.1)
+
+> Amended by DECISIONS.md DEC-023: the scheme count is reconciled in Phase 2, because `vat` and `vat-nl` share one workbook column (14 columns against 15 ids).
+
+- [ ] All 14 schemes are in `model/schemes/`, with a source for every statement; gaps are in `docs/gaps.md`.
+- [ ] CI is green: validation, SHACL, model-driven tests, unit and acceptance tests.
+- [ ] The six engine functions work for all schemes, and every conclusion has an explanation.
+- [ ] The website is on GitHub Pages and the EORI case works there.
+- [ ] The MCP server can be started via `npx` and answers the example questions from §2 in Claude Desktop.
+- [ ] `dist/` (TTL, JSON-LD, landscape table) can be downloaded at release `v0.1.0`.
+- [ ] README (including glossary and EORI case), CONTRIBUTING (one page) and both LICENSE files are present.
+
+## 12. Open choices and defaults
+
+> Amended by DECISIONS.md DEC-007: TypeScript 7 (7.0.2) with Biome 2.5 for lint and format, plus `tsc --noEmit`; no ESLint or Prettier.
+
+> Amended by DECISIONS.md DEC-011: the base namespace `https://w3id.org/uio/` is configurable in `config.yaml`; the w3id registration is deferred to Phase 8, with namespace maintainers Leon Roseleur and Joost Wisselink.
+
+> Amended by DECISIONS.md DEC-012: the repository stays `DavinciLeon123/MoUIfO` for v0.1, and the GitHub Pages base path is configurable as `pages_base_path` in `config.yaml`.
+
+> Amended by DECISIONS.md DEC-013: `LICENSE-model` (CC-BY-4.0) also covers `sources/` and `docs/`.
+
+| Choice | Default until decided |
+|---|---|
+| Owner of the repository and the namespace | Namespace `https://w3id.org/uio/`, configurable in one place in `config.yaml`. Repo owner to follow. |
+| Language of the engine | TypeScript |
+| Licences | Code under EUPL-1.2; model and dist under CC-BY-4.0 |
+| BSN | Recognise and warn, do not process further (§6.3) |
+| Definition of "applicable" | Four statuses (§5.1); per jurisdiction several are possible at the same time |
+
+## 13. Build order
+
+1. Monorepo setup, licences, `config.yaml`, CI skeleton.
+2. Closed lists, JSON Schema for the YAML, validation tool.
+3. Starter data: `eori`, `vat-nl`, `rsin`, `kvk-number`, `euid` in full (this covers the EORI case); then the other schemes.
+4. Build: YAML → `model.json`, TTL, JSON-LD, landscape table; SHACL shapes.
+5. Engine: checksums and transformations → `recognise`, `describe`, `applicability` → `relate`, `derive`, `check` → EORI acceptance test.
+6. MCP server.
+7. Website.
+8. README, CONTRIBUTING, issue templates, release `v0.1.0`.
+
+---
+
+## Appendix A — Start data in brief (from the landscape table)
+
+> Amended by DECISIONS.md DEC-003: for the Dutch EORI the primary derivation is from the RSIN (NL + RSIN for legal persons), not from the VAT number.
+
+| Scheme | Issuer | Jurisdiction | Format (according to source) | Related to |
+|---|---|---|---|---|
+| KvK number | Kamer van Koophandel | NL | 8 digits | Origin of many other IDs |
+| Establishment number | Kamer van Koophandel | NL | 12 digits | KvK number |
+| OIN | Logius | NL | 20 digits: prefix(8) + KvK number or RSIN + suffix | KvK number or RSIN |
+| RSIN | Kamer van Koophandel | NL | 9 digits | VAT number; based on fi-number |
+| VAT number (NL) | Belastingdienst | NL (VAT ids worldwide) | NL + 9 digits + B + 2 digits | RSIN (not for sole proprietorships) |
+| ROO | Logius / KOOP | NL | n/a (register, URL) | KvK number, OIN |
+| Peppol-ID | OpenPeppol | NL / international | One of: KvK number, OIN, VAT number, IBAN, GLN, with ICD prefix | RSIN, OIN, VAT number |
+| LEI | LOUs under GLEIF | worldwide | 20 characters: LOU(4) + ID(14) + check digits(2), ISO 17442 | KvK number via RA codes |
+| GLN | GS1 | worldwide | 13 digits (GS1) | none |
+| EUID | national register, via BRIS | EU | country code + register code + national number (+ check digit) | KvK number |
+| EORI | national customs | EU | NL: VAT number without the last 3 characters | VAT number, KvK number |
+| DUNS | Dun & Bradstreet | worldwide | 9 digits | KvK number, LEI, VAT number |
+| BSN | Rijksoverheid (BRP) | NL | 9 digits, elfproef variant | (person-related) |
+| fi-number | Belastingdienst | NL | 9 digits | RSIN |
+
+## Appendix B — Details to verify (do not adopt without a source)
+
+> Amended by DECISIONS.md DEC-004: the checksum of a scheme is an any-of list with its own source and certainty per entry; for `vat-nl` the mod 97 entry is marked `likely`.
+
+These are commonly used values. They must first be confirmed with an authoritative source in `model/sources/` before they enter the model.
+
+- ISO 6523 ICD codes: 0106 (KvK), 0190 (OIN), 0088 (GLN), 0060 (DUNS), 0199 (LEI); Peppol EAS 9944 (VAT number NL).
+- Checksums: BSN, RSIN and fi-number via elfproef (last weight −1); LEI via ISO 7064 mod 97-10; GLN via GS1 mod 10; VAT id of a sole proprietorship (since 2020) via mod 97.
+- Format of the Dutch EUID: the Excel mentions `NL.KVK.05058078`; check this against the e-Justice Portal or BRIS documentation.
+- OIN structure: prefix `00000001` (based on RSIN) and `00000003` (based on KvK number); check this in the Logius documentation.
