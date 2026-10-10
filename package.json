@@ -11,6 +11,9 @@
   "engines": {
     "node": ">=22.18"
   },
+  "allowScripts": {
+    "fsevents": false
+  },
   "scripts": {
     "check": "biome check --error-on-warnings . && tsc",
     "fix": "biome check --write .",
