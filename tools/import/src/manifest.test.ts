@@ -5,8 +5,19 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse } from 'csv-parse/sync';
 import { describe, expect, test } from 'vitest';
-import { LINKS_FILE, MANIFEST_FILE, manifestText, TAB_FILES } from './export-landscape.ts';
-import { PERSONAL_PATH_PATTERN, parseManifest, verifyManifest } from './manifest.ts';
+import {
+  LINKS_FILE,
+  MANIFEST_FILE,
+  manifestText,
+  sha256Hex,
+  TAB_FILES,
+} from './export-landscape.ts';
+import {
+  PERSONAL_PATH_PATTERN,
+  parseManifest,
+  parseProvenanceTable,
+  verifyManifest,
+} from './manifest.ts';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 const SOURCES = join(REPO, 'sources');
@@ -171,5 +182,37 @@ describe('workbook is never committed', () => {
     expect(() =>
       execFileSync('git', ['check-ignore', '-q', 'UID-table - v1.2.xlsx'], { cwd: REPO }),
     ).not.toThrow();
+  });
+});
+
+describe('sources provenance (D-22)', () => {
+  const readme = readFileSync(join(SOURCES, 'README.md'), 'utf8');
+  const rows = parseProvenanceTable(readme);
+
+  test('the table lists the landscape export and the v0.9 ontology', () => {
+    expect(rows.map((r) => r.File)).toEqual([
+      'landscape-v1.2-overview-uids.csv, landscape-v1.2-persistence.csv, landscape-v1.2-links.csv',
+      'uio-ontology-v0.9.ttl',
+    ]);
+  });
+
+  test('every row naming an existing file with a 64-hex repository hash matches that file', () => {
+    let checked = 0;
+    for (const row of rows) {
+      const path = join(SOURCES, row.File ?? '');
+      const hash = row['SHA-256 (repository copy)'] ?? '';
+      if (!existsSync(path) || !/^[0-9a-f]{64}$/.test(hash)) continue;
+      expect(sha256Hex(readFileSync(path)), row.File).toBe(hash);
+      checked++;
+    }
+    expect(checked).toBeGreaterThanOrEqual(1);
+  });
+
+  test('the ontology keeps its original CRLF hash on record and has no CR byte', () => {
+    const row = rows.find((r) => r.File === 'uio-ontology-v0.9.ttl');
+    expect(row?.['SHA-256 (original)']).toBe(
+      '919e99f270e8ad000e866c4693569019aeb0358d7f6143a5bc4e8d83962c2af7',
+    );
+    expect(readFileSync(join(SOURCES, 'uio-ontology-v0.9.ttl')).includes(0x0d)).toBe(false);
   });
 });
