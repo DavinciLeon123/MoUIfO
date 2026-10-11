@@ -5,7 +5,9 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { REPO_ROOT } from 'uio-config';
 import { afterAll, describe, expect, test, vi } from 'vitest';
+import { parse, stringify } from 'yaml';
 import { runValidation } from './index.ts';
+import { EXPECTED_RUN_STEPS } from './workflow-rules.ts';
 
 vi.setConfig({ testTimeout: 60_000 });
 
@@ -86,6 +88,31 @@ describe('validate CLI', () => {
     expect(status).toBe(1);
     expect(stdout).toContain('::error file=DECISIONS.md');
     expect(stdout).toMatch(/validate: \d+ problems/);
+  });
+
+  test('exits 1 when ci.yml merges every run step into one run: |- step (CR-01, verifier reproduction)', () => {
+    const root = copyOfRepo();
+    const path = join(root, '.github/workflows/ci.yml');
+    // An expression opener, spelled out so the source holds no literal placeholder.
+    const sha = `${'$' + '{{'} github.sha }}`;
+    // biome-ignore lint/suspicious/noExplicitAny: the test rewrites arbitrary parsed YAML
+    const doc = parse(readFileSync(path, 'utf8'), { schema: 'core' }) as any;
+    doc.jobs.ci.steps = [
+      ...doc.jobs.ci.steps.slice(0, 2),
+      {
+        name: 'All',
+        env: { ALLOWLIST_REF: sha, BASE_SHA: sha, HEAD_SHA: sha },
+        run: EXPECTED_RUN_STEPS.join('\n'),
+      },
+    ];
+    const written = stringify(doc, { schema: 'core', blockQuote: 'literal' });
+    expect(written).toContain('run: |-');
+    writeFileSync(path, written);
+    const { status, stdout } = runCli(root);
+    expect(status).toBe(1);
+    expect(stdout).toContain('::error file=.github/workflows/ci.yml::run steps must be, in order');
+    expect(stdout).toContain('the tree guard step is missing');
+    expect(stdout).toContain('the PR-commit guard step is missing');
   });
 
   test('a broken config.yaml becomes one problem for config.yaml', () => {

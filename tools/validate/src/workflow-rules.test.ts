@@ -259,6 +259,37 @@ describe('checkWorkflows', () => {
   const rangeIndex = (doc: Doc): number => runStepIndex(doc, EXPECTED_RUN_STEPS[3] ?? '');
   const validateIndex = (doc: Doc): number => runStepIndex(doc, 'npm run validate');
 
+  /** Replace every step after the two `uses` steps with one step that runs all eight commands. */
+  const mergeAllRunSteps = (doc: Doc): void => {
+    const list = steps(doc);
+    list.splice(2, list.length - 2, {
+      name: 'All',
+      env: {
+        ALLOWLIST_REF: `${EXPR} github.sha }}`,
+        BASE_SHA: `${EXPR} github.sha }}`,
+        HEAD_SHA: `${EXPR} github.sha }}`,
+      },
+      run: EXPECTED_RUN_STEPS.join('\n'),
+    });
+  };
+
+  /** The tree and PR-commit guard commands as one multi-line run on the tree guard step. */
+  const mergeGuardSteps = (doc: Doc): void => {
+    const list = steps(doc);
+    list[treeIndex(doc)].run = `${EXPECTED_RUN_STEPS[2]}\n${EXPECTED_RUN_STEPS[3]}`;
+    list.splice(
+      list.findIndex((step: Doc) => step.name === 'Personal-number guard (PR commits)'),
+      1,
+    );
+  };
+
+  /** Two adjacent commands as one multi-line run on the `npm ci` step. */
+  const mergeCiAndCheck = (doc: Doc): void => {
+    const list = steps(doc);
+    list[runStepIndex(doc, 'npm ci')].run = `${EXPECTED_RUN_STEPS[0]}\n${EXPECTED_RUN_STEPS[1]}`;
+    list.splice(runStepIndex(doc, 'npm run check'), 1);
+  };
+
   const NO_COE = 'continue-on-error is not allowed';
   const IF_STEP = 'an if condition is only allowed on the PR-commit guard step';
 
@@ -384,6 +415,42 @@ describe('checkWorkflows', () => {
         doc.on.issue_comment = { types: ['created'] };
       },
       'issue_comment is forbidden',
+    ],
+    [
+      'two run steps merged into one multi-line run (npm ci and npm run check)',
+      CI,
+      mergeCiAndCheck,
+      'run steps must be, in order',
+    ],
+    [
+      'the two guard steps merged into one multi-line run',
+      CI,
+      mergeGuardSteps,
+      'run steps must be, in order',
+    ],
+    [
+      'the two guard steps merged into one multi-line run (PR-commit guard step missing)',
+      CI,
+      mergeGuardSteps,
+      'the PR-commit guard step is missing',
+    ],
+    [
+      'all run steps merged into one multi-line run with github.sha refs (verifier reproduction)',
+      CI,
+      mergeAllRunSteps,
+      'run steps must be, in order',
+    ],
+    [
+      'all run steps merged into one multi-line run (tree guard step missing)',
+      CI,
+      mergeAllRunSteps,
+      'the tree guard step is missing',
+    ],
+    [
+      'all run steps merged into one multi-line run (PR-commit guard step missing)',
+      CI,
+      mergeAllRunSteps,
+      'the PR-commit guard step is missing',
     ],
   ];
 
