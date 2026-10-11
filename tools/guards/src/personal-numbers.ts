@@ -3,7 +3,9 @@
 // tool. Every finding is shown masked (six asterisks plus the last three digits).
 //
 // Usage: node tools/guards/src/personal-numbers.ts [--allowlist <file>] [--range <base>..<head>]
-//   tree mode (default): scans every tracked and untracked-but-not-ignored text file.
+//   tree mode (default): scans every tracked and untracked-but-not-ignored text file. No path or file
+//   name is skipped: installed dependencies are excluded only because .gitignore ignores them
+//   (git's --exclude-standard).
 //   --range mode: scans the added lines of every non-merge commit in <base>..<head>, so a value that
 //   was added in one commit and removed in a later one is still caught (D-23).
 // Exit codes: 0 clean, 1 findings, 2 usage or configuration error (the message never contains a
@@ -58,11 +60,6 @@ function comparePath(a: string, b: string): number {
   return a < b ? -1 : a > b ? 1 : 0; // code-unit order, independent of locale
 }
 
-export function skipPath(path: string): boolean {
-  const segments = path.split('/');
-  return segments.includes('node_modules') || segments.at(-1) === 'package-lock.json';
-}
-
 /** Scan every tracked and untracked-but-not-ignored text file of the working tree. */
 export function runTreeScan(
   root: string,
@@ -73,7 +70,6 @@ export function runTreeScan(
   const findings: TreeFinding[] = [];
   let scanned = 0;
   for (const path of paths) {
-    if (skipPath(path)) continue;
     const full = join(root, path);
     let stat: ReturnType<typeof lstatSync>;
     try {
@@ -151,7 +147,6 @@ export function runRangeScan(
     ]);
     const found: RangeFinding[] = [];
     for (const added of parseAddedLines(diff)) {
-      if (skipPath(added.path)) continue;
       for (const f of scanText(added.text, allow)) {
         found.push({ commit, path: added.path, line: added.line, col: f.col, value: f.value });
       }
