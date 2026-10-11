@@ -56,18 +56,42 @@ function stepsOf(job: unknown): Json[] {
   return Array.isArray(raw) ? raw.filter(isRecord) : [];
 }
 
-/** Checks that hold for every workflow file (T-01-27 to T-01-30). */
+/**
+ * Triggers no workflow may use: each runs with a privileged token outside the pull request's
+ * read-only context (D-25, D-30).
+ */
+const FORBIDDEN_TRIGGERS: readonly (readonly [string, string])[] = [
+  [
+    'pull_request_target',
+    'pull_request_target is forbidden: PR code must not run with a privileged token',
+  ],
+  [
+    'workflow_run',
+    "workflow_run is forbidden: it runs with a privileged token outside the pull request's read-only context",
+  ],
+  [
+    'issue_comment',
+    "issue_comment is forbidden: any commenter can trigger it, and it runs with a privileged token outside the pull request's read-only context",
+  ],
+];
+
+/** True when the `on` value names the trigger in mapping, string or list form. */
+function hasTrigger(triggers: unknown, name: string): boolean {
+  return (
+    (isRecord(triggers) && name in triggers) ||
+    triggers === name ||
+    (Array.isArray(triggers) && triggers.includes(name))
+  );
+}
+
+/**
+ * Checks that hold for every workflow file: the forbidden triggers pull_request_target,
+ * workflow_run and issue_comment, no expression in a run string, first-party actions only
+ * (T-01-27 to T-01-30, T-01-53).
+ */
 function checkCommon(file: string, doc: Json, problems: Problem[]): void {
-  const triggers = doc.on;
-  const hasTarget =
-    (isRecord(triggers) && 'pull_request_target' in triggers) ||
-    triggers === 'pull_request_target' ||
-    (Array.isArray(triggers) && triggers.includes('pull_request_target'));
-  if (hasTarget) {
-    problems.push({
-      file,
-      message: 'pull_request_target is forbidden: PR code must not run with a privileged token',
-    });
+  for (const [name, message] of FORBIDDEN_TRIGGERS) {
+    if (hasTrigger(doc.on, name)) problems.push({ file, message });
   }
 
   const jobs = isRecord(doc.jobs) ? doc.jobs : {};
@@ -89,11 +113,64 @@ function checkCommon(file: string, doc: Json, problems: Problem[]): void {
   }
 }
 
+/** The label of a step in a problem message: its name, else its run string, else its action. */
+function stepLabel(step: Json): string {
+  for (const key of ['name', 'run', 'uses']) {
+    const value = step[key];
+    if (typeof value === 'string') return value;
+  }
+  return '(unnamed)';
+}
+
+/**
+ * Job and step integrity of ci.yml (DEC-026, T-01-51, T-01-52, T-01-54): presence of the key
+ * decides, whatever its value, so `continue-on-error: false` and `permissions: {}` are rejected too.
+ */
+function checkIntegrity(doc: Json, bad: (message: string) => void): void {
+  const jobs = isRecord(doc.jobs) ? doc.jobs : {};
+  for (const [jobId, job] of Object.entries(jobs)) {
+    if (!isRecord(job)) continue;
+    if ('continue-on-error' in job) {
+      bad(
+        `job ${jobId}: continue-on-error is not allowed in ci.yml (it turns a failing job green)`,
+      );
+    }
+    if ('if' in job) {
+      bad(
+        `job ${jobId}: a job-level if is not allowed in ci.yml (a skipped job satisfies a required check)`,
+      );
+    }
+    if ('permissions' in job) {
+      bad(
+        `job ${jobId}: job-level permissions are not allowed in ci.yml; the top-level contents: read applies`,
+      );
+    }
+    if ('uses' in job) {
+      bad(`job ${jobId}: a reusable workflow call (job-level uses) is not allowed in ci.yml`);
+    }
+    for (const step of stepsOf(job)) {
+      if ('continue-on-error' in step) {
+        bad(
+          `job ${jobId}: step "${stepLabel(step)}": continue-on-error is not allowed in ci.yml (it turns a failing guard or validate step green)`,
+        );
+      }
+      if ('if' in step && step.run !== RANGE_STEP) {
+        bad(
+          `job ${jobId}: step "${stepLabel(step)}": an if condition is only allowed on the PR-commit guard step`,
+        );
+      }
+    }
+  }
+}
+
+/** Security-relevant shape of ci.yml, including the job and step integrity rules (DEC-026). */
 function checkCi(doc: Json, problems: Problem[]): void {
   const file = CI_FILE;
   const bad = (message: string): void => {
     problems.push({ file, message });
   };
+
+  checkIntegrity(doc, bad);
 
   const triggers = doc.on;
   if (!isRecord(triggers) || !('pull_request' in triggers)) bad('must trigger on pull_request');
