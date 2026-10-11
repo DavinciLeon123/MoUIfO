@@ -452,6 +452,87 @@ describe('checkWorkflows', () => {
       mergeAllRunSteps,
       'the PR-commit guard step is missing',
     ],
+    [
+      'an actions/github-script step inserted before the tree guard step',
+      CI,
+      (doc) => {
+        steps(doc).splice(treeIndex(doc), 0, {
+          uses: 'actions/github-script@v7',
+          with: { script: 'core.info("hi")' },
+        });
+      },
+      'only actions/checkout and actions/setup-node may be used',
+    ],
+    [
+      'an actions/github-script step inserted before the tree guard step (uses order)',
+      CI,
+      (doc) => {
+        steps(doc).splice(treeIndex(doc), 0, {
+          uses: 'actions/github-script@v7',
+          with: { script: 'core.info("hi")' },
+        });
+      },
+      'uses steps must be, in order',
+    ],
+    [
+      'a second actions/checkout step that checks out another repository into tools',
+      CI,
+      (doc) => {
+        steps(doc).splice(treeIndex(doc), 0, {
+          uses: 'actions/checkout@v7',
+          with: { repository: 'someone/else', path: 'tools' },
+        });
+      },
+      'uses steps must be, in order',
+    ],
+    [
+      'a local action step',
+      CI,
+      (doc) => {
+        steps(doc).splice(treeIndex(doc), 0, { uses: './.github/actions/x' });
+      },
+      'only actions/checkout and actions/setup-node may be used',
+    ],
+    [
+      'workflow-level env with NODE_OPTIONS',
+      CI,
+      (doc) => {
+        doc.env = { NODE_OPTIONS: '--import=./x.js' };
+      },
+      'env is not allowed at workflow level',
+    ],
+    [
+      'workflow-level empty env (presence decides)',
+      CI,
+      (doc) => {
+        doc.env = {};
+      },
+      'env is not allowed at workflow level',
+    ],
+    [
+      'workflow-level defaults with a no-op run shell',
+      CI,
+      (doc) => {
+        doc.defaults = { run: { shell: 'true {0}' } };
+      },
+      'defaults is not allowed at workflow level',
+    ],
+    [
+      'job-level env with npm_config_script_shell on job ci',
+      CI,
+      (doc) => {
+        doc.jobs.ci.env = { npm_config_script_shell: '/bin/true' };
+      },
+      'job-level env is not allowed',
+    ],
+    [
+      'job-level defaults with a no-op run shell on job ci',
+      CI,
+      (doc) => {
+        doc.jobs.ci.defaults = { run: { shell: 'true {0}' } };
+      },
+      'job-level defaults is not allowed',
+    ],
   ];
 
   test.each(hardeningCases)('flags %s', (_label, rel, change, fragment) => {
@@ -491,6 +572,54 @@ describe('checkWorkflows', () => {
       expect(problems.some((p) => p.file === EXTRA && p.message.includes(message))).toBe(true);
     },
   );
+
+  const extraJobRows: [string, string, string][] = [
+    [
+      'a remote reusable workflow call with secrets inherit',
+      '  x:\n    uses: someone/repo/.github/workflows/x.yml@main\n    secrets: inherit\n',
+      'job-level uses',
+    ],
+    [
+      'job-level permissions contents write',
+      '  x:\n    runs-on: ubuntu-latest\n    permissions:\n      contents: write\n    steps:\n      - uses: actions/github-script@v7\n',
+      'job-level permissions are not allowed',
+    ],
+    [
+      'a job-level if',
+      "  x:\n    runs-on: ubuntu-latest\n    if: github.event_name == 'push'\n    steps:\n      - run: echo hi\n",
+      'a job-level if is not allowed',
+    ],
+  ];
+
+  test.each(extraJobRows)(
+    'a job-level rule in an additional workflow file is flagged: %s',
+    (_label, job, message) => {
+      const root = fixture();
+      writeFileSync(join(root, EXTRA), `name: Extra\non:\n  workflow_dispatch:\njobs:\n${job}`);
+      const problems = checkWorkflows(root);
+      expect(problems.some((p) => p.file === EXTRA && p.message.includes(message))).toBe(true);
+    },
+  );
+
+  test('checkout and setup-node bumped to a new major ref still pass', () => {
+    const root = fixture();
+    mutate(root, CI, (doc) => {
+      steps(doc)[0].uses = 'actions/checkout@v8';
+      steps(doc)[1].uses = 'actions/setup-node@v8';
+    });
+    expect(checkWorkflows(root)).toEqual([]);
+  });
+
+  test('a job-level rule in ci.yml yields exactly one problem', () => {
+    const root = fixture();
+    mutate(root, CI, (doc) => {
+      doc.jobs.ci.permissions = {};
+    });
+    const problems = checkWorkflows(root);
+    expect(problems).toHaveLength(1);
+    expect(problems[0]?.message).toContain('job-level permissions are not allowed');
+    expect(problems[0]?.message).toContain('job ci');
+  });
 
   test('an additional workflow file with an allowed trigger passes', () => {
     const root = fixture();
