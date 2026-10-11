@@ -58,8 +58,8 @@ describe('checkWorkflows', () => {
     expect(EXPECTED_RUN_STEPS).toEqual([
       'npm ci',
       'npm run check',
-      'npm run guard',
-      'npm run guard -- --range "$BASE_SHA..$HEAD_SHA"',
+      'npm run guard -- --allowlist-ref "$ALLOWLIST_REF"',
+      'npm run guard -- --range "$BASE_SHA..$HEAD_SHA" --allowlist-ref "$BASE_SHA"',
       'npm run validate',
       'npm run build:dist',
       'npm test',
@@ -160,6 +160,44 @@ describe('checkWorkflows', () => {
       CI,
       (doc) => {
         delete steps(doc)[runStepIndex(doc, EXPECTED_RUN_STEPS[3] ?? '')].env.BASE_SHA;
+      },
+    ],
+    [
+      'the tree guard step without its env block',
+      CI,
+      (doc) => {
+        delete steps(doc)[runStepIndex(doc, EXPECTED_RUN_STEPS[2] ?? '')].env;
+      },
+    ],
+    [
+      'the tree guard ALLOWLIST_REF built from the pull request head',
+      CI,
+      (doc) => {
+        steps(doc)[runStepIndex(doc, EXPECTED_RUN_STEPS[2] ?? '')].env.ALLOWLIST_REF =
+          `${EXPR} github.event.pull_request.head.sha || github.sha }}`;
+      },
+    ],
+    [
+      'the tree guard ALLOWLIST_REF built from github.sha only',
+      CI,
+      (doc) => {
+        steps(doc)[runStepIndex(doc, EXPECTED_RUN_STEPS[2] ?? '')].env.ALLOWLIST_REF =
+          `${EXPR} github.sha }}`;
+      },
+    ],
+    [
+      'the range guard step without --allowlist-ref',
+      CI,
+      (doc) => {
+        steps(doc)[runStepIndex(doc, EXPECTED_RUN_STEPS[3] ?? '')].run =
+          'npm run guard -- --range "$BASE_SHA..$HEAD_SHA"';
+      },
+    ],
+    [
+      'the tree guard step without --allowlist-ref',
+      CI,
+      (doc) => {
+        steps(doc)[runStepIndex(doc, EXPECTED_RUN_STEPS[2] ?? '')].run = 'npm run guard';
       },
     ],
     [
