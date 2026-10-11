@@ -255,13 +255,196 @@ describe('checkWorkflows', () => {
     expect(checkWorkflows(root).map((p) => p.file)).toContain(CI);
   });
 
-  test('pull_request_target in an additional workflow file is flagged', () => {
+  const treeIndex = (doc: Doc): number => runStepIndex(doc, EXPECTED_RUN_STEPS[2] ?? '');
+  const rangeIndex = (doc: Doc): number => runStepIndex(doc, EXPECTED_RUN_STEPS[3] ?? '');
+  const validateIndex = (doc: Doc): number => runStepIndex(doc, 'npm run validate');
+
+  const NO_COE = 'continue-on-error is not allowed';
+  const IF_STEP = 'an if condition is only allowed on the PR-commit guard step';
+
+  // WR-04 (D-25, D-30): each way to neutralise the guard or widen the token, one fixture each.
+  // Presence of the key decides, whatever its value.
+  const hardeningCases: [string, string, (doc: Doc) => void, string][] = [
+    [
+      'continue-on-error true on the tree guard step',
+      CI,
+      (doc) => {
+        steps(doc)[treeIndex(doc)]['continue-on-error'] = true;
+      },
+      NO_COE,
+    ],
+    [
+      'continue-on-error true on the PR-commit guard step',
+      CI,
+      (doc) => {
+        steps(doc)[rangeIndex(doc)]['continue-on-error'] = true;
+      },
+      NO_COE,
+    ],
+    [
+      'continue-on-error true on the Validate step',
+      CI,
+      (doc) => {
+        steps(doc)[validateIndex(doc)]['continue-on-error'] = true;
+      },
+      NO_COE,
+    ],
+    [
+      'continue-on-error true on job ci',
+      CI,
+      (doc) => {
+        doc.jobs.ci['continue-on-error'] = true;
+      },
+      NO_COE,
+    ],
+    [
+      'continue-on-error false on the tree guard step (presence decides)',
+      CI,
+      (doc) => {
+        steps(doc)[treeIndex(doc)]['continue-on-error'] = false;
+      },
+      NO_COE,
+    ],
+    [
+      'an if always() on the tree guard step',
+      CI,
+      (doc) => {
+        steps(doc)[treeIndex(doc)].if = 'always()';
+      },
+      IF_STEP,
+    ],
+    [
+      'an if false on the Validate step',
+      CI,
+      (doc) => {
+        steps(doc)[validateIndex(doc)].if = 'false';
+      },
+      IF_STEP,
+    ],
+    [
+      'the PR-commit guard step with a push condition',
+      CI,
+      (doc) => {
+        steps(doc)[rangeIndex(doc)].if = "github.event_name == 'push'";
+      },
+      'the PR-commit guard step must have: if: github.event_name',
+    ],
+    [
+      'a job-level if on job ci',
+      CI,
+      (doc) => {
+        doc.jobs.ci.if = "github.event_name == 'push'";
+      },
+      'a job-level if is not allowed',
+    ],
+    [
+      'job-level permissions contents write on job ci',
+      CI,
+      (doc) => {
+        doc.jobs.ci.permissions = { contents: 'write' };
+      },
+      'job-level permissions are not allowed',
+    ],
+    [
+      'job-level empty permissions on job ci (presence decides)',
+      CI,
+      (doc) => {
+        doc.jobs.ci.permissions = {};
+      },
+      'job-level permissions are not allowed',
+    ],
+    [
+      'a job calling a remote reusable workflow',
+      CI,
+      (doc) => {
+        doc.jobs.remote = { uses: 'someone/repo/.github/workflows/x.yml@main' };
+      },
+      'job-level uses',
+    ],
+    [
+      'a job calling a local reusable workflow',
+      CI,
+      (doc) => {
+        doc.jobs.local = { uses: './.github/workflows/local.yml' };
+      },
+      'job-level uses',
+    ],
+    [
+      'a workflow_run trigger in ci.yml (mapping form)',
+      CI,
+      (doc) => {
+        doc.on.workflow_run = { workflows: ['CI'], types: ['completed'] };
+      },
+      'workflow_run is forbidden',
+    ],
+    [
+      'an issue_comment trigger in ci.yml (mapping form, D-30)',
+      CI,
+      (doc) => {
+        doc.on.issue_comment = { types: ['created'] };
+      },
+      'issue_comment is forbidden',
+    ],
+  ];
+
+  test.each(hardeningCases)('flags %s', (_label, rel, change, fragment) => {
     const root = fixture();
-    writeFileSync(
-      join(root, '.github/workflows/extra.yml'),
-      'name: Extra\non:\n  pull_request_target:\njobs:\n  x:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo hi\n',
-    );
+    mutate(root, rel, change);
     const problems = checkWorkflows(root);
-    expect(problems.map((p) => p.file)).toContain('.github/workflows/extra.yml');
+    expect(problems.some((p) => p.file === rel && p.message.includes(fragment))).toBe(true);
+  });
+
+  const EXTRA = '.github/workflows/extra.yml';
+  const extraWorkflow = (on: string): string =>
+    `name: Extra\n${on}\njobs:\n  x:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo hi\n`;
+  const forbiddenTriggers: [string, string][] = [
+    ['workflow_run', 'workflow_run is forbidden'],
+    ['issue_comment', 'issue_comment is forbidden'],
+    ['pull_request_target', 'pull_request_target is forbidden'],
+  ];
+  const triggerForms: [string, (name: string) => string][] = [
+    ['mapping', (name) => `on:\n  ${name}:`],
+    ['string', (name) => `on: ${name}`],
+    ['list', (name) => `on: [push, ${name}]`],
+  ];
+  const triggerRows = forbiddenTriggers.flatMap(([name, message]) =>
+    triggerForms.map(([form, write]): [string, string, string] => [
+      `${name} (${form} form)`,
+      write(name),
+      message,
+    ]),
+  );
+
+  test.each(triggerRows)(
+    'a forbidden trigger in an additional workflow file is flagged: %s',
+    (_label, on, message) => {
+      const root = fixture();
+      writeFileSync(join(root, EXTRA), extraWorkflow(on));
+      const problems = checkWorkflows(root);
+      expect(problems.some((p) => p.file === EXTRA && p.message.includes(message))).toBe(true);
+    },
+  );
+
+  test('an additional workflow file with an allowed trigger passes', () => {
+    const root = fixture();
+    writeFileSync(join(root, EXTRA), extraWorkflow('on:\n  workflow_dispatch:'));
+    expect(checkWorkflows(root)).toEqual([]);
+  });
+
+  test('each violation yields exactly one problem and the order is stable', () => {
+    const root = fixture();
+    mutate(root, CI, (doc) => {
+      steps(doc)[treeIndex(doc)]['continue-on-error'] = true;
+      doc.jobs.ci.if = "github.event_name == 'push'";
+    });
+    const first = checkWorkflows(root);
+    const second = checkWorkflows(root);
+    expect(first).toHaveLength(2);
+    expect(first.filter((p) => p.message.includes(NO_COE))).toHaveLength(1);
+    expect(first.filter((p) => p.message.includes('a job-level if is not allowed'))).toHaveLength(
+      1,
+    );
+    expect(first.every((p) => p.message.includes('job ci'))).toBe(true);
+    expect(second).toEqual(first);
   });
 });
