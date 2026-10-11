@@ -1,0 +1,2 @@
+# One 9-digit value per line followed by '# reason'. Public or synthetic values only. Every change is reviewed in the PR.
+001469630  # public example RSIN (ABN AMRO Schadeverzekering N.V.) from UID table v1.2

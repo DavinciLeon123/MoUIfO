@@ -1,0 +1,17 @@
+{
+  "name": "uio-import",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "EUPL-1.2",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "dependencies": {
+    "csv-stringify": "6.9.0",
+    "xlsx": "file:vendor/xlsx-0.20.3.tgz"
+  },
+  "devDependencies": {
+    "csv-parse": "7.0.3"
+  }
+}

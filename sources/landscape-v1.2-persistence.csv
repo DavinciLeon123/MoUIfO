@@ -1,0 +1,16 @@
+,PERSISTENCE of UID's,,,,,,,,,,,,,,
+,UID,CoC number,vestigingsnummer,OIN,RSIN,VAT-nr,ROO,Peppol-ID,LEI,GLN,EUID,EORI,D-U-N-S,BSN,fi-nummer
+,Property,,,,,,,,,,,,,,
+,Behaviour on merger,New number for merged entity,New numbers for new establishments,Unchanged if entity persists; otherwise new,Usually new for merged entity,Usually new,New number,Depends on underlying ID,New LEI for merged entity,Recommended new,Follows national register behaviour,Unchanged if entity persists,"Often new, but can persist",n/a,New number for merged entity
+,Behaviour on acquisition no legal merger,Unchanged,Unchanged,Unchanged,Unchanged,Unchanged,Unchanged,Unchanged,Unchanged,Unchanged,Unchanged,Unchanged,Unchanged,n/a,Unchanged
+,Behaviour on split,New numbers for split entities,New numbers,New OIN,New RSINs,New VAT numbers,New number,New ID,New LEIs,New GLNs,New EUIDs,New EORI,New DUNS for new entities,n/a,New numbers for split entities
+,Behaviour on dissolution,Ceases,Ceases,Ceases,Ceases,Ceases,Ceases,Inactive,Lapsed,Ceases,Ceases,Ceases,Inactive,n/a,Ceases
+,Move within country,Unchanged,New number,Unchanged,Unchanged,Sometimes new,Unchanged,Unchanged,Unchanged,Unchanged,Unchanged,Unchanged,Unchanged,n/a,Unchanged
+,Move to other country,New number,N/A,New OIN,New RSIN,Always new,N/A,New ID,New registration,New GLN,New EUID,New EORI,Can persist,n/a,New number
+,,,,,,,,,,,,,,,
+,Persistence summary,medium,low,high within NL,low-medium,low,low-medium,variable,medium,Low,low-medium,medium,high,n/a,medium
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,
+,,,,,,,,,,"'Recommended new' because a GLN is not legally bound to the register. GLN identifies a location, not necessarily a legal entity.",,,,,
+,,,,,,,,,,"Still, it is strongly recommended not to reuse any GLN.",,,,,

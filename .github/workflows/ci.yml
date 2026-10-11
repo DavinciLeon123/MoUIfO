@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - name: Install
+        run: npm ci
+      - name: Lint, format and type check
+        run: npm run check
+      - name: Personal-number guard (tree)
+        env:
+          ALLOWLIST_REF: ${{ github.event.pull_request.base.sha || github.sha }}
+        run: npm run guard -- --allowlist-ref "$ALLOWLIST_REF"
+      - name: Personal-number guard (PR commits)
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: npm run guard -- --range "$BASE_SHA..$HEAD_SHA" --allowlist-ref "$BASE_SHA"
+      - name: Validate
+        run: npm run validate
+      - name: Build dist
+        run: npm run build:dist
+      - name: Test
+        run: npm test
+      - name: Build packages (engine, mcp, web)
+        run: npm run build:packages

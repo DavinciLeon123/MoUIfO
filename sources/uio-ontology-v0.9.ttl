@@ -1,0 +1,259 @@
+@prefix : <http://example.org/id-ontology#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+#################################
+# Classes
+#################################
+
+:Actor a owl:Class .
+
+:NaturalPerson a owl:Class ;
+    rdfs:subClassOf :Actor .
+
+:LegalEntity a owl:Class ;
+    rdfs:subClassOf :Actor .
+
+:Enterprise a owl:Class ;
+    rdfs:subClassOf :Actor .
+
+:Branch a owl:Class ;
+    rdfs:subClassOf :Actor .
+
+:Role a owl:Class .
+:TaxableEntityRole a owl:Class ; rdfs:subClassOf :Role .
+:EconomicOperatorRole a owl:Class ; rdfs:subClassOf :Role .
+
+:IdentifierType a owl:Class .
+:IdentifierInstance a owl:Class .
+
+:IssuingBody a owl:Class .
+
+#################################
+# Context / Knowledge layer
+#################################
+
+:Context a owl:Class .
+:Country a owl:Class ;
+    rdfs:subClassOf :Context .
+
+:Netherlands a :Country ;
+    rdfs:label "Nederland" .
+
+:ForeignCountry a :Country ;
+    rdfs:label "Buitenland" .
+
+#################################
+# Properties
+#################################
+
+:issuedBy a owl:ObjectProperty ;
+    rdfs:domain :IdentifierType ;
+    rdfs:range :IssuingBody .
+
+:identifiesActor a owl:ObjectProperty ;
+    rdfs:domain :IdentifierType ;
+    rdfs:range :Actor .
+
+:identifiesRole a owl:ObjectProperty ;
+    rdfs:domain :IdentifierType ;
+    rdfs:range :Role .
+
+:hasIdentifier a owl:ObjectProperty ;
+    rdfs:domain :Actor ;
+    rdfs:range :IdentifierInstance .
+
+:identifierType a owl:ObjectProperty ;
+    rdfs:domain :IdentifierInstance ;
+    rdfs:range :IdentifierType .
+
+:derivedFrom a owl:ObjectProperty ;
+    rdfs:domain :IdentifierType ;
+    rdfs:range :IdentifierType .
+
+:mayBeLinkedTo a owl:ObjectProperty ;
+    rdfs:domain :IdentifierType ;
+    rdfs:range :IdentifierType .
+
+:likelyLinkedTo a owl:ObjectProperty ;
+    rdfs:domain :IdentifierType ;
+    rdfs:range :IdentifierType .
+
+:hasEnterprise a owl:ObjectProperty ;
+    rdfs:domain :LegalEntity ;
+    rdfs:range :Enterprise .
+
+:hasBranch a owl:ObjectProperty ;
+    rdfs:domain :Enterprise ;
+    rdfs:range :Branch .
+
+#################################
+# Interpretation properties (NEW)
+#################################
+
+:hasTypicalLevel a owl:ObjectProperty ;
+    rdfs:domain :IdentifierType ;
+    rdfs:range :Actor .
+
+:typicallyIdentifies a owl:ObjectProperty ;
+    rdfs:domain :IdentifierType ;
+    rdfs:range :Actor .
+
+:dependsOnContext a owl:ObjectProperty ;
+    rdfs:domain :IdentifierType ;
+    rdfs:range :Context .
+
+#################################
+# Issuing Bodies
+#################################
+
+:KvK a :IssuingBody ; rdfs:label "Kamer van Koophandel" .
+:Belastingdienst a :IssuingBody ; rdfs:label "Belastingdienst" .
+:Douane a :IssuingBody ; rdfs:label "Douane" .
+:Logius a :IssuingBody ; rdfs:label "Logius" .
+:GLEIF a :IssuingBody ; rdfs:label "GLEIF" .
+:GS1 a :IssuingBody ; rdfs:label "GS1" .
+:OpenPeppol a :IssuingBody ; rdfs:label "OpenPeppol" .
+
+#################################
+# Identifier types (FULL SET)
+#################################
+
+:RSIN a :IdentifierType ;
+    rdfs:label "RSIN" ;
+    :issuedBy :KvK ;
+    :identifiesActor :LegalEntity .
+
+:CoCNumber a :IdentifierType ;
+    rdfs:label "KVK-nummer" ;
+    :issuedBy :KvK ;
+    :identifiesActor :Enterprise .
+
+:Vestigingsnummer a :IdentifierType ;
+    rdfs:label "Vestigingsnummer" ;
+    :issuedBy :KvK ;
+    :identifiesActor :Branch .
+
+:OIN a :IdentifierType ;
+    rdfs:label "Organisatie-identificatienummer" ;
+    :issuedBy :Logius ;
+    :identifiesActor :LegalEntity .
+
+:VAT a :IdentifierType ;
+    rdfs:label "BTW-nummer" ;
+    :issuedBy :Belastingdienst ;
+    :identifiesRole :TaxableEntityRole ;
+    rdfs:comment "Kan meerdere juridische entiteiten omvatten (fiscale eenheid)" .
+
+:EORI a :IdentifierType ;
+    rdfs:label "EORI-nummer" ;
+    :issuedBy :Douane ;
+    :identifiesRole :EconomicOperatorRole ;
+    rdfs:comment "Niet strikt 1-op-1 gekoppeld aan entiteit; interpretatie contextafhankelijk" .
+
+:PeppolID a :IdentifierType ;
+    rdfs:label "Peppol ID" ;
+    :issuedBy :OpenPeppol ;
+    :identifiesActor :Actor .
+
+:LEI a :IdentifierType ;
+    rdfs:label "Legal Entity Identifier" ;
+    :issuedBy :GLEIF ;
+    :identifiesActor :LegalEntity .
+
+:GLN a :IdentifierType ;
+    rdfs:label "Global Location Number" ;
+    :issuedBy :GS1 ;
+    :identifiesActor :Actor .
+
+:DUNS a :IdentifierType ;
+    rdfs:label "DUNS nummer" ;
+    :identifiesActor :LegalEntity .
+
+:EUID a :IdentifierType ;
+    rdfs:label "European Unique Identifier" ;
+    :identifiesActor :LegalEntity .
+
+:BSN a :IdentifierType ;
+    rdfs:label "Burgerservicenummer" ;
+    :identifiesActor :NaturalPerson .
+
+:FiNumber a :IdentifierType ;
+    rdfs:label "Fiscaal nummer" ;
+    :issuedBy :Belastingdienst ;
+    :identifiesActor :LegalEntity .
+
+:ROO a :IdentifierType ;
+    rdfs:label "Register van Overheidsorganisaties ID" ;
+    :identifiesActor :LegalEntity .
+
+#################################
+# HARD relations
+#################################
+
+:VAT :derivedFrom :RSIN .
+:EORI :derivedFrom :RSIN .
+
+:PeppolID :derivedFrom :CoCNumber .
+:PeppolID :derivedFrom :OIN .
+:PeppolID :derivedFrom :VAT .
+
+#################################
+# SOFT / PROBABILISTIC relations
+#################################
+
+:EORI :mayBeLinkedTo :VAT .
+
+:VAT :mayBeLinkedTo :CoCNumber .
+:VAT :mayBeLinkedTo :OIN .
+
+:LEI :mayBeLinkedTo :CoCNumber .
+:LEI :mayBeLinkedTo :RSIN .
+
+:GLN :mayBeLinkedTo :CoCNumber .
+
+#################################
+# LIKELY relations (NEW nuance)
+#################################
+
+:EORI :likelyLinkedTo :VAT .
+:VAT :likelyLinkedTo :RSIN .
+:PeppolID :likelyLinkedTo :VAT .
+:PeppolID :likelyLinkedTo :CoCNumber .
+
+#################################
+# CONTEXTUAL KNOWLEDGE
+#################################
+
+:EORI :typicallyIdentifies :LegalEntity .
+:EORI :dependsOnContext :Netherlands .
+:EORI :dependsOnContext :ForeignCountry .
+
+#################################
+# MINI DATASET
+#################################
+
+:LegalEntity_1 a :LegalEntity .
+:Enterprise_1 a :Enterprise .
+:Branch_1 a :Branch .
+:Branch_2 a :Branch .
+
+:LegalEntity_1 :hasEnterprise :Enterprise_1 .
+:Enterprise_1 :hasBranch :Branch_1 .
+:Enterprise_1 :hasBranch :Branch_2 .
+
+:RSIN_1 a :IdentifierInstance ; :identifierType :RSIN .
+:KVK_1 a :IdentifierInstance ; :identifierType :CoCNumber .
+:VEST_1 a :IdentifierInstance ; :identifierType :Vestigingsnummer .
+:VEST_2 a :IdentifierInstance ; :identifierType :Vestigingsnummer .
+:VAT_1 a :IdentifierInstance ; :identifierType :VAT .
+:EORI_1 a :IdentifierInstance ; :identifierType :EORI .
+
+:LegalEntity_1 :hasIdentifier :RSIN_1 .
+:LegalEntity_1 :hasIdentifier :VAT_1 .
+:LegalEntity_1 :hasIdentifier :EORI_1 .
+
+:Enterprise_1 :hasIdentifier :KVK_1 .
+:Branch_1 :hasIdentifier :VEST_1 .
+:Branch_2 :hasIdentifier :VEST_2 .

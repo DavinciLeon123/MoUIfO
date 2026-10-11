@@ -1,0 +1,137 @@
+,,Analysis of Unique Identifiers for Organisations,, ,,,,,,,,,,,,,,
+,,Version:,1.2, ,,,,,,,,,,,,,,
+,,Date:,"July 3rd, 2026",,,,,,,,,,,,,,,
+,,Authors:,"Joost Wisselink, Leon Roseleur",,,,,,,,,,,,,,,
+,,Organisation:,Davinci Conclusion / TNO - CoE-DSC,,,,,,,,,,,,,,,
+,,,, ,1,2,3,4,5,6,7,8,9,10,11,12,13,14
+,,name,, ,KvK number,vestigingsnummer,OIN,RSIN,VAT-nr,ROO,Peppol-ID,LEI,GLN,EUID,EORI,D-U-N-S,BSN,fi-nummer
+,,name in full,, ,Kamer van Koophandel number,vestigingsnummer,Organisatie Identificatie Nummer,Rechtspersonen en Samenwerkingsverbanden Identificatie Nummer,Value Added Tax number,Register Overheidsorganisaties,Peppol-ID,Legal Entity Identifier,Global Location Number,European Unique Identifier,Economic Operators Registration and Identification,Data Universal Numbering System,Burger Service Nummer,fiscaal nummer
+,,structure,formal specification or standard, ,,,,,,n/a,,ISO 17442,-,ISO6523,-,,,
+,,format,(alpha)numeric, ,NL: unique ID - num(8),NL: unique ID - num(12),unique ID - num(20),unique ID - num(9) (11-proof),"in NL: NL + num(9) + B + [subnummer]
+for EMZ: NL + 10 random digits (no BSN)",n/a,"either one of KvK-nr, OIN, VAT-nr,
+IBAN, GLN",str(20),internal numbering,[Country Code(2)][Register Identifier(3?)][National registration number]<Verification Digit(1)>,"NL + RSIN
+for EMZ: NL + 10 random digits (no BSN)
+non-Dutch: NL + fi-nummer",num(9),unique ID - num(9) (11-proof),unique ID - num(9) (11-proof)
+,,,specification, ,,,[prefix(8)][CoC-number(8/9)][suffix(4/3)],,"Dutch single person enterprise: [NL][unique ID(9)][B][[verification(2)]
+other Dutch enterprises: [NL][RSIN]",,,[LOU-id(4)][unique ID LP (14)][verification(2)],n/a,,,numeric,,
+,,jurisdiction,region in which applicable, ,national,Netherlands,Netherlands,Netherlands,global,Netherlands,Netherlands,global,global,Europe (BRIS),EU,global,Netherlands,Netherlands
+,,legal basis,underlying laws / regulations,,NL: Handelswet,NL: Handelswet,-,Tax legislation,Tax legislation,-,-,Implementing regulation - 2017/394 - EN - EUR-Lex,-,Digital Single Market (EU),Union Customs Code (Regulation (EU) No 952/2013),none,Dutch law,Tax legislation
+,,,,,,,,,,,,"EU: EMIR, MiFID II
+US: DFA",,,implementing/delegated acts,,,
+,,issuing authority,official body issuing the ID, ,Kamer van Koophandel,Kamer van Koophandel,Logius,Kamer van Koophandel,National Tax Service,Logius / KOOP,,GLEIF supervised local institutions (LOU's),GS1 - GLN,"national CoC, according to EU standards",National customs authorities in EU Member States,Dun & Bradstreet,Ministerie van BZK (RvIG),National Tax Service
+,,validation source,where can the UID be validated, ,NL/D: Handelsregister / B: Kruispuntbank,,Logius,Handelsregister,Vies on-the-Web - European Commission,Register van Overheidsorganisaties,,GLEIF index / API,-,BRIS,EORI number validation,very limited (US only),BRP,
+,,trust anchor,proof of authenticity, ,extract (digital or hardcopy),,-,,n/a,n/a,,Deed of Incorporation,-,-,-,-,civil registry extract,
+,,validity,are there limitations to the validity of the UID?, ,unlimited (recent extract often required),,unlimited,unlimited,unlimited,unlimited,,limited to 1 year,-,following CoC-nr,valid while the economic operator remains registered for customs purposes,intentionally permanent and not to be reused,unlimited,unlimited
+,,persistence,behavior of the UID when (legal) structure changes (see tab Persistence), ,medium,low,high within NL,low-medium,low,low-medium,variable,medium,low,low-medium,medium,high,,
+,,assurance,see also trust score below, ,backed by national government,,,issued by KvK,,,,,,,,,,
+,,mandatoriness,, ,"yes, for all organizations engaging in entrepreneurial activities",no,no,"yes, for legal persons",yes; in NL: determined by Tax Service,no,no,"yes, for engaging in financial transactions",no,"yes, for cross-border trading","yes, for cross-border trading involving EU costoms",mostly optional,"yes, for natural persons","yes, for organisations with VAT duty"
+,,prerequisites,, ,see below,sub-number of a KvK number,,KvK number,KvK number,,,legal entity must be registered by an official source,-,presence of CoC-nr,VAT-nr,proof of existence (e.g. CoC-nr),,CoC number (1 on 1)
+,,availability,publicly or restricted, ,public,public,partially public,public,public,public,,public,public,public,public (details are  restricted),publicly (within restrictions),restricted,internal
+,,related to,derived from any other ID in this analysis, ,origin for many other ID's,KvK number (randomly assigned),KvK number (randomly assigned) or RSIN,KvK number,RSIN,"KvK number, OIN",RSIN; OIN; VAT-nr,CoC number via RA codes (RA = Registration Authority),none,-,"VAT-nr, CoC number","CoC number, LEI, VAT-nr",,CoC number
+,,references,where can the ID be searched for, ,Zoeken bij KVK | KVK,not searchable in itself,OIN Register,Zoeken bij KVK | KVK,Zoeken bij KVK | KvK,Register van Overheidsorganisaties,NPa Peppol Test Tool,GLEIF Registration Authorities List,Verified by GS1 (NL),European e-Justice Portal,EORI number validation,D&B D-U-N-S Number Lookup,n/a,n/a
+,,scope / application,in what business area(s) / for what kind of entities is the ID used, ,required in many formal activities,multiple subsidiaries of a company in different locations,Everyone engaged in digital communication with the Dutch government (eHerkenning),legal person equivalent of BSN; used for digital communication with Dutch government,required for tax payments,information on governmental organisations only,(inter)national e-invoicing through the Peppol network,"entities involved in financial transactions(stocks, bonds etc.)
+for risk assessment purposes (AML,CTF)
+natural persons are NOT required to have a LEI.","legal entities, locations, functions;
+mainly for EDI and e-invoicing","only applicable for ""companies"" (in Dutch: vennootschappen)
+main use: communication between national registers about structural changes in the company","required for international trade with EU and UK involving customs;
+for legal persons as well as single person enterprises","international trading, government assignments, app development, credit checks",,"all parties being assigned an RSIN now were assigned a fi-nummer in the past.
+Foreign parties are assigned a fi-nummer if they:
+- apply for an EORI in NL
+- must pay VAT in NL"
+,,remarks,, ,"in NL: mandatory for all organizations engaging in entrepreneurial activities. Specific exceptions apply.
+Dutch Chamber of Commerce now uses 'Kamer van Koophandel' as formal name",,"based on RSIN if there is no KvK-nr;
+OINs assiged by a TSP are not publically searchable",(predecessed by fi-number),"in Dutch: BTW-nummer, BTW-identificatienummer","ROO is a register, not an ID.
+A URL is used for identification",not relevant for identification,costly and cumbersome for SME,"not relevant for identification, but possibly  for search purposes","limited to EU, so less valuable for multinational companies
+Country code is according to ISO3166","not a general business ID, often derived from one.",,,"issued by Tax Service until 2010, when CoC started issuing RSIN instead."
+,,,,,,,,,,,,,,,,,,
+,,Trust score,,,KvK number,vestigingsnummer,OIN,RSIN,VAT-nr,ROO,Peppol-ID,LEI,GLN,EUID,EORI,D-U-N-S,BSN,fi-nummer
+,,Legal basis and status [0..2],"0 = private / proprietary, no legal obligations
+1 = public / standard, no general obligation
+2 = explicit legal obligation",,2,2,1,2,2,1,1,1,0,2,1,0,,
+,,"Registration authority
+and data quality [0..1]","public availability, data format, authoritative status",,1,1,1,1,1,0,1,1,0,0,1,1,,
+,,Verifiability [0..1],publicly verifiable,,1,1,0,1,1,0,1,1,0,0,0,0,,
+,,"Information on links
+with other sources [0..1]",presence of authoritative 'crosswalks',,1,0,1,1,1,0,0,1,0,1,1,0,,
+,,Life cycle management [0..1],Active life cycle management on UID's,,1,0,0,0,0,0,0,1,0,1,1,1,,
+,,,,,,,,,,,,,,,,,,
+,,Total trust score,,,6,4,3,5,5,1,3,5,0,4,4,2,0,0
+,,,,,,,,,,,,,,,,,,
+,,Examples,,,KvK number,vestigingsnummer,OIN,RSIN,VAT-nr,ROO,Peppol-ID,LEI,GLN,EUID,EORI,D-U-N-S,BSN,fi-nummer
+,,,ABN AMRO Schadeverzekering N.V.,,05058078,000019478445,,001469630,NL001469630B01,,,724500G3PJTYPL2L9M11,,NL.KVK.05058078,NL001469630,,?,?
+,,,ABN AMRO Hypotheken Groep B.V.,,08024285,,00000003080242850000,,,,,,,,,,?,?
+,,,various / other,,,,,,,,iso6523-actorid-upis::9918:nl23rabo0137300425,,,,,362596397,?,?
+,,,, ,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,
+,,,, ,Abbreviations,,,,,,,,,,EORI composition,,,
+,,,,,GLEIF,Global Legal Entity Identification Framework,,,,,,,,"for Dutch ""eenmanszaken"":",NL + id (10),,,
+,,,, ,LOU,Local Operating Unit,,,,,,,,for Dutch legal persons:,NL + RSIN,,,
+,,,, ,EMIR,European Market Infrastructure Regulation,European Market Infrastructure Regulation (EMIR) | DNB,,,,,,,non-Dutch companies,NL + fi-nummer,,,
+,,,, ,MiFID II,Markets in Financial Instruments Directive,MiFID II,,,,,,,,,,,
+,,,, ,SME,Small and Medium sized Enterprises,,,,,,,,,,,,
+,,,, ,FSB,Financial Stabiliy Board,,,,,,,,,,,,
+,,,, ,GLEIS,Global LEI System,The Global LEI System - GLEIF – GLEIF,,,,,,,,,,,
+,,,, ,LEI-ROC,LEI Regulatory Oversight Committee,,,,,,,,,,,,
+,,,, ,BRIS,Business Registers Interconnection System,Business Register Interconnection System (BRIS),,,,,,,,,,,
+,,,, ,,,applies in 31 participating countries,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
+,,,, ,,,,,,,,,,,,,,
