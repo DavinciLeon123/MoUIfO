@@ -104,7 +104,7 @@ describe('tree mode', () => {
     expect(r.stdout).toMatch(/scanned 1 files, 0 findings/);
   });
 
-  test('binary files, package-lock.json and node_modules are skipped', () => {
+  test('binary files are skipped; node_modules and package-lock.json paths are scanned', () => {
     const repo = makeRepo({
       'blob.bin': Buffer.concat([Buffer.from([0]), Buffer.from(`${v}\n`)]),
       'package-lock.json': `${v}\n`,
@@ -112,6 +112,43 @@ describe('tree mode', () => {
       'node_modules/pkg/index.js': `${v}\n`,
       'readme.txt': 'clean\n',
     });
+    const r = guard(repo);
+    expect(r.code).toBe(1);
+    const lines = r.stdout.split('\n').filter((l) => l.startsWith('::error'));
+    expect(lines).toHaveLength(3);
+    expect(lines[0]).toContain('file=node_modules/pkg/index.js,');
+    expect(lines[1]).toContain('file=package-lock.json,');
+    expect(lines[2]).toContain('file=sub/package-lock.json,');
+    expect(r.stdout).toContain(masked);
+    expect(r.stdout).toMatch(/scanned 4 files, 3 findings/);
+    expect(r.all).not.toContain(v);
+  });
+
+  test('a committed file below a node_modules segment at any depth is a finding', () => {
+    const repo = makeRepo({ 'docs/node_modules/x.txt': `id ${v}\n` });
+    const r = guard(repo);
+    expect(r.code).toBe(1);
+    expect(r.stdout).toContain(
+      '::error file=docs/node_modules/x.txt,line=1,col=4,title=personal-number guard::',
+    );
+    expect(r.stdout).toContain(masked);
+    expect(r.stdout).toMatch(/scanned 1 files, 1 findings/);
+    expect(r.all).not.toContain(v);
+  });
+
+  test('an untracked, non-ignored file below a node_modules segment is a finding', () => {
+    const repo = makeRepo({ 'ok.txt': 'fine\n' }, { 'docs/node_modules/y.txt': `${v}\n` });
+    const r = guard(repo);
+    expect(r.code).toBe(1);
+    expect(r.stdout).toContain('file=docs/node_modules/y.txt');
+    expect(r.all).not.toContain(v);
+  });
+
+  test('an untracked file inside a gitignored node_modules directory is not scanned', () => {
+    const repo = makeRepo(
+      { '.gitignore': 'node_modules/\n' },
+      { 'node_modules/pkg/index.js': `${v}\n` },
+    );
     const r = guard(repo);
     expect(r.code).toBe(0);
     expect(r.stdout).toMatch(/scanned 1 files, 0 findings/);
@@ -240,6 +277,35 @@ describe('range mode', () => {
     expect(r.stdout).toContain(masked);
     expect(r.stdout).toContain(
       `personal-number guard: scanned 2 commits (${short(base)}..${short(head)}), 1 findings`,
+    );
+    expect(r.all).not.toContain(v);
+  });
+
+  test('a value added then removed below node_modules and in a nested lockfile is reported', () => {
+    const repo = makeRepo({ 'a.txt': 'x\n' });
+    const base = git(repo, 'rev-parse', 'HEAD').trim();
+    write(repo, {
+      'docs/node_modules/x.txt': `id ${v}\n`,
+      'sub/package-lock.json': `id ${v}\n`,
+    });
+    const added = commit(repo, 'add');
+    rmSync(join(repo, 'docs/node_modules/x.txt'));
+    rmSync(join(repo, 'sub/package-lock.json'));
+    const head = commit(repo, 'remove');
+
+    expect(guard(repo).code).toBe(0);
+    const r = guard(repo, '--range', `${base}..HEAD`);
+    expect(r.code).toBe(1);
+    const lines = r.stdout.split('\n').filter((l) => l.startsWith('::error'));
+    expect(lines).toHaveLength(2);
+    expect(lines[0]).toContain('file=docs/node_modules/x.txt,');
+    expect(lines[1]).toContain('file=sub/package-lock.json,');
+    for (const line of lines) {
+      expect(line).toContain(`title=personal-number guard (commit ${short(added)})::`);
+    }
+    expect(r.stdout).toContain(masked);
+    expect(r.stdout).toContain(
+      `personal-number guard: scanned 2 commits (${short(base)}..${short(head)}), 2 findings`,
     );
     expect(r.all).not.toContain(v);
   });
