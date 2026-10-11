@@ -1,5 +1,11 @@
 import type { Problem } from 'uio-config';
-import { discoverModelFiles, type ModelFile, parseModelFile, schemaFileFor } from './load.ts';
+import {
+  discoverModelFiles,
+  type ModelFile,
+  noSchemaMessage,
+  parseModelFile,
+  schemaFileFor,
+} from './load.ts';
 import { createAjv, schemaProblems } from './schema.ts';
 
 const compare = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
@@ -14,17 +20,20 @@ function sorted(problems: Problem[]): Problem[] {
   );
 }
 
-/** Pure core: parse and schema-check the given files; problems sorted by file, line, column, message. */
+/**
+ * Pure core: parse and schema-check the given files; problems sorted by file, line, column and
+ * message. A file whose data cannot be trusted (parser error, non-mapping root) is not schema-checked.
+ */
 export function checkModelFiles(files: readonly ModelFile[]): Problem[] {
   const ajv = createAjv();
   const problems: Problem[] = [];
   for (const file of files) {
-    const { parsed, problems: parseProblems } = parseModelFile(file);
+    const { parsed, problems: parseProblems, usable } = parseModelFile(file);
     problems.push(...parseProblems);
-    if (parseProblems.length > 0) continue;
+    if (!usable) continue;
     const schemaId = schemaFileFor(file.path);
     if (schemaId === undefined) {
-      problems.push({ file: file.path, message: 'no schema is known for this file' });
+      problems.push({ file: file.path, message: noSchemaMessage(file.path) });
       continue;
     }
     problems.push(...schemaProblems(ajv, schemaId, parsed));
@@ -32,7 +41,8 @@ export function checkModelFiles(files: readonly ModelFile[]): Problem[] {
   return sorted(problems);
 }
 
-/** Read every model file under `root` and check it. */
+/** Read every model file under `root` and check it, including stray entries under `model/`. */
 export function checkModel(root: string): Problem[] {
-  return checkModelFiles(discoverModelFiles(root));
+  const { files, problems } = discoverModelFiles(root);
+  return sorted([...problems, ...checkModelFiles(files)]);
 }
