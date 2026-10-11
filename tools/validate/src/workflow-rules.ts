@@ -22,6 +22,12 @@ export const EXPECTED_RUN_STEPS: readonly string[] = [
   'npm run build:packages',
 ];
 
+/**
+ * The only actions of ci.yml, in order. They are matched as prefixes so that any version ref
+ * passes: Dependabot bumps the ref monthly, and an exact-ref pin would fail every such update.
+ */
+const EXPECTED_ACTIONS: readonly string[] = ['actions/checkout@', 'actions/setup-node@'];
+
 const TREE_STEP = EXPECTED_RUN_STEPS[2];
 const RANGE_STEP = EXPECTED_RUN_STEPS[3];
 
@@ -86,8 +92,8 @@ function hasTrigger(triggers: unknown, name: string): boolean {
 
 /**
  * Checks that hold for every workflow file: the forbidden triggers pull_request_target,
- * workflow_run and issue_comment, no expression in a run string, first-party actions only
- * (T-01-27 to T-01-30, T-01-53).
+ * workflow_run and issue_comment, no job-level if, permissions or uses (D-31, T-01-66), no
+ * expression in a run string, first-party actions only (T-01-27 to T-01-30, T-01-53).
  */
 function checkCommon(file: string, doc: Json, problems: Problem[]): void {
   for (const [name, message] of FORBIDDEN_TRIGGERS) {
@@ -96,6 +102,26 @@ function checkCommon(file: string, doc: Json, problems: Problem[]): void {
 
   const jobs = isRecord(doc.jobs) ? doc.jobs : {};
   for (const [jobId, job] of Object.entries(jobs)) {
+    if (isRecord(job)) {
+      if ('if' in job) {
+        problems.push({
+          file,
+          message: `job ${jobId}: a job-level if is not allowed (a skipped job satisfies a required check)`,
+        });
+      }
+      if ('permissions' in job) {
+        problems.push({
+          file,
+          message: `job ${jobId}: job-level permissions are not allowed; set permissions at the top level of the workflow`,
+        });
+      }
+      if ('uses' in job) {
+        problems.push({
+          file,
+          message: `job ${jobId}: a reusable workflow call (job-level uses) is not allowed`,
+        });
+      }
+    }
     for (const step of stepsOf(job)) {
       if (typeof step.run === 'string' && step.run.includes(EXPR_OPEN)) {
         problems.push({
@@ -123,10 +149,23 @@ function stepLabel(step: Json): string {
 }
 
 /**
- * Job and step integrity of ci.yml (DEC-026, T-01-51, T-01-52, T-01-54): presence of the key
- * decides, whatever its value, so `continue-on-error: false` and `permissions: {}` are rejected too.
+ * Job and step integrity of ci.yml (DEC-026, DEC-027, T-01-51, T-01-52, T-01-64, T-01-65): presence
+ * of the key decides, whatever its value, so `continue-on-error: false` and `env: {}` are rejected
+ * too. It covers job-level continue-on-error, step-level continue-on-error and if, the env and
+ * defaults bans at workflow and job level, and the pinned actions.
  */
 function checkIntegrity(doc: Json, bad: (message: string) => void): void {
+  if ('env' in doc) {
+    bad(
+      'env is not allowed at workflow level in ci.yml (it reaches every step, for example NODE_OPTIONS)',
+    );
+  }
+  if ('defaults' in doc) {
+    bad(
+      'defaults is not allowed at workflow level in ci.yml (defaults.run.shell can turn every run step into a no-op)',
+    );
+  }
+
   const jobs = isRecord(doc.jobs) ? doc.jobs : {};
   for (const [jobId, job] of Object.entries(jobs)) {
     if (!isRecord(job)) continue;
@@ -135,18 +174,15 @@ function checkIntegrity(doc: Json, bad: (message: string) => void): void {
         `job ${jobId}: continue-on-error is not allowed in ci.yml (it turns a failing job green)`,
       );
     }
-    if ('if' in job) {
+    if ('env' in job) {
       bad(
-        `job ${jobId}: a job-level if is not allowed in ci.yml (a skipped job satisfies a required check)`,
+        `job ${jobId}: job-level env is not allowed in ci.yml (it reaches every step of the job, for example NODE_OPTIONS)`,
       );
     }
-    if ('permissions' in job) {
+    if ('defaults' in job) {
       bad(
-        `job ${jobId}: job-level permissions are not allowed in ci.yml; the top-level contents: read applies`,
+        `job ${jobId}: job-level defaults is not allowed in ci.yml (defaults.run.shell can turn every run step into a no-op)`,
       );
-    }
-    if ('uses' in job) {
-      bad(`job ${jobId}: a reusable workflow call (job-level uses) is not allowed in ci.yml`);
     }
     for (const step of stepsOf(job)) {
       if ('continue-on-error' in step) {
@@ -157,6 +193,14 @@ function checkIntegrity(doc: Json, bad: (message: string) => void): void {
       if ('if' in step && step.run !== RANGE_STEP) {
         bad(
           `job ${jobId}: step "${stepLabel(step)}": an if condition is only allowed on the PR-commit guard step`,
+        );
+      }
+      if (
+        typeof step.uses === 'string' &&
+        !EXPECTED_ACTIONS.some((prefix) => (step.uses as string).startsWith(prefix))
+      ) {
+        bad(
+          `job ${jobId}: step "${stepLabel(step)}": only actions/checkout and actions/setup-node may be used in ci.yml`,
         );
       }
     }
@@ -228,6 +272,16 @@ function checkCi(doc: Json, problems: Problem[]): void {
       bad('checkout must use fetch-depth: 0 so the PR commit range can be scanned');
     if (withBlock['persist-credentials'] !== false)
       bad('checkout must set persist-credentials: false');
+  }
+
+  const used = steps.flatMap((step) => (typeof step.uses === 'string' ? [step.uses] : []));
+  if (
+    used.length !== EXPECTED_ACTIONS.length ||
+    used.some((uses, index) => !uses.startsWith(EXPECTED_ACTIONS[index] ?? '\0'))
+  ) {
+    bad(
+      `uses steps must be, in order: ${EXPECTED_ACTIONS.map((prefix) => `${prefix}<ref>`).join(' | ')}`,
+    );
   }
 
   const runs = steps.filter((step) => typeof step.run === 'string');
