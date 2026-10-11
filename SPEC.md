@@ -98,6 +98,12 @@ The engine reads **only** the generated `dist/model.json`, a compact, normalised
 
 > Amended by DECISIONS.md DEC-018: the v0.9 ontology is tracked as `sources/uio-ontology-v0.9.ttl`, moved from the repository root.
 
+> Amended by DECISIONS.md DEC-031: `model/authorities/` holds authority classes and per-country instances (`instance_of`, `jurisdiction`, own source); a scheme's `issuer` names a class, or an instance for a national-only scheme.
+
+> Amended by DECISIONS.md DEC-032: jurisdictions declare `part_of` with a source and the validator rejects a cycle; the seeded set is minimal (EU, NL, BE, GB and XI), and EL is a prefix alias of GR, not a jurisdiction.
+
+> Amended by DECISIONS.md DEC-040: supersedes DEC-032 in part; GR (Greece, `part_of` EU) is seeded now as a sixth jurisdiction so that the prefix entry EL to GR resolves.
+
 ```
 /
 ├─ SPEC.md                      # this document
@@ -137,6 +143,12 @@ Monorepo with npm workspaces. Node LTS. No backend, database or telemetry.
 
 ### 5.1 Closed lists (`model/vocab/`)
 
+> Amended by DECISIONS.md DEC-032: each applicability status gets an `inherits_down` flag, and results will be classed stated, inherited (from X) or no-data; the engine logic follows in Phase 5.
+
+> Amended by DECISIONS.md DEC-034: the `relation-kind` list gains `specializes`, first used for `vat-nl specializes vat`.
+
+> Amended by DECISIONS.md DEC-041: `inherits_down` is false for `issued`, true for `recognised`, true for `verifiable` and false for `not-applicable`, a modelling decision without an external source; a stated applicability beats an inherited one and an inherited result stays below `certain`.
+
 | List | Values (starter set) |
 |---|---|
 | `certainty` | `certain`, `likely`, `possible` (ranking: certain > likely > possible) |
@@ -153,6 +165,16 @@ Monorepo with npm workspaces. Node LTS. No backend, database or telemetry.
 > Amended by DECISIONS.md DEC-004: `checksum` is an any-of list, each entry with its own source and certainty, instead of a single algorithm name.
 
 > Amended by DECISIONS.md DEC-028: the JSON Schema is hand-written (draft 2020-12, closed, checked by Ajv at build time only), every model file names it in a `# yaml-language-server` header, and identifier values are always quoted strings.
+
+> Amended by DECISIONS.md DEC-029: each scheme declares a default source that covers its bare header fields (`issuer`, `jurisdiction`, `kind`, `abbreviation`, `availability`, `iso6523_icd`, `peppol_eas`), which may use the long form `{ value, source, certainty }`; every statement carries its own `source` and explicit `certainty`.
+
+> Amended by DECISIONS.md DEC-031: `issuer` names an authority class, or an instance for a national-only scheme; instances and classes live in `model/authorities/`.
+
+> Amended by DECISIONS.md DEC-035: a scheme may declare `context_from.issuing_country` with a `capture` (regex and group) and the `country-prefix` map, each with its own source and certainty, to read the issuing country from the value.
+
+> Amended by DECISIONS.md DEC-036: `iso6523_icd` and `peppol_eas` are separate nullable 4-digit string fields, and a composite scheme names its delegates with explicit `components` and a relation.
+
+> Amended by DECISIONS.md DEC-038: a checksum entry is `{ algorithm, over?, source, certainty }`, where `over` is an optional list of SPEC §5.3 transforms applied before the algorithm.
 
 Validate with a JSON Schema in `tools/validate`. Fields:
 
@@ -220,6 +242,8 @@ The values above are illustrative. Take the real values from `sources/` (§9). T
 
 ### 5.3 Rules as data
 
+> Amended by DECISIONS.md DEC-035: the `capture` operation is also used by `context_from` to read the issuing country from a value, and a prefix that the `country-prefix` map does not know gives no context, not an error.
+
 A rule is either a **transformation** of a value, or an **if-then rule** over properties.
 
 **Transformations** are a list of steps from a fixed, small set of operations. Do not add free code or expressions.
@@ -236,6 +260,10 @@ A rule is either a **transformation** of a value, or an **if-then rule** over pr
 ### 5.4 Source and certainty (mandatory)
 
 > Amended by DECISIONS.md DEC-019: strict sourcing; a statement without a source and a certainty is left out of the model and logged in `docs/gaps.md`, and no expert sources are invented.
+
+> Amended by DECISIONS.md DEC-029: a scheme's default source covers its bare header fields and every statement keeps its own `source` and explicit `certainty`; `label`, `notes` and `scope` need no source.
+
+> Amended by DECISIONS.md DEC-030: every source needs `id`, `title`, `date` and `type`, plus the fields of its type (`eli` or `url` for law, `publisher` and `reference` for a standard, `url` for a register document, `method` for an analysis, `role` and `organisation` for an expert).
 
 - Every statement (level, role, applicability, relation, rule, pattern, trust, persistence) has `source` (id in `model/sources/`) and `certainty` (default `certain` if it follows from law or a standard; otherwise fill in explicitly).
 - `model/sources/<id>.yaml`: `id`, `title`, `url?`, `publisher?`, `date`, `type` (`law` | `standard` | `register-doc` | `expert` | `analysis`). For an expert: role and organisation, never a personal name without consent.
@@ -254,6 +282,8 @@ A rule is either a **transformation** of a value, or an **if-then rule** over pr
 ### 5.6 Validation (CI fails on each of these)
 
 > Amended by DECISIONS.md DEC-028: the validator reports every error of every model file with file, line and column, rejects unquoted numbers with a leading zero or more than 15 digits and duplicate keys, and treats an uncited source as a warning.
+
+> Amended by DECISIONS.md DEC-039: an `examples_valid` value must be accepted by the scheme, and an `examples_invalid` value is valid when the scheme does not accept it, so a pattern match with every checksum entry failing is a valid invalid example.
 
 1. YAML conforms to the JSON Schema.
 2. Every reference (issuer, jurisdiction, source, target, input/output of rules) exists.
@@ -303,6 +333,8 @@ interface Step {
 
 ### 6.2 Behaviour
 
+> Amended by DECISIONS.md DEC-041: when applicability is resolved through `part_of`, a stated applicability beats an inherited one and an inherited result is capped below `certain`.
+
 - **Weakest link:** the certainty of a conclusion is the minimum over all steps in `explanation`. A condition that is not established counts as an `assumption` step with certainty `likely`.
 - **`recognise`:** try all patterns of all schemes and check the checksum. Return all candidates, sorted by certainty and then by specificity (length of the regex match without wildcards). Multiple candidates are normal; 9 digits can be RSIN, BSN or DUNS.
 - **`relate`:** a direct relation, otherwise the shortest chain (BFS) over `relations` and `rules`, with at most 4 steps. All chains of equal length are returned.
@@ -322,6 +354,10 @@ interface Step {
 ### 6.4 Checksum algorithms (fixed set, called by name from the model)
 
 > Amended by DECISIONS.md DEC-004: a scheme's checksum is an any-of list with a source and certainty per entry; for `vat-nl` it is elfproef or ISO 7064 mod 97-10, with the mod 97 entry marked `likely`.
+
+> Amended by DECISIONS.md DEC-037: the checksum kernel and the SPEC §5.3 transform set are built in Phase 2 in `packages/engine` with zero dependencies, and mod 97-10 uses per-character remainders, never floating point.
+
+> Amended by DECISIONS.md DEC-038: a checksum entry may carry an `over` list of transforms applied before the algorithm, so `vat-nl` runs elfproef on the 9-digit core and mod 97-10 on the whole value.
 
 `elfproef` (11-proof; weights 9…2 and −1 for the last digit; applies to BSN and RSIN, which therefore cannot be told apart by checksum), `iso7064-mod97-10` (LEI, also the VAT id of sole proprietorships), `gs1-mod10` (GLN), `none`. Each algorithm has its own unit tests with known valid and invalid values. Before use, record which schemes have which algorithm, with a source; see Appendix B.
 
@@ -384,6 +420,8 @@ REST API, a dedicated chat with a language model (for example Jev by TypeSafe AI
 
 > Amended by DECISIONS.md DEC-023: the workbook is `UID-table - v1.2.xlsx` with tabs `Overview UIDs` and `Persistence`; it has one LEI column, BSN and fi-number columns are present (sparse), and it has 14 scheme columns where this section lists 15 ids.
 
+> Amended by DECISIONS.md DEC-033: v0.1 has 16 schemes (the 15 ids plus KBO); `vat` is the generic EU VAT identifier and `vat-nl` the Dutch form, and both cite the workbook column `VAT-nr`.
+
 **Source:** `sources/Analysis of Unique IDs for companies.xlsx` (tab *Overzicht UID* = landscape table, *Persistence*, *KvK in NL en buitenland*). Also deliver a conversion script `tools/import/excel.ts`, or transfer the values by hand. In both cases record `source: landscape-v1.2` per field.
 
 **Starter set of 14 schemes:** `kvk-number`, `kvk-establishment-number` (establishment number), `oin`, `rsin`, `vat` (generic) plus `vat-nl`, `roo`, `peppol-id`, `lei`, `gln`, `euid`, `eori`, `duns`, `bsn`, `fi-number`.
@@ -423,6 +461,8 @@ REST API, a dedicated chat with a language model (for example Jev by TypeSafe AI
 
 > Amended by DECISIONS.md DEC-023: the scheme count is reconciled in Phase 2, because `vat` and `vat-nl` share one workbook column (14 columns against 15 ids).
 
+> Amended by DECISIONS.md DEC-033: the scheme count for v0.1 is 16 (the 15 ids plus KBO), with `vat` as the generic EU VAT identifier and `vat-nl` as the Dutch form.
+
 - [ ] All 14 schemes are in `model/schemes/`, with a source for every statement; gaps are in `docs/gaps.md`.
 - [ ] CI is green: validation, SHACL, model-driven tests, unit and acceptance tests.
 - [ ] The six engine functions work for all schemes, and every conclusion has an explanation.
@@ -450,6 +490,8 @@ REST API, a dedicated chat with a language model (for example Jev by TypeSafe AI
 | Definition of "applicable" | Four statuses (§5.1); per jurisdiction several are possible at the same time |
 
 ## 13. Build order
+
+> Amended by DECISIONS.md DEC-037: the checksum kernel and the transform set of step 5 are built in Phase 2, ahead of step 5, because the validator of step 2 runs them.
 
 1. Monorepo setup, licences, `config.yaml`, CI skeleton.
 2. Closed lists, JSON Schema for the YAML, validation tool.
@@ -486,6 +528,8 @@ REST API, a dedicated chat with a language model (for example Jev by TypeSafe AI
 ## Appendix B — Details to verify (do not adopt without a source)
 
 > Amended by DECISIONS.md DEC-004: the checksum of a scheme is an any-of list with its own source and certainty per entry; for `vat-nl` the mod 97 entry is marked `likely`.
+
+> Amended by DECISIONS.md DEC-036: ICD codes and Peppol EAS codes are separate header fields `iso6523_icd` and `peppol_eas`; 9944 is a Peppol EAS value, not an ISO 6523 ICD.
 
 These are commonly used values. They must first be confirmed with an authoritative source in `model/sources/` before they enter the model.
 
