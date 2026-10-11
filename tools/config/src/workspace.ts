@@ -54,6 +54,50 @@ function ownScopes(cfg: UioConfig, root: string): Set<string> {
   return scopes;
 }
 
+/**
+ * Every own package name (each own scope combined with each published suffix). Import and export
+ * specifiers use these names; they are derived from config.yaml and rewritten by config:sync.
+ */
+export function ownPackageNames(cfg: UioConfig, root: string = REPO_ROOT): string[] {
+  const names: string[] = [];
+  for (const scope of ownScopes(cfg, root)) {
+    for (const suffix of SUFFIXES) names.push(`${scope}/${suffix}`);
+  }
+  return names;
+}
+
+/** Quoted own package name directly after `from`, a bare `import`, or `import(`. */
+function specifierPattern(names: readonly string[], flags: string): RegExp {
+  const alternation = names.map(escapeRegExp).join('|');
+  return new RegExp(
+    `(\\bfrom\\s*|\\bimport\\s*\\(\\s*|\\bimport\\s+)(["'])(${alternation})\\2`,
+    flags,
+  );
+}
+
+/** `.ts` files under `<dir>/src` of every `packages/*` and `tools/*` directory, sorted, repo-relative. */
+function listSourceFiles(root: string): string[] {
+  const found: string[] = [];
+  const walk = (rel: string): void => {
+    const dir = join(root, rel);
+    for (const entry of readdirSync(dir).sort()) {
+      if (entry === 'node_modules') continue;
+      const child = `${rel}/${entry}`;
+      if (statSync(join(root, child)).isDirectory()) walk(child);
+      else if (entry.endsWith('.ts')) found.push(child);
+    }
+  };
+  for (const top of ['packages', 'tools']) {
+    const base = join(root, top);
+    if (!existsSync(base)) continue;
+    for (const entry of readdirSync(base).sort()) {
+      const src = `${top}/${entry}/src`;
+      if (existsSync(join(root, src)) && statSync(join(root, src)).isDirectory()) walk(src);
+    }
+  }
+  return found.sort();
+}
+
 /** Repo-relative paths of the package.json of every workspace, sorted. */
 export function listWorkspaceManifests(root: string = REPO_ROOT): string[] {
   const rootManifest = readManifest(root, 'package.json');
@@ -129,6 +173,8 @@ export function checkPackageNames(cfg: UioConfig, root: string = REPO_ROOT): Pro
 export function syncPackageNames(cfg: UioConfig, root: string = REPO_ROOT): string[] {
   const scopes = ownScopes(cfg, root);
   const oldScopes = [...scopes].filter((scope) => scope !== cfg.npm_scope);
+  // Taken before the manifests are rewritten, which removes the old scopes from the manifests.
+  const oldNames = oldScopes.flatMap((scope) => SUFFIXES.map((suffix) => `${scope}/${suffix}`));
   const changed: string[] = [];
 
   for (const file of listWorkspaceManifests(root)) {
@@ -156,6 +202,25 @@ export function syncPackageNames(cfg: UioConfig, root: string = REPO_ROOT): stri
     if (text !== original) {
       writeFileSync(path, text);
       changed.push(file);
+    }
+  }
+
+  if (oldScopes.length > 0) {
+    const pattern = specifierPattern(oldNames, 'g');
+    for (const file of listSourceFiles(root)) {
+      const path = join(root, file);
+      const original = readFileSync(path, 'utf8');
+      const text = original.replace(
+        pattern,
+        (_whole, lead: string, quote: string, name: string) => {
+          const suffix = name.slice(name.indexOf('/') + 1);
+          return `${lead}${quote}${cfg.npm_scope}/${suffix}${quote}`;
+        },
+      );
+      if (text !== original) {
+        writeFileSync(path, text);
+        changed.push(file);
+      }
     }
   }
 
@@ -196,6 +261,7 @@ export function findConfigLiterals(
 ): Problem[] {
   const needles = [cfg.namespace.replace(/\/$/, ''), `${cfg.npm_scope}/`];
   const problems: Problem[] = [];
+  const specifiers = specifierPattern(ownPackageNames(cfg, root), 'g');
 
   for (const file of (files ?? listRepoFiles(root)).filter(isScanned)) {
     let buffer: Buffer;
@@ -206,7 +272,17 @@ export function findConfigLiterals(
     }
     if (buffer.subarray(0, 8000).includes(0)) continue;
     const lines = buffer.toString('utf8').split('\n');
-    lines.forEach((text, index) => {
+    const isTs = file.endsWith('.ts');
+    lines.forEach((raw, index) => {
+      // Own package names used as import or export specifiers are legitimate in .ts files: blank
+      // them (same length) so any other occurrence on the same line is still found.
+      const text = isTs
+        ? raw.replace(
+            specifiers,
+            (_whole, lead: string, quote: string, name: string) =>
+              `${lead}${quote}${' '.repeat(name.length)}${quote}`,
+          )
+        : raw;
       const needle = needles.find((n) => text.includes(n));
       if (needle !== undefined) {
         problems.push({
