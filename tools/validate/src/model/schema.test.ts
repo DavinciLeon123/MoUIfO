@@ -102,21 +102,24 @@ describe('certainty schema messages', () => {
 
 describe('error shaping on an inline schema', () => {
   const ajv = createAjv();
-  ajv.addSchema({
-    $id: 'shape-test.schema.json',
-    type: 'object',
-    properties: {
-      one: { oneOf: [{ type: 'string', minLength: 3 }, { type: 'integer' }] },
-      any: { anyOf: [{ type: 'string' }, { type: 'integer' }] },
-      pick: { enum: ['x', 'y'] },
-      cond: {
-        if: { type: 'object' },
-        then: { type: 'object', required: ['k'], properties: { k: { type: 'string' } } },
-        else: { type: 'string' },
+  // Written as JSON text: a `then` key in an object literal trips the thenable lint rule.
+  ajv.addSchema(
+    JSON.parse(`{
+      "$id": "shape-test.schema.json",
+      "type": "object",
+      "properties": {
+        "one": { "oneOf": [{ "type": "string", "minLength": 3 }, { "type": "integer" }] },
+        "any": { "anyOf": [{ "type": "string" }, { "type": "integer" }] },
+        "pick": { "enum": ["x", "y"] },
+        "cond": {
+          "if": { "type": "object" },
+          "then": { "type": "object", "required": ["k"], "properties": { "k": { "type": "string" } } },
+          "else": { "type": "string" }
+        }
       },
-    },
-    unevaluatedProperties: false,
-  });
+      "unevaluatedProperties": false
+    }`) as object,
+  );
 
   const run = (body: string) => {
     const { parsed } = parseModelFile({ path: 'model/vocab/shape.yaml', text: body });

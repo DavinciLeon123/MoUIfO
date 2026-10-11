@@ -136,13 +136,16 @@ function parseMessage(code: string, message: string): string {
 /**
  * Parse one model file and apply the file-level rules (header, parser errors and warnings, mapping
  * root, bare numbers, id equals file name). `usable` is false when the data cannot be trusted for
- * schema validation (a parser error or warning, or a root that is not a mapping). Positions come
+ * schema validation (a parser error or warning, or a root that is not a mapping); `coerced` lists
+ * the positions of bare numbers that lost digits, where a schema type error would repeat the
+ * same finding. Positions come
  * from the error offset, never from a pretty-printed message, so no source text is echoed.
  */
 export function parseModelFile(file: ModelFile): {
   parsed: ParsedFile;
   problems: Problem[];
   usable: boolean;
+  coerced: Position[];
 } {
   const lineCounter = new LineCounter();
   const doc = parseDocument(file.text, {
@@ -152,6 +155,7 @@ export function parseModelFile(file: ModelFile): {
     lineCounter,
   });
   const problems: Problem[] = [];
+  const coerced: Position[] = [];
   const at = (offset: number, message: string): void => {
     const { line, col } = lineCounter.linePos(offset);
     problems.push({ file: file.path, line, column: col, message });
@@ -185,7 +189,11 @@ export function parseModelFile(file: ModelFile): {
       const source = node.source ?? '';
       if (/^[+-]?0[0-9xXoObB]/.test(source) || /^[+-]?[0-9]{16,}/.test(source)) {
         const offset = node.range?.[0];
-        if (offset !== undefined) at(offset, NUMERIC_MESSAGE);
+        if (offset !== undefined) {
+          at(offset, NUMERIC_MESSAGE);
+          const { line, col } = lineCounter.linePos(offset);
+          coerced.push({ line, column: col });
+        }
       }
     },
   });
@@ -206,7 +214,7 @@ export function parseModelFile(file: ModelFile): {
       });
     }
   }
-  return { parsed, problems, usable };
+  return { parsed, problems, usable, coerced };
 }
 
 function locate(
