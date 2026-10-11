@@ -154,6 +154,23 @@ describe('tree mode', () => {
     expect(r.stdout).toMatch(/scanned 1 files, 0 findings/);
   });
 
+  test('a -diff attribute does not hide a committed value in tree mode', () => {
+    const repo = makeRepo({ '.gitattributes': '*.txt -diff\n', 'b.txt': `${v}\n` });
+    const r = guard(repo);
+    expect(r.code).toBe(1);
+    expect(r.stdout).toContain('file=b.txt,');
+    expect(r.all).not.toContain(v);
+  });
+
+  test('a committed file with a NUL byte is skipped in tree mode', () => {
+    const repo = makeRepo({
+      'blob.bin': Buffer.concat([Buffer.from([0]), Buffer.from(`\n${v}\n`)]),
+    });
+    const r = guard(repo);
+    expect(r.code).toBe(0);
+    expect(r.stdout).toMatch(/scanned 0 files, 0 findings/);
+  });
+
   test('symlinks and files deleted from the working tree are skipped', () => {
     const repo = makeRepo({ 'gone.txt': 'x\n', 'real.txt': 'clean\n' });
     symlinkSync('real.txt', join(repo, 'link.txt'));
@@ -308,6 +325,47 @@ describe('range mode', () => {
       `personal-number guard: scanned 2 commits (${short(base)}..${short(head)}), 2 findings`,
     );
     expect(r.all).not.toContain(v);
+  });
+
+  test.each([
+    ['-diff added in the same commit', { attributes: '*.txt -diff\n', inBase: false }],
+    ['binary added in the same commit', { attributes: '*.txt binary\n', inBase: false }],
+    ['-diff already present in the base', { attributes: '*.txt -diff\n', inBase: true }],
+  ])('a value added then removed in a file marked %s is reported once', (_name, row) => {
+    const repo = makeRepo(row.inBase ? { '.gitattributes': row.attributes } : { 'a.txt': 'x\n' });
+    const base = git(repo, 'rev-parse', 'HEAD').trim();
+    write(
+      repo,
+      row.inBase
+        ? { 'b.txt': `id ${v}\n` }
+        : { '.gitattributes': row.attributes, 'b.txt': `id ${v}\n` },
+    );
+    const added = commit(repo, 'add');
+    rmSync(join(repo, 'b.txt'));
+    commit(repo, 'remove');
+
+    const r = guard(repo, '--range', `${base}..HEAD`);
+    expect(r.code).toBe(1);
+    expect(r.stdout).toContain(
+      `::error file=b.txt,line=1,col=4,title=personal-number guard (commit ${short(added)})::`,
+    );
+    expect(r.stdout).toContain(masked);
+    expect(r.stdout).toMatch(/, 1 findings/);
+    expect(r.all).not.toContain(v);
+  });
+
+  test('range mode reads a file with a NUL byte as text, unlike tree mode', () => {
+    const repo = makeRepo({ 'a.txt': 'x\n' });
+    const base = git(repo, 'rev-parse', 'HEAD').trim();
+    write(repo, { 'blob.bin': Buffer.concat([Buffer.from([0]), Buffer.from(`\n${v}\n`)]) });
+    const added = commit(repo, 'add');
+    const r = guard(repo, '--range', `${base}..HEAD`);
+    expect(r.code).toBe(1);
+    expect(r.stdout).toContain(
+      `file=blob.bin,line=2,col=1,title=personal-number guard (commit ${short(added)})::`,
+    );
+    expect(r.all).not.toContain(v);
+    expect(guard(repo).code).toBe(0);
   });
 
   test('findings are ordered by commit, oldest first', () => {
