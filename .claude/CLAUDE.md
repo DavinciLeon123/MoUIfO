@@ -5,7 +5,7 @@
 - Ask the owner before any new deviation from `SPEC.md` or `DECISIONS.md`, and record an agreed deviation as a new `DECISIONS.md` row.
 - The generated sections below (between the GSD markers) are regenerated from planning research, predate `DECISIONS.md` and are never edited by hand. Where they differ from `DECISIONS.md`, `DECISIONS.md` wins; the known differences are listed under "Overridden by DECISIONS.md" directly below.
 - `SPEC.md` section 0 refers to `CLAUDE.md`; this file lives at `.claude/CLAUDE.md` (DEC-002).
-- Never commit a personal number: tests build valid-looking 9-digit values at runtime, and only entries of `tools/guards/personal-number-allowlist.txt` (public or synthetic, each with a reason) may appear.
+- Never commit a personal number: tests build valid-looking 9-digit values at runtime, and only entries of `tools/guards/personal-number-allowlist.txt` (public or synthetic, each with a reason) may appear. On a pull request the guard uses the base commit's allow-list, so an entry cannot be added in the same change that needs it (DEC-025).
 - `config.yaml` is the only place for the namespace and the npm scope.
 
 ### Overridden by DECISIONS.md
