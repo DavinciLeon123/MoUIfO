@@ -478,7 +478,7 @@ describe('allow-list from a commit (--allowlist-ref)', () => {
     expect(errors[0]).toContain('file=notes.txt,line=2,');
     expect(errors[0]).toContain('title=personal-number guard::');
     expect(errors[0]).toContain(maskedW);
-    expect(errors[1]).toContain(`file=${LIST.replaceAll(':', '%3A')},`);
+    expect(errors[1]).toContain(`file=${LIST},`);
     expect(errors[1]).toContain('title=personal-number guard (allow-list)::');
     expect(errors[1]).toContain(maskedW);
     expect(r.stdout).not.toContain(masked);
@@ -509,7 +509,7 @@ describe('allow-list from a commit (--allowlist-ref)', () => {
     expect(errors[0]).toContain(`title=personal-number guard (commit ${short(head)})::`);
     expect(errors[1]).toContain(`file=${LIST},`);
     expect(errors[1]).toContain(
-      `title=personal-number guard (allow-list, commit ${short(head)})::`,
+      `title=personal-number guard (allow-list%2C commit ${short(head)})::`,
     );
     expect(r.all).not.toContain(v);
     expect(r.all).not.toContain(w);
@@ -525,7 +525,7 @@ describe('allow-list from a commit (--allowlist-ref)', () => {
     expect(r.code).toBe(0);
     const notices = r.stdout.split('\n').filter((l) => l.startsWith('::notice'));
     expect(notices).toHaveLength(1);
-    expect(notices[0]).toContain(`::notice file=${LIST.replaceAll(':', '%3A')},`);
+    expect(notices[0]).toContain(`::notice file=${LIST},`);
     expect(notices[0]).toContain('title=personal-number guard (allow-list)::');
     expect(notices[0]).toContain(masked);
     expect(r.all).not.toContain(v);

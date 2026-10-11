@@ -2,13 +2,20 @@
 // 9-digit value (a possible BSN) must never be committed, and must never be printed in full by this
 // tool. Every finding is shown masked (six asterisks plus the last three digits).
 //
-// Usage: node tools/guards/src/personal-numbers.ts [--allowlist <file>] [--range <base>..<head>]
+// Usage: node tools/guards/src/personal-numbers.ts [--allowlist <file>] [--allowlist-ref <commit>]
+//        [--range <base>..<head>]
 //   tree mode (default): scans every tracked and untracked-but-not-ignored text file. No path or file
 //   name is skipped: installed dependencies are excluded only because .gitignore ignores them
 //   (git's --exclude-standard).
 //   --range mode: scans the added lines of every non-merge commit in <base>..<head>, so a value that
 //   was added in one commit and removed in a later one is still caught (D-23). Added lines are read
 //   with `git show --text`, so .gitattributes -diff/binary rules cannot hide them.
+//   --allowlist-ref <commit>: reads the allow-list from that commit (CI passes the pull request base),
+//   so an entry the change under review adds is not honoured, including the new line in the allow-list
+//   file itself (DEC-025). An entry the change removes stays honoured for that run and is announced
+//   with one masked notice. When the commit has no allow-list file, the working-tree copy (or
+//   --allowlist) is used and the source line says so. The working-tree copy is always parsed. An
+//   unresolvable ref, a path that is not a regular file in the commit or a malformed copy exits 2.
 // Exit codes: 0 clean, 1 findings, 2 usage or configuration error (the message never contains a
 // candidate value).
 //
@@ -16,7 +23,9 @@
 // numbers split across lines; grouped forms such as three groups of three digits or dotted groups;
 // 8-digit BSNs written without the leading zero; full-width digits; encoded content. Tree mode skips
 // files with a NUL byte in the first 8000 bytes, range mode reads every added line as text (so it is
-// stricter than tree mode for such files); base64 and hex tokens are blanked in both modes.
+// stricter than tree mode for such files); base64 and hex tokens are blanked in both modes. The guard
+// code, the `guard` npm script and the workflow run from the change under review, so a change that
+// edits them can neutralise the guard for its own run (owner-accepted residual risk, DEC-025).
 import { execFileSync } from 'node:child_process';
 import { lstatSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -88,7 +97,20 @@ export function runTreeScan(
   return { scanned, findings };
 }
 
-export function annotate(f: TreeFinding): string {
+/** Message for a value in the allow-list file that the trusted allow-list does not hold. */
+function untrustedEntryMessage(f: TreeFinding, trustedSha: string): string {
+  return (
+    `value ${mask(f.value)} in the allow-list file is not in the allow-list of ${trustedSha.slice(0, 7)}, ` +
+    'which this run trusts: an entry added by the change under review is not honoured. ' +
+    'Land a new entry as a separate change that the owner merges (DEC-025).'
+  );
+}
+
+/** `trustedSha` is set only when this run uses the allow-list of a trusted commit. */
+export function annotate(f: TreeFinding, trustedSha?: string): string {
+  if (trustedSha !== undefined && f.path === ALLOWLIST_LABEL) {
+    return `::error file=${escapeProperty(f.path)},line=${f.line},col=${f.col},title=${escapeProperty('personal-number guard (allow-list)')}::${escapeData(untrustedEntryMessage(f, trustedSha))}`;
+  }
   const message =
     `elfproef-valid 9-digit value ${mask(f.value)} is not in ${ALLOWLIST_LABEL}. ` +
     'Remove it; allow-list it only if it is public or synthetic, with a reason.';
@@ -100,12 +122,17 @@ export type RangeFinding = TreeFinding & { commit: string };
 const REF = /^[A-Za-z0-9][A-Za-z0-9._/-]*$/;
 
 /** Validate a ref (no leading dash, no whitespace) and resolve it to a commit sha. */
-function resolveCommit(root: string, ref: string, which: 'base' | 'head'): string {
-  if (!REF.test(ref)) throw new UsageError(`the ${which} of --range is not a plain ref name`);
+function resolveCommit(
+  root: string,
+  ref: string,
+  which: 'base' | 'head' | 'allowlist-ref',
+): string {
+  const what = which === 'allowlist-ref' ? 'the --allowlist-ref value' : `the ${which} of --range`;
+  if (!REF.test(ref)) throw new UsageError(`${what} is not a plain ref name`);
   try {
     return git(root, ['rev-parse', '--verify', '--quiet', `${ref}^{commit}`]).trim();
   } catch {
-    throw new UsageError(`the ${which} of --range does not resolve to a commit`);
+    throw new UsageError(`${what} does not resolve to a commit`);
   }
 }
 
@@ -160,8 +187,12 @@ export function runRangeScan(
   return { commits, baseSha, headSha, findings };
 }
 
-export function annotateRange(f: RangeFinding): string {
+export function annotateRange(f: RangeFinding, trustedSha?: string): string {
   const sha7 = f.commit.slice(0, 7);
+  if (trustedSha !== undefined && f.path === ALLOWLIST_LABEL) {
+    const title = escapeProperty(`personal-number guard (allow-list, commit ${sha7})`);
+    return `::error file=${escapeProperty(f.path)},line=${f.line},col=${f.col},title=${title}::${escapeData(untrustedEntryMessage(f, trustedSha))}`;
+  }
   const message =
     `elfproef-valid 9-digit value ${mask(f.value)} was added in commit ${sha7}. ` +
     'Removing it in a later commit is not enough: rewrite the pull request history so that no commit contains it.';
@@ -182,6 +213,37 @@ function loadAllowlist(path: string): Set<string> {
   }
 }
 
+/**
+ * The allow-list of a trusted commit. `allow` is null only when the commit has no allow-list file
+ * (the caller then falls back to the working-tree copy); every other problem throws, so an unreadable
+ * or malformed trusted copy can never turn into a silent fallback.
+ */
+export function loadAllowlistAt(
+  root: string,
+  ref: string,
+): { sha: string; allow: Set<string> | null } {
+  const sha = resolveCommit(root, ref, 'allowlist-ref');
+  const sha7 = sha.slice(0, 7);
+  let text: string;
+  try {
+    const entry = git(root, ['ls-tree', '-z', sha, '--', ALLOWLIST_LABEL]).split('\0')[0] ?? '';
+    if (entry === '') return { sha, allow: null };
+    const m = /^(100644|100755) blob ([0-9a-f]+)\t/.exec(entry);
+    if (!m?.[2]) throw new UsageError(`the allow-list in ${sha7} is not a regular file`);
+    text = git(root, ['cat-file', 'blob', m[2]]);
+  } catch (error) {
+    if (error instanceof UsageError) throw error;
+    throw new UsageError(`cannot read the allow-list from ${sha7}`);
+  }
+  try {
+    return { sha, allow: parseAllowlist(text) };
+  } catch (error) {
+    throw new UsageError(
+      `allow-list at ${sha7}: ${error instanceof Error ? error.message : 'invalid allow-list'}`,
+    );
+  }
+}
+
 function repoRoot(): string {
   try {
     return git(process.cwd(), ['rev-parse', '--show-toplevel']).trim();
@@ -192,24 +254,51 @@ function repoRoot(): string {
 
 function main(argv: string[]): number {
   let allowlistPath = DEFAULT_ALLOWLIST;
+  let allowlistRef: string | undefined;
   let range: string | undefined;
   try {
     const { values } = parseArgs({
       args: argv,
-      options: { allowlist: { type: 'string' }, range: { type: 'string' } },
+      options: {
+        allowlist: { type: 'string' },
+        'allowlist-ref': { type: 'string' },
+        range: { type: 'string' },
+      },
       strict: true,
       allowPositionals: false,
     });
     if (values.allowlist !== undefined) allowlistPath = values.allowlist;
+    allowlistRef = values['allowlist-ref'];
     range = values.range;
   } catch {
     throw new UsageError(
-      'invalid arguments; usage: personal-numbers.ts [--allowlist <file>] [--range <base>..<head>]',
+      'invalid arguments; usage: personal-numbers.ts [--allowlist <file>] [--allowlist-ref <commit>] [--range <base>..<head>]',
     );
   }
   const parsedRange = range === undefined ? undefined : parseRange(range);
-  const allow = loadAllowlist(allowlistPath);
+  let allow = loadAllowlist(allowlistPath);
   const root = repoRoot();
+  let trustedSha: string | undefined;
+  if (allowlistRef !== undefined) {
+    const trusted = loadAllowlistAt(root, allowlistRef);
+    const sha7 = trusted.sha.slice(0, 7);
+    if (trusted.allow === null) {
+      console.log(
+        `personal-number guard: allow-list source: working tree (${sha7} has no ${ALLOWLIST_LABEL})`,
+      );
+    } else {
+      console.log(`personal-number guard: allow-list source: ${sha7}`);
+      for (const value of trusted.allow) {
+        if (allow.has(value)) continue;
+        const message = `entry ${mask(value)} is removed by this change; it stays honoured until the change is merged`;
+        console.log(
+          `::notice file=${escapeProperty(ALLOWLIST_LABEL)},title=${escapeProperty('personal-number guard (allow-list)')}::${escapeData(message)}`,
+        );
+      }
+      allow = trusted.allow;
+      trustedSha = trusted.sha;
+    }
+  }
   if (parsedRange) {
     const { commits, baseSha, headSha, findings } = runRangeScan(
       root,
@@ -217,14 +306,14 @@ function main(argv: string[]): number {
       parsedRange.head,
       allow,
     );
-    for (const f of findings) console.log(annotateRange(f));
+    for (const f of findings) console.log(annotateRange(f, trustedSha));
     console.log(
       `personal-number guard: scanned ${commits.length} commits (${baseSha.slice(0, 7)}..${headSha.slice(0, 7)}), ${findings.length} findings`,
     );
     return findings.length > 0 ? 1 : 0;
   }
   const { scanned, findings } = runTreeScan(root, allow);
-  for (const f of findings) console.log(annotate(f));
+  for (const f of findings) console.log(annotate(f, trustedSha));
   console.log(`personal-number guard: scanned ${scanned} files, ${findings.length} findings`);
   return findings.length > 0 ? 1 : 0;
 }
