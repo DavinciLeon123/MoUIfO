@@ -10,8 +10,18 @@ export type ConfigKey = (typeof CONFIG_KEYS)[number];
 
 export type UioConfig = Readonly<Record<ConfigKey, string>>;
 
-/** A finding that a check reports; `toAnnotation` renders it as a GitHub workflow command. */
-export type Problem = { file: string; line?: number; message: string };
+/**
+ * A finding that a check reports; `toAnnotation` renders it as a GitHub workflow command.
+ * `line` and `column` are 1-based. An absent `severity` means `error`; only `warning` leaves the
+ * validate exit code at 0.
+ */
+export type Problem = {
+  file: string;
+  line?: number;
+  column?: number;
+  severity?: 'error' | 'warning';
+  message: string;
+};
 
 export class ConfigError extends Error {
   override name = 'ConfigError';
@@ -106,10 +116,28 @@ const escapeData = (s: string): string =>
 const escapeProperty = (s: string): string =>
   escapeData(s).replaceAll(':', '%3A').replaceAll(',', '%2C');
 
-/** Render a problem as a GitHub Actions `::error` workflow command. */
+/** Render a problem as a GitHub Actions `::error` or `::warning` workflow command. */
 export function toAnnotation(p: Problem): string {
-  const line = p.line === undefined ? '' : `,line=${p.line}`;
-  return `::error file=${escapeProperty(p.file)}${line}::${escapeData(p.message)}`;
+  const command = p.severity === 'warning' ? 'warning' : 'error';
+  const position =
+    p.line === undefined
+      ? ''
+      : `,line=${p.line}${p.column === undefined ? '' : `,col=${p.column}`}`;
+  return `::${command} file=${escapeProperty(p.file)}${position}::${escapeData(p.message)}`;
+}
+
+/**
+ * One output line per problem: the annotation form in CI, otherwise
+ * `<file>[:<line>[:<column>]] [warning: ]<message>`.
+ */
+export function formatProblem(p: Problem, options: { github: boolean }): string {
+  if (options.github) return toAnnotation(p);
+  let where = p.file;
+  if (p.line !== undefined) {
+    where += `:${p.line}`;
+    if (p.column !== undefined) where += `:${p.column}`;
+  }
+  return `${where} ${p.severity === 'warning' ? 'warning: ' : ''}${p.message}`;
 }
 
 export * from './workspace.ts';
