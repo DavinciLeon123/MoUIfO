@@ -11,6 +11,18 @@
  * - `{capture:n}` in a template is group n of the most recent preceding `capture` step.
  * - Every pattern and capture regex compiles with the single flag `u` (REGEX_FLAGS).
  * - A step that gives null makes the whole transform give null (SPEC: no conclusion).
+ * - `strip_prefix: n` and `strip_suffix: n` (integer, 0 or more) drop n characters from the start or
+ *   the end; n equal to the length gives the empty string, n above the length gives null, n = 0
+ *   changes nothing.
+ * - `add_prefix: s` and `add_suffix: s` (non-empty string) concatenate s at the start or the end.
+ * - `pad_left: { length, char }` pads on the left with exactly one `char` (one UTF-16 code unit)
+ *   until the value has `length` characters (integer, 1 or more); a longer value is left unchanged.
+ * - `uppercase` is the bare string step (no argument) and upper-cases in a locale-independent way.
+ * - `remove: chars` (non-empty string) deletes every character of `chars` from the value, wherever
+ *   it occurs (SPEC example: `remove: " .-"`).
+ * - `template: text` builds a new value from `text`; the only placeholders are `{value}` and
+ *   `{capture:n}`, and any other brace content or an unmatched brace is a compile error.
+ * - Steps run in list order; `{capture:n}` needs an earlier `capture` step with at least n groups.
  */
 
 /** The only regex flag: Unicode mode. Caller-chosen flags do not exist. */
@@ -57,7 +69,9 @@ export type TransformResult =
 /** State shared between the steps of one run: the match of the most recent `capture` step. */
 type RunState = { match: RegExpExecArray | null };
 type CompiledStep = (value: string, state: RunState) => string | null;
-type StepResult = { ok: true; apply: CompiledStep } | { ok: false; message: string };
+type StepResult =
+  | { ok: true; apply: CompiledStep; groups?: number }
+  | { ok: false; message: string };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -87,6 +101,7 @@ function compileCapture(argument: unknown): StepResult {
   const compiled = pattern.regex;
   return {
     ok: true,
+    groups: pattern.groups,
     apply(value, state) {
       // The regex has no g or y flag, so exec keeps no state between runs.
       const match = compiled.exec(value);
@@ -97,31 +112,165 @@ function compileCapture(argument: unknown): StepResult {
   };
 }
 
-function compileStep(step: unknown): StepResult {
-  let operation: string;
-  let argument: unknown;
-  if (typeof step === 'string') {
-    operation = step;
-    argument = undefined;
-    if (operation !== 'uppercase') {
-      return TRANSFORM_OPERATIONS.includes(operation as TransformOperation)
-        ? { ok: false, message: `operation "${operation}" needs an argument` }
-        : { ok: false, message: `unknown transform operation "${operation}"` };
-    }
-  } else if (isRecord(step)) {
-    const keys = Object.keys(step);
-    if (keys.length !== 1) return { ok: false, message: 'a step must have exactly one operation' };
-    operation = keys[0] as string;
-    argument = step[operation];
-    if (!TRANSFORM_OPERATIONS.includes(operation as TransformOperation)) {
-      return { ok: false, message: `unknown transform operation "${operation}"` };
-    }
-  } else {
-    return { ok: false, message: 'a step must have exactly one operation' };
-  }
+/** Compile-time knowledge of the preceding steps: the group count of the latest `capture`. */
+type CompileContext = { groups: number | null; captureFailed: boolean };
 
-  if (operation === 'capture') return compileCapture(argument);
-  return { ok: false, message: `operation "${operation}" is not implemented yet` };
+function fail(message: string): StepResult {
+  return { ok: false, message };
+}
+
+function compileCount(operation: 'strip_prefix' | 'strip_suffix', argument: unknown): StepResult {
+  if (typeof argument !== 'number' || !Number.isInteger(argument) || argument < 0) {
+    return fail(`${operation} needs an integer of at least 0`);
+  }
+  const n = argument;
+  if (operation === 'strip_prefix') {
+    return { ok: true, apply: (value) => (value.length < n ? null : value.slice(n)) };
+  }
+  // An explicit end index: slice(0, -n) would be wrong for n = 0.
+  return {
+    ok: true,
+    apply: (value) => (value.length < n ? null : value.slice(0, value.length - n)),
+  };
+}
+
+function compileAdd(operation: 'add_prefix' | 'add_suffix', argument: unknown): StepResult {
+  if (typeof argument !== 'string' || argument.length === 0) {
+    return fail(`${operation} needs a non-empty string`);
+  }
+  const text = argument;
+  return operation === 'add_prefix'
+    ? { ok: true, apply: (value) => text + value }
+    : { ok: true, apply: (value) => value + text };
+}
+
+function compilePadLeft(argument: unknown): StepResult {
+  if (!isRecord(argument)) return fail('pad_left needs an object with length and char');
+  if (Object.keys(argument).some((key) => key !== 'length' && key !== 'char')) {
+    return fail('pad_left accepts only length and char');
+  }
+  const { length, char } = argument;
+  if (typeof length !== 'number' || !Number.isInteger(length) || length < 1) {
+    return fail('pad_left length must be an integer of at least 1');
+  }
+  if (typeof char !== 'string' || char.length !== 1) {
+    return fail('pad_left char must be exactly one character');
+  }
+  return { ok: true, apply: (value) => value.padStart(length, char) };
+}
+
+function compileRemove(argument: unknown): StepResult {
+  if (typeof argument !== 'string' || argument.length === 0) {
+    return fail('remove needs a non-empty string');
+  }
+  const unwanted = new Set([...argument]);
+  return { ok: true, apply: (value) => [...value].filter((c) => !unwanted.has(c)).join('') };
+}
+
+type TemplatePart = string | { value: true } | { capture: number };
+
+/** Split a template into literal text and placeholders; only {value} and {capture:n} are allowed. */
+function parseTemplate(text: string): TemplatePart[] | string {
+  const parts: TemplatePart[] = [];
+  let literal = '';
+  let i = 0;
+  while (i < text.length) {
+    const c = text[i] as string;
+    if (c === '}') return 'invalid template placeholder: unmatched }';
+    if (c !== '{') {
+      literal += c;
+      i += 1;
+      continue;
+    }
+    const close = text.indexOf('}', i);
+    if (close === -1) return 'invalid template placeholder: unmatched {';
+    const inner = text.slice(i + 1, close);
+    if (literal !== '') parts.push(literal);
+    literal = '';
+    if (inner === 'value') {
+      parts.push({ value: true });
+    } else if (/^capture:[0-9]+$/.test(inner)) {
+      parts.push({ capture: Number(inner.slice('capture:'.length)) });
+    } else {
+      return `invalid template placeholder: {${inner}}`;
+    }
+    i = close + 1;
+  }
+  if (literal !== '') parts.push(literal);
+  return parts;
+}
+
+function compileTemplate(argument: unknown, context: CompileContext): StepResult {
+  if (typeof argument !== 'string') return fail('template needs a string');
+  const parts = parseTemplate(argument);
+  if (typeof parts === 'string') return fail(parts);
+  for (const part of parts) {
+    if (typeof part === 'string' || !('capture' in part) || context.captureFailed) continue;
+    if (context.groups === null) {
+      return fail('invalid template placeholder: {capture:n} needs an earlier capture step');
+    }
+    if (part.capture > context.groups) {
+      return fail(
+        `invalid template placeholder: {capture:${part.capture}} is above the ${context.groups} groups of the latest capture`,
+      );
+    }
+  }
+  return {
+    ok: true,
+    apply(value, state) {
+      let out = '';
+      for (const part of parts) {
+        if (typeof part === 'string') {
+          out += part;
+        } else if ('value' in part) {
+          out += value;
+        } else {
+          const group = state.match?.[part.capture];
+          if (group === undefined) return null;
+          out += group;
+        }
+      }
+      return out;
+    },
+  };
+}
+
+function compileStep(step: unknown, context: CompileContext): StepResult {
+  if (typeof step === 'string') {
+    if (step === 'uppercase') return { ok: true, apply: (value) => value.toUpperCase() };
+    return TRANSFORM_OPERATIONS.includes(step as TransformOperation)
+      ? fail(`operation "${step}" needs an argument`)
+      : fail(`unknown transform operation "${step}"`);
+  }
+  if (!isRecord(step)) return fail('a step must have exactly one operation');
+  const keys = Object.keys(step);
+  if (keys.length !== 1) return fail('a step must have exactly one operation');
+  const operation = keys[0] as string;
+  const argument = step[operation];
+  switch (operation as TransformOperation) {
+    case 'strip_prefix':
+    case 'strip_suffix':
+      return compileCount(operation as 'strip_prefix' | 'strip_suffix', argument);
+    case 'add_prefix':
+    case 'add_suffix':
+      return compileAdd(operation as 'add_prefix' | 'add_suffix', argument);
+    case 'pad_left':
+      return compilePadLeft(argument);
+    case 'uppercase':
+      return fail('uppercase is the bare string step and takes no argument');
+    case 'remove':
+      return compileRemove(argument);
+    case 'capture': {
+      const result = compileCapture(argument);
+      context.captureFailed = !result.ok;
+      if (result.ok) context.groups = result.groups ?? null;
+      return result;
+    }
+    case 'template':
+      return compileTemplate(argument, context);
+    default:
+      return fail(`unknown transform operation "${operation}"`);
+  }
 }
 
 /**
@@ -134,8 +283,9 @@ export function compileTransform(steps: readonly unknown[]): TransformResult {
   }
   const errors: TransformError[] = [];
   const compiled: CompiledStep[] = [];
+  const context: CompileContext = { groups: null, captureFailed: false };
   steps.forEach((step, index) => {
-    const result = compileStep(step);
+    const result = compileStep(step, context);
     if (result.ok) compiled.push(result.apply);
     else errors.push({ step: index, message: result.message });
   });
