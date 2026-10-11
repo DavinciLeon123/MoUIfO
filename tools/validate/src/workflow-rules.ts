@@ -163,7 +163,12 @@ function checkIntegrity(doc: Json, bad: (message: string) => void): void {
   }
 }
 
-/** Security-relevant shape of ci.yml, including the job and step integrity rules (DEC-026). */
+/**
+ * Security-relevant shape of ci.yml, including the job and step integrity rules (DEC-026). The run
+ * steps are compared one by one with `EXPECTED_RUN_STEPS`, so a multi-line `run` cannot stand for
+ * several commands, and a missing tree or PR-commit guard step is a problem of its own instead of
+ * silently skipping its checks (T-01-63).
+ */
 function checkCi(doc: Json, problems: Problem[]): void {
   const file = CI_FILE;
   const bad = (message: string): void => {
@@ -227,12 +232,19 @@ function checkCi(doc: Json, problems: Problem[]): void {
 
   const runs = steps.filter((step) => typeof step.run === 'string');
   const actual = runs.map((step) => step.run as string);
-  if (actual.join('\n') !== EXPECTED_RUN_STEPS.join('\n')) {
+  if (
+    actual.length !== EXPECTED_RUN_STEPS.length ||
+    actual.some((run, index) => run !== EXPECTED_RUN_STEPS[index])
+  ) {
     bad(`run steps must be, in order: ${EXPECTED_RUN_STEPS.join(' | ')}`);
   }
 
   const treeStep = runs.find((step) => step.run === TREE_STEP);
-  if (treeStep) {
+  if (!treeStep) {
+    bad(
+      'the tree guard step is missing: no step runs exactly the pinned tree guard command, so its ALLOWLIST_REF pin cannot be checked (DEC-025)',
+    );
+  } else {
     const env = isRecord(treeStep.env) ? treeStep.env : {};
     if (env.ALLOWLIST_REF !== expr('github.event.pull_request.base.sha || github.sha')) {
       bad(
@@ -242,7 +254,11 @@ function checkCi(doc: Json, problems: Problem[]): void {
   }
 
   const rangeStep = runs.find((step) => step.run === RANGE_STEP);
-  if (rangeStep) {
+  if (!rangeStep) {
+    bad(
+      'the PR-commit guard step is missing: no step runs exactly the pinned PR-commit guard command, so its if condition and BASE_SHA and HEAD_SHA pins cannot be checked',
+    );
+  } else {
     if (rangeStep.if !== "github.event_name == 'pull_request'") {
       bad("the PR-commit guard step must have: if: github.event_name == 'pull_request'");
     }
