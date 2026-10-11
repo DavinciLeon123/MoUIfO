@@ -7,14 +7,16 @@
 //   name is skipped: installed dependencies are excluded only because .gitignore ignores them
 //   (git's --exclude-standard).
 //   --range mode: scans the added lines of every non-merge commit in <base>..<head>, so a value that
-//   was added in one commit and removed in a later one is still caught (D-23).
+//   was added in one commit and removed in a later one is still caught (D-23). Added lines are read
+//   with `git show --text`, so .gitattributes -diff/binary rules cannot hide them.
 // Exit codes: 0 clean, 1 findings, 2 usage or configuration error (the message never contains a
 // candidate value).
 //
 // Known gaps (accepted and documented, not fixed): merge-commit conflict resolutions are not scanned;
 // numbers split across lines; grouped forms such as three groups of three digits or dotted groups;
-// 8-digit BSNs written without the leading zero; full-width digits; binary or encoded content
-// (binary files are skipped, base64 and hex tokens are blanked).
+// 8-digit BSNs written without the leading zero; full-width digits; encoded content. Tree mode skips
+// files with a NUL byte in the first 8000 bytes, range mode reads every added line as text (so it is
+// stricter than tree mode for such files); base64 and hex tokens are blanked in both modes.
 import { execFileSync } from 'node:child_process';
 import { lstatSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -140,6 +142,7 @@ export function runRangeScan(
       '--no-ext-diff',
       '--no-textconv',
       '--no-renames',
+      '--text',
       '--unified=0',
       '--src-prefix=a/',
       '--dst-prefix=b/',
