@@ -7,18 +7,22 @@ const CI_FILE = '.github/workflows/ci.yml';
 const DEPENDABOT_FILE = '.github/dependabot.yml';
 const WORKFLOW_DIR = '.github/workflows';
 
-/** The `run` strings of ci.yml in order; the fourth is the PR-commit guard (range mode). */
+/**
+ * The `run` strings of ci.yml in order; the third is the tree guard and the fourth the PR-commit
+ * guard (range mode), both reading the allow-list of a trusted commit (DEC-025).
+ */
 export const EXPECTED_RUN_STEPS: readonly string[] = [
   'npm ci',
   'npm run check',
-  'npm run guard',
-  'npm run guard -- --range "$BASE_SHA..$HEAD_SHA"',
+  'npm run guard -- --allowlist-ref "$ALLOWLIST_REF"',
+  'npm run guard -- --range "$BASE_SHA..$HEAD_SHA" --allowlist-ref "$BASE_SHA"',
   'npm run validate',
   'npm run build:dist',
   'npm test',
   'npm run build:packages',
 ];
 
+const TREE_STEP = EXPECTED_RUN_STEPS[2];
 const RANGE_STEP = EXPECTED_RUN_STEPS[3];
 
 /** A GitHub Actions expression; built here so the source holds no literal placeholder. */
@@ -148,6 +152,16 @@ function checkCi(doc: Json, problems: Problem[]): void {
   const actual = runs.map((step) => step.run as string);
   if (actual.join('\n') !== EXPECTED_RUN_STEPS.join('\n')) {
     bad(`run steps must be, in order: ${EXPECTED_RUN_STEPS.join(' | ')}`);
+  }
+
+  const treeStep = runs.find((step) => step.run === TREE_STEP);
+  if (treeStep) {
+    const env = isRecord(treeStep.env) ? treeStep.env : {};
+    if (env.ALLOWLIST_REF !== expr('github.event.pull_request.base.sha || github.sha')) {
+      bad(
+        'the tree guard step must set ALLOWLIST_REF from github.event.pull_request.base.sha || github.sha (DEC-025)',
+      );
+    }
   }
 
   const rangeStep = runs.find((step) => step.run === RANGE_STEP);

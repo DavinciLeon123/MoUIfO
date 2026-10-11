@@ -35,13 +35,15 @@ jobs:
       - name: Lint, format and type check
         run: npm run check
       - name: Personal-number guard (tree)
-        run: npm run guard
+        env:
+          ALLOWLIST_REF: ${{ github.event.pull_request.base.sha || github.sha }}
+        run: npm run guard -- --allowlist-ref "$ALLOWLIST_REF"
       - name: Personal-number guard (PR commits)
         if: github.event_name == 'pull_request'
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: npm run guard -- --range "$BASE_SHA..$HEAD_SHA"
+        run: npm run guard -- --range "$BASE_SHA..$HEAD_SHA" --allowlist-ref "$BASE_SHA"
       - name: Validate
         run: npm run validate
       - name: Build dist
