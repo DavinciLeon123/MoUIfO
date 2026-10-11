@@ -152,6 +152,8 @@ Monorepo with npm workspaces. Node LTS. No backend, database or telemetry.
 
 > Amended by DECISIONS.md DEC-004: `checksum` is an any-of list, each entry with its own source and certainty, instead of a single algorithm name.
 
+> Amended by DECISIONS.md DEC-028: the JSON Schema is hand-written (draft 2020-12, closed, checked by Ajv at build time only), every model file names it in a `# yaml-language-server` header, and identifier values are always quoted strings.
+
 Validate with a JSON Schema in `tools/validate`. Fields:
 
 ```yaml
@@ -250,6 +252,8 @@ A rule is either a **transformation** of a value, or an **if-then rule** over pr
 - Output: `dist/uio.ttl`, `dist/uio.jsonld`, `dist/model.json` (for the engine), `dist/landscape-table.md` and `.csv`, `docs/model.md`.
 
 ### 5.6 Validation (CI fails on each of these)
+
+> Amended by DECISIONS.md DEC-028: the validator reports every error of every model file with file, line and column, rejects unquoted numbers with a leading zero or more than 15 digits and duplicate keys, and treats an uncited source as a warning.
 
 1. YAML conforms to the JSON Schema.
 2. Every reference (issuer, jurisdiction, source, target, input/output of rules) exists.
