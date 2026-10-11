@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "common.schema.json",
+  "description": "Definitions shared by every model schema.",
+  "$defs": {
+    "kebab-id": {
+      "description": "A lowercase identifier made of letters, digits and single hyphens, starting with a letter.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$"
+    },
+    "label": {
+      "description": "A short name; English is required, Dutch where available.",
+      "type": "object",
+      "properties": {
+        "en": { "type": "string", "minLength": 1 },
+        "nl": { "type": "string", "minLength": 1 }
+      },
+      "required": ["en"],
+      "unevaluatedProperties": false
+    },
+    "text": {
+      "description": "A longer text; English is required, Dutch where available.",
+      "type": "object",
+      "properties": {
+        "en": { "type": "string", "minLength": 1 },
+        "nl": { "type": "string", "minLength": 1 }
+      },
+      "required": ["en"],
+      "unevaluatedProperties": false
+    }
+  }
+}

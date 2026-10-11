@@ -180,7 +180,10 @@ describe('validate CLI', () => {
     function brokenCopy(): string {
       const root = copyOfRepo();
       const path = join(root, 'model/vocab/certainty.yaml');
-      writeFileSync(path, readFileSync(path, 'utf8').replace('rank: 3\n', 'rank: 3\n    rnak: 1\n'));
+      writeFileSync(
+        path,
+        readFileSync(path, 'utf8').replace('rank: 3\n', 'rank: 3\n    rnak: 1\n'),
+      );
       return root;
     }
 

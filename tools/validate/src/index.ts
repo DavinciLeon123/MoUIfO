@@ -9,6 +9,7 @@ import {
   loadConfig,
   REPO_ROOT,
 } from 'uio-config';
+import { checkModel } from './model/check-model.ts';
 import {
   checkDecisions,
   checkInstructionFile,
@@ -20,7 +21,7 @@ import {
 import { checkWorkflows } from './workflow-rules.ts';
 
 /** Number of rule groups `runValidation` runs (printed by the CLI summary). */
-export const RULE_COUNT = 9;
+export const RULE_COUNT = 10;
 
 /** Run every repository rule against `root`; an empty array means the repository is valid. */
 export function runValidation(root: string = REPO_ROOT): Problem[] {
@@ -40,6 +41,7 @@ export function runValidation(root: string = REPO_ROOT): Problem[] {
     ...checkSpecPair(root),
     ...checkInstructionFile(root),
     ...checkWorkflows(root),
+    ...checkModel(root),
   );
   return problems;
 }

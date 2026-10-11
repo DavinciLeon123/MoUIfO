@@ -36,7 +36,7 @@ describe('checkModelFiles positions', () => {
     const text = REAL.replace('rank: 2\n', 'rank: high\n');
     const problems = checkModelFiles([{ path: PATH, text }]);
     expect(problems).toHaveLength(1);
-    expect(problems[0]).toMatchObject({ file: PATH, ...where(text, 'high') });
+    expect(problems[0]).toMatchObject({ file: PATH, ...where(text, 'high\n') });
   });
 
   test('a missing required key is one problem on the mapping that lacks it', () => {
