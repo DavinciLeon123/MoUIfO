@@ -128,19 +128,19 @@ describe('validate CLI', () => {
   test('exits 0 and prints the passed summary on the real repository, plain mode', () => {
     const { status, stdout } = runCli(undefined, { GITHUB_ACTIONS: undefined });
     expect(status).toBe(0);
-    expect(stdout).toContain('validate: repository rules passed (9 rules)');
+    expect(stdout).toContain('validate: repository rules passed (10 rules)');
     expect(stdout).not.toMatch(/^::/m);
   });
 
   test('exits 0 and prints the passed summary on the real repository, annotation mode', () => {
     const { status, stdout } = runCli(undefined, { GITHUB_ACTIONS: 'true' });
     expect(status).toBe(0);
-    expect(stdout).toContain('validate: repository rules passed (9 rules)');
+    expect(stdout).toContain('validate: repository rules passed (10 rules)');
   });
 
   test('a copy of the repository passes too', () => {
     const { status, stdout } = runCli(copyOfRepo());
-    expect(stdout).toContain('validate: repository rules passed (9 rules)');
+    expect(stdout).toContain('validate: repository rules passed (10 rules)');
     expect(status).toBe(0);
   });
 
@@ -174,6 +174,29 @@ describe('validate CLI', () => {
       out.split('\n').filter((line) => line !== '' && !line.startsWith('validate:')).length;
     expect(problemLines(plain.stdout)).toBe(problemLines(annotated.stdout));
     expect(problemLines(plain.stdout)).toBeGreaterThan(0);
+  });
+
+  describe('a certainty vocabulary with an unknown key', () => {
+    function brokenCopy(): string {
+      const root = copyOfRepo();
+      const path = join(root, 'model/vocab/certainty.yaml');
+      writeFileSync(path, readFileSync(path, 'utf8').replace('rank: 3\n', 'rank: 3\n    rnak: 1\n'));
+      return root;
+    }
+
+    test('CI mode prints a GitHub annotation with file, line and column', () => {
+      const { status, stdout } = runCli(brokenCopy(), { GITHUB_ACTIONS: 'true' });
+      expect(status).toBe(1);
+      expect(stdout).toContain('::error file=model/vocab/certainty.yaml,line=');
+      expect(stdout).toContain(',col=');
+    });
+
+    test('plain mode prints path:line:col and no annotation', () => {
+      const { status, stdout } = runCli(brokenCopy(), { GITHUB_ACTIONS: undefined });
+      expect(status).toBe(1);
+      expect(stdout).toMatch(/^model\/vocab\/certainty\.yaml:\d+:\d+ /m);
+      expect(stdout).not.toContain('::error');
+    });
   });
 
   test('exits 1 when ci.yml merges every run step into one run: |- step (CR-01, verifier reproduction)', () => {

@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/vocab-certainty.schema.json
+id: certainty
+label:
+  en: Certainty
+  nl: Zekerheid
+values:
+  - id: certain
+    label:
+      en: Certain
+      nl: Zeker
+    definition:
+      en: "The highest level (rank 3) in the ranking certain > likely > possible of SPEC section 5.1. It is the default certainty of a statement that follows from law or a standard (SPEC section 5.4)."
+    rank: 3
+  - id: likely
+    label:
+      en: Likely
+      nl: Waarschijnlijk
+    definition:
+      en: "The middle level (rank 2) in the ranking certain > likely > possible of SPEC section 5.1. A statement that does not follow from law or a standard gets its certainty filled in explicitly (SPEC section 5.4)."
+    rank: 2
+  - id: possible
+    label:
+      en: Possible
+      nl: Mogelijk
+    definition:
+      en: "The lowest level (rank 1) in the ranking certain > likely > possible of SPEC section 5.1. A statement that does not follow from law or a standard gets its certainty filled in explicitly (SPEC section 5.4)."
+    rank: 1
