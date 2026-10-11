@@ -450,3 +450,185 @@ describe('range mode', () => {
     expect(existsSync(target)).toBe(false);
   });
 });
+
+describe('allow-list from a commit (--allowlist-ref)', () => {
+  const LIST = 'tools/guards/personal-number-allowlist.txt';
+  const w = firstSyntheticValid(String(Number(v.slice(0, 8)) + 1));
+  const maskedW = `******${w.slice(6)}`;
+  const entries = (...values: string[]) =>
+    `# test list\n${values.map((value, i) => `${value}  # synthetic test value ${i + 1}\n`).join('')}`;
+  const withList = (repo: string) => join(repo, LIST);
+  const errorLines = (stdout: string) => stdout.split('\n').filter((l) => l.startsWith('::error'));
+
+  /** Base commit lists v; the change adds an entry for w and a notes file holding v and w. */
+  function addedEntryRepo() {
+    const repo = makeRepo({ [LIST]: entries(v) });
+    const base = git(repo, 'rev-parse', 'HEAD').trim();
+    write(repo, { [LIST]: entries(v, w), 'notes.txt': `v ${v}\nw ${w}\n` });
+    const head = commit(repo, 'add entry');
+    return { repo, base, head };
+  }
+
+  test('an entry added by the change is not honoured in tree mode, including its own line', () => {
+    const { repo, base } = addedEntryRepo();
+    const r = guard(repo, '--allowlist', withList(repo), '--allowlist-ref', base);
+    expect(r.code).toBe(1);
+    const errors = errorLines(r.stdout);
+    expect(errors).toHaveLength(2);
+    expect(errors[0]).toContain('file=notes.txt,line=2,');
+    expect(errors[0]).toContain('title=personal-number guard::');
+    expect(errors[0]).toContain(maskedW);
+    expect(errors[1]).toContain(`file=${LIST.replaceAll(':', '%3A')},`);
+    expect(errors[1]).toContain('title=personal-number guard (allow-list)::');
+    expect(errors[1]).toContain(maskedW);
+    expect(r.stdout).not.toContain(masked);
+    expect(r.stdout).toContain(`allow-list source: ${short(base)}`);
+    expect(r.all).not.toContain(v);
+    expect(r.all).not.toContain(w);
+    expect(guard(repo, '--allowlist', withList(repo), '--allowlist-ref', base).stdout).toBe(
+      r.stdout,
+    );
+    expect(guard(repo, '--allowlist', withList(repo)).code).toBe(0);
+  });
+
+  test('an entry added by the change is not honoured in range mode', () => {
+    const { repo, base, head } = addedEntryRepo();
+    const r = guard(
+      repo,
+      '--allowlist',
+      withList(repo),
+      '--range',
+      `${base}..HEAD`,
+      '--allowlist-ref',
+      base,
+    );
+    expect(r.code).toBe(1);
+    const errors = errorLines(r.stdout);
+    expect(errors).toHaveLength(2);
+    expect(errors[0]).toContain('file=notes.txt,');
+    expect(errors[0]).toContain(`title=personal-number guard (commit ${short(head)})::`);
+    expect(errors[1]).toContain(`file=${LIST},`);
+    expect(errors[1]).toContain(
+      `title=personal-number guard (allow-list, commit ${short(head)})::`,
+    );
+    expect(r.all).not.toContain(v);
+    expect(r.all).not.toContain(w);
+    expect(guard(repo, '--allowlist', withList(repo), '--range', `${base}..HEAD`).code).toBe(0);
+  });
+
+  test('an entry the change removes stays honoured for that run and is announced masked', () => {
+    const repo = makeRepo({ [LIST]: entries(v), 'notes.txt': `id ${v}\n` });
+    const base = git(repo, 'rev-parse', 'HEAD').trim();
+    write(repo, { [LIST]: entries() });
+    commit(repo, 'remove entry');
+    const r = guard(repo, '--allowlist', withList(repo), '--allowlist-ref', base);
+    expect(r.code).toBe(0);
+    const notices = r.stdout.split('\n').filter((l) => l.startsWith('::notice'));
+    expect(notices).toHaveLength(1);
+    expect(notices[0]).toContain(`::notice file=${LIST.replaceAll(':', '%3A')},`);
+    expect(notices[0]).toContain('title=personal-number guard (allow-list)::');
+    expect(notices[0]).toContain(masked);
+    expect(r.all).not.toContain(v);
+    expect(guard(repo, '--allowlist', withList(repo)).code).toBe(1);
+  });
+
+  test('output order is source line, removal notices, findings, summary', () => {
+    const repo = makeRepo({ [LIST]: entries(v, w), 'notes.txt': `a ${v}\nb ${w}\n` });
+    const base = git(repo, 'rev-parse', 'HEAD').trim();
+    const x = firstSyntheticValid(String(Number(w.slice(0, 8)) + 1));
+    write(repo, { [LIST]: entries(w), 'other.txt': `x ${x}\n` });
+    commit(repo, 'remove and leak');
+    const lines = guard(repo, '--allowlist', withList(repo), '--allowlist-ref', base)
+      .stdout.trim()
+      .split('\n');
+    expect(lines).toHaveLength(4);
+    expect(lines[0]).toBe(`personal-number guard: allow-list source: ${short(base)}`);
+    expect(lines[1]).toContain('::notice');
+    expect(lines[1]).toContain(masked);
+    expect(lines[2]).toContain('::error file=other.txt');
+    expect(lines[3]).toMatch(/^personal-number guard: scanned \d+ files, 1 findings$/);
+  });
+
+  test('a base without an allow-list falls back to the working-tree copy and says so', () => {
+    const repo = makeRepo({ 'a.txt': 'x\n' });
+    const base = git(repo, 'rev-parse', 'HEAD').trim();
+    write(repo, { [LIST]: entries(w), 'notes.txt': `w ${w}\n` });
+    commit(repo, 'add list');
+    const r = guard(repo, '--allowlist', withList(repo), '--allowlist-ref', base);
+    expect(r.code).toBe(0);
+    expect(r.stdout).toContain(`allow-list source: working tree (${short(base)} has no ${LIST})`);
+    expect(r.all).not.toContain(w);
+  });
+
+  test('a base allow-list that holds only comments honours nothing', () => {
+    const repo = makeRepo({ [LIST]: '# only a comment\n' });
+    const base = git(repo, 'rev-parse', 'HEAD').trim();
+    write(repo, { [LIST]: entries(v), 'notes.txt': `v ${v}\n` });
+    commit(repo, 'add entry');
+    const r = guard(repo, '--allowlist', withList(repo), '--allowlist-ref', base);
+    expect(r.code).toBe(1);
+    expect(r.stdout).toContain(`allow-list source: ${short(base)}`);
+    expect(r.all).not.toContain(v);
+  });
+
+  test('without the flag the output is exactly the one summary line', () => {
+    const { repo } = addedEntryRepo();
+    const r = guard(repo, '--allowlist', withList(repo));
+    expect(r.stdout.trim().split('\n')).toHaveLength(1);
+    expect(r.stdout).not.toContain('allow-list source');
+  });
+
+  test.each([
+    ['an empty value', ''],
+    ['an unknown ref', 'no-such-ref'],
+  ])('%s fails closed', (_name, ref) => {
+    const { repo } = addedEntryRepo();
+    const r = guard(repo, '--allowlist', withList(repo), '--allowlist-ref', ref);
+    expect(r.code).toBe(2);
+    expect(r.stderr).not.toBe('');
+    expect(r.all).not.toContain(v);
+    expect(r.all).not.toContain(w);
+  });
+
+  test('an option-shaped value exits 2 without reaching git', () => {
+    const { repo } = addedEntryRepo();
+    const target = join(makeDir(), 'pwned.txt');
+    expect(guard(repo, '--allowlist', withList(repo), '--allowlist-ref=-x').code).toBe(2);
+    const r = guard(repo, '--allowlist', withList(repo), `--allowlist-ref=--output=${target}`);
+    expect(r.code).toBe(2);
+    expect(existsSync(target)).toBe(false);
+  });
+
+  test('a base allow-list line without a reason exits 2 and names the commit and line', () => {
+    const repo = makeRepo({ [LIST]: `# header\n${v}\n` });
+    const base = git(repo, 'rev-parse', 'HEAD').trim();
+    const list = join(makeDir(), 'list.txt');
+    writeFileSync(list, entries());
+    const r = guard(repo, '--allowlist', list, '--allowlist-ref', base);
+    expect(r.code).toBe(2);
+    expect(r.stderr).toContain(`allow-list at ${short(base)}`);
+    expect(r.stderr).toContain('line 2');
+    expect(r.all).not.toContain(v);
+  });
+
+  test('a malformed working-tree copy exits 2 even when the base copy is valid', () => {
+    const repo = makeRepo({ [LIST]: entries(v) });
+    const base = git(repo, 'rev-parse', 'HEAD').trim();
+    const list = join(makeDir(), 'list.txt');
+    writeFileSync(list, `${w}\n`);
+    const r = guard(repo, '--allowlist', list, '--allowlist-ref', base);
+    expect(r.code).toBe(2);
+    expect(r.stderr).toContain('allow-list line 1');
+    expect(r.all).not.toContain(w);
+  });
+
+  test('a base where the allow-list path is not a regular file exits 2', () => {
+    const repo = makeRepo({ [`${LIST}/inner.txt`]: 'x\n' });
+    const base = git(repo, 'rev-parse', 'HEAD').trim();
+    const list = join(makeDir(), 'list.txt');
+    writeFileSync(list, entries(v));
+    const r = guard(repo, '--allowlist', list, '--allowlist-ref', base);
+    expect(r.code).toBe(2);
+    expect(r.stderr).toContain('not a regular file');
+  });
+});
