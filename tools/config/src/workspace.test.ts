@@ -2,6 +2,7 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'nod
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterEach, describe, expect, test } from 'vitest';
+import type { Problem } from './index.ts';
 import {
   checkPackageNames,
   findConfigLiterals,
@@ -169,6 +170,35 @@ describe('syncPackageNames', () => {
     expect(web.dependencies).toEqual({ '@vendor/web': '1.0.0' });
   });
 
+  test('rewrites own import and export specifiers in packages/*/src and tools/*/src', () => {
+    const root = makeRoot('@other');
+    write(
+      root,
+      'tools/x/src/a.ts',
+      "import { a } from '@example-scope/engine';\nexport const b = a;\n",
+    );
+    write(
+      root,
+      'packages/mcp/src/b.ts',
+      'export * from "@example-scope/engine";\nconst m = await import(\'@example-scope/web\');\n',
+    );
+    write(root, 'tools/x/src/third.ts', "import { v } from '@vendor/engine';\n");
+    const changed = syncPackageNames(loadConfig(root), root);
+    expect(changed).toEqual([
+      'packages/engine/package.json',
+      'packages/mcp/package.json',
+      'packages/mcp/src/b.ts',
+      'packages/web/package.json',
+      'tools/x/src/a.ts',
+    ]);
+    expect(readFileSync(join(root, 'tools/x/src/a.ts'), 'utf8')).toContain("from '@other/engine'");
+    expect(readFileSync(join(root, 'packages/mcp/src/b.ts'), 'utf8')).toBe(
+      'export * from "@other/engine";\nconst m = await import(\'@other/web\');\n',
+    );
+    expect(readFileSync(join(root, 'tools/x/src/third.ts'), 'utf8')).toContain("'@vendor/engine'");
+    expect(syncPackageNames(loadConfig(root), root)).toEqual([]);
+  });
+
   test('returns an empty list when nothing needs to change', () => {
     const root = makeRoot('@example-scope');
     expect(syncPackageNames(loadConfig(root), root)).toEqual([]);
@@ -193,7 +223,7 @@ describe('findConfigLiterals', () => {
     const root = mkdtempSync(join(tmpdir(), 'uio-literals-'));
     temps.push(root);
     write(root, 'tools/z/src/b.ts', "const a = 1;\nconst ns = 'https://example.org/ns';\n");
-    write(root, 'tools/z/src/a.ts', "import x from '@example-scope/engine';\nconst y = 2;\n");
+    write(root, 'tools/z/src/a.ts', '// @example-scope/engine\nconst y = 2;\n');
     write(root, 'tools/z/package.json', '{"name":"@example-scope/z"}\n');
     write(root, 'package-lock.json', '{"@example-scope/engine":{}}\n');
     write(root, 'tools/z/blob.bin', Buffer.from('@example-scope/engine\0binary'));
@@ -249,6 +279,51 @@ describe('findConfigLiterals', () => {
 
   test('a listed file that no longer exists is skipped', () => {
     expect(findConfigLiterals(cfg, literalRoot(), ['tools/gone.ts'])).toEqual([]);
+  });
+
+  describe('own package-name specifiers (DEC-010)', () => {
+    const scan = (content: string, file = 'tools/q/src/s.ts'): Problem[] => {
+      const root = mkdtempSync(join(tmpdir(), 'uio-specifiers-'));
+      temps.push(root);
+      write(root, file, content);
+      return findConfigLiterals(cfg, root, [file]);
+    };
+
+    test.for([
+      "import { a } from '@example-scope/engine';\n",
+      "export * from '@example-scope/engine';\n",
+      'export { b } from "@example-scope/mcp-server";\n',
+      "const m = await import('@example-scope/web');\n",
+      "import '@example-scope/engine';\n",
+    ])('an import or export specifier is not reported: %s', (line) => {
+      expect(scan(line)).toEqual([]);
+    });
+
+    test.for([
+      ['a comment', '// @example-scope/engine\n'],
+      ['a sub-path', "import { a } from '@example-scope/engine/sub';\n"],
+      ['a plain string', "const s = '@example-scope/engine';\n"],
+      [
+        'the namespace',
+        "import { a } from '@example-scope/engine'; const n = 'https://example.org/ns';\n",
+      ],
+      [
+        'a second scope literal on the line',
+        "import { a } from '@example-scope/engine'; // @example-scope/x\n",
+      ],
+    ])('%s is still reported', ([, content]) => {
+      expect(scan(content as string)).toHaveLength(1);
+    });
+
+    test('a JSON file containing a package name is still reported', () => {
+      expect(scan('{"x":"@example-scope/engine"}\n', 'tools/q/data.json')).toHaveLength(1);
+    });
+
+    test('a specifier in a non-ts file is still reported', () => {
+      expect(scan("import { a } from '@example-scope/engine';\n", 'tools/q/src/s.js')).toHaveLength(
+        1,
+      );
+    });
   });
 
   test('the real repo contains no hard-coded namespace or scope literal', () => {
