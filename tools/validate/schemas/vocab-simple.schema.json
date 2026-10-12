@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "vocab-simple.schema.json",
+  "description": "A simple vocabulary: a closed list of members with an id, a label and a definition (SPEC 5.1).",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/kebab-id" },
+    "label": { "$ref": "common.schema.json#/$defs/label" },
+    "values": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "common.schema.json#/$defs/vocab-member",
+        "unevaluatedProperties": false
+      }
+    }
+  },
+  "required": ["id", "label", "values"],
+  "unevaluatedProperties": false
+}

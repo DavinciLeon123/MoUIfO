@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/jurisdiction.schema.json
+id: GR
+label:
+  en: Greece
+  nl: Griekenland
+part_of:
+  - jurisdiction: EU
+    source: teu-art-52
+    certainty: certain

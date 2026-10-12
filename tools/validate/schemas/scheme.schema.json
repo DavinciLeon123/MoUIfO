@@ -1,0 +1,390 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "scheme.schema.json",
+  "description": "A scheme: one kind of organisation identifier (SPEC 5.2, DEC-029). The header fields issuer, jurisdiction, kind, abbreviation, availability, iso6523_icd and peppol_eas are covered by sources.default with certainty certain when written as a bare value; any of them may use the long form { value, source, certainty }, which overrides the default for that field (D-07, D-08). Every statement carries its own source and certainty (DEC-029). label, scope and notes are descriptive text and need no source (D-09).",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "common.schema.json#/$defs/kebab-id"
+    },
+    "label": {
+      "$ref": "common.schema.json#/$defs/label"
+    },
+    "abbreviation": {
+      "$ref": "common.schema.json#/$defs/header-text"
+    },
+    "iso6523_icd": {
+      "$ref": "common.schema.json#/$defs/header-code"
+    },
+    "peppol_eas": {
+      "$ref": "common.schema.json#/$defs/header-code"
+    },
+    "kind": {
+      "$ref": "common.schema.json#/$defs/header-kind"
+    },
+    "issuer": {
+      "$ref": "common.schema.json#/$defs/header-authority"
+    },
+    "jurisdiction": {
+      "$ref": "common.schema.json#/$defs/header-jurisdiction"
+    },
+    "availability": {
+      "$ref": "common.schema.json#/$defs/header-kebab"
+    },
+    "sources": {
+      "description": "The default source for the bare header fields (D-07). Required even when every header field uses the long form.",
+      "type": "object",
+      "properties": {
+        "default": {
+          "$ref": "common.schema.json#/$defs/source-ref"
+        }
+      },
+      "required": ["default"],
+      "unevaluatedProperties": false
+    },
+    "scope": {
+      "$ref": "common.schema.json#/$defs/text"
+    },
+    "notes": {
+      "$ref": "common.schema.json#/$defs/text"
+    },
+    "level": {
+      "description": "Levels (SPEC 5.1 level vocabulary).",
+      "type": "array",
+      "items": {
+        "description": "A level this scheme identifies. Carries its own source and certainty (DEC-029).",
+        "$ref": "common.schema.json#/$defs/statement",
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "uioRef": "vocab:level"
+          }
+        },
+        "required": ["value"],
+        "unevaluatedProperties": false
+      }
+    },
+    "roles": {
+      "description": "Roles (role vocabulary).",
+      "type": "array",
+      "items": {
+        "description": "A role in which the identifier is used. Carries its own source and certainty (DEC-029).",
+        "$ref": "common.schema.json#/$defs/statement",
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "uioRef": "vocab:role"
+          }
+        },
+        "required": ["value"],
+        "unevaluatedProperties": false
+      }
+    },
+    "applicability": {
+      "description": "Applicability per jurisdiction.",
+      "type": "array",
+      "items": {
+        "description": "Where the identifier is issued, recognised or verifiable. Carries its own source and certainty (DEC-029).",
+        "$ref": "common.schema.json#/$defs/statement",
+        "type": "object",
+        "properties": {
+          "jurisdiction": {
+            "$ref": "common.schema.json#/$defs/jurisdiction-ref"
+          },
+          "status": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "uioRef": "vocab:applicability-status"
+            }
+          }
+        },
+        "required": ["jurisdiction", "status"],
+        "unevaluatedProperties": false
+      }
+    },
+    "persistence": {
+      "description": "Persistence behaviour per event.",
+      "type": "array",
+      "items": {
+        "description": "What happens to the identifier on a life-cycle event. Carries its own source and certainty (DEC-029).",
+        "$ref": "common.schema.json#/$defs/statement",
+        "type": "object",
+        "properties": {
+          "event": {
+            "type": "string",
+            "uioRef": "vocab:persistence-event"
+          },
+          "behaviour": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": ["event", "behaviour"],
+        "unevaluatedProperties": false
+      }
+    },
+    "trust": {
+      "description": "The five trust sub-scores in their workbook ranges (legal_basis 0..2, the others 0..1), each null when not assessed (DAT-08). Carries its own source and certainty (DEC-029).",
+      "$ref": "common.schema.json#/$defs/statement",
+      "type": "object",
+      "properties": {
+        "legal_basis": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "maximum": 2
+        },
+        "registration_quality": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "verifiability": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "crosswalks": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "lifecycle": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "legal_basis",
+        "registration_quality",
+        "verifiability",
+        "crosswalks",
+        "lifecycle"
+      ],
+      "unevaluatedProperties": false
+    },
+    "relations": {
+      "description": "Relations to other schemes.",
+      "type": "array",
+      "items": {
+        "description": "A relation to another scheme. Carries its own source and certainty (DEC-029).",
+        "$ref": "common.schema.json#/$defs/statement",
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "uioRef": "vocab:relation-kind"
+          },
+          "target": {
+            "$ref": "common.schema.json#/$defs/scheme-ref"
+          }
+        },
+        "required": ["kind", "target"],
+        "unevaluatedProperties": false
+      }
+    },
+    "legal_basis": {
+      "description": "Legal bases.",
+      "type": "array",
+      "items": {
+        "description": "A legal basis. Carries its own source and certainty (DEC-029).",
+        "$ref": "common.schema.json#/$defs/statement",
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "eli": {
+            "$ref": "common.schema.json#/$defs/http-url"
+          },
+          "url": {
+            "$ref": "common.schema.json#/$defs/http-url"
+          }
+        },
+        "required": ["title"],
+        "unevaluatedProperties": false
+      }
+    },
+    "validation_source": {
+      "description": "Where an identifier can be checked. Carries its own source and certainty (DEC-029).",
+      "$ref": "common.schema.json#/$defs/statement",
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "$ref": "common.schema.json#/$defs/http-url"
+        }
+      },
+      "required": ["label", "url"],
+      "unevaluatedProperties": false
+    },
+    "mandatory": {
+      "description": "When the identifier is mandatory. Carries its own source and certainty (DEC-029).",
+      "$ref": "common.schema.json#/$defs/statement",
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": ["text"],
+      "unevaluatedProperties": false
+    },
+    "format": {
+      "description": "What a valid value looks like (SPEC 5.2). A value is accepted only when some pattern matches the whole value (DEC-039) and, if checksum entries exist, some entry passes (any-of, DEC-038). Both lists are optional in the schema, but a format without patterns accepts no value, so every examples_valid entry of it is reported (SPEC 5.6 check 4).",
+      "type": "object",
+      "properties": {
+        "patterns": {
+          "type": "array",
+          "items": {
+            "description": "A regular expression the value may match. Carries its own source and certainty (DEC-029).",
+            "$ref": "common.schema.json#/$defs/statement",
+            "type": "object",
+            "properties": {
+              "regex": {
+                "description": "A regular expression the whole value must match. The engine anchors it, so a start and an end anchor may be written but are not needed. The capture regexes of over and context_from search the value instead, because they extract part of it.",
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": ["regex"],
+            "unevaluatedProperties": false
+          }
+        },
+        "checksum": {
+          "type": "array",
+          "items": {
+            "description": "A checksum algorithm; optional over is a transform list that extracts the part the algorithm applies to (D-23). Carries its own source and certainty (DEC-029).",
+            "$ref": "common.schema.json#/$defs/statement",
+            "type": "object",
+            "properties": {
+              "algorithm": {
+                "type": "string",
+                "uioRef": "vocab:checksum"
+              },
+              "over": {
+                "$ref": "transform.schema.json#/$defs/list"
+              }
+            },
+            "required": ["algorithm"],
+            "unevaluatedProperties": false
+          }
+        },
+        "examples_valid": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "examples_invalid": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "context_from": {
+      "description": "Where the engine reads the issuing country from a value (D-18). Only issuing_country exists.",
+      "type": "object",
+      "properties": {
+        "issuing_country": {
+          "description": "Capture the country prefix and map it with the country-prefix vocabulary. Carries its own source and certainty (DEC-029).",
+          "$ref": "common.schema.json#/$defs/statement",
+          "type": "object",
+          "properties": {
+            "capture": {
+              "$ref": "common.schema.json#/$defs/capture"
+            },
+            "map": {
+              "type": "string",
+              "const": "country-prefix",
+              "uioRef": "vocab"
+            }
+          },
+          "required": ["capture", "map"],
+          "unevaluatedProperties": false
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "components": {
+      "description": "The schemes a composite scheme delegates to (D-19, DEC-036); allowed, and required, only for kind composite.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "description": "One component scheme and the prefix that selects it. Carries its own source and certainty (DEC-029).",
+        "$ref": "common.schema.json#/$defs/statement",
+        "type": "object",
+        "properties": {
+          "prefix": {
+            "type": "string",
+            "minLength": 1
+          },
+          "scheme": {
+            "$ref": "common.schema.json#/$defs/scheme-ref"
+          }
+        },
+        "required": ["prefix", "scheme"],
+        "unevaluatedProperties": false
+      }
+    },
+    "rules": {
+      "description": "Derivation rules from another scheme to this one (SPEC 5.2).",
+      "type": "array",
+      "items": {
+        "description": "A derivation rule. Carries its own source and certainty (DEC-029).",
+        "$ref": "common.schema.json#/$defs/statement",
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "common.schema.json#/$defs/kebab-id"
+          },
+          "input": {
+            "$ref": "common.schema.json#/$defs/scheme-ref"
+          },
+          "output": {
+            "$ref": "common.schema.json#/$defs/scheme-ref"
+          },
+          "transform": {
+            "$ref": "transform.schema.json#/$defs/list"
+          },
+          "examples": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "properties": {
+                "in": {
+                  "type": "string"
+                },
+                "out": {
+                  "type": "string"
+                }
+              },
+              "required": ["in", "out"],
+              "unevaluatedProperties": false
+            }
+          }
+        },
+        "required": ["id", "input", "output", "transform"],
+        "unevaluatedProperties": false
+      }
+    }
+  },
+  "required": ["id", "label", "kind", "issuer", "jurisdiction", "sources"],
+  "unevaluatedProperties": false
+}

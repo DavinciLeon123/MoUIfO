@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "vocab-certainty.schema.json",
+  "description": "The certainty vocabulary: a closed list of levels with a rank (SPEC 5.1).",
+  "type": "object",
+  "properties": {
+    "id": { "const": "certainty" },
+    "label": { "$ref": "common.schema.json#/$defs/label" },
+    "values": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "common.schema.json#/$defs/vocab-member",
+        "properties": {
+          "rank": { "type": "integer", "minimum": 1 }
+        },
+        "required": ["rank"],
+        "unevaluatedProperties": false
+      }
+    }
+  },
+  "required": ["id", "label", "values"],
+  "unevaluatedProperties": false
+}

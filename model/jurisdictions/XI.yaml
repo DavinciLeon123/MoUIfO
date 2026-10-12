@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/jurisdiction.schema.json
+id: XI
+label:
+  en: Northern Ireland
+  nl: Noord-Ierland
+part_of:
+  - jurisdiction: GB
+    source: nia-1998-s1
+    certainty: certain
+notes:
+  en: "The XI-prefixed EORI applies to customs activities in Northern Ireland and falls under EU legislation (hmrc-eori-introduction). An answer inherited from GB is capped below certain (DEC-041)."

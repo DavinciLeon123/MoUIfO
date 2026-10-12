@@ -1,0 +1,46 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/vocab-simple.schema.json
+id: level
+label:
+  en: Level
+  nl: Niveau
+values:
+  - id: legal-entity
+    label:
+      en: Legal entity
+    definition:
+      en: "The identifier identifies a legal entity, an organisation with legal personality (SPEC section 5.1)."
+  - id: legal-entity-top-level
+    label:
+      en: Legal entity, top level
+    definition:
+      en: "The identifier identifies the top-level legal entity of a group or hierarchy (SPEC section 5.1)."
+  - id: enterprise
+    label:
+      en: Enterprise
+    definition:
+      en: "The identifier identifies an enterprise, the economic unit that carries out activities (SPEC section 5.1)."
+  - id: establishment
+    label:
+      en: Establishment
+    definition:
+      en: "The identifier identifies an establishment, a physical or operational unit of an enterprise (SPEC section 5.1)."
+  - id: natural-person
+    label:
+      en: Natural person
+    definition:
+      en: "The identifier identifies a natural person (SPEC section 5.1)."
+  - id: government-organisation
+    label:
+      en: Government organisation
+    definition:
+      en: "The identifier identifies a government organisation (SPEC section 5.1)."
+  - id: location
+    label:
+      en: Location
+    definition:
+      en: "The identifier identifies a location, not necessarily a legal entity (SPEC section 5.1)."
+  - id: declaring-entity
+    label:
+      en: Declaring entity
+    definition:
+      en: "The identifier identifies the entity that makes a declaration, for example in a customs or tax context (SPEC section 5.1)."

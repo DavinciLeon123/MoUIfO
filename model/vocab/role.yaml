@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/vocab-simple.schema.json
+id: role
+label:
+  en: Role
+  nl: Rol
+values:
+  - id: taxpayer
+    label:
+      en: Taxpayer
+    definition:
+      en: "The party acts as a taxpayer, for example a VAT or income tax subject (SPEC section 5.1)."
+  - id: economic-operator
+    label:
+      en: Economic operator
+    definition:
+      en: "The party acts as an economic operator, for example in cross-border trade involving customs (SPEC section 5.1)."
+  - id: e-invoicing-participant
+    label:
+      en: E-invoicing participant
+    definition:
+      en: "The party takes part in electronic invoicing, as sender or receiver (SPEC section 5.1)."
+  - id: financial-counterparty
+    label:
+      en: Financial counterparty
+    definition:
+      en: "The party acts as a counterparty in a financial transaction or report (SPEC section 5.1)."

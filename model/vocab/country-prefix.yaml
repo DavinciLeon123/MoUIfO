@@ -1,0 +1,30 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/vocab-country-prefix.schema.json
+id: country-prefix
+label:
+  en: Country prefix
+  nl: Landprefix
+values:
+  - prefix: NL
+    jurisdiction: NL
+    source: vat-directive-art-215
+    certainty: certain
+  - prefix: BE
+    jurisdiction: BE
+    source: vat-directive-art-215
+    certainty: certain
+  - prefix: EL
+    jurisdiction: GR
+    source: vat-directive-art-215
+    certainty: certain
+    note:
+      en: Greece may use the prefix EL (Art. 215)
+  - prefix: XI
+    jurisdiction: XI
+    source: vat-directive-art-215
+    certainty: certain
+    note:
+      en: "'XI' shall be used for Northern Ireland (Art. 215, as amended by Directive (EU) 2020/1756)"
+  - prefix: GB
+    jurisdiction: GB
+    source: hmrc-eori-introduction
+    certainty: certain

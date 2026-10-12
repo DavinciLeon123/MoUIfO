@@ -2,7 +2,14 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, test } from 'vitest';
-import { CONFIG_KEYS, ConfigError, loadConfig, parseConfig, toAnnotation } from './index.ts';
+import {
+  CONFIG_KEYS,
+  ConfigError,
+  formatProblem,
+  loadConfig,
+  parseConfig,
+  toAnnotation,
+} from './index.ts';
 
 const GOOD = [
   'namespace: "https://example.org/ns/"',
@@ -189,5 +196,69 @@ describe('toAnnotation', () => {
   test('escapes properties and message', () => {
     const out = toAnnotation({ file: 'a:b,c%.ts', line: 1, message: '50%\r\nnext' });
     expect(out).toBe('::error file=a%3Ab%2Cc%25.ts,line=1::50%25%0D%0Anext');
+  });
+});
+
+describe('toAnnotation: column and severity', () => {
+  test('adds the column after the line', () => {
+    expect(toAnnotation({ file: 'a.yaml', line: 3, column: 5, message: 'bad' })).toBe(
+      '::error file=a.yaml,line=3,col=5::bad',
+    );
+  });
+
+  test('a column without a line adds no col property', () => {
+    expect(toAnnotation({ file: 'a.yaml', column: 5, message: 'bad' })).toBe(
+      '::error file=a.yaml::bad',
+    );
+  });
+
+  test('a warning renders as ::warning', () => {
+    expect(
+      toAnnotation({ file: 'a.yaml', line: 3, column: 5, severity: 'warning', message: 'bad' }),
+    ).toBe('::warning file=a.yaml,line=3,col=5::bad');
+  });
+
+  test('an explicit error severity renders as ::error', () => {
+    expect(toAnnotation({ file: 'a.yaml', severity: 'error', message: 'bad' })).toBe(
+      '::error file=a.yaml::bad',
+    );
+  });
+});
+
+describe('formatProblem', () => {
+  const plain = { github: false };
+
+  test('plain form with file, line and column', () => {
+    expect(formatProblem({ file: 'a.yaml', line: 3, column: 5, message: 'bad' }, plain)).toBe(
+      'a.yaml:3:5 bad',
+    );
+  });
+
+  test('plain form without a column', () => {
+    expect(formatProblem({ file: 'a.yaml', line: 3, message: 'bad' }, plain)).toBe('a.yaml:3 bad');
+  });
+
+  test('plain form without a line', () => {
+    expect(formatProblem({ file: 'a.yaml', message: 'bad' }, plain)).toBe('a.yaml bad');
+  });
+
+  test('plain form drops a column that has no line', () => {
+    expect(formatProblem({ file: 'a.yaml', column: 5, message: 'bad' }, plain)).toBe('a.yaml bad');
+  });
+
+  test('plain form marks a warning', () => {
+    expect(
+      formatProblem(
+        { file: 'a.yaml', line: 3, column: 5, severity: 'warning', message: 'bad' },
+        plain,
+      ),
+    ).toBe('a.yaml:3:5 warning: bad');
+  });
+
+  test('github form equals toAnnotation for both severities', () => {
+    const error = { file: 'a.yaml', line: 3, column: 5, message: 'bad' } as const;
+    const warning = { ...error, severity: 'warning' } as const;
+    expect(formatProblem(error, { github: true })).toBe(toAnnotation(error));
+    expect(formatProblem(warning, { github: true })).toBe(toAnnotation(warning));
   });
 });

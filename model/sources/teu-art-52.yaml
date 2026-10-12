@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/source.schema.json
+id: teu-art-52
+title: Treaty on European Union (consolidated version of 15 March 2025), Article 52
+type: law
+date: 2025-03-15
+url: http://data.europa.eu/eli/treaty/teu_2016/2025-03-15
+eli: http://data.europa.eu/eli/treaty/teu_2016/2025-03-15
+publisher: Publications Office of the European Union (EUR-Lex)

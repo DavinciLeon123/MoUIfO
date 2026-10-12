@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/jurisdiction.schema.json
+id: GB
+label:
+  en: United Kingdom
+  nl: Verenigd Koninkrijk
+notes:
+  en: "The GB prefix of an EORI number covers customs activities in Great Britain, that is England, Scotland and Wales (hmrc-eori-introduction), so this label names the state, not the area the GB EORI prefix covers."

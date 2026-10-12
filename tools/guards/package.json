@@ -6,5 +6,8 @@
   "license": "EUPL-1.2",
   "engines": {
     "node": ">=22.18"
+  },
+  "devDependencies": {
+    "@uio/engine": "*"
   }
 }

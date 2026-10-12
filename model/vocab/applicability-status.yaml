@@ -1,0 +1,38 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/vocab-applicability-status.schema.json
+id: applicability-status
+label:
+  en: Applicability status
+  nl: Toepasselijkheidsstatus
+values:
+  - id: issued
+    label:
+      en: Issued
+    definition:
+      en: "The identifier is issued in this jurisdiction (SPEC section 5.1)."
+    inherits_down: false
+    rationale:
+      en: "Not inherited by a part of the jurisdiction: issuing is tied to the issuing authority of that jurisdiction. This value is a modelling decision (DEC-041) and no external source exists for it."
+  - id: recognised
+    label:
+      en: Recognised
+    definition:
+      en: "The identifier is legally or formally recognised in this jurisdiction (SPEC section 5.1)."
+    inherits_down: true
+    rationale:
+      en: "Inherited by a part of the jurisdiction: recognition under a rule of the parent applies to its parts. This value is a modelling decision (DEC-041) and no external source exists for it."
+  - id: verifiable
+    label:
+      en: Verifiable
+    definition:
+      en: "The identifier can be verified from this jurisdiction (SPEC section 5.1)."
+    inherits_down: true
+    rationale:
+      en: "Inherited by a part of the jurisdiction: a verification route of the parent is available to its parts. This value is a modelling decision (DEC-041) and no external source exists for it."
+  - id: not-applicable
+    label:
+      en: Not applicable
+    definition:
+      en: "The identifier does not apply in this jurisdiction (SPEC section 5.1)."
+    inherits_down: false
+    rationale:
+      en: "Not inherited by a part of the jurisdiction: a part may have its own arrangement, as with XI under GB. This value is a modelling decision (DEC-041) and no external source exists for it."

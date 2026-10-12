@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/source.schema.json
+id: vat-directive-art-215
+title: Council Directive 2006/112/EC on the common system of value added tax, consolidated version of 14 April 2025, Article 215
+type: law
+date: 2025-04-14
+url: https://eur-lex.europa.eu/legal-content/nl/TXT/?uri=CELEX%3A32006L0112
+eli: http://data.europa.eu/eli/dir/2006/112/2025-04-14
+publisher: Publications Office of the European Union (EUR-Lex)

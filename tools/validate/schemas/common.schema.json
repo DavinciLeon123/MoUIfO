@@ -1,0 +1,324 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "common.schema.json",
+  "description": "Definitions shared by every model schema.",
+  "$defs": {
+    "kebab-id": {
+      "description": "A lowercase identifier made of letters, digits and single hyphens, starting with a letter.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$"
+    },
+    "http-url": {
+      "description": "An absolute web address a person may follow: scheme http or https, nothing else. One definition for every URL and ELI field, so that a script, data, file, ftp or mail URI never enters the model.",
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https?://"
+    },
+    "label": {
+      "description": "A short name; English is required, Dutch where available.",
+      "type": "object",
+      "properties": {
+        "en": {
+          "type": "string",
+          "minLength": 1
+        },
+        "nl": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": ["en"],
+      "unevaluatedProperties": false
+    },
+    "text": {
+      "description": "A longer text; English is required, Dutch where available.",
+      "type": "object",
+      "properties": {
+        "en": {
+          "type": "string",
+          "minLength": 1
+        },
+        "nl": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": ["en"],
+      "unevaluatedProperties": false
+    },
+    "source-ref": {
+      "description": "The id of a source file under model/sources/.",
+      "type": "string",
+      "$ref": "#/$defs/kebab-id",
+      "uioRef": "source"
+    },
+    "jurisdiction-id": {
+      "description": "A jurisdiction id: two uppercase ASCII letters (ISO 3166-1 alpha-2 style codes, plus EU and XI) or GLOBAL for worldwide schemes (SPEC section 4).",
+      "type": "string",
+      "pattern": "^(?:[A-Z]{2}|GLOBAL)$"
+    },
+    "jurisdiction-ref": {
+      "description": "The id of a jurisdiction file under model/jurisdictions/.",
+      "type": "string",
+      "$ref": "#/$defs/jurisdiction-id",
+      "uioRef": "jurisdiction"
+    },
+    "certainty-ref": {
+      "description": "A member of the certainty vocabulary.",
+      "type": "string",
+      "uioRef": "vocab:certainty"
+    },
+    "vocab-member": {
+      "description": "Base of a vocabulary member; a cited source and a certainty come together. The closing unevaluatedProperties lives in the schema that uses this base.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/kebab-id"
+        },
+        "label": {
+          "$ref": "#/$defs/label"
+        },
+        "definition": {
+          "$ref": "#/$defs/text"
+        },
+        "source": {
+          "$ref": "#/$defs/source-ref"
+        },
+        "certainty": {
+          "$ref": "#/$defs/certainty-ref"
+        }
+      },
+      "required": ["id", "label", "definition"],
+      "dependentRequired": {
+        "source": ["certainty"],
+        "certainty": ["source"]
+      }
+    },
+    "scheme-ref": {
+      "description": "The id of a scheme file under model/schemes/.",
+      "type": "string",
+      "$ref": "#/$defs/kebab-id",
+      "uioRef": "scheme"
+    },
+    "authority-ref": {
+      "description": "The id of an authority class or instance under model/authorities/ (DEC-031).",
+      "type": "string",
+      "$ref": "#/$defs/kebab-id",
+      "uioRef": "authority"
+    },
+    "icd-code": {
+      "description": "An ISO 6523 ICD code or a Peppol EAS code: exactly four ASCII digits, always quoted so leading zeros survive (DEC-036); null or absent means no code is recorded.",
+      "type": ["string", "null"],
+      "pattern": "^[0-9]{4}$"
+    },
+    "header-authority": {
+      "description": "A scheme issuer: an authority class, or an instance for a national-only scheme. A bare value is covered by the scheme default source with certainty certain; the long form { value, source, certainty } overrides that for this field only (DEC-029).",
+      "if": {
+        "type": "object"
+      },
+      "then": {
+        "type": "object",
+        "required": ["value", "source", "certainty"],
+        "properties": {
+          "value": {
+            "$ref": "#/$defs/authority-ref"
+          },
+          "source": {
+            "$ref": "#/$defs/source-ref"
+          },
+          "certainty": {
+            "$ref": "#/$defs/certainty-ref"
+          }
+        },
+        "unevaluatedProperties": false
+      },
+      "else": {
+        "$ref": "#/$defs/authority-ref"
+      }
+    },
+    "header-jurisdiction": {
+      "description": "A scheme jurisdiction. A bare value is covered by the scheme default source with certainty certain; the long form { value, source, certainty } overrides that for this field only (DEC-029).",
+      "if": {
+        "type": "object"
+      },
+      "then": {
+        "type": "object",
+        "required": ["value", "source", "certainty"],
+        "properties": {
+          "value": {
+            "$ref": "#/$defs/jurisdiction-ref"
+          },
+          "source": {
+            "$ref": "#/$defs/source-ref"
+          },
+          "certainty": {
+            "$ref": "#/$defs/certainty-ref"
+          }
+        },
+        "unevaluatedProperties": false
+      },
+      "else": {
+        "$ref": "#/$defs/jurisdiction-ref"
+      }
+    },
+    "header-kind": {
+      "description": "The kind of a scheme. A bare value is covered by the scheme default source with certainty certain; the long form { value, source, certainty } overrides that for this field only (DEC-029).",
+      "if": {
+        "type": "object"
+      },
+      "then": {
+        "type": "object",
+        "required": ["value", "source", "certainty"],
+        "properties": {
+          "value": {
+            "enum": ["identifier", "register", "composite"]
+          },
+          "source": {
+            "$ref": "#/$defs/source-ref"
+          },
+          "certainty": {
+            "$ref": "#/$defs/certainty-ref"
+          }
+        },
+        "unevaluatedProperties": false
+      },
+      "else": {
+        "enum": ["identifier", "register", "composite"]
+      }
+    },
+    "header-text": {
+      "description": "A short free-text header value, for example an abbreviation. A bare value is covered by the scheme default source with certainty certain; the long form { value, source, certainty } overrides that for this field only (DEC-029).",
+      "if": {
+        "type": "object"
+      },
+      "then": {
+        "type": "object",
+        "required": ["value", "source", "certainty"],
+        "properties": {
+          "value": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source": {
+            "$ref": "#/$defs/source-ref"
+          },
+          "certainty": {
+            "$ref": "#/$defs/certainty-ref"
+          }
+        },
+        "unevaluatedProperties": false
+      },
+      "else": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "header-kebab": {
+      "description": "A kebab-case header value, for example availability. A bare value is covered by the scheme default source with certainty certain; the long form { value, source, certainty } overrides that for this field only (DEC-029).",
+      "if": {
+        "type": "object"
+      },
+      "then": {
+        "type": "object",
+        "required": ["value", "source", "certainty"],
+        "properties": {
+          "value": {
+            "$ref": "#/$defs/kebab-id"
+          },
+          "source": {
+            "$ref": "#/$defs/source-ref"
+          },
+          "certainty": {
+            "$ref": "#/$defs/certainty-ref"
+          }
+        },
+        "unevaluatedProperties": false
+      },
+      "else": {
+        "$ref": "#/$defs/kebab-id"
+      }
+    },
+    "header-code": {
+      "description": "An ISO 6523 ICD or Peppol EAS code, or null. A bare value is covered by the scheme default source with certainty certain; the long form { value, source, certainty } overrides that for this field only (DEC-029).",
+      "if": {
+        "type": "object"
+      },
+      "then": {
+        "type": "object",
+        "required": ["value", "source", "certainty"],
+        "properties": {
+          "value": {
+            "$ref": "#/$defs/icd-code"
+          },
+          "source": {
+            "$ref": "#/$defs/source-ref"
+          },
+          "certainty": {
+            "$ref": "#/$defs/certainty-ref"
+          }
+        },
+        "unevaluatedProperties": false
+      },
+      "else": {
+        "$ref": "#/$defs/icd-code"
+      }
+    },
+    "condition": {
+      "description": "When a statement applies (SPEC 5.3): a closed set of keys, at least one. issuing_country may be negated with a leading ! (for example \"!NL\"); entity_form and context come from their vocabularies.",
+      "type": "object",
+      "properties": {
+        "issuing_country": {
+          "type": "string",
+          "pattern": "^!?[A-Z]{2}$",
+          "uioRef": "jurisdiction-negatable"
+        },
+        "entity_form": {
+          "type": "string",
+          "uioRef": "vocab:entity-form"
+        },
+        "context": {
+          "type": "string",
+          "uioRef": "vocab:condition-context"
+        }
+      },
+      "minProperties": 1,
+      "unevaluatedProperties": false
+    },
+    "statement": {
+      "description": "Base of every scheme statement: its own source and certainty (DEC-029), an optional condition, and an optional free-text note covered by that source (D-09). The closing unevaluatedProperties lives in the schema that uses this base.",
+      "type": "object",
+      "properties": {
+        "condition": {
+          "$ref": "#/$defs/condition"
+        },
+        "certainty": {
+          "$ref": "#/$defs/certainty-ref"
+        },
+        "source": {
+          "$ref": "#/$defs/source-ref"
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": ["certainty", "source"]
+    },
+    "capture": {
+      "description": "Run a regular expression on a value and take one capture group (group 0 is the whole match). Used by transforms and by context_from.",
+      "type": "object",
+      "properties": {
+        "regex": {
+          "type": "string",
+          "minLength": 1
+        },
+        "group": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": ["regex", "group"],
+      "unevaluatedProperties": false
+    }
+  }
+}

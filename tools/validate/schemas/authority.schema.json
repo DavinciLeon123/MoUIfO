@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "authority.schema.json",
+  "description": "An authority is either a class (for example a national customs authority) or a per-country instance of a class (SPEC 4, DEC-031, D-12). A scheme's issuer names a class, or an instance for a national-only scheme; the engine resolves class plus issuing country to an instance, or reports the class when no instance exists, in Phase 5.",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/kebab-id" },
+    "kind": { "enum": ["class", "instance"] },
+    "label": { "$ref": "common.schema.json#/$defs/label" },
+    "definition": { "$ref": "common.schema.json#/$defs/text" },
+    "instance_of": {
+      "type": "string",
+      "$ref": "common.schema.json#/$defs/kebab-id",
+      "uioRef": "authority-class"
+    },
+    "jurisdiction": { "$ref": "common.schema.json#/$defs/jurisdiction-ref" },
+    "source": { "$ref": "common.schema.json#/$defs/source-ref" },
+    "certainty": { "$ref": "common.schema.json#/$defs/certainty-ref" },
+    "notes": { "$ref": "common.schema.json#/$defs/text" }
+  },
+  "required": ["id", "kind", "label"],
+  "allOf": [
+    {
+      "if": { "properties": { "kind": { "const": "class" } }, "required": ["kind"] },
+      "then": {
+        "type": "object",
+        "required": ["definition"],
+        "properties": {
+          "instance_of": false,
+          "jurisdiction": false,
+          "source": false,
+          "certainty": false
+        }
+      }
+    },
+    {
+      "if": { "properties": { "kind": { "const": "instance" } }, "required": ["kind"] },
+      "then": {
+        "type": "object",
+        "required": ["instance_of", "jurisdiction", "source", "certainty"]
+      }
+    }
+  ],
+  "unevaluatedProperties": false
+}

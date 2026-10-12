@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "vocab-country-prefix.schema.json",
+  "description": "The country-prefix map (D-18, DEC-035): each entry maps a two-letter prefix, as a context_from capture yields it, to one jurisdiction, with its own source and certainty. Each prefix appears once and maps to exactly one jurisdiction. The map need not be complete: a prefix that is not in it gives no context at run time, never a validation error.",
+  "type": "object",
+  "properties": {
+    "id": { "const": "country-prefix" },
+    "label": { "$ref": "common.schema.json#/$defs/label" },
+    "values": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "prefix": {
+            "description": "Exactly two uppercase ASCII letters, the shape a context_from capture yields.",
+            "type": "string",
+            "pattern": "^[A-Z]{2}$"
+          },
+          "jurisdiction": { "$ref": "common.schema.json#/$defs/jurisdiction-ref" },
+          "source": { "$ref": "common.schema.json#/$defs/source-ref" },
+          "certainty": { "$ref": "common.schema.json#/$defs/certainty-ref" },
+          "note": { "$ref": "common.schema.json#/$defs/text" }
+        },
+        "required": ["prefix", "jurisdiction", "source", "certainty"],
+        "unevaluatedProperties": false
+      }
+    }
+  },
+  "required": ["id", "label", "values"],
+  "unevaluatedProperties": false
+}

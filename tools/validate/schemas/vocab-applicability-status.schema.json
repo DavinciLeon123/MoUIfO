@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "vocab-applicability-status.schema.json",
+  "description": "The applicability-status vocabulary (SPEC 5.1): a closed list whose members carry the inherits_down flag of D-13. The flag values are a modelling decision (DEC-041), recorded in a rationale and not in a source.",
+  "type": "object",
+  "properties": {
+    "id": { "const": "applicability-status" },
+    "label": { "$ref": "common.schema.json#/$defs/label" },
+    "values": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "common.schema.json#/$defs/vocab-member",
+        "properties": {
+          "inherits_down": { "type": "boolean" },
+          "rationale": { "$ref": "common.schema.json#/$defs/text" }
+        },
+        "required": ["inherits_down"],
+        "unevaluatedProperties": false
+      }
+    }
+  },
+  "required": ["id", "label", "values"],
+  "unevaluatedProperties": false
+}

@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/vocab-simple.schema.json
+id: relation-kind
+label:
+  en: Relation kind
+  nl: Relatiesoort
+values:
+  - id: derived-from
+    label:
+      en: Derived from
+    definition:
+      en: "The subject identifier can be derived from the target identifier by a rule (SPEC section 5.1)."
+  - id: contains
+    label:
+      en: Contains
+    definition:
+      en: "The subject identifier contains the target identifier as a part of its own value (SPEC section 5.1)."
+  - id: prerequisite
+    label:
+      en: Prerequisite
+    definition:
+      en: "The subject identifier can only be obtained when the target identifier exists (SPEC section 5.1)."
+  - id: same-level
+    label:
+      en: Same level
+    definition:
+      en: "The subject and the target identify the same level of an organisation (SPEC section 5.1)."
+  - id: different-level
+    label:
+      en: Different level
+    definition:
+      en: "The subject and the target identify different levels of an organisation (SPEC section 5.1)."
+  - id: equivalent-in
+    label:
+      en: Equivalent in
+    definition:
+      en: "The subject has the same function in another country as the target (SPEC section 5.1)."
+  - id: may-identify-same-party
+    label:
+      en: May identify the same party
+    definition:
+      en: "The subject and the target may identify the same party, without a rule that proves it (SPEC section 5.1)."
+  - id: references
+    label:
+      en: References
+    definition:
+      en: "The subject identifier refers to the target identifier (SPEC section 5.1)."
+  - id: specializes
+    label:
+      en: Specializes
+    definition:
+      en: "The subject scheme is a narrower, national form of the target scheme, for example vat-nl of vat (DEC-034, amending SPEC section 5.1)."
