@@ -524,8 +524,10 @@ describe('euid with the Dutch form at possible, its EU legal basis and the five 
       .filter((name) => name.endsWith('.yaml'))
       .sort();
     expect(files).toEqual([
+      'bsn.yaml',
       'eori.yaml',
       'euid.yaml',
+      'fi-number.yaml',
       'kvk-establishment-number.yaml',
       'kvk-number.yaml',
       'oin.yaml',

@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/authority.schema.json
+id: rvig
+kind: class
+label:
+  en: National Office for Identity Data (RvIG)
+  nl: Rijksdienst voor Identiteitsgegevens
+definition:
+  en: The Dutch agency of the Ministry of the Interior and Kingdom Relations (BZK) that issues the citizen service number.

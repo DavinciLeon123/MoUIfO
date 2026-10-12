@@ -62,10 +62,24 @@ Every seeded membership, prefix and source was read on its live page while the s
 
 ## Elfproef of RSIN, BSN and fi-number rests on the workbook
 
-- **Item:** the 9-digit pattern and the elfproef check of the `rsin` scheme are stated at likely, on the workbook only (DEC-046). Plan 03-09 applies the same basis to the BSN and the fi-number.
+- **Item:** the 9-digit pattern and the elfproef check of the `rsin` scheme are stated at likely, on the workbook only (DEC-046). The `bsn` and `fi-number` schemes carry the same pattern and check at likely on the same basis.
 - **Why it is not in the model:** no primary source read states the digit count or the check. The Wabb text read gives no digit rule, and the research found no primary source for the RSIN or fi-number elfproef (Appendix B, gap G9). The SPEC §10 example passes the elfproef, which is consistent with the workbook but is not proof of it.
 - **Open question:** does an official source state the elfproef, and the digit count, for the RSIN, the BSN and the fi-number?
 - **Owner or next step:** the end-of-phase human check; the certainty of these statements rises to certain only once a source states them.
+
+## BSN and fi-number have no valid example
+
+- **Item:** the `bsn` and `fi-number` schemes have no `examples_valid`. Both carry the 9-digit pattern and the elfproef at likely from the workbook, and the workbook gives "?" as the example in every row of both schemes.
+- **Why it is not in the model:** no public example of either number is read. A valid-looking nine-digit value committed to the repository would be a possible personal number, which the personal-number guard refuses (DEC-022, DEC-025), and an allow-list entry for one may only land as a separate change that the owner merges first. The model keeps two invalid examples per scheme, each rejected by the format (DEC-039); a test that needs a valid value builds one at runtime.
+- **Open question:** does the owner want a synthetic, elfproef-valid BSN example for Phase 5 `recognise`, admitted through the allow-list as its own change merged before the model change?
+- **Owner or next step:** the owner decides. Until then the model shows the two schemes with invalid examples only.
+
+## BSN validation register without a URL
+
+- **Item:** the workbook names the validation source of the BSN as the BRP (Basisregistratie Personen) and gives no URL. The `bsn` scheme therefore has no `validation_source`.
+- **Why it is not in the model:** a validation source needs a label and a URL, and no read source gives a URL at which a BSN can be checked. The workbook gives the BSN availability as restricted, so a public check may not exist.
+- **Open question:** is there a public page, from the RvIG or Logius, that states how a BSN is verified, and does the BRP offer any open check?
+- **Owner or next step:** the owner or the RvIG names a source; the `validation_source` is then added at its own certainty.
 
 ## RSIN long name differs between the workbook and the KVK
 
@@ -118,8 +132,8 @@ Every seeded membership, prefix and source was read on its live page while the s
 
 ## Levels and roles without a source
 
-- **Item:** the level and role statements that the model omits for lack of a source. `kvk-number` declares neither a level nor a role. The `euid` level `legal-entity` is modelled at likely on the workbook's scope text alone, with no primary source behind it.
-- **Why it is not in the model:** no read source states the level of a KVK number or the role it plays. The KVK page says that "your business or organisation" has an 8-digit KVK number, which does not name a level. The research (G13) finds no sourced level or role for `kvk-number`, `oin`, `vat`, `duns`, `roo` or `peppol-id`, and a statement without a source is not written (DEC-019). The `euid` level rests on the workbook (DEC-046) and is marked likely for that reason.
+- **Item:** the level and role statements that the model omits for lack of a source. `kvk-number` declares neither a level nor a role. `oin` and `fi-number` declare no level either. The `euid` level `legal-entity` is modelled at likely on the workbook's scope text alone, with no primary source behind it.
+- **Why it is not in the model:** no read source states the level of a KVK number or the role it plays. The KVK page says that "your business or organisation" has an 8-digit KVK number, which does not name a level. The research (G13) finds no sourced level or role for `kvk-number`, `oin`, `fi-number`, `vat`, `duns` or `peppol-id`, and a statement without a source is not written (DEC-019). The `roo` level (KOOP page) and the `bsn` level (Wabb Article 1) are sourced and so are not listed. The `euid` level rests on the workbook (DEC-046) and is marked likely for that reason.
 - **Open question:** does a read source state whether a KVK number identifies a legal entity or an establishment, and what role the KVK number and the EUID play in a transaction?
 - **Owner or next step:** the owner names a source for each level and role, or accepts the omission. Later plans add their own levels and roles with their sources (G13).
 
