@@ -70,12 +70,20 @@ describe('landscape snapshot and model sources (DAT-05, DEC-043)', () => {
     }
   });
 
-  test('for every registered link whose source file exists, the file url equals the link URL exactly', () => {
+  test('every registered link has its source file, and that file url equals the link URL exactly', () => {
     for (const link of snapshotLinks().filter((candidate) => candidate.registered)) {
       const id = link.source as string;
-      if (!existsSync(sourceFilePath(id))) continue;
+      expect(existsSync(sourceFilePath(id)), id).toBe(true);
       expect(sourceFileOf(id).url, id).toBe(link.url);
     }
+  });
+
+  test('no workbook link URL is the url of two model sources (one source per URL, DEC-043)', () => {
+    const linkUrls = new Set(snapshotLinks().map((link) => link.url));
+    const cited = sourceIds()
+      .map((id) => sourceFileOf(id).url)
+      .filter((url): url is string => url !== undefined && linkUrls.has(url));
+    expect(new Set(cited).size, 'a workbook URL is the url of two sources').toBe(cited.length);
   });
 
   test('kvk-zoeken is a register-doc whose url is the URL of the F25 link', () => {
