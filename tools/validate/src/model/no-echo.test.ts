@@ -16,7 +16,7 @@ import {
   positionOfToken,
   runValidateCli,
   schemeFixture,
-  withRealModel,
+  withSeedModel,
 } from './testing.ts';
 
 vi.setConfig({ testTimeout: 60_000 });
@@ -61,7 +61,7 @@ const SECRETS = [upper, lower, core];
 
 const check = (extra: string) =>
   checkModelFiles(
-    withRealModel([
+    withSeedModel([
       fixtureSource(),
       ...fixtureAuthorities(),
       schemeFixture('fixture-echo', minimalSchemeBody('fixture-echo', {}, extra)),

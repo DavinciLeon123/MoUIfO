@@ -15,7 +15,7 @@ import {
   positionOfToken,
   runValidateCli,
   schemeFixture,
-  withRealModel,
+  withSeedModel,
 } from './testing.ts';
 
 vi.setConfig({ testTimeout: 60_000 });
@@ -103,7 +103,7 @@ function problemsOf(field: Field, value: string) {
   const quoted = JSON.stringify(value);
   const files = field.files(quoted);
   const text = files.find((file) => file.path === field.path)?.text ?? '';
-  const problems = checkModelFiles(withRealModel(files)).filter(
+  const problems = checkModelFiles(withSeedModel(files)).filter(
     (problem) => problem.file === field.path,
   );
   return { problems, at: positionOfToken(text, quoted) };
