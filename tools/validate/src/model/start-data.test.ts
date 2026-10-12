@@ -233,3 +233,56 @@ describe('sources and gap entries (DAT-01, DEC-019, DEC-042)', () => {
     expect(section).toContain('XI');
   });
 });
+
+describe('vat-nl and the VAT to EORI chain (DAT-01, DEC-003, DEC-004, DEC-050)', () => {
+  test('VAT to EORI is the two-step chain: rsin-from-vat-nl, then eori-nl-from-rsin, gives the Dutch EORI', () => {
+    const toRsin = ruleOf(scheme('rsin'), 'rsin-from-vat-nl');
+    expect(toRsin.input).toBe('vat-nl');
+    expect(toRsin.output).toBe('rsin');
+    expect(toRsin.condition).toEqual({ entity_form: 'legal-person' });
+    expect(toRsin.certainty).toBe('certain');
+    expect(toRsin.source).toBe('ondernemersplein-btw-vermelden');
+    const rsin = run(toRsin.transform, 'NL001469630B01');
+    expect(rsin).toBe('001469630');
+    const toEori = ruleOf(scheme('eori'), 'eori-nl-from-rsin');
+    expect(run(toEori.transform, String(rsin))).toBe('NL001469630');
+  });
+
+  test('vat-nl accepts NL001469630B01 and rejects a missing digit (no pattern) and a wrong check digit (elfproef)', () => {
+    const format = formatOf(scheme('vat-nl'));
+    expect(checkValue(format, 'NL001469630B01').accepted).toBe(true);
+    expect(checkValue(format, 'NL001469630B1').accepted).toBe(false);
+    expect(checkValue(format, 'NL000099998B58').accepted).toBe(false);
+  });
+
+  test('the elfproef entry and the contains rsin relation carry entity_form legal-person', () => {
+    const vat = scheme('vat-nl');
+    const elfproef = listOf((vat.format as Json).checksum).find(
+      (entry) => entry.algorithm === 'elfproef',
+    );
+    expect(elfproef?.condition).toEqual({ entity_form: 'legal-person' });
+    expect(listOf(vat.relations)).toEqual([
+      expect.objectContaining({
+        kind: 'contains',
+        target: 'rsin',
+        condition: { entity_form: 'legal-person' },
+        certainty: 'certain',
+      }),
+    ]);
+  });
+
+  test('no rule has output vat-nl, and none has input vat-nl with output eori (DEC-050, DEC-003)', () => {
+    const rules = loadAll('schemes').flatMap((s) => listOf(s.rules));
+    expect(rules.filter((rule) => rule.output === 'vat-nl')).toEqual([]);
+    expect(rules.filter((rule) => rule.input === 'vat-nl' && rule.output === 'eori')).toEqual([]);
+  });
+
+  test('belastingdienst is the NL instance of national-tax-authority, sourced at certain', () => {
+    const tax = load('model/authorities/belastingdienst.yaml');
+    expect(tax.kind).toBe('instance');
+    expect(tax.instance_of).toBe('national-tax-authority');
+    expect(tax.jurisdiction).toBe('NL');
+    expect(tax.source).toBe('ondernemersplein-nummers-voor-de-btw');
+    expect(tax.certainty).toBe('certain');
+  });
+});
