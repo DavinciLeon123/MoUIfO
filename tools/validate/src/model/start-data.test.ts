@@ -525,7 +525,7 @@ describe('euid with the Dutch form at possible, its EU legal basis and the five 
     );
   });
 
-  test('model/schemes holds exactly the scheme files written by plans 03-06 to 03-09', () => {
+  test('model/schemes holds exactly the scheme files written by plans 03-06 to 03-10', () => {
     const files = readdirSync(join(REPO_ROOT, 'model', 'schemes'))
       .filter((name) => name.endsWith('.yaml'))
       .sort();
@@ -542,6 +542,7 @@ describe('euid with the Dutch form at possible, its EU legal basis and the five 
       'roo.yaml',
       'rsin.yaml',
       'vat-nl.yaml',
+      'vat.yaml',
     ]);
   });
 });
@@ -953,5 +954,127 @@ describe('bsn and fi-number without valid examples (DAT-02, SPEC §10, DEC-022, 
       expect(found, `${heading}: ${part}`).toBeGreaterThanOrEqual(0);
       at = found + part.length;
     }
+  });
+});
+
+/** The text of one `##` section of docs/gaps.md, from its heading to the next heading. */
+function gapSection(heading: string): string {
+  const gaps = read('docs/gaps.md');
+  const start = gaps.indexOf(heading);
+  expect(start, heading).toBeGreaterThanOrEqual(0);
+  return gaps.slice(start).split('\n## ')[0] ?? '';
+}
+
+describe('vat, the generic EU VAT identifier, and vat-nl specializes vat (DAT-02, DEC-033, DEC-034, DEC-035, DEC-045)', () => {
+  test('vat has jurisdiction EU, not GLOBAL (DEC-033), and reads its country from the prefix through country-prefix', () => {
+    const vat = scheme('vat');
+    expect(vat.jurisdiction).toBe('EU');
+    expect(vat.sources).toEqual({ default: 'vat-directive-art-215' });
+    const context = (vat.context_from as Json).issuing_country as Json;
+    expect(context).toEqual(
+      expect.objectContaining({
+        map: 'country-prefix',
+        certainty: 'certain',
+        source: 'vat-directive-art-215',
+      }),
+    );
+    expect(context.capture).toEqual({ regex: '^([A-Z]{2})', group: 1 });
+  });
+
+  test('accepts NL001469630B01 and NL000099998B57, rejects nl001469630b01 and 001469630; no checksum', () => {
+    const format = formatOf(scheme('vat'));
+    expect(checkValue(format, 'NL001469630B01').accepted).toBe(true);
+    expect(checkValue(format, 'NL000099998B57').accepted).toBe(true);
+    expect(checkValue(format, 'nl001469630b01').accepted).toBe(false);
+    expect(checkValue(format, '001469630').accepted).toBe(false);
+    expect((scheme('vat').format as Json).checksum).toBeUndefined();
+  });
+
+  test('vat-nl specializes vat with a certain relation sourced to vat-directive-art-215 (DEC-034)', () => {
+    expect(listOf(scheme('vat-nl').relations)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: 'specializes',
+          target: 'vat',
+          certainty: 'certain',
+          source: 'vat-directive-art-215',
+        }),
+      ]),
+    );
+  });
+
+  test('the legal basis is Council Directive 2006/112/EC Article 215, certain, with its ELI', () => {
+    expect(listOf(scheme('vat').legal_basis)).toEqual([
+      expect.objectContaining({
+        source: 'vat-directive-art-215',
+        certainty: 'certain',
+        eli: 'http://data.europa.eu/eli/dir/2006/112/2025-04-14',
+        title: expect.stringContaining('Article 215'),
+      }),
+    ]);
+  });
+
+  test('applicability: EU issued and recognised from the Directive, EU verifiable from VIES, both certain', () => {
+    expect(listOf(scheme('vat').applicability)).toEqual([
+      expect.objectContaining({
+        jurisdiction: 'EU',
+        status: ['issued', 'recognised'],
+        certainty: 'certain',
+        source: 'vat-directive-art-215',
+      }),
+      expect.objectContaining({
+        jurisdiction: 'EU',
+        status: ['verifiable'],
+        certainty: 'certain',
+        source: 'vies',
+      }),
+    ]);
+  });
+
+  test('its issuer is the national-tax-authority class, likely from the Directive, and the class needs no instance (DEC-045)', () => {
+    expect(scheme('vat').issuer).toEqual({
+      value: 'national-tax-authority',
+      source: 'vat-directive-art-215',
+      certainty: 'likely',
+    });
+    expect(load('model/authorities/national-tax-authority.yaml')).toEqual(
+      expect.objectContaining({ kind: 'class' }),
+    );
+  });
+
+  test.each([
+    '## IBAN component of the Peppol participant identifier',
+    '## Peppol participant identifier wrapper syntax',
+    '## GS1 check digit text',
+  ])('the entry "%s" exists in the four-part form', (heading) => {
+    const section = gapSection(heading);
+    let at = 0;
+    for (const part of [
+      '- **Item:**',
+      '- **Why it is not in the model:**',
+      '- **Open question:**',
+      '- **Owner or next step:**',
+    ]) {
+      const found = section.indexOf(part, at);
+      expect(found, `${heading}: ${part}`).toBeGreaterThanOrEqual(0);
+      at = found + part.length;
+    }
+  });
+
+  test('the Peppol ICD entry names gln with 0088; the levels entry names vat and peppol-id as declaring no level', () => {
+    expect(gapSection('## ICD codes stated only by the Peppol code list')).toContain('`0088`');
+    expect(gapSection('## Levels and roles without a source')).toContain(
+      '`vat` and `peppol-id` declare no level',
+    );
+  });
+
+  test('the DEC-042 entry names gs1-gln-allocation-rules as a month-only date', () => {
+    const section = gapSection('## Source dates not stated on the page (DEC-042)');
+    expect(section).toContain('gs1-gln-allocation-rules');
+    expect(section).toContain('month stated, day not stated');
+  });
+
+  test('no gap entry carries a nine-digit number (seed-data rule 9)', () => {
+    expect(read('docs/gaps.md')).not.toMatch(/(^|[^0-9])[0-9]{9}([^0-9]|$)/m);
   });
 });
