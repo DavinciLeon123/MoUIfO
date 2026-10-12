@@ -161,3 +161,38 @@ describe('trust and persistence equal the workbook snapshot (DAT-08, DEC-046)', 
     }
   });
 });
+
+/** The Dutch register schemes and the EORI (plan 03-13); plan 03-14 sweeps the other seven. */
+const DUTCH_AND_EORI = [
+  'kvk-number',
+  'kvk-establishment-number',
+  'oin',
+  'rsin',
+  'roo',
+  'bsn',
+  'fi-number',
+  'eori',
+] as const;
+
+describe('the Dutch register schemes and the EORI carry the snapshot (DAT-08, plan 03-13)', () => {
+  test.each(DUTCH_AND_EORI)('%s declares trust and persistence equal to the snapshot', (id) => {
+    const data = loadScheme(id);
+    expectTrustMatches(id, data);
+    expectPersistenceMatches(id, data);
+  });
+
+  test('bsn and fi-number store null for every trust sub-score, never 0 (not assessed)', () => {
+    for (const id of ['bsn', 'fi-number']) {
+      const trust = (loadScheme(id).trust ?? {}) as Json;
+      for (const key of TRUST_KEYS) expect(trust[key], `${id} ${key}`).toBeNull();
+    }
+  });
+
+  test('persistence counts: bsn none, kvk-establishment-number and roo five, fi-number six', () => {
+    const count = (id: string): number => ((loadScheme(id).persistence ?? []) as unknown[]).length;
+    expect(loadScheme('bsn').persistence, 'bsn declares no persistence').toBeUndefined();
+    expect(count('kvk-establishment-number')).toBe(5);
+    expect(count('roo')).toBe(5);
+    expect(count('fi-number')).toBe(6);
+  });
+});
