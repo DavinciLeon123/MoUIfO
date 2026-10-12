@@ -214,3 +214,41 @@ describe('the VAT, EU and Peppol schemes carry the snapshot (DAT-08, plan 03-14)
     expect(vatNl.persistence).toEqual(vat.persistence);
   });
 });
+
+describe('completeness over every workbook scheme (DAT-08, plan 03-14)', () => {
+  const ids = Object.keys(snapshotSchemes()).sort();
+
+  test('the snapshot holds the fifteen workbook schemes', () => {
+    expect(ids).toHaveLength(15);
+  });
+
+  test('every snapshot scheme id has a scheme file that declares trust', () => {
+    for (const id of ids) {
+      expect(loadScheme(id).trust, `${id} declares trust`).toBeDefined();
+    }
+  });
+
+  test('every snapshot scheme with a modelled persistence cell declares persistence; bsn declares none', () => {
+    for (const id of ids) {
+      const modelled = expectedPersistence(id).length > 0;
+      const declared = loadScheme(id).persistence !== undefined;
+      expect(declared, `${id} declares persistence`).toBe(modelled);
+    }
+    expect(loadScheme('bsn').persistence, 'bsn declares no persistence').toBeUndefined();
+  });
+
+  test('kbo declares neither trust nor persistence (no workbook column, DEC-046)', () => {
+    const kbo = loadScheme('kbo');
+    expect(kbo.trust, 'kbo trust').toBeUndefined();
+    expect(kbo.persistence, 'kbo persistence').toBeUndefined();
+  });
+
+  test('gln merger statement carries the two workbook note cells, joined with a space', () => {
+    const notes = snapshotSchemes().gln?.persistence?.notes as string[] | undefined;
+    expect(notes, 'gln has two persistence notes').toHaveLength(2);
+    const merger = ((loadScheme('gln').persistence ?? []) as Json[]).find(
+      (item) => item.event === 'merger',
+    );
+    expect(merger?.note).toBe((notes ?? []).join(' '));
+  });
+});
