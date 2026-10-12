@@ -1,6 +1,7 @@
 import type { KeywordDefinition } from 'ajv/dist/2020.js';
 import type { DataValidationCxt, SchemaValidateFunction } from 'ajv/dist/types/index.js';
-import type { ParsedFile } from './load.ts';
+import type { Problem } from 'uio-config';
+import { type ParsedFile, positionOf, VOCAB_SCHEMAS } from './load.ts';
 
 /**
  * Every id a reference may name, by kind: `source`, `jurisdiction`, `authority`, `authority-class`,
@@ -114,4 +115,72 @@ export function refKeyword(registry: Registry | undefined, cited: Set<string>): 
     return false;
   };
   return { keyword: 'uioRef', type: 'string', schemaType: 'string', errors: true, validate: check };
+}
+
+/**
+ * Vocabularies that may have `values: []`. Every other SPEC 5.1 list comes with a starter set;
+ * no source names a context tag yet, so `condition-context` is seeded empty (DEC-019).
+ */
+export const EMPTY_VOCABS_ALLOWED = ['condition-context'] as const;
+
+/**
+ * Integrity of one vocabulary's closed list: each member key (`id`, or `prefix` for a
+ * prefix-valued list) and each `rank` appears once (error at the second occurrence), and the list
+ * is not empty unless the vocabulary is in `EMPTY_VOCABS_ALLOWED`. Messages never echo a value.
+ */
+export function checkVocabMembers(parsed: ParsedFile): Problem[] {
+  const data = asRecord(parsed.data);
+  const values = data?.values;
+  if (data === undefined || !Array.isArray(values)) return [];
+  const problems: Problem[] = [];
+  const at = (pointer: string, target: 'value' | 'key', message: string): void => {
+    const { line, column } = positionOf(parsed, pointer, target);
+    problems.push({ file: parsed.path, line, column, message });
+  };
+
+  const allowed: readonly string[] = EMPTY_VOCABS_ALLOWED;
+  if (values.length === 0 && !(typeof data.id === 'string' && allowed.includes(data.id))) {
+    at('/values', 'key', 'a vocabulary needs at least one value');
+  }
+
+  const keys = new Set<string>();
+  const ranks = new Set<number>();
+  values.forEach((value, index) => {
+    const member = asRecord(value);
+    if (member === undefined) return;
+    const field = typeof member.id === 'string' ? 'id' : 'prefix';
+    const key = member[field];
+    if (typeof key === 'string') {
+      if (keys.has(key)) {
+        at(
+          `/values/${index}/${field}`,
+          'value',
+          'duplicate member: each member may appear only once',
+        );
+      }
+      keys.add(key);
+    }
+    const rank = member.rank;
+    if (typeof rank === 'number') {
+      if (ranks.has(rank)) {
+        at(`/values/${index}/rank`, 'value', 'duplicate rank: each rank may be used only once');
+      }
+      ranks.add(rank);
+    }
+  });
+  return problems;
+}
+
+/**
+ * One file-level problem for each known vocabulary (key of `VOCAB_SCHEMAS`) whose file is not among
+ * `paths`, in sorted order. The required list is the known list: a vocabulary is added by adding
+ * its file and its `VOCAB_SCHEMAS` entry together.
+ */
+export function checkRequiredVocabs(paths: readonly string[]): Problem[] {
+  const present = new Set(paths);
+  return Object.keys(VOCAB_SCHEMAS)
+    .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
+    .map((id) => `model/vocab/${id}.yaml`)
+    .filter((path) => !present.has(path))
+    .map((file) => ({ file, message: 'required vocabulary file is missing' }));
 }

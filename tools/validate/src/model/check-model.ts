@@ -7,7 +7,7 @@ import {
   parseModelFile,
   schemaFileFor,
 } from './load.ts';
-import { buildRegistry } from './refs.ts';
+import { buildRegistry, checkRequiredVocabs, checkVocabMembers } from './refs.ts';
 import { createAjv, schemaProblems } from './schema.ts';
 
 const compare = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
@@ -76,6 +76,7 @@ export function runModelChecks(files: readonly ModelFile[]): {
   const referencing = createAjv({ registry: buildRegistry(clean), cited });
   for (const { parsed, schemaId } of clean) {
     problems.push(...schemaProblems(referencing, schemaId, parsed, 'uioRef'));
+    if (parsed.path.startsWith('model/vocab/')) problems.push(...checkVocabMembers(parsed));
   }
   return { problems, cited };
 }
@@ -92,5 +93,11 @@ export function checkModelFiles(files: readonly ModelFile[]): Problem[] {
 /** Read every model file under `root` and check it, including stray entries under `model/`. */
 export function checkModel(root: string): Problem[] {
   const { files, problems } = discoverModelFiles(root);
-  return sorted(uniqueProblems([...problems, ...checkModelFiles(files)]));
+  return sorted(
+    uniqueProblems([
+      ...problems,
+      ...checkModelFiles(files),
+      ...checkRequiredVocabs(files.map((file) => file.path)),
+    ]),
+  );
 }

@@ -8,16 +8,13 @@
     "label": { "$ref": "common.schema.json#/$defs/label" },
     "values": {
       "type": "array",
-      "minItems": 1,
       "items": {
         "type": "object",
+        "$ref": "common.schema.json#/$defs/vocab-member",
         "properties": {
-          "id": { "$ref": "common.schema.json#/$defs/kebab-id" },
-          "label": { "$ref": "common.schema.json#/$defs/label" },
-          "definition": { "$ref": "common.schema.json#/$defs/text" },
           "rank": { "type": "integer", "minimum": 1 }
         },
-        "required": ["id", "label", "definition", "rank"],
+        "required": ["rank"],
         "unevaluatedProperties": false
       }
     }
