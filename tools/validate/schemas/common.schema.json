@@ -27,6 +27,30 @@
       },
       "required": ["en"],
       "unevaluatedProperties": false
+    },
+    "source-ref": {
+      "description": "The id of a source file under model/sources/.",
+      "type": "string",
+      "$ref": "#/$defs/kebab-id",
+      "uioRef": "source"
+    },
+    "certainty-ref": {
+      "description": "A member of the certainty vocabulary.",
+      "type": "string",
+      "uioRef": "vocab:certainty"
+    },
+    "vocab-member": {
+      "description": "Base of a vocabulary member; a cited source and a certainty come together. The closing unevaluatedProperties lives in the schema that uses this base.",
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "#/$defs/kebab-id" },
+        "label": { "$ref": "#/$defs/label" },
+        "definition": { "$ref": "#/$defs/text" },
+        "source": { "$ref": "#/$defs/source-ref" },
+        "certainty": { "$ref": "#/$defs/certainty-ref" }
+      },
+      "required": ["id", "label", "definition"],
+      "dependentRequired": { "source": ["certainty"], "certainty": ["source"] }
     }
   }
 }

@@ -3,9 +3,11 @@ import {
   discoverModelFiles,
   type ModelFile,
   noSchemaMessage,
+  type ParsedFile,
   parseModelFile,
   schemaFileFor,
 } from './load.ts';
+import { buildRegistry } from './refs.ts';
 import { createAjv, schemaProblems } from './schema.ts';
 
 const compare = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
@@ -38,12 +40,19 @@ export function uniqueProblems(problems: readonly Problem[]): Problem[] {
 }
 
 /**
- * Pure core: parse and schema-check the given files; problems sorted by file, line, column and
- * message. A file whose data cannot be trusted (parser error, non-mapping root) is not schema-checked.
+ * Passes A to C over the given files. A: parse and structure with a registry-free Ajv. B: build
+ * the registry from files with no parse or schema problem, so a broken file never vouches for a
+ * reference. C: re-validate those same files with the registry-backed Ajv and keep only `uioRef`
+ * errors, so a file with structural errors is never reference-checked (no cascade). Also returns
+ * the set of source ids cited anywhere.
  */
-export function checkModelFiles(files: readonly ModelFile[]): Problem[] {
-  const ajv = createAjv();
+export function runModelChecks(files: readonly ModelFile[]): {
+  problems: Problem[];
+  cited: Set<string>;
+} {
+  const structural = createAjv();
   const problems: Problem[] = [];
+  const clean: { parsed: ParsedFile; schemaId: string }[] = [];
   for (const file of files) {
     const { parsed, problems: parseProblems, usable, coerced } = parseModelFile(file);
     problems.push(...parseProblems);
@@ -56,13 +65,28 @@ export function checkModelFiles(files: readonly ModelFile[]): Problem[] {
     // A bare number that lost digits is already reported where it stands; its schema type error
     // at the same position would be the same finding twice.
     const covered = new Set(coerced.map((position) => `${position.line}:${position.column}`));
-    problems.push(
-      ...schemaProblems(ajv, schemaId, parsed).filter(
-        (problem) => !covered.has(`${problem.line}:${problem.column}`),
-      ),
+    const found = schemaProblems(structural, schemaId, parsed).filter(
+      (problem) => !covered.has(`${problem.line}:${problem.column}`),
     );
+    problems.push(...found);
+    if (parseProblems.length === 0 && found.length === 0) clean.push({ parsed, schemaId });
   }
-  return sorted(uniqueProblems(problems));
+
+  const cited = new Set<string>();
+  const referencing = createAjv({ registry: buildRegistry(clean), cited });
+  for (const { parsed, schemaId } of clean) {
+    problems.push(...schemaProblems(referencing, schemaId, parsed, 'uioRef'));
+  }
+  return { problems, cited };
+}
+
+/**
+ * Pure core: parse, schema-check and reference-check the given files; problems sorted by file,
+ * line, column and message. A file whose data cannot be trusted (parser error, non-mapping root)
+ * is not schema-checked.
+ */
+export function checkModelFiles(files: readonly ModelFile[]): Problem[] {
+  return sorted(uniqueProblems(runModelChecks(files).problems));
 }
 
 /** Read every model file under `root` and check it, including stray entries under `model/`. */

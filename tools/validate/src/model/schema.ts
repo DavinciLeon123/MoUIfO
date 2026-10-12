@@ -4,16 +4,22 @@ import { Ajv2020, type ErrorObject } from 'ajv/dist/2020.js';
 import addFormatsModule from 'ajv-formats';
 import type { Problem } from 'uio-config';
 import { type ParsedFile, positionOf } from './load.ts';
+import { type Registry, refKeyword } from './refs.ts';
 
 /** Directory of the hand-written JSON Schemas. */
 export const SCHEMA_DIR = new URL('../../schemas/', import.meta.url);
 
 const compare = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
 
-/** One Ajv instance with every `*.schema.json` registered under its relative `$id`. */
-export function createAjv(): Ajv2020 {
+/**
+ * One Ajv instance with the `uioRef` keyword and every `*.schema.json` registered under its relative
+ * `$id`. Without a registry `uioRef` always passes (structure only); with one it checks references
+ * and records every cited source in `cited`.
+ */
+export function createAjv(options: { registry?: Registry; cited?: Set<string> } = {}): Ajv2020 {
   const ajv = new Ajv2020({ strict: true, strictRequired: false, allErrors: true });
   addFormatsModule.default(ajv);
+  ajv.addKeyword(refKeyword(options.registry, options.cited ?? new Set()));
   const dir = fileURLToPath(SCHEMA_DIR);
   for (const name of readdirSync(dir)
     .filter((entry) => entry.endsWith('.schema.json'))
@@ -55,6 +61,8 @@ function messageOf(error: ErrorObject): string {
       return `must be "${String(params.allowedValue)}"`;
     case 'type':
       return `must be ${Array.isArray(params.type) ? params.type.join(' or ') : String(params.type)}`;
+    case 'dependentRequired':
+      return `property "${String(params.missingProperty)}" is required when "${String(params.property)}" is present`;
     case 'oneOf':
       return 'must match exactly one allowed form';
     case 'anyOf':
@@ -82,12 +90,22 @@ function toProblem(parsed: ParsedFile, error: ErrorObject): Problem {
   return { file: parsed.path, line, column, message: messageOf(error) };
 }
 
-/** Validate the parsed data against the schema `schemaId`; one positioned problem per failing rule. */
-export function schemaProblems(ajv: Ajv2020, schemaId: string, parsed: ParsedFile): Problem[] {
+/**
+ * Validate the parsed data against the schema `schemaId`; one positioned problem per failing rule.
+ * With `onlyKeyword` only the errors of that keyword are kept (pass C keeps `uioRef`).
+ */
+export function schemaProblems(
+  ajv: Ajv2020,
+  schemaId: string,
+  parsed: ParsedFile,
+  onlyKeyword?: string,
+): Problem[] {
   const validate = ajv.getSchema(schemaId);
   if (validate === undefined) {
     return [{ file: parsed.path, message: `schema ${schemaId} is not available` }];
   }
   if (validate(parsed.data)) return [];
-  return shapeErrors(validate.errors ?? []).map((error) => toProblem(parsed, error));
+  return shapeErrors(validate.errors ?? [])
+    .filter((error) => onlyKeyword === undefined || error.keyword === onlyKeyword)
+    .map((error) => toProblem(parsed, error));
 }

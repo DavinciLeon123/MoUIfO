@@ -59,7 +59,9 @@ describe('the real relation-kind vocabulary', () => {
 
 describe('uioRef on a vocabulary member', () => {
   test('an unknown certainty and an unknown source are reported at their values', () => {
-    const file = relationKind(member('contains', '    certainty: sure\n    source: no-such-source\n'));
+    const file = relationKind(
+      member('contains', '    certainty: sure\n    source: no-such-source\n'),
+    );
     const problems = check(file);
     expect(problems).toHaveLength(2);
     const certainty = problems.find((p) => p.message.includes('vocabulary certainty'));
@@ -97,8 +99,13 @@ describe('uioRef on a vocabulary member', () => {
 
   test('a broken referenced file does not vouch for its members', () => {
     const real = realFile(CERTAINTY);
-    const broken = { path: CERTAINTY, text: real.text.replace('rank: 2\n', 'rank: 2\n    rnak: 3\n') };
-    const file = relationKind(member('contains', '    certainty: likely\n    source: no-such-source\n'));
+    const broken = {
+      path: CERTAINTY,
+      text: real.text.replace('rank: 2\n', 'rank: 2\n    rnak: 3\n'),
+    };
+    const file = relationKind(
+      member('contains', '    certainty: likely\n    source: no-such-source\n'),
+    );
     const problems = checkModelFiles(withRealModel([broken, file]));
     expect(problems.map((p) => p.message)).toContain('unknown property "rnak"');
     const likely = problems.find((p) => p.file === RELATION_KIND && p.message.includes('"likely"'));
@@ -109,9 +116,11 @@ describe('uioRef on a vocabulary member', () => {
   test('a reference value that is not id-shaped is reported without being echoed', () => {
     const file = relationKind(member('contains', '    certainty: "12 34"\n    source: x\n'));
     const problems = check(file);
-    expect(problems).toHaveLength(1);
-    expect(problems[0]?.message).toBe('the value is not a known member of vocabulary certainty');
-    expect(problems[0]?.message).not.toContain('12 34');
+    expect(problems).toHaveLength(2);
+    expect(problems.map((p) => p.message)).toContain(
+      'the value is not a known member of vocabulary certainty',
+    );
+    for (const problem of problems) expect(problem.message).not.toContain('12 34');
   });
 });
 
@@ -166,7 +175,9 @@ describe('refKeyword', () => {
 });
 
 describe('buildRegistry', () => {
-  const parsed = (path: string, text: string) => ({ parsed: parseModelFile({ path, text }).parsed });
+  const parsed = (path: string, text: string) => ({
+    parsed: parseModelFile({ path, text }).parsed,
+  });
 
   test('collects ids by kind, authority classes and vocabulary members', () => {
     const registry = buildRegistry([

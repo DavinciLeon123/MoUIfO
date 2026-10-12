@@ -22,6 +22,7 @@ export const MODEL_KINDS = ['vocab', 'jurisdictions', 'authorities', 'sources', 
 /** Schema `$id` per vocabulary file stem; later plans add their vocabularies here. */
 export const VOCAB_SCHEMAS: Readonly<Record<string, string>> = {
   certainty: 'vocab-certainty.schema.json',
+  'relation-kind': 'vocab-simple.schema.json',
 };
 
 const KIND_SCHEMAS: Readonly<Record<string, string>> = {
