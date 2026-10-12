@@ -68,3 +68,36 @@ relations:
     certainty: likely
     source: landscape-v1-2
     note: "Workbook: related to CoC number, LEI, VAT-nr."
+trust:
+  legal_basis: 0
+  registration_quality: 1
+  verifiability: 0
+  crosswalks: 0
+  lifecycle: 1
+  certainty: likely
+  source: landscape-v1-2
+persistence:
+  - event: merger
+    behaviour: "Often new, but can persist"
+    certainty: likely
+    source: landscape-v1-2
+  - event: acquisition-without-merger
+    behaviour: "Unchanged"
+    certainty: likely
+    source: landscape-v1-2
+  - event: split
+    behaviour: "New DUNS for new entities"
+    certainty: likely
+    source: landscape-v1-2
+  - event: dissolution
+    behaviour: "Inactive"
+    certainty: likely
+    source: landscape-v1-2
+  - event: move-within-country
+    behaviour: "Unchanged"
+    certainty: likely
+    source: landscape-v1-2
+  - event: move-to-other-country
+    behaviour: "Can persist"
+    certainty: likely
+    source: landscape-v1-2

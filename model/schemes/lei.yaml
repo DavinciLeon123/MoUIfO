@@ -68,3 +68,36 @@ mandatory:
   text: "yes, for engaging in financial transactions"
   certainty: likely
   source: landscape-v1-2
+trust:
+  legal_basis: 1
+  registration_quality: 1
+  verifiability: 1
+  crosswalks: 1
+  lifecycle: 1
+  certainty: likely
+  source: landscape-v1-2
+persistence:
+  - event: merger
+    behaviour: "New LEI for merged entity"
+    certainty: likely
+    source: landscape-v1-2
+  - event: acquisition-without-merger
+    behaviour: "Unchanged"
+    certainty: likely
+    source: landscape-v1-2
+  - event: split
+    behaviour: "New LEIs"
+    certainty: likely
+    source: landscape-v1-2
+  - event: dissolution
+    behaviour: "Lapsed"
+    certainty: likely
+    source: landscape-v1-2
+  - event: move-within-country
+    behaviour: "Unchanged"
+    certainty: likely
+    source: landscape-v1-2
+  - event: move-to-other-country
+    behaviour: "New registration"
+    certainty: likely
+    source: landscape-v1-2

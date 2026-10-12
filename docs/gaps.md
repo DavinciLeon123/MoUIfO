@@ -234,3 +234,10 @@ Every seeded membership, prefix and source was read on its live page while the s
 - **Why it is not in the model:** the workbook has no KBO column, so no workbook statement exists for `kbo`. DEC-046 takes trust and persistence only from the workbook, and the Belgian sources read give no trust or persistence statement that could be cited. A score or an event without a source is not written (DEC-019).
 - **Open question:** does an official Belgian source state how the enterprise number behaves on a merger, a split or a move, and how far it is verifiable?
 - **Owner or next step:** the owner names a source for each sub-score and event, or accepts that `kbo` stays without them. A later workbook version with a KBO column would add them at likely (DEC-046).
+
+## Persistence summary ratings and not-assessed cells (DAT-08, plan 03-14)
+
+- **Item:** the persistence summary ratings of the workbook, and the persistence and trust cells the workbook does not assess.
+- **Why it is not in the model:** each scheme of the persistence tab carries a summary rating (high, medium, low-medium, low, variable; the OIN reads "high within NL" and the GLN "Low"). The model has no schema field for such a rating, and a composite or summary score is out of scope, so no rating is stored. Cells that read `n/a` or are empty are not modelled: all six events for `bsn`, and "move to another country" for `kvk-establishment-number` and `roo`. The trust cells of `bsn` and `fi-number` are blank in the workbook, so their five sub-scores are null, never 0.
+- **Open question:** does the owner want the workbook's summary ratings in the model, and if so, in which field and with which vocabulary?
+- **Owner or next step:** a schema decision if the ratings are wanted (a DECISIONS row and a schema field). Until then the ratings stay out of the model, and the not-assessed cells stay unmodelled.
