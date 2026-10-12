@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/source.schema.json
+id: handelsregisterbesluit-2008
+title: Handelsregisterbesluit 2008 (BWBR0024067, version of 30 April 2021)
+type: law
+date: 2021-04-30
+url: https://wetten.overheid.nl/BWBR0024067/2021-04-30/
+publisher: wetten.overheid.nl (Overheid.nl)

@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/source.schema.json
+id: wet-op-de-omzetbelasting-1968
+title: Wet op de omzetbelasting 1968 (BWBR0002629, version of 1 January 2026)
+type: law
+date: 2026-01-01
+url: https://wetten.overheid.nl/BWBR0002629/2026-01-01
+publisher: wetten.overheid.nl (Overheid.nl)
