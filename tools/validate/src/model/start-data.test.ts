@@ -269,14 +269,16 @@ describe('vat-nl and the VAT to EORI chain (DAT-01, DEC-003, DEC-004, DEC-050)',
       (entry) => entry.algorithm === 'elfproef',
     );
     expect(elfproef?.condition).toEqual({ entity_form: 'legal-person' });
-    expect(listOf(vat.relations)).toEqual([
+    const relations = listOf(vat.relations);
+    expect(relations.map((relation) => relation.kind)).toEqual(['contains', 'specializes']);
+    expect(relations[0]).toEqual(
       expect.objectContaining({
         kind: 'contains',
         target: 'rsin',
         condition: { entity_form: 'legal-person' },
         certainty: 'certain',
       }),
-    ]);
+    );
   });
 
   test('no rule has output vat-nl, and none has input vat-nl with output eori (DEC-050, DEC-003)', () => {

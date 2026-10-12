@@ -34,7 +34,7 @@ Every seeded membership, prefix and source was read on its live page while the s
 
 ## Source dates not stated on the page (DEC-042)
 
-- **Item:** the `date` of these registry sources is a DEC-042 fallback, with the kind of date used: kvk-home (JSON-LD `dateModified`), kvk-zoeken (JSON-LD `dateModified`, 2026-01-20 read on 2026-10-12), koop-roo (`DCTERMS.modified`), gs1-nl-gln (read date), dnb-duns (HTTP `Last-Modified`), oin-register (HTTP `Last-Modified`), vies (read date), organisaties-overheid (read date), e-justice-business-registers (HTTP `Last-Modified`), eori-validation (read date), peppol-test-tool (HTTP `Last-Modified`), gs1-verified (read date), dnb-duns-lookup (HTTP `Last-Modified`), commission-eori (JSON-LD `dateModified`, 2026-06-03; the page shows no visible date), ondernemersplein-nummers-voor-de-btw (JSON-LD `dateModified`, 2026-08-04; no visible date found on the page).
+- **Item:** the `date` of these registry sources is a DEC-042 fallback, with the kind of date used: kvk-home (JSON-LD `dateModified`), kvk-zoeken (JSON-LD `dateModified`, 2026-01-20 read on 2026-10-12), koop-roo (`DCTERMS.modified`), gs1-nl-gln (read date), dnb-duns (HTTP `Last-Modified`), oin-register (HTTP `Last-Modified`), vies (read date), organisaties-overheid (read date), e-justice-business-registers (HTTP `Last-Modified`), eori-validation (read date), peppol-test-tool (HTTP `Last-Modified`), gs1-verified (read date), dnb-duns-lookup (HTTP `Last-Modified`), commission-eori (JSON-LD `dateModified`, 2026-06-03; the page shows no visible date), ondernemersplein-nummers-voor-de-btw (JSON-LD `dateModified`, 2026-08-04; no visible date found on the page), and gs1-gln-allocation-rules (month stated, day not stated: the cover reads "Aug 2022"; the date used is 2022-08-01).
 - **Why it is not in the model:** the source schema dates a register-doc by the page's last-updated date, and the schema needs a date for every source. DEC-042 takes the machine-readable modification date, then the date the page was read, when the page states no date. Whether each page also shows a visible version date was not checked for every page.
 - **Open question:** does each page show a version date a person can read (for example "Bijgewerkt" or "Last update")? If it does, that date replaces the fallback.
 - **Owner or next step:** the end-of-phase human check opens each page and confirms or corrects its `date`; the affected files are adjusted if it differs. Later plans append the ids of their own fallback-dated sources to this entry.
@@ -132,15 +132,15 @@ Every seeded membership, prefix and source was read on its live page while the s
 
 ## ICD codes stated only by the Peppol code list
 
-- **Item:** the ICD code `0106` of `kvk-number`, held as `iso6523_icd` at likely from `peppol-code-lists-9-7`, and any other ICD code that only the Peppol Code Lists v9.7 state. The EAS code `0106` is certain from the same list, because the list is the only source for both values.
+- **Item:** the ICD code `0106` of `kvk-number`, held as `iso6523_icd` at likely from `peppol-code-lists-9-7`, and any other ICD code that only the Peppol Code Lists v9.7 state. The ICD code `0088` of `gln` is held the same way, at likely from the same list. The EAS code `0106` is certain from the same list, because the list is the only source for both values.
 - **Why it is not in the model:** it is in the model at likely, not certain. The ISO/IEC 6523 ICD registry (iso6523.info) could not be read on 2026-10-12, because its certificate has expired, so no read source confirms the ICD value beyond the Peppol list. The Peppol list also gives a RegEx note for 0106 (17 digits) that does not match the KVK number's 8 digits; that note is not used.
 - **Open question:** does the ISO/IEC 6523 ICD registry list 0106 as the code of the Netherlands Chamber of Commerce, as the Peppol list states?
 - **Owner or next step:** a human check of the ISO 6523 registry once its certificate is readable (G8). If the registry differs, the `iso6523_icd` statement of `kvk-number` changes or is removed.
 
 ## Levels and roles without a source
 
-- **Item:** the level and role statements that the model omits for lack of a source. `kvk-number` declares neither a level nor a role. `oin` and `fi-number` declare no level either. The `euid` level `legal-entity` is modelled at likely on the workbook's scope text alone, with no primary source behind it.
-- **Why it is not in the model:** no read source states the level of a KVK number or the role it plays. The KVK page says that "your business or organisation" has an 8-digit KVK number, which does not name a level. The research (G13) finds no sourced level or role for `kvk-number`, `oin`, `fi-number`, `vat`, `duns` or `peppol-id`, and a statement without a source is not written (DEC-019). The `roo` level (KOOP page) and the `bsn` level (Wabb Article 1) are sourced and so are not listed. The `euid` level rests on the workbook (DEC-046) and is marked likely for that reason.
+- **Item:** the level and role statements that the model omits for lack of a source. `kvk-number` declares neither a level nor a role. `oin` and `fi-number` declare no level either. `vat` and `peppol-id` declare no level either; the workbook gives `vat` the role `taxpayer` and `peppol-id` the role `e-invoicing-participant`, both at likely (DEC-046). The `euid` level `legal-entity` is modelled at likely on the workbook's scope text alone, with no primary source behind it.
+- **Why it is not in the model:** no read source states the level of a KVK number or the role it plays. The KVK page says that "your business or organisation" has an 8-digit KVK number, which does not name a level. The research (G13) finds no sourced level or role for `kvk-number`, `oin`, `fi-number` or `duns`, and no sourced level for `vat` or `peppol-id`; a statement without a source is not written (DEC-019). The `roo` level (KOOP page) and the `bsn` level (Wabb Article 1) are sourced and so are not listed. The `euid` level rests on the workbook (DEC-046) and is marked likely for that reason.
 - **Open question:** does a read source state whether a KVK number identifies a legal entity or an establishment, and what role the KVK number and the EUID play in a transaction?
 - **Owner or next step:** the owner names a source for each level and role, or accepts the omission. Later plans add their own levels and roles with their sources (G13).
 
@@ -157,3 +157,24 @@ Every seeded membership, prefix and source was read on its live page while the s
 - **Why it is not in the model:** no read source lists the 31 countries. The model's jurisdiction vocabulary has EU and no area that could hold the non-EU participants, and the jurisdictions may not change in Phase 3. The EU jurisdiction is the claim the Directive (Article 16(1)) and the Regulation (Annex point 9) support, because both apply to the registers of the Member States.
 - **Open question:** which countries take part in BRIS, and should the EUID be stated for an EEA or other area, with a new jurisdiction?
 - **Owner or next step:** the owner or the BRIS documentation names the participating countries. A jurisdiction change is a new DECISIONS row, since the vocabulary is not changed in Phase 3.
+
+## IBAN component of the Peppol participant identifier
+
+- **Item:** the workbook lists five components of the Peppol participant identifier, "either one of KvK-nr, OIN, VAT-nr, IBAN, GLN" (format row of the Overview tab), and its example uses the Peppol code 9918, which is the IBAN. The model holds four components of `peppol-id`: 0106 (`kvk-number`), 0190 (`oin`), 9944 (`vat-nl`) and 0088 (`gln`).
+- **Why it is not in the model:** the model has no IBAN scheme and no source for one. The Peppol Code Lists v9.7 give the code 9918 and a RegEx for it, but the IBAN's own definition (ISO 13616) was not read. DEC-036 forbids adding a component by inference from a code, so the IBAN is not added as a component.
+- **Open question:** should the model hold an IBAN scheme, with an IBAN source read, as a fifth explicit component of `peppol-id`?
+- **Owner or next step:** the owner decides whether an IBAN scheme is added. If it is, the IBAN becomes a fifth explicit component with its own source (DEC-036) and this entry is removed.
+
+## Peppol participant identifier wrapper syntax
+
+- **Item:** the pattern `iso6523-actorid-upis::<code>:<value>` of `peppol-id`, with a four-digit code and an alphanumeric value. The wrapper rests on the workbook example of the identifier alone (research assumption A4) and on no OpenPeppol text. The pattern is held at likely.
+- **Why it is not in the model:** the OpenPeppol participant identifier policy, which would state the wrapper and any restriction on the value after the code, was not read. The example in the model is the workbook's own, and no other example is written.
+- **Open question:** does the OpenPeppol policy state the `iso6523-actorid-upis::` wrapper, and does it restrict the value that follows the code?
+- **Owner or next step:** a human check of the OpenPeppol policy on participant identifiers. Until then the pattern stays at likely; if the policy differs, the pattern changes.
+
+## GS1 check digit text
+
+- **Item:** the structure and the check of the GLN in `gln`: 13 digits, the last one a check digit, with the GS1 mod 10 check and weights 1 and 3. The Peppol Code Lists v9.7 entry 0088 states "13 digits including check digits", "RegEx: [0-9]{13}" and "Check Digit: mod10 (weights 1, 3)", so the pattern and the checksum are held at likely from that list.
+- **Why it is not in the model:** the GS1 General Specifications, section 7.9, where GS1 gives the check digit calculation, was not extracted (research assumption A2). The GS1 GLN Allocation Rules Standard 3.0.2 was read; it does not state the length or the check digit. The example pair in the model is synthetic: the value that passes and the value with a wrong check digit were computed for the test.
+- **Open question:** do GS1 General Specifications section 7.9 and the length statement agree with the Peppol entry?
+- **Owner or next step:** the end-of-phase human check (G7) reads GS1 General Specifications section 7.9. If it differs, the pattern or the checksum of `gln` changes.

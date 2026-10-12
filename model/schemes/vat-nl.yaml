@@ -56,6 +56,11 @@ relations:
       entity_form: legal-person
     certainty: certain
     source: ondernemersplein-btw-vermelden
+  - kind: specializes
+    target: vat
+    certainty: certain
+    source: vat-directive-art-215
+    note: "The Dutch btw-identificatienummer is the national form of the generic EU VAT identifier (DEC-034)."
 legal_basis:
   - title: "Wet op de omzetbelasting 1968, Article 1, under g (definition of the btw-identificatienummer)"
     url: "https://wetten.overheid.nl/BWBR0002629/2026-01-01"

@@ -1,0 +1,63 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/scheme.schema.json
+id: vat
+label:
+  en: VAT identification number
+  nl: Btw-identificatienummer
+kind: identifier
+issuer:
+  value: national-tax-authority
+  source: vat-directive-art-215
+  certainty: likely
+jurisdiction: EU
+availability:
+  value: public
+  source: landscape-v1-2
+  certainty: likely
+sources:
+  default: vat-directive-art-215
+scope:
+  en: "required for tax payments"
+context_from:
+  issuing_country:
+    capture:
+      regex: "^([A-Z]{2})"
+      group: 1
+    map: country-prefix
+    certainty: certain
+    source: vat-directive-art-215
+format:
+  patterns:
+    - regex: "^[A-Z]{2}[A-Z0-9]+$"
+      certainty: likely
+      source: vat-directive-art-215
+      note: "A country prefix of ISO 3166 alpha-2 (EL for Greece, XI for Northern Ireland, Article 215) followed by the national part. The national part is not modelled; the national forms are in their own schemes, such as vat-nl."
+  examples_valid:
+    - "NL001469630B01"
+    - "NL000099998B57"
+  examples_invalid:
+    - "nl001469630b01"
+    - "001469630"
+legal_basis:
+  - title: "Council Directive 2006/112/EC on the common system of value added tax, Article 215"
+    eli: "http://data.europa.eu/eli/dir/2006/112/2025-04-14"
+    certainty: certain
+    source: vat-directive-art-215
+    note: "Article 215: each VAT identification number carries a prefix by which the Member State of identification may be identified."
+roles:
+  - value: taxpayer
+    certainty: likely
+    source: landscape-v1-2
+validation_source:
+  label: VIES VAT number validation (European Commission)
+  url: "https://ec.europa.eu/taxation_customs/vies/#/vat-validation"
+  certainty: certain
+  source: vies
+applicability:
+  - jurisdiction: EU
+    status: [issued, recognised]
+    certainty: certain
+    source: vat-directive-art-215
+  - jurisdiction: EU
+    status: [verifiable]
+    certainty: certain
+    source: vies
