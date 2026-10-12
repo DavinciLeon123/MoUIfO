@@ -132,14 +132,14 @@ Every seeded membership, prefix and source was read on its live page while the s
 
 ## ICD codes stated only by the Peppol code list
 
-- **Item:** the ICD code `0106` of `kvk-number`, held as `iso6523_icd` at likely from `peppol-code-lists-9-7`, and any other ICD code that only the Peppol Code Lists v9.7 state. The ICD code `0088` of `gln` is held the same way, at likely from the same list, as are `0060` of `duns` and `0199` of `lei` (plan 03-11). The EAS code `0106` is certain from the same list, because the list is the only source for both values.
+- **Item:** the ICD code `0106` of `kvk-number`, held as `iso6523_icd` at likely from `peppol-code-lists-9-7`, and any other ICD code that only the Peppol Code Lists v9.7 state. The ICD code `0088` of `gln` is held the same way, at likely from the same list, as are `0060` of `duns`, `0199` of `lei` (plan 03-11) and `0208` of `kbo` (plan 03-12). The EAS code `0106` is certain from the same list, because the list is the only source for both values.
 - **Why it is not in the model:** it is in the model at likely, not certain. The ISO/IEC 6523 ICD registry (iso6523.info) could not be read on 2026-10-12, because its certificate has expired, so no read source confirms the ICD value beyond the Peppol list. The Peppol list also gives a RegEx note for 0106 (17 digits) that does not match the KVK number's 8 digits; that note is not used.
 - **Open question:** does the ISO/IEC 6523 ICD registry list 0106 as the code of the Netherlands Chamber of Commerce, as the Peppol list states?
 - **Owner or next step:** a human check of the ISO 6523 registry once its certificate is readable (G8). If the registry differs, the `iso6523_icd` statement of `kvk-number` changes or is removed.
 
 ## Levels and roles without a source
 
-- **Item:** the level and role statements that the model omits for lack of a source. `kvk-number` declares neither a level nor a role. `oin` and `fi-number` declare no level either. `vat` and `peppol-id` declare no level either; the workbook gives `vat` the role `taxpayer` and `peppol-id` the role `e-invoicing-participant`, both at likely (DEC-046). `lei` declares no level either: its Peppol entry speaks of the legal entity whose official name an LEI records, but no level statement is written for it in plan 03-11; its role `financial-counterparty` is the workbook's, at likely. The `euid` level `legal-entity` is modelled at likely on the workbook's scope text alone, with no primary source behind it.
+- **Item:** the level and role statements that the model omits for lack of a source. `kvk-number` declares neither a level nor a role. `oin` and `fi-number` declare no level either. `vat` and `peppol-id` declare no level either; the workbook gives `vat` the role `taxpayer` and `peppol-id` the role `e-invoicing-participant`, both at likely (DEC-046). `lei` declares no level either: its Peppol entry speaks of the legal entity whose official name an LEI records, but no level statement is written for it in plan 03-11; its role `financial-counterparty` is the workbook's, at likely. `kbo` declares neither a level nor a role: the KBO Public Search page states neither (plan 03-12). The `euid` level `legal-entity` is modelled at likely on the workbook's scope text alone, with no primary source behind it.
 - **Why it is not in the model:** no read source states the level of a KVK number or the role it plays. The KVK page says that "your business or organisation" has an 8-digit KVK number, which does not name a level. The research (G13) finds no sourced level or role for `kvk-number`, `oin`, `fi-number` or `duns`, and no sourced level for `vat`, `peppol-id` or `lei`; a statement without a source is not written (DEC-019). The `roo` level (KOOP page) and the `bsn` level (Wabb Article 1) are sourced and so are not listed. The `euid` level rests on the workbook (DEC-046) and is marked likely for that reason.
 - **Open question:** does a read source state whether a KVK number identifies a legal entity or an establishment, and what role the KVK number and the EUID play in a transaction?
 - **Owner or next step:** the owner names a source for each level and role, or accepts the omission. Later plans add their own levels and roles with their sources (G13).
@@ -206,3 +206,31 @@ Every seeded membership, prefix and source was read on its live page while the s
 - **Why it is not in the model:** the usage text is the statement about the nine-digit form, so `none` is modelled at likely on it; the structure text is an older description and is not followed. The D&B page (`dnb-duns`) calls the number "a unique nine-digit identifier" and states no check rule, so it does not settle the question. A `none` entry is a claim that the values carry no check digit; the Peppol list contradicts itself on that claim, so it stays at likely (T-03-26).
 - **Open question:** does a current D&B or Peppol statement say whether the nine-digit D-U-N-S number carries a check digit?
 - **Owner or next step:** a human check of the D&B documentation and of the Peppol entry. If a check digit is confirmed, `duns` gets the matching checksum entry and its examples are re-checked (rule 6). If no source states that the values carry no check digit, the `none` entry is removed.
+
+## KBO equivalent-in relation to the KVK number (DEC-048)
+
+- **Item:** the `equivalent-in` relation from `kbo` to `kvk-number`, which DEC-020 asked for. The model holds `kbo` without it.
+- **Why it is not in the model:** the owner answered on 2026-10-12 (DEC-048) that no readable official Belgian source supports the relation, because the FOD Economie pages are CAPTCHA-gated (see "Official Belgian KBO sources not readable"). The GLEIF registration authority list gives the two registers their codes (RA000463 for the Dutch register, RA000025 for the Belgian one), which shows that both are registers; it does not state that their numbers are equivalent. The workbook's validation note for the KVK number ("B: Kruispuntbank") names the Belgian register without stating an equivalence.
+- **Open question:** does an official Belgian or Dutch source state that a KVK number and a Belgian enterprise number identify the same entity, or that they stand in an equivalent-in relation?
+- **Owner or next step:** the owner names an official source that states the equivalence, or a readable FOD Economie page does so, and records a new DECISIONS row. Then `kbo` gets the relation at the certainty that source supports. Until then the relation stays out.
+
+## Belgian enterprise-number check digit (DEC-048)
+
+- **Item:** the check digit of the Belgian enterprise number. `kbo` has no checksum entry.
+- **Why it is not in the model:** Peppol Code Lists v9.7, entry 0208, states "Check digit: mod97". DEC-048 (owner answer 3, 2026-10-12) records the Belgian rule as 97 minus the first eight digits mod 97. That is a different computation from `iso7064-mod97-10`, the only mod 97 member of the closed checksum vocabulary (`model/vocab/checksum.yaml`). Adding the rule needs a new kernel algorithm, a vocabulary member and a DECISIONS row, which is a Phase 2 contract change, so the owner chose to omit it and log it. The Belgian rule was not read from an official Belgian source, because the FOD Economie pages were not readable.
+- **Open question:** what does an official Belgian source state as the check of the enterprise number, and is it the rule of DEC-048?
+- **Owner or next step:** when an official source is read, the owner decides whether the vocabulary gains a member (a DECISIONS row and a kernel algorithm). Until then `kbo` keeps no checksum entry, so its pattern accepts a ten-digit value whose check digit is wrong.
+
+## Official Belgian KBO sources not readable
+
+- **Item:** the official Belgian sources for `kbo` beyond the KBO Public Search. The FOD Economie information pages on the enterprise number and the Code of Economic Law, Book III, were not read.
+- **Why it is not in the model:** the FOD Economie pages returned a CAPTCHA to the researcher (research G5), and the Code of Economic Law, Book III, was not read. D-13 asks for official Belgian sources, so the `kbo` statements rest on the KBO Public Search (the register's own search page, dated by the database situation it states, 11/10/2026) and on the Peppol Code Lists v9.7, entry 0208, which carries the pattern at likely. `kbo` has no legal basis, because no text read states one.
+- **Open question:** does Book III of the Code of Economic Law, or an FOD Economie information page, state the form, the check digit and the legal basis of the enterprise number, and does it confirm the pattern `^[01][0-9]{9}$`?
+- **Owner or next step:** a human opens the FOD Economie pages and Book III in a browser and checks the pattern, the check digit and the legal basis. A legal basis is added with its own source, and the pattern changes if the reading differs.
+
+## KBO trust and persistence
+
+- **Item:** the trust sub-scores and the persistence events of `kbo`. The scheme holds neither.
+- **Why it is not in the model:** the workbook has no KBO column, so no workbook statement exists for `kbo`. DEC-046 takes trust and persistence only from the workbook, and the Belgian sources read give no trust or persistence statement that could be cited. A score or an event without a source is not written (DEC-019).
+- **Open question:** does an official Belgian source state how the enterprise number behaves on a merger, a split or a move, and how far it is verifiable?
+- **Owner or next step:** the owner names a source for each sub-score and event, or accepts that `kbo` stays without them. A later workbook version with a KBO column would add them at likely (DEC-046).

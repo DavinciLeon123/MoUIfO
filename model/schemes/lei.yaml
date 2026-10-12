@@ -59,6 +59,11 @@ relations:
     certainty: likely
     source: gleif-ra-list
     note: "GLEIF Registration Authorities List v1.9: RA000463 is the Dutch Handelsregister (Kamer van Koophandel), so an LEI record can name the KVK number through its registration authority code."
+  - kind: references
+    target: kbo
+    certainty: likely
+    source: gleif-ra-list
+    note: "GLEIF Registration Authorities List v1.9: RA000025 is the Belgian Crossroads Bank of Enterprises, so an LEI record can name the Belgian enterprise number through its registration authority code (the same reading as RA000463 for kvk-number)."
 mandatory:
   text: "yes, for engaging in financial transactions"
   certainty: likely

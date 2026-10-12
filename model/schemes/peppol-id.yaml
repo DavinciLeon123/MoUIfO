@@ -39,6 +39,11 @@ components:
     certainty: certain
     source: peppol-code-lists-9-7
     note: "GLN, Peppol Code Lists v9.7"
+  - prefix: "0208"
+    scheme: kbo
+    certainty: certain
+    source: peppol-code-lists-9-7
+    note: "BE:EN, Peppol Code Lists v9.7"
 relations:
   - kind: contains
     target: kvk-number
@@ -54,6 +59,10 @@ relations:
     source: peppol-code-lists-9-7
   - kind: contains
     target: gln
+    certainty: certain
+    source: peppol-code-lists-9-7
+  - kind: contains
+    target: kbo
     certainty: certain
     source: peppol-code-lists-9-7
 format:
