@@ -63,6 +63,8 @@ function messageOf(error: ErrorObject): string {
       return `must be ${Array.isArray(params.type) ? params.type.join(' or ') : String(params.type)}`;
     case 'dependentRequired':
       return `property "${String(params.missingProperty)}" is required when "${String(params.property)}" is present`;
+    case 'false schema':
+      return 'this property is not allowed for this kind';
     case 'oneOf':
       return 'must match exactly one allowed form';
     case 'anyOf':
@@ -85,7 +87,7 @@ function toProblem(parsed: ParsedFile, error: ErrorObject): Problem {
   const { line, column } = positionOf(
     parsed,
     error.instancePath,
-    error.keyword === 'required' ? 'key' : 'value',
+    error.keyword === 'required' || error.keyword === 'false schema' ? 'key' : 'value',
   );
   return { file: parsed.path, line, column, message: messageOf(error) };
 }

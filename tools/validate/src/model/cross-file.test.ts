@@ -212,7 +212,7 @@ describe('authority classes and instances', () => {
       {
         file: CLASS,
         ...where(file.text, 'instance_of'),
-        message: 'this property is not allowed for this kind of authority',
+        message: 'this property is not allowed for this kind',
       },
     ]);
   });
