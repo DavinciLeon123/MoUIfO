@@ -570,7 +570,7 @@ describe('trust sub-scores (DAT-08)', () => {
     ['legal_basis: 3', 'legal_basis: 1', 'must be <= 2'],
     ['legal_basis: -1', 'legal_basis: 1', 'must be >= 0'],
     ['verifiability: 2', 'verifiability: 0', 'must be <= 1'],
-    ['crosswalks: 1.5', 'crosswalks: 1', 'must be integer'],
+    ['crosswalks: 0.5', 'crosswalks: 1', 'must be integer or null'],
     ['lifecycle: "high"', 'lifecycle: null', 'must be integer or null'],
   ] as const)('%s fails at the value', ([bad, good, message]) => {
     const file = trust(FULL.replace(good, bad));

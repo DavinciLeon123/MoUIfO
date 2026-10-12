@@ -256,6 +256,47 @@
       "else": {
         "$ref": "#/$defs/icd-code"
       }
+    },
+    "condition": {
+      "description": "When a statement applies (SPEC 5.3): a closed set of keys, at least one. issuing_country may be negated with a leading ! (for example \"!NL\"); entity_form and context come from their vocabularies.",
+      "type": "object",
+      "properties": {
+        "issuing_country": {
+          "type": "string",
+          "pattern": "^!?[A-Z]{2}$",
+          "uioRef": "jurisdiction-negatable"
+        },
+        "entity_form": {
+          "type": "string",
+          "uioRef": "vocab:entity-form"
+        },
+        "context": {
+          "type": "string",
+          "uioRef": "vocab:condition-context"
+        }
+      },
+      "minProperties": 1,
+      "unevaluatedProperties": false
+    },
+    "statement": {
+      "description": "Base of every scheme statement: its own source and certainty (DEC-029), an optional condition, and an optional free-text note covered by that source (D-09). The closing unevaluatedProperties lives in the schema that uses this base.",
+      "type": "object",
+      "properties": {
+        "condition": {
+          "$ref": "#/$defs/condition"
+        },
+        "certainty": {
+          "$ref": "#/$defs/certainty-ref"
+        },
+        "source": {
+          "$ref": "#/$defs/source-ref"
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": ["certainty", "source"]
     }
   }
 }

@@ -47,6 +47,201 @@
     },
     "notes": {
       "$ref": "common.schema.json#/$defs/text"
+    },
+    "level": {
+      "description": "Levels (SPEC 5.1 level vocabulary).",
+      "type": "array",
+      "items": {
+        "description": "A level this scheme identifies. Carries its own source and certainty (DEC-029).",
+        "$ref": "common.schema.json#/$defs/statement",
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "uioRef": "vocab:level"
+          }
+        },
+        "required": ["value"],
+        "unevaluatedProperties": false
+      }
+    },
+    "roles": {
+      "description": "Roles (role vocabulary).",
+      "type": "array",
+      "items": {
+        "description": "A role in which the identifier is used. Carries its own source and certainty (DEC-029).",
+        "$ref": "common.schema.json#/$defs/statement",
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "uioRef": "vocab:role"
+          }
+        },
+        "required": ["value"],
+        "unevaluatedProperties": false
+      }
+    },
+    "applicability": {
+      "description": "Applicability per jurisdiction.",
+      "type": "array",
+      "items": {
+        "description": "Where the identifier is issued, recognised or verifiable. Carries its own source and certainty (DEC-029).",
+        "$ref": "common.schema.json#/$defs/statement",
+        "type": "object",
+        "properties": {
+          "jurisdiction": {
+            "$ref": "common.schema.json#/$defs/jurisdiction-ref"
+          },
+          "status": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "uioRef": "vocab:applicability-status"
+            }
+          }
+        },
+        "required": ["jurisdiction", "status"],
+        "unevaluatedProperties": false
+      }
+    },
+    "persistence": {
+      "description": "Persistence behaviour per event.",
+      "type": "array",
+      "items": {
+        "description": "What happens to the identifier on a life-cycle event. Carries its own source and certainty (DEC-029).",
+        "$ref": "common.schema.json#/$defs/statement",
+        "type": "object",
+        "properties": {
+          "event": {
+            "type": "string",
+            "uioRef": "vocab:persistence-event"
+          },
+          "behaviour": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": ["event", "behaviour"],
+        "unevaluatedProperties": false
+      }
+    },
+    "trust": {
+      "description": "The five trust sub-scores in their workbook ranges (legal_basis 0..2, the others 0..1), each null when not assessed (DAT-08). Carries its own source and certainty (DEC-029).",
+      "$ref": "common.schema.json#/$defs/statement",
+      "type": "object",
+      "properties": {
+        "legal_basis": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "maximum": 2
+        },
+        "registration_quality": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "verifiability": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "crosswalks": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "lifecycle": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "legal_basis",
+        "registration_quality",
+        "verifiability",
+        "crosswalks",
+        "lifecycle"
+      ],
+      "unevaluatedProperties": false
+    },
+    "relations": {
+      "description": "Relations to other schemes.",
+      "type": "array",
+      "items": {
+        "description": "A relation to another scheme. Carries its own source and certainty (DEC-029).",
+        "$ref": "common.schema.json#/$defs/statement",
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "uioRef": "vocab:relation-kind"
+          },
+          "target": {
+            "$ref": "common.schema.json#/$defs/scheme-ref"
+          }
+        },
+        "required": ["kind", "target"],
+        "unevaluatedProperties": false
+      }
+    },
+    "legal_basis": {
+      "description": "Legal bases.",
+      "type": "array",
+      "items": {
+        "description": "A legal basis. Carries its own source and certainty (DEC-029).",
+        "$ref": "common.schema.json#/$defs/statement",
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "eli": {
+            "type": "string",
+            "format": "uri"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "required": ["title"],
+        "unevaluatedProperties": false
+      }
+    },
+    "validation_source": {
+      "description": "Where an identifier can be checked. Carries its own source and certainty (DEC-029).",
+      "$ref": "common.schema.json#/$defs/statement",
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": ["label", "url"],
+      "unevaluatedProperties": false
+    },
+    "mandatory": {
+      "description": "When the identifier is mandatory. Carries its own source and certainty (DEC-029).",
+      "$ref": "common.schema.json#/$defs/statement",
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": ["text"],
+      "unevaluatedProperties": false
     }
   },
   "required": ["id", "label", "kind", "issuer", "jurisdiction", "sources"],
