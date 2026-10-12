@@ -160,3 +160,202 @@ describe('check 4: examples run through the engine format check (SPEC 5.6, DEC-0
     ).toBe(false);
   });
 });
+
+/** Like `where`, but searching only after the first occurrence of `marker`. */
+function whereAfter(
+  text: string,
+  marker: string,
+  needle: string,
+): { line: number; column: number } {
+  const start = text.indexOf(marker);
+  expect(start).toBeGreaterThanOrEqual(0);
+  const index = text.indexOf(needle, start);
+  expect(index).toBeGreaterThanOrEqual(0);
+  const before = text.slice(0, index).split('\n');
+  return { line: before.length, column: (before.at(-1) ?? '').length + 1 };
+}
+
+const VAT_FORMAT = `  patterns:\n    - ${VAT_PATTERN}\n${VAT_CHECKSUM}`;
+const RULE_OUT = 'NL001469630B01';
+const ADD_NL_B01 = '[{ add_prefix: "NL" }, { add_suffix: "B01" }]';
+
+const ruleBlock = (
+  transform: string,
+  example = `{ in: "${BARE_CORE}", out: "${RULE_OUT}" }`,
+  output = 'fixture-scheme',
+): string =>
+  `rules:\n  - id: fixture-rule\n    input: fixture-target\n    output: ${output}\n    transform: ${transform}\n    certainty: likely\n    source: fixture-source\n    examples:\n      - ${example}\n`;
+
+/** A scheme with the vat-nl-style format (or `format`) followed by one rule. */
+const withRule = (rules: string, format: string | undefined = VAT_FORMAT): ModelFile =>
+  schemeFixture(
+    'fixture-scheme',
+    minimalSchemeBody(
+      'fixture-scheme',
+      {},
+      `${format === undefined ? '' : `format:\n${format}`}${rules}`,
+    ),
+  );
+
+describe('check 5: rule examples run through the transform and the target format (SPEC 5.3, 5.6)', () => {
+  test('a rule whose example output equals the transform result and passes the format gives no problem', () => {
+    expect(check(withRule(ruleBlock(ADD_NL_B01)))).toEqual([]);
+  });
+
+  test('an example output that differs from the transform result is reported at its out', () => {
+    const file = withRule(ruleBlock(ADD_NL_B01, `{ in: "${BARE_CORE}", out: "NL001469630B02" }`));
+    const problems = check(file);
+    expect(problems).toHaveLength(1);
+    expect(problems[0]).toMatchObject({
+      file: SCHEME,
+      ...whereAfter(file.text, 'examples:', '"NL001469630B02"'),
+    });
+    expect(problems[0]?.message).toContain('rule example gives a different output');
+    expect(problems[0]?.message).toContain('rules[0].examples[0]');
+    noEcho(problems, [BARE_CORE, 'NL001469630B02', RULE_OUT]);
+  });
+
+  test('a transform that gives no result for the example is reported at its out', () => {
+    const file = withRule(ruleBlock('[{ strip_prefix: 20 }]'));
+    const problems = check(file);
+    expect(problems).toHaveLength(1);
+    expect(problems[0]).toMatchObject({
+      file: SCHEME,
+      ...whereAfter(file.text, 'examples:', `"${RULE_OUT}"`),
+    });
+    expect(problems[0]?.message).toContain('rule example gives no result');
+    noEcho(problems, [BARE_CORE, RULE_OUT]);
+  });
+
+  test('an output that fails the output scheme format is reported, naming that scheme (no conclusion)', () => {
+    const file = withRule(
+      ruleBlock(
+        '[{ add_prefix: "NL" }, { add_suffix: "X" }]',
+        `{ in: "${BARE_CORE}", out: "NL001469630X" }`,
+      ),
+    );
+    const problems = check(file);
+    expect(problems).toHaveLength(1);
+    expect(problems[0]).toMatchObject({
+      file: SCHEME,
+      ...whereAfter(file.text, 'examples:', '"NL001469630X"'),
+    });
+    expect(problems[0]?.message).toContain('rule output fails the format of fixture-scheme');
+    noEcho(problems, [BARE_CORE, 'NL001469630X']);
+  });
+
+  test('an output scheme without a format is checked by equality only', () => {
+    const file = withRule(
+      ruleBlock(
+        '[{ add_prefix: "NL" }]',
+        `{ in: "${BARE_CORE}", out: "NL${BARE_CORE}" }`,
+        'fixture-target',
+      ),
+      undefined,
+    );
+    expect(check(file)).toEqual([]);
+    const wrong = withRule(
+      ruleBlock('[{ add_prefix: "NL" }]', `{ in: "${BARE_CORE}", out: "XX" }`, 'fixture-target'),
+      undefined,
+    );
+    const problems = check(wrong);
+    expect(problems).toHaveLength(1);
+    expect(problems[0]?.message).toContain('rule example gives a different output');
+  });
+
+  test('a rule whose output scheme is missing is skipped: only the reference error remains', () => {
+    const problems = check(withRule(ruleBlock(ADD_NL_B01, undefined, 'no-such-scheme')));
+    expect(problems).toHaveLength(1);
+    expect(problems[0]?.message).toContain('no-such-scheme');
+  });
+});
+
+describe('compile checks: every transform, over list, pattern and capture the engine will run', () => {
+  test('a template with an unknown placeholder is reported at its transform step', () => {
+    const file = withRule(ruleBlock('[{ template: "NL{bogus}" }]'));
+    const problems = check(file);
+    expect(problems).toHaveLength(1);
+    expect(problems[0]).toMatchObject({
+      file: SCHEME,
+      ...whereAfter(file.text, 'transform:', '{ template'),
+    });
+  });
+
+  test('a capture index above the capture group count is reported at the template step', () => {
+    const file = withRule(
+      ruleBlock('[{ capture: { regex: "^([0-9]{4})", group: 1 } }, { template: "{capture:2}" }]'),
+    );
+    const problems = check(file);
+    expect(problems).toHaveLength(1);
+    expect(problems[0]).toMatchObject({
+      file: SCHEME,
+      ...whereAfter(file.text, 'transform:', '{ template'),
+    });
+  });
+
+  test('a rule that does not compile has its examples skipped (one problem, not a cascade)', () => {
+    const problems = check(withRule(ruleBlock('[{ template: "NL{bogus}" }]')));
+    expect(problems.map((problem) => problem.message)).toEqual([
+      expect.not.stringContaining('rule example'),
+    ]);
+  });
+
+  test('an over step with a bad template is reported at the over step', () => {
+    const file = withFormat(
+      `  patterns:\n    - ${VAT_PATTERN}\n  checksum:\n    - { algorithm: elfproef, over: [{ template: "{bogus}" }], certainty: certain, source: fixture-source }\n`,
+    );
+    const problems = check(file);
+    expect(problems).toHaveLength(1);
+    expect(problems[0]).toMatchObject({
+      file: SCHEME,
+      ...whereAfter(file.text, 'over:', '{ template'),
+    });
+  });
+
+  test('a pattern regex that does not compile is reported at its regex', () => {
+    const file = withFormat(`  patterns:\n    - { regex: "([", ${OK} }\n  examples_valid: ["x"]\n`);
+    const problems = check(file);
+    expect(problems).toHaveLength(1);
+    expect(problems[0]).toMatchObject({ file: SCHEME, ...where(file.text, '"(["') });
+  });
+
+  test('a context_from capture regex that does not compile is reported at the regex', () => {
+    const file = schemeFixture(
+      'fixture-scheme',
+      minimalSchemeBody(
+        'fixture-scheme',
+        {},
+        `context_from:\n  issuing_country:\n    capture: { regex: "([", group: 1 }\n    map: country-prefix\n    certainty: certain\n    source: fixture-source\n`,
+      ),
+    );
+    const problems = check(file);
+    expect(problems).toHaveLength(1);
+    expect(problems[0]).toMatchObject({ file: SCHEME, ...where(file.text, '"(["') });
+  });
+
+  test('a context_from group above the regex group count is reported at the group', () => {
+    const file = schemeFixture(
+      'fixture-scheme',
+      minimalSchemeBody(
+        'fixture-scheme',
+        {},
+        `context_from:\n  issuing_country:\n    capture: { regex: "^([A-Z]{2})", group: 2 }\n    map: country-prefix\n    certainty: certain\n    source: fixture-source\n`,
+      ),
+    );
+    const problems = check(file);
+    expect(problems).toHaveLength(1);
+    expect(problems[0]).toMatchObject({ file: SCHEME, ...where(file.text, '2 }') });
+  });
+
+  test('an unmapped prefix is no problem: context_from is compiled, never run on examples', () => {
+    const file = schemeFixture(
+      'fixture-scheme',
+      minimalSchemeBody(
+        'fixture-scheme',
+        {},
+        `format:\n  patterns:\n    - { regex: "^[A-Z]{2}[0-9]{4}$", ${OK} }\n  examples_valid: ["DE1234"]\ncontext_from:\n  issuing_country:\n    capture: { regex: "^([A-Z]{2})", group: 1 }\n    map: country-prefix\n    certainty: certain\n    source: fixture-source\n`,
+      ),
+    );
+    expect(check(file)).toEqual([]);
+  });
+});
