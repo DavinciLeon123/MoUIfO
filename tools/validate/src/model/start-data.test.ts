@@ -527,7 +527,7 @@ describe('euid with the Dutch form at possible, its EU legal basis and the five 
     );
   });
 
-  test('model/schemes holds exactly the scheme files written by plans 03-06 to 03-11', () => {
+  test('model/schemes holds exactly the scheme files written by plans 03-06 to 03-12 (sixteen, DEC-033)', () => {
     const files = readdirSync(join(REPO_ROOT, 'model', 'schemes'))
       .filter((name) => name.endsWith('.yaml'))
       .sort();
@@ -538,6 +538,7 @@ describe('euid with the Dutch form at possible, its EU legal basis and the five 
       'euid.yaml',
       'fi-number.yaml',
       'gln.yaml',
+      'kbo.yaml',
       'kvk-establishment-number.yaml',
       'kvk-number.yaml',
       'lei.yaml',
@@ -1285,7 +1286,7 @@ describe('duns, the D-U-N-S number with its Peppol check statement, and the last
     );
   });
 
-  test('model/schemes holds exactly the 15 scheme ids of the workbook snapshot (kbo follows in plan 03-12)', () => {
+  test('model/schemes holds the 15 scheme ids of the workbook snapshot plus kbo, which the workbook does not carry (DEC-033)', () => {
     const snapshot = JSON.parse(read('sources/landscape-snapshot-v1.2.json')) as {
       schemes: Record<string, unknown>;
     };
@@ -1293,8 +1294,8 @@ describe('duns, the D-U-N-S number with its Peppol check statement, and the last
       .filter((name) => name.endsWith('.yaml'))
       .map((name) => name.replace(/\.yaml$/, ''))
       .sort();
-    expect(ids).toHaveLength(15);
-    expect(ids).toEqual(Object.keys(snapshot.schemes).sort());
+    expect(ids).toHaveLength(16);
+    expect(ids).toEqual([...Object.keys(snapshot.schemes), 'kbo'].sort());
   });
 });
 
@@ -1352,5 +1353,112 @@ describe('docs/gaps.md entries of plan 03-11 (DAT-02, DAT-05, DEC-019, DEC-049)'
     expect(section).toContain('one LEI column');
     expect(section).toContain('DEC-023');
     expect(section).toContain('medium');
+  });
+});
+
+describe('kbo, the Belgian enterprise number as a light scheme (DAT-03, plan 03-12, DEC-020, DEC-033, DEC-045, DEC-048)', () => {
+  test('kbo is a light identifier of jurisdiction BE, issued by the fod-economie instance, with its default source the KBO Public Search', () => {
+    const kbo = scheme('kbo');
+    expect(kbo.id).toBe('kbo');
+    expect(kbo.kind).toBe('identifier');
+    expect(kbo.issuer).toBe('fod-economie');
+    expect(kbo.jurisdiction).toBe('BE');
+    expect(kbo.availability).toBe('public');
+    expect(kbo.sources).toEqual({ default: 'kbo-public-search' });
+  });
+
+  test('the issuer fod-economie is an instance of national-business-register in BE, sourced to the KBO Public Search at certain (DEC-045)', () => {
+    expect(load('model/authorities/fod-economie.yaml')).toEqual(
+      expect.objectContaining({
+        id: 'fod-economie',
+        kind: 'instance',
+        instance_of: 'national-business-register',
+        jurisdiction: 'BE',
+        source: 'kbo-public-search',
+        certainty: 'certain',
+      }),
+    );
+  });
+
+  test('the KBO Public Search is a register-doc at its URL, dated 2026-10-11 from the database situation the page states', () => {
+    expect(load('model/sources/kbo-public-search.yaml')).toEqual(
+      expect.objectContaining({
+        id: 'kbo-public-search',
+        type: 'register-doc',
+        date: '2026-10-11',
+        url: 'https://kbopub.economie.fgov.be/kbopub/zoeknummerform.html?lang=en',
+      }),
+    );
+  });
+
+  test('its pattern is likely from the Peppol list entry 0208, and the format has no checksum entry (DEC-048)', () => {
+    const format = scheme('kbo').format as Json;
+    expect(format.patterns).toEqual([
+      expect.objectContaining({
+        regex: '^[01][0-9]{9}$',
+        certainty: 'likely',
+        source: 'peppol-code-lists-9-7',
+      }),
+    ]);
+    expect(format.checksum).toBeUndefined();
+  });
+
+  test('accepts a ten-digit value that starts with 0 or 1, and rejects a leading 2 and the two invalid examples of the file', () => {
+    const format = formatOf(scheme('kbo'));
+    expect(checkValue(format, '1' + '0'.repeat(9)).accepted).toBe(true);
+    expect(checkValue(format, '2' + '0'.repeat(9)).accepted).toBe(false);
+    expect(checkValue(format, '2123456789').accepted).toBe(false);
+    expect(checkValue(format, '01234567').accepted).toBe(false);
+  });
+
+  test('the ICD 0208 is likely and the EAS 0208 is certain, both long form from the Peppol list (the default source is the KBO page)', () => {
+    const kbo = scheme('kbo');
+    expect(kbo.iso6523_icd).toEqual({
+      value: '0208',
+      source: 'peppol-code-lists-9-7',
+      certainty: 'likely',
+    });
+    expect(kbo.peppol_eas).toEqual({
+      value: '0208',
+      source: 'peppol-code-lists-9-7',
+      certainty: 'certain',
+    });
+  });
+
+  test('its validation source is the KBO Public Search, certain; applicability is BE issued and BE verifiable, both certain from that page', () => {
+    const kbo = scheme('kbo');
+    expect(kbo.validation_source).toEqual({
+      label: 'KBO Public Search (FOD Economie)',
+      url: 'https://kbopub.economie.fgov.be/kbopub/zoeknummerform.html?lang=en',
+      certainty: 'certain',
+      source: 'kbo-public-search',
+    });
+    expect(listOf(kbo.applicability)).toEqual([
+      expect.objectContaining({
+        jurisdiction: 'BE',
+        status: ['issued'],
+        certainty: 'certain',
+        source: 'kbo-public-search',
+      }),
+      expect.objectContaining({
+        jurisdiction: 'BE',
+        status: ['verifiable'],
+        certainty: 'certain',
+        source: 'kbo-public-search',
+      }),
+    ]);
+  });
+
+  test('no scheme file holds an equivalent-in relation, and kbo declares no relation of its own (DEC-048, T-03-18)', () => {
+    const relations = readdirSync(join(REPO_ROOT, 'model', 'schemes'))
+      .filter((name) => name.endsWith('.yaml'))
+      .flatMap((name) => listOf(load(`model/schemes/${name}`).relations));
+    expect(relations.some((relation) => relation.kind === 'equivalent-in')).toBe(false);
+    expect(scheme('kbo').relations).toBeUndefined();
+  });
+
+  test('kbo has no trust and no persistence, since the workbook has no KBO column (plan 03-12)', () => {
+    expect(scheme('kbo').trust).toBeUndefined();
+    expect(scheme('kbo').persistence).toBeUndefined();
   });
 });
