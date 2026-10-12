@@ -66,11 +66,11 @@ rules:
   - id: fixture-rule
     input: fixture-target
     output: fixture-scheme
-    transform: [{ add_prefix: "NL" }]
+    transform: [{ add_prefix: "NL" }, { add_suffix: "B01" }]
     certainty: likely
     source: fixture-source
     examples:
-      - { in: "001469630", out: "NL001469630" }
+      - { in: "001469630", out: "NL001469630B01" }
 `;
 
 describe('a vat-nl-style scheme (D-18, D-21, D-22, D-23)', () => {

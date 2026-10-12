@@ -1,4 +1,9 @@
-import { compileFormat, type FormatCompileResult } from '@uio/engine';
+import {
+  compileFormat,
+  compilePattern,
+  compileTransform,
+  type FormatCompileResult,
+} from '@uio/engine';
 import type { Problem } from 'uio-config';
 import { type ParsedFile, positionOf } from './load.ts';
 
@@ -114,6 +119,100 @@ export function checkExamples(
         ),
       );
     });
+  }
+  return problems;
+}
+
+/**
+ * SPEC 5.6 check 5 and 5.3: every rule's transform is compiled by the engine (a step it cannot
+ * compile is a problem at `/rules/<i>/transform/<step>`), then each example `in` is run through it.
+ * The result is validated against the output scheme's format when that scheme has a compiled one
+ * (no format means only the comparison with `out` applies); a missing result, a result outside the
+ * format or a result different from `out` is a problem at the example's `out`. A rule whose output
+ * scheme is missing or structurally invalid is skipped: its own reference or schema error explains
+ * it.
+ */
+export function checkRuleExamples(
+  schemes: readonly ParsedFile[],
+  compiled: ReadonlyMap<string, CompiledFormat>,
+): Problem[] {
+  const problems: Problem[] = [];
+  const known = new Set(schemes.flatMap((parsed) => schemeIdOf(parsed) ?? []));
+  for (const parsed of schemes) {
+    const id = schemeIdOf(parsed);
+    const rules = asRecord(parsed.data)?.rules;
+    if (id === undefined || !Array.isArray(rules)) continue;
+    rules.forEach((candidate, index) => {
+      const rule = asRecord(candidate);
+      if (rule === undefined || !Array.isArray(rule.transform)) return;
+      const transform = compileTransform(rule.transform);
+      if (!transform.ok) {
+        for (const error of transform.errors) {
+          problems.push(
+            problemAt(parsed, `/rules/${index}/transform/${error.step}`, error.message),
+          );
+        }
+        return;
+      }
+      const output = typeof rule.output === 'string' ? rule.output : undefined;
+      if (output === undefined || !known.has(output)) return;
+      const format = compiled.get(output);
+      const examples = Array.isArray(rule.examples) ? rule.examples : [];
+      examples.forEach((candidateExample, exampleIndex) => {
+        const example = asRecord(candidateExample);
+        if (typeof example?.in !== 'string') return;
+        const where = `rules[${index}].examples[${exampleIndex}] of ${id}`;
+        const report = (message: string): void => {
+          problems.push(
+            problemAt(
+              parsed,
+              `/rules/${index}/examples/${exampleIndex}/out`,
+              `${message} (${where})`,
+            ),
+          );
+        };
+        const result = transform.run(example.in);
+        if (result === null) {
+          report('rule example gives no result');
+          return;
+        }
+        if (format !== undefined && !format.check(result).accepted) {
+          report(`rule output fails the format of ${output}`);
+        }
+        if (result !== example.out) report('rule example gives a different output');
+      });
+    });
+  }
+  return problems;
+}
+
+/**
+ * D-18: a `context_from` capture regex must compile and its `group` must not exceed the regex's
+ * group count (the engine reports it, the validator never runs the capture on examples: an
+ * unmapped prefix at run time gives no context).
+ */
+export function checkContextFrom(schemes: readonly ParsedFile[]): Problem[] {
+  const problems: Problem[] = [];
+  for (const parsed of schemes) {
+    const contexts = asRecord(asRecord(parsed.data)?.context_from);
+    if (contexts === undefined) continue;
+    for (const [name, candidate] of Object.entries(contexts)) {
+      const capture = asRecord(asRecord(candidate)?.capture);
+      if (typeof capture?.regex !== 'string') continue;
+      const base = `/context_from/${name}/capture`;
+      const regex = compilePattern(capture.regex);
+      if (!regex.ok) {
+        problems.push(problemAt(parsed, `${base}/regex`, regex.message));
+      } else if (typeof capture.group === 'number' && capture.group > regex.groups) {
+        problems.push(
+          problemAt(
+            parsed,
+            `${base}/group`,
+            `group ${capture.group} is above the ${regex.groups} capture group(s) of the regex`,
+          ),
+        );
+      }
+    }
   }
   return problems;
 }

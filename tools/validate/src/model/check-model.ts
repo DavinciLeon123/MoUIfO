@@ -1,6 +1,6 @@
 import type { Problem } from 'uio-config';
 import { checkPartOf, uncitedSourceWarnings } from './cross-file.ts';
-import { checkExamples, checkFormats } from './examples.ts';
+import { checkContextFrom, checkExamples, checkFormats, checkRuleExamples } from './examples.ts';
 import {
   discoverModelFiles,
   type ModelFile,
@@ -85,7 +85,8 @@ export function runModelChecks(files: readonly ModelFile[]): {
   const inDirectory = (directory: string): ParsedFile[] =>
     clean.map(({ parsed }) => parsed).filter(({ path }) => path.startsWith(`model/${directory}/`));
   // Passes D and E run on structurally valid scheme files only: formats compile through the engine,
-  // then the examples run through the compiled format.
+  // then the examples and the rule examples run through the compiled formats and transforms, and the
+  // context_from captures are compiled.
   const schemes = inDirectory('schemes');
   const formats = checkFormats(schemes);
   problems.push(
@@ -93,6 +94,8 @@ export function runModelChecks(files: readonly ModelFile[]): {
     ...checkSchemes(schemes),
     ...formats.problems,
     ...checkExamples(schemes, formats.compiled),
+    ...checkRuleExamples(schemes, formats.compiled),
+    ...checkContextFrom(schemes),
     ...uncitedSourceWarnings(inDirectory('sources'), cited),
   );
   return { problems, cited };
