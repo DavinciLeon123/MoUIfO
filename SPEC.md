@@ -265,6 +265,8 @@ A rule is either a **transformation** of a value, or an **if-then rule** over pr
 
 > Amended by DECISIONS.md DEC-030: every source needs `id`, `title`, `date` and `type`, plus the fields of its type (`eli` or `url` for law, `publisher` and `reference` for a standard, `url` for a register document, `method` for an analysis, `role` and `organisation` for an expert).
 
+> Amended by DECISIONS.md DEC-042: a source whose page states no date takes the page's machine-readable modification date, or else the date it was read, and is listed in `docs/gaps.md`.
+
 - Every statement (level, role, applicability, relation, rule, pattern, trust, persistence) has `source` (id in `model/sources/`) and `certainty` (default `certain` if it follows from law or a standard; otherwise fill in explicitly).
 - `model/sources/<id>.yaml`: `id`, `title`, `url?`, `publisher?`, `date`, `type` (`law` | `standard` | `register-doc` | `expert` | `analysis`). For an expert: role and organisation, never a personal name without consent.
 
