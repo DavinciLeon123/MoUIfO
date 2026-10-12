@@ -1,12 +1,13 @@
 import { CHECKSUMS, type ChecksumId } from './checksum/index.ts';
-import { compilePattern, compileTransform } from './transform.ts';
+import { compileTransform, compileWholeValuePattern } from './transform.ts';
 
 /**
  * The format check of SPEC §5.6 check 4 (DEC-004, D-21, D-23, D-24). A value is accepted when some
- * pattern matches AND (the checksum list is absent or empty OR at least one checksum entry passes).
- * Checksum entries are any-of: the failing entries do not matter once one passes. An entry may first
- * select part of the value with `over` (a transform); when `over` gives no value the entry is
- * `not-applicable` and does not pass.
+ * pattern matches the whole value AND (the checksum list is absent or empty OR at least one checksum
+ * entry passes). A format without patterns accepts nothing by design (DEC-039). Checksum entries are
+ * any-of: the failing entries do not matter once one passes. An entry may first select part of the
+ * value with `over` (a transform); when `over` gives no value the entry is `not-applicable` and does
+ * not pass.
  */
 export type FormatSpec = {
   patterns?: readonly { regex: string }[];
@@ -39,7 +40,7 @@ export function compileFormat(spec: FormatSpec): FormatCompileResult {
 
   const patterns: RegExp[] = [];
   (spec.patterns ?? []).forEach((pattern, index) => {
-    const result = compilePattern(pattern.regex);
+    const result = compileWholeValuePattern(pattern.regex);
     if (result.ok) patterns.push(result.regex);
     else errors.push({ path: `/patterns/${index}/regex`, message: result.message });
   });

@@ -252,6 +252,7 @@
             "type": "object",
             "properties": {
               "regex": {
+                "description": "A regular expression the whole value must match. The engine anchors it, so a start and an end anchor may be written but are not needed. The capture regexes of over and context_from search the value instead, because they extract part of it.",
                 "type": "string",
                 "minLength": 1
               }

@@ -10,6 +10,8 @@
  *   (0 is the whole match). No match, or a group that did not take part, gives no result (null).
  * - `{capture:n}` in a template is group n of the most recent preceding `capture` step.
  * - Every pattern and capture regex compiles with the single flag `u` (REGEX_FLAGS).
+ * - A format pattern matches the whole value (compileWholeValuePattern); a capture regex, a checksum
+ *   `over` list and `context_from` search the value and extract part of it.
  * - A step that gives null makes the whole transform give null (SPEC: no conclusion).
  * - `strip_prefix: n` and `strip_suffix: n` (integer, 0 or more) drop n characters from the start or
  *   the end; n equal to the length gives the empty string, n above the length gives null, n = 0
@@ -58,6 +60,27 @@ export function compilePattern(source: string): PatternResult {
   } catch (error) {
     return { ok: false, message: error instanceof Error ? error.message : String(error) };
   }
+}
+
+/**
+ * Compile a model regex so that it matches the whole value (WR-05, DEC-039): the compiled regex is
+ * wrapped as a non-capturing group between a start and an end anchor, with REGEX_FLAGS and no `m`
+ * flag, so the end anchor is the end of the input and not of a line. The group keeps an alternation
+ * such as `a|bc` from escaping the anchors, and the group count is the one of `compilePattern`.
+ *
+ * The wrapper is built from the `source` of the already compiled regex and never from the caller's
+ * string: a string that is only valid because the wrapper closes it (an unbalanced parenthesis such
+ * as `a)|(b`) fails in `compilePattern` and never reaches the wrapper, and `source` is the escaped
+ * form that compiles to the same regex. An author-written start or end anchor stays harmless.
+ */
+export function compileWholeValuePattern(source: string): PatternResult {
+  const pattern = compilePattern(source);
+  if (!pattern.ok) return pattern;
+  return {
+    ok: true,
+    regex: new RegExp(`^(?:${pattern.regex.source})$`, REGEX_FLAGS),
+    groups: pattern.groups,
+  };
 }
 
 export type TransformError = { step: number; message: string };

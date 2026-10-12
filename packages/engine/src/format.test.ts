@@ -111,6 +111,41 @@ describe('empty edge', () => {
   });
 });
 
+describe('whole-value matching (WR-05, DEC-039): a pattern matches the whole value, not a part of it', () => {
+  const acceptsOnly = (regex: string, accepted: readonly string[], rejected: readonly string[]) => {
+    const format = compiled({ patterns: [{ regex }] });
+    for (const value of accepted) expect(format.check(value).accepted).toBe(true);
+    for (const value of rejected) expect(format.check(value).accepted).toBe(false);
+  };
+
+  test.for([
+    ['an unanchored class', '[0-9]{3}', ['123'], ['abc123xyz', '1234', '12', '']],
+    ['an alternation is grouped before anchoring', 'a|bc', ['a', 'bc'], ['ab', 'abc', 'xbc', 'ca']],
+    ['the end is the end of the input, not of a line', 'abc', ['abc'], ['abc\n', '\nabc']],
+    ['an anchored pattern behaves as before', '^[0-9]{3}$', ['123'], ['1234', 'x123']],
+    ['the empty regex accepts only the empty value', '', [''], ['a', ' ']],
+    ['a slash in the source still matches', 'a/b', ['a/b'], ['xa/b', 'a/bx']],
+  ] as const)('%s', ([, regex, accepted, rejected]) => {
+    acceptsOnly(regex, accepted, rejected);
+  });
+
+  test('the pattern flags follow the whole-value reading', () => {
+    const format = compiled({ patterns: [{ regex: '[0-9]{3}' }] });
+    expect(format.check('123').patterns).toEqual([true]);
+    expect(format.check('abc123xyz').patterns).toEqual([false]);
+  });
+
+  test('a source that is invalid on its own is not made valid by the wrapper', () => {
+    for (const regex of ['(', 'a)|(b']) {
+      const result = compileFormat({ patterns: [{ regex }] });
+      expect(result.ok).toBe(false);
+      expect(result.ok ? [] : result.errors.map((error) => error.path)).toEqual([
+        '/patterns/0/regex',
+      ]);
+    }
+  });
+});
+
 describe('compile errors carry a pointer path relative to the format', () => {
   function errorsOf(spec: FormatSpec) {
     const result = compileFormat(spec);

@@ -135,6 +135,24 @@ describe('check 4: examples run through the engine format check (SPEC 5.6, DEC-0
     expect(check(withFormat('  examples_invalid: ["DE1234"]\n'))).toEqual([]);
   });
 
+  test('an unanchored pattern is matched against the whole example (WR-05)', () => {
+    const file = withFormat(
+      `  patterns:\n    - { regex: "[A-Z]{2}[0-9]{4}", ${OK} }\n  examples_valid: ["DE1234"]\n  examples_invalid: ["xxDE1234yy", "DE12345"]\n`,
+    );
+    expect(check(file)).toEqual([]);
+  });
+
+  test('a valid example that only contains a match is reported as matching no pattern', () => {
+    const file = withFormat(
+      `  patterns:\n    - { regex: "[A-Z]{2}[0-9]{4}", ${OK} }\n  examples_valid: ["xxDE1234yy"]\n`,
+    );
+    const problems = check(file);
+    expect(problems).toHaveLength(1);
+    expect(problems[0]).toMatchObject({ file: SCHEME, ...where(file.text, '"xxDE1234yy"') });
+    expect(problems[0]?.message).toContain('no pattern matches');
+    noEcho(problems, ['xxDE1234yy']);
+  });
+
   test('pattern conditions are not evaluated: a conditional pattern still matches the examples', () => {
     const file = withFormat(
       `  patterns:\n    - { regex: "^[A-Z]{2}[0-9]{4}$", condition: { issuing_country: NL }, ${OK} }\n  examples_valid: ["NL1234"]\n  examples_invalid: ["NL5678"]\n`,
