@@ -241,7 +241,7 @@
       "unevaluatedProperties": false
     },
     "format": {
-      "description": "What a valid value looks like (SPEC 5.2). A value is valid when some pattern matches and, if checksum entries exist, some entry passes (any-of, DEC-038). Neither list is required.",
+      "description": "What a valid value looks like (SPEC 5.2). A value is accepted only when some pattern matches the whole value (DEC-039) and, if checksum entries exist, some entry passes (any-of, DEC-038). Both lists are optional in the schema, but a format without patterns accepts no value, so every examples_valid entry of it is reported (SPEC 5.6 check 4).",
       "type": "object",
       "properties": {
         "patterns": {

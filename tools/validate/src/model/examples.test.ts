@@ -1,6 +1,10 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, test } from 'vitest';
 import { checkModelFiles } from './check-model.ts';
 import type { ModelFile } from './load.ts';
+import { SCHEMA_DIR } from './schema.ts';
 import {
   fixtureAuthorities,
   fixtureSource,
@@ -118,17 +122,41 @@ describe('check 4: examples run through the engine format check (SPEC 5.6, DEC-0
     expect(check(file)).toEqual([]);
   });
 
-  test('a format with examples_valid but no patterns fails every valid example', () => {
-    const file = withFormat('  examples_valid: ["DE1234", "FR5678"]\n');
-    const problems = check(file);
-    expect(problems).toHaveLength(2);
-    expect(problems.map((problem) => problem.message)).toEqual([
-      expect.stringContaining('no pattern matches'),
-      expect.stringContaining('no pattern matches'),
-    ]);
-    expect(problems[0]).toMatchObject(where(file.text, '"DE1234"'));
-    expect(problems[1]).toMatchObject(where(file.text, '"FR5678"'));
-    noEcho(problems, ['DE1234', 'FR5678']);
+  const NO_PATTERN_REASON = (index: number) =>
+    `example is not accepted: the format declares no pattern, so it accepts no value (examples_valid[${index}] of fixture-scheme)`;
+
+  test.for([
+    ['patterns absent', '  examples_valid: ["DE1234", "FR5678"]\n', ['DE1234', 'FR5678']],
+    ['patterns empty', '  patterns: []\n  examples_valid: ["DE1234"]\n', ['DE1234']],
+    [
+      'checksum only',
+      `  checksum:\n    - { algorithm: elfproef, ${OK} }\n  examples_valid: ["DE1234"]\n`,
+      ['DE1234'],
+    ],
+  ] as const)(
+    'a format with %s fails every valid example as declaring no pattern (WR-04)',
+    ([, block, examples]) => {
+      const file = withFormat(block);
+      const problems = check(file);
+      expect(problems).toHaveLength(examples.length);
+      examples.forEach((example, index) => {
+        expect(problems[index]).toMatchObject({
+          file: SCHEME,
+          ...where(file.text, `"${example}"`),
+        });
+        expect(problems[index]?.message).toBe(NO_PATTERN_REASON(index));
+      });
+      noEcho(problems, examples);
+    },
+  );
+
+  test('the format description states the DEC-039 contract and no longer says neither list is needed', () => {
+    const schema = JSON.parse(
+      readFileSync(join(fileURLToPath(SCHEMA_DIR), 'scheme.schema.json'), 'utf8'),
+    ) as { properties: { format: { description: string } } };
+    const description = schema.properties.format.description;
+    expect(description).toContain('accepts no value');
+    expect(description).not.toMatch(/neither list is required/i);
   });
 
   test('a format with no patterns accepts nothing, so every invalid example is fine', () => {

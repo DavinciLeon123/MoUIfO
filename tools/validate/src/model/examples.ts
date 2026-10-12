@@ -91,6 +91,9 @@ export function checkExamples(
       .filter((name): name is string => typeof name === 'string')
       .join(', ');
 
+    // DEC-039: a format without a pattern accepts nothing, and the reason names that.
+    const declaresPattern = Array.isArray(spec.patterns) && spec.patterns.length > 0;
+
     const valid = Array.isArray(spec.examples_valid) ? spec.examples_valid : [];
     valid.forEach((value, index) => {
       if (typeof value !== 'string') return;
@@ -98,7 +101,9 @@ export function checkExamples(
       if (result.accepted) return;
       const reason = result.patterns.some(Boolean)
         ? `a pattern matches but every checksum entry fails (${algorithms})`
-        : 'no pattern matches';
+        : declaresPattern
+          ? 'no pattern matches'
+          : 'the format declares no pattern, so it accepts no value';
       problems.push(
         problemAt(
           parsed,
