@@ -423,13 +423,19 @@ describe('kvk-number and the RSIN prerequisite (DAT-01, DEC-036, research Pitfal
     ]);
   });
 
-  test('rsin has the relation prerequisite kvk-number, likely, sourced to kvk-rsin', () => {
+  test('rsin has the relation prerequisite kvk-number, likely, sourced to kvk-rsin, and may-identify-same-party fi-number, likely, from the workbook', () => {
     expect(listOf(scheme('rsin').relations)).toEqual([
       expect.objectContaining({
         kind: 'prerequisite',
         target: 'kvk-number',
         certainty: 'likely',
         source: 'kvk-rsin',
+      }),
+      expect.objectContaining({
+        kind: 'may-identify-same-party',
+        target: 'fi-number',
+        certainty: 'likely',
+        source: 'landscape-v1-2',
       }),
     ]);
   });
@@ -595,6 +601,12 @@ describe('oin and the reverse rules to the KVK number and the RSIN (DAT-02, DEC-
       expect.objectContaining({
         kind: 'derived-from',
         target: 'rsin',
+        certainty: 'certain',
+        source: 'oin-stelsel-2-1-0',
+      }),
+      expect.objectContaining({
+        kind: 'may-identify-same-party',
+        target: 'fi-number',
         certainty: 'certain',
         source: 'oin-stelsel-2-1-0',
       }),
@@ -797,9 +809,22 @@ describe('bsn and fi-number without valid examples (DAT-02, SPEC §10, DEC-022, 
     expect(load('model/authorities/rvig.yaml')).toEqual(expect.objectContaining({ kind: 'class' }));
   });
 
+  test('no rule takes a fi-number as its input, so no RSIN or OIN is derived from it; derived-from is rule-backed (SPEC §5.1)', () => {
+    const rules = loadAll('schemes').flatMap((s) => listOf(s.rules));
+    expect(rules.filter((rule) => rule.input === 'fi-number')).toEqual([]);
+    const toFi = [scheme('rsin'), scheme('oin')].flatMap((s) =>
+      listOf(s.relations).filter((relation) => relation.target === 'fi-number'),
+    );
+    expect(toFi.map((relation) => relation.kind)).toEqual([
+      'may-identify-same-party',
+      'may-identify-same-party',
+    ]);
+  });
+
   test.each([
     '## BSN and fi-number have no valid example',
     '## BSN validation register without a URL',
+    '## No rule from the fi-number to the RSIN or the OIN',
   ])('the entry "%s" exists in the four-part form', (heading) => {
     const gaps = read('docs/gaps.md');
     const start = gaps.indexOf(heading);

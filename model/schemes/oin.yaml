@@ -67,6 +67,11 @@ relations:
     certainty: certain
     source: oin-stelsel-2-1-0
     note: "Prefix 00000001 (RSIN), OIN Stelsel 2.1.0 section 6.2."
+  - kind: may-identify-same-party
+    target: fi-number
+    certainty: certain
+    source: oin-stelsel-2-1-0
+    note: "Prefix 00000002 (fi-nummer), OIN Stelsel 2.1.0 section 6.2. No rule derives the OIN from the fi-number."
 rules:
   - id: oin-from-kvk-number
     input: kvk-number

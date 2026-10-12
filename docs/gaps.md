@@ -81,6 +81,13 @@ Every seeded membership, prefix and source was read on its live page while the s
 - **Open question:** is there a public page, from the RvIG or Logius, that states how a BSN is verified, and does the BRP offer any open check?
 - **Owner or next step:** the owner or the RvIG names a source; the `validation_source` is then added at its own certainty.
 
+## No rule from the fi-number to the RSIN or the OIN
+
+- **Item:** the `rsin` and `oin` schemes relate to `fi-number` as `may-identify-same-party`, and no rule takes a fi-number as its input. No RSIN and no OIN is derived from a fi-nummer in the model.
+- **Why it is not in the model:** `derived-from` means that a rule derives the subject identifier (SPEC section 5.1), so it would claim a rule that no source states in full. For the RSIN no transform is stated: the workbook says the RSIN replaced the fi-nummer (remark "predecessed by fi-number"), and no read source gives a conversion. For the OIN, OIN Stelsel 2.1.0 gives the prefix `00000002` for a fi-nummer and the suffix rule for a 9-digit number (sections 6.1 and 6.2), which would allow a rule, but no owner decision has asked for one.
+- **Open question:** does the owner want an `oin-from-fi-number` rule built from those sections of the standard, and does any source state how an RSIN relates to a fi-nummer by a rule?
+- **Owner or next step:** the owner decides; a rule is then added with its own citation and a `derived-from` relation can replace the `may-identify-same-party` edge.
+
 ## RSIN long name differs between the workbook and the KVK
 
 - **Item:** the workbook gives the RSIN the name "Rechtspersonen en Samenwerkingsverbanden Identificatie Nummer", and the KVK RSIN page gives "Rechtspersonen en Samenwerkingsverbanden Informatienummer" (Legal Entities and Partnerships Information Number). The model uses the KVK name in the `label`; the workbook's name stays in the committed snapshot.

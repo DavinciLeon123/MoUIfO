@@ -60,6 +60,11 @@ relations:
     certainty: likely
     source: kvk-rsin
     note: "The RSIN is issued with the KvK number; only sole proprietorships receive none (KVK RSIN page)."
+  - kind: may-identify-same-party
+    target: fi-number
+    certainty: likely
+    source: landscape-v1-2
+    note: "The workbook remark '(predecessed by fi-number)' and the fi-number scope: parties with an RSIN were assigned a fi-nummer in the past. No rule derives one from the other."
 rules:
   - id: rsin-from-eori-nl
     input: eori
