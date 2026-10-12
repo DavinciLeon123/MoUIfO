@@ -530,3 +530,81 @@ describe('euid with the Dutch form at possible, its EU legal basis and the five 
     ]);
   });
 });
+
+describe('oin and the reverse rules to the KVK number and the RSIN (DAT-02, DEC-045, OIN Stelsel 2.1.0 §6)', () => {
+  test('accepts the workbook OIN and the RSIN-based OIN, rejects a 19-digit value; no check digit (Peppol 0190)', () => {
+    const format = formatOf(scheme('oin'));
+    expect(checkValue(format, '00000003080242850000').accepted).toBe(true);
+    expect(checkValue(format, '00000001001469630000').accepted).toBe(true);
+    expect(checkValue(format, '0000000308024285000').accepted).toBe(false);
+    expect(listOf((scheme('oin').format as Json).checksum)).toEqual([
+      expect.objectContaining({ algorithm: 'none', source: 'peppol-code-lists-9-7' }),
+    ]);
+  });
+
+  test('the KVK-based OIN of the workbook example is derived by rule from 08024285, and the reverse capture gives the number back', () => {
+    const forward = ruleOf(scheme('oin'), 'oin-from-kvk-number');
+    expect(forward.input).toBe('kvk-number');
+    expect(forward.output).toBe('oin');
+    expect(run(forward.transform, '08024285')).toBe('00000003080242850000');
+    const back = ruleOf(scheme('kvk-number'), 'kvk-number-from-oin');
+    expect(back.input).toBe('oin');
+    expect(back.certainty).toBe('certain');
+    expect(run(back.transform, '00000003080242850000')).toBe('08024285');
+  });
+
+  test('the RSIN-based OIN is derived by rule from 001469630, and the reverse capture gives the RSIN back', () => {
+    const forward = ruleOf(scheme('oin'), 'oin-from-rsin');
+    expect(forward.input).toBe('rsin');
+    expect(run(forward.transform, '001469630')).toBe('00000001001469630000');
+    const back = ruleOf(scheme('rsin'), 'rsin-from-oin');
+    expect(back.input).toBe('oin');
+    expect(run(back.transform, '00000001001469630000')).toBe('001469630');
+  });
+
+  test('each reverse capture keeps its own prefix: an RSIN-based OIN gives no KVK number and a KVK-based OIN gives no RSIN', () => {
+    const kvkBack = ruleOf(scheme('kvk-number'), 'kvk-number-from-oin');
+    const rsinBack = ruleOf(scheme('rsin'), 'rsin-from-oin');
+    expect(run(kvkBack.transform, '00000001001469630000')).toBeNull();
+    expect(run(rsinBack.transform, '00000003080242850000')).toBeNull();
+  });
+
+  test('a KVK number and its OIN round-trip by rule (KVK, OIN, KVK) and give the same number', () => {
+    const toOin = ruleOf(scheme('oin'), 'oin-from-kvk-number');
+    const toKvk = ruleOf(scheme('kvk-number'), 'kvk-number-from-oin');
+    const oin = run(toOin.transform, '08024285');
+    expect(oin).not.toBeNull();
+    expect(run(toKvk.transform, String(oin))).toBe('08024285');
+  });
+
+  test('oin carries derived-from kvk-number and derived-from rsin, both certain and sourced to the OIN Stelsel', () => {
+    expect(listOf(scheme('oin').relations)).toEqual([
+      expect.objectContaining({
+        kind: 'derived-from',
+        target: 'kvk-number',
+        certainty: 'certain',
+        source: 'oin-stelsel-2-1-0',
+      }),
+      expect.objectContaining({
+        kind: 'derived-from',
+        target: 'rsin',
+        certainty: 'certain',
+        source: 'oin-stelsel-2-1-0',
+      }),
+    ]);
+  });
+
+  test('the OIN Stelsel 2.1.0 is a standard dated 2024-01-19; the Logius class is the issuer of oin and has no instance', () => {
+    expect(load('model/sources/oin-stelsel-2-1-0.yaml')).toEqual(
+      expect.objectContaining({
+        type: 'standard',
+        date: '2024-01-19',
+        url: 'https://gitdocumentatie.logius.nl/publicatie/dk/oin/2.1.0/',
+      }),
+    );
+    expect(issuerOf(scheme('oin'))).toBe('logius');
+    expect(load('model/authorities/logius.yaml')).toEqual(
+      expect.objectContaining({ kind: 'class' }),
+    );
+  });
+});
