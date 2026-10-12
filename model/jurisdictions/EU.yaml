@@ -1,0 +1,5 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/jurisdiction.schema.json
+id: EU
+label:
+  en: European Union
+  nl: Europese Unie

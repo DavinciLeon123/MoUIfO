@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "jurisdiction.schema.json",
+  "description": "A jurisdiction (SPEC 4, DEC-032). part_of is a list of sourced membership claims; several distinct parents are allowed, and how inheritance combines them is Phase 5 logic (DEC-041). A cycle or a self-reference is rejected by the cross-file check.",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/jurisdiction-id" },
+    "label": { "$ref": "common.schema.json#/$defs/label" },
+    "part_of": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "jurisdiction": { "$ref": "common.schema.json#/$defs/jurisdiction-ref" },
+          "source": { "$ref": "common.schema.json#/$defs/source-ref" },
+          "certainty": { "$ref": "common.schema.json#/$defs/certainty-ref" },
+          "note": { "$ref": "common.schema.json#/$defs/text" }
+        },
+        "required": ["jurisdiction", "source", "certainty"],
+        "unevaluatedProperties": false
+      }
+    },
+    "notes": { "$ref": "common.schema.json#/$defs/text" }
+  },
+  "required": ["id", "label"],
+  "unevaluatedProperties": false
+}

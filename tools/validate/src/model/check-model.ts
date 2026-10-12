@@ -1,4 +1,5 @@
 import type { Problem } from 'uio-config';
+import { checkPartOf, uncitedSourceWarnings } from './cross-file.ts';
 import {
   discoverModelFiles,
   type ModelFile,
@@ -43,7 +44,8 @@ export function uniqueProblems(problems: readonly Problem[]): Problem[] {
  * Passes A to C over the given files. A: parse and structure with a registry-free Ajv. B: build
  * the registry from files with no parse or schema problem, so a broken file never vouches for a
  * reference. C: re-validate those same files with the registry-backed Ajv and keep only `uioRef`
- * errors, so a file with structural errors is never reference-checked (no cascade). Also returns
+ * errors, so a file with structural errors is never reference-checked (no cascade). Then the
+ * jurisdiction graph check and the uncited-source warnings run on the clean files. Also returns
  * the set of source ids cited anywhere.
  */
 export function runModelChecks(files: readonly ModelFile[]): {
@@ -78,6 +80,12 @@ export function runModelChecks(files: readonly ModelFile[]): {
     problems.push(...schemaProblems(referencing, schemaId, parsed, 'uioRef'));
     if (parsed.path.startsWith('model/vocab/')) problems.push(...checkVocabMembers(parsed));
   }
+  const inDirectory = (directory: string): ParsedFile[] =>
+    clean.map(({ parsed }) => parsed).filter(({ path }) => path.startsWith(`model/${directory}/`));
+  problems.push(
+    ...checkPartOf(inDirectory('jurisdictions')),
+    ...uncitedSourceWarnings(inDirectory('sources'), cited),
+  );
   return { problems, cited };
 }
 

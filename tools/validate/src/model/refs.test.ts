@@ -301,7 +301,11 @@ describe('vocabulary integrity', () => {
   test('a certainty member with a source and no certainty gives the dependentRequired error', () => {
     const real = realFile(CERTAINTY);
     const text = real.text.replace('rank: 2\n', 'rank: 2\n    source: x\n');
-    const problems = checkModelFiles(withRealModel({ path: CERTAINTY, text }));
+    // Real files that cite a certainty (NL.yaml) report the vocabulary as unvouched: only the
+    // problems of the certainty file itself are the subject here.
+    const problems = checkModelFiles(withRealModel({ path: CERTAINTY, text })).filter(
+      (problem) => problem.file === CERTAINTY,
+    );
     expect(problems).toHaveLength(1);
     expect(problems[0]?.message).toContain('certainty');
     expect(problems[0]).toMatchObject(where(text, 'id: likely'));

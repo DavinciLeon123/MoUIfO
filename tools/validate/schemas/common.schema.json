@@ -34,6 +34,17 @@
       "$ref": "#/$defs/kebab-id",
       "uioRef": "source"
     },
+    "jurisdiction-id": {
+      "description": "A jurisdiction id: two uppercase ASCII letters (ISO 3166-1 alpha-2 style codes, plus EU and XI) or GLOBAL for worldwide schemes (SPEC section 4).",
+      "type": "string",
+      "pattern": "^(?:[A-Z]{2}|GLOBAL)$"
+    },
+    "jurisdiction-ref": {
+      "description": "The id of a jurisdiction file under model/jurisdictions/.",
+      "type": "string",
+      "$ref": "#/$defs/jurisdiction-id",
+      "uioRef": "jurisdiction"
+    },
     "certainty-ref": {
       "description": "A member of the certainty vocabulary.",
       "type": "string",
