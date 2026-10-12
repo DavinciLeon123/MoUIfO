@@ -1,0 +1,58 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/scheme.schema.json
+id: kvk-establishment-number
+label:
+  en: KVK establishment number
+  nl: Vestigingsnummer
+kind: identifier
+issuer: kvk
+jurisdiction: NL
+availability:
+  value: public
+  source: landscape-v1-2
+  certainty: likely
+sources:
+  default: kvk-establishment
+scope:
+  en: "multiple subsidiaries of a company in different locations"
+notes:
+  en: "Each establishment has its own number. The workbook says it is not searchable in itself."
+format:
+  patterns:
+    - regex: "^[0-9]{12}$"
+      certainty: certain
+      source: kvk-establishment
+      note: "A unique 12-digit establishment number (KVK branch-number page)."
+  examples_valid:
+    - "000019478445"
+  examples_invalid:
+    - "00001947844"
+level:
+  - value: establishment
+    certainty: certain
+    source: kvk-establishment
+    note: "Each establishment (branch) of a business or legal entity has a unique 12-digit establishment number."
+legal_basis:
+  - title: "Handelsregisterwet 2007 (the business register in which the establishments are registered)"
+    url: "https://zoek.officielebekendmakingen.nl/stb-2007-153.pdf"
+    certainty: certain
+    source: handelsregisterwet-2007
+mandatory:
+  text: "no"
+  certainty: likely
+  source: landscape-v1-2
+applicability:
+  - jurisdiction: NL
+    status: [issued]
+    certainty: certain
+    source: kvk-establishment
+relations:
+  - kind: prerequisite
+    target: kvk-number
+    certainty: likely
+    source: landscape-v1-2
+    note: "The workbook gives 'sub-number of a KvK number' as the prerequisite."
+  - kind: different-level
+    target: kvk-number
+    certainty: likely
+    source: kvk-establishment
+    note: "The KVK page says the establishment number does not look the same as the KVK number of an establishment."

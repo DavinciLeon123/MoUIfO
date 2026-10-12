@@ -1,0 +1,53 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/scheme.schema.json
+id: roo
+label:
+  en: Register of Government Organisations
+  nl: Register van Overheidsorganisaties
+abbreviation: ROO
+kind: register
+issuer: koop
+jurisdiction: NL
+availability:
+  value: public
+  source: landscape-v1-2
+  certainty: likely
+sources:
+  default: koop-roo
+scope:
+  en: "information on governmental organisations only"
+notes:
+  en: "A register, not an identifier: a URL is used for identification."
+level:
+  - value: government-organisation
+    certainty: certain
+    source: koop-roo
+    note: "The ROO page: the register holds data about and from government bodies."
+mandatory:
+  text: "no"
+  certainty: likely
+  source: landscape-v1-2
+validation_source:
+  label: Overheidsorganisaties (organisaties.overheid.nl)
+  url: "https://organisaties.overheid.nl/"
+  certainty: certain
+  source: organisaties-overheid
+applicability:
+  - jurisdiction: NL
+    status: [issued]
+    certainty: certain
+    source: koop-roo
+  - jurisdiction: NL
+    status: [verifiable]
+    certainty: certain
+    source: organisaties-overheid
+relations:
+  - kind: references
+    target: kvk-number
+    certainty: likely
+    source: landscape-v1-2
+    note: "The workbook gives 'KvK number' as related to ROO."
+  - kind: references
+    target: oin
+    certainty: likely
+    source: landscape-v1-2
+    note: "The workbook gives 'OIN' as related to ROO."

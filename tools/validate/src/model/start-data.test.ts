@@ -526,8 +526,10 @@ describe('euid with the Dutch form at possible, its EU legal basis and the five 
     expect(files).toEqual([
       'eori.yaml',
       'euid.yaml',
+      'kvk-establishment-number.yaml',
       'kvk-number.yaml',
       'oin.yaml',
+      'roo.yaml',
       'rsin.yaml',
       'vat-nl.yaml',
     ]);
