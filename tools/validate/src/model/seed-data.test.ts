@@ -56,12 +56,12 @@ describe('the real seed: NL is part of the EU, sourced by TEU Article 52', () =>
     expect(data.part_of).toBeUndefined();
   });
 
-  test('teu-art-52 is a law source with a legislation.gov.uk url and no eli', () => {
+  test('teu-art-52 is a law source on EUR-Lex with its ELI', () => {
     const data = parse(readReal(TEU), { schema: 'core' }) as Record<string, unknown>;
     expect(data.type).toBe('law');
-    expect(String(data.url)).toMatch(/^https:\/\/www\.legislation\.gov\.uk\//);
-    expect(data).not.toHaveProperty('eli');
-    expect(data.date).toBe('2020-03-01');
+    expect(String(data.url)).toMatch(/^https:\/\/eur-lex\.europa\.eu\//);
+    expect(data.eli).toBe('http://data.europa.eu/eli/treaty/teu_2016/oj');
+    expect(data.date).toBe('2016-06-07');
   });
 });
 
@@ -190,13 +190,15 @@ describe('the real seed: Belgium and Greece are EU members, EL means Greece', ()
     });
   });
 
-  test('vat-directive-art-215 is a law source with a legislation.gov.uk url and no eli', () => {
+  test('vat-directive-art-215 is a law source on EUR-Lex with its consolidated-version ELI', () => {
     const data = realRecord(ART_215);
     expect(data.type).toBe('law');
-    expect(String(data.url)).toBe('https://www.legislation.gov.uk/eudr/2006/112/article/215');
-    expect(data).not.toHaveProperty('eli');
+    expect(String(data.url)).toBe(
+      'https://eur-lex.europa.eu/legal-content/nl/TXT/?uri=CELEX%3A32006L0112',
+    );
+    expect(data.eli).toBe('http://data.europa.eu/eli/dir/2006/112/2025-04-14');
+    expect(data.date).toBe('2025-04-14');
     expect(String(data.title)).toContain('2006/112/EC');
-    expect(String(data.title)).toContain('2020/1756');
   });
 });
 
