@@ -1,10 +1,10 @@
-import { cpSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { cpSync, mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { REPO_ROOT } from 'uio-config';
 import { afterAll, describe, expect, test } from 'vitest';
 import { parse } from 'yaml';
-import { report } from '../index.ts';
+import { report, runValidation } from '../index.ts';
 import { checkModel, checkModelFiles } from './check-model.ts';
 import type { ModelFile } from './load.ts';
 import { fixture, withRealModel } from './testing.ts';
@@ -151,7 +151,7 @@ const prefixEntry = (prefix: string, jurisdiction: string, source = 'vat-directi
   `  - prefix: ${prefix}\n    jurisdiction: ${jurisdiction}\n    source: ${source}\n    certainty: certain\n`;
 
 describe('the real seed: Belgium and Greece are EU members, EL means Greece', () => {
-  test('country-prefix maps NL, BE and EL, each sourced by Article 215 with certainty certain', () => {
+  test('country-prefix maps NL, BE, EL, XI and GB; the EU has no prefix', () => {
     const data = realRecord(PREFIX);
     expect(data.id).toBe('country-prefix');
     const entries = data.values as PrefixEntry[];
@@ -159,9 +159,14 @@ describe('the real seed: Belgium and Greece are EU members, EL means Greece', ()
       ['NL', 'NL'],
       ['BE', 'BE'],
       ['EL', 'GR'],
+      ['XI', 'XI'],
+      ['GB', 'GB'],
     ]);
+    expect(entries.map((entry) => entry.jurisdiction)).not.toContain('EU');
     for (const entry of entries) {
-      expect(entry.source).toBe('vat-directive-art-215');
+      expect(entry.source).toBe(
+        entry.prefix === 'GB' ? 'hmrc-eori-introduction' : 'vat-directive-art-215',
+      );
       expect(entry.certainty).toBe('certain');
     }
   });
@@ -264,5 +269,93 @@ describe('the country-prefix vocabulary contract', () => {
         message: 'required vocabulary file is missing',
       });
     }, 30_000);
+  });
+});
+
+const list = (directory: string): string[] =>
+  readdirSync(join(REPO_ROOT, 'model', directory)).sort();
+
+describe('the complete Phase 2 seed: six jurisdictions, four sources', () => {
+  test('model/jurisdictions holds exactly BE, EU, GB, GR, NL and XI', () => {
+    expect(list('jurisdictions')).toEqual([
+      'BE.yaml',
+      'EU.yaml',
+      'GB.yaml',
+      'GR.yaml',
+      'NL.yaml',
+      'XI.yaml',
+    ]);
+  });
+
+  test('model/sources holds exactly the four seeded sources', () => {
+    expect(list('sources')).toEqual([
+      'hmrc-eori-introduction.yaml',
+      'nia-1998-s1.yaml',
+      'teu-art-52.yaml',
+      'vat-directive-art-215.yaml',
+    ]);
+  });
+
+  test('every part_of claim is one of the four sourced memberships', () => {
+    const claims: string[] = [];
+    for (const file of list('jurisdictions')) {
+      const data = realRecord(`model/jurisdictions/${file}`);
+      for (const claim of (data.part_of ?? []) as Record<string, string>[]) {
+        claims.push(`${data.id}>${claim.jurisdiction}:${claim.source}:${claim.certainty}`);
+      }
+    }
+    expect(claims.sort()).toEqual([
+      'BE>EU:teu-art-52:certain',
+      'GR>EU:teu-art-52:certain',
+      'NL>EU:teu-art-52:certain',
+      'XI>GB:nia-1998-s1:certain',
+    ]);
+  });
+
+  test('XI and GB carry the EORI-area notes and the labels', () => {
+    const xi = realRecord('model/jurisdictions/XI.yaml');
+    const gb = realRecord('model/jurisdictions/GB.yaml');
+    expect(xi.label).toEqual({ en: 'Northern Ireland', nl: 'Noord-Ierland' });
+    expect(gb.label).toEqual({ en: 'United Kingdom', nl: 'Verenigd Koninkrijk' });
+    expect(gb.part_of).toBeUndefined();
+    expect(String((xi.notes as { en: string }).en)).toContain('EU legislation');
+    expect(String((gb.notes as { en: string }).en)).toContain('England, Scotland and Wales');
+    expect(String((xi.notes as { en: string }).en)).toContain('DEC-041');
+  });
+
+  test('the new sources are law and register-doc with a url and no eli', () => {
+    const nia = realRecord('model/sources/nia-1998-s1.yaml');
+    expect(nia.type).toBe('law');
+    expect(nia.url).toBe('https://www.legislation.gov.uk/ukpga/1998/47/section/1');
+    expect(nia.date).toBe('1998-11-19');
+    expect(nia).not.toHaveProperty('eli');
+    const hmrc = realRecord('model/sources/hmrc-eori-introduction.yaml');
+    expect(hmrc.type).toBe('register-doc');
+    expect(String(hmrc.url)).toBe(
+      'https://www.gov.uk/guidance/economic-operators-registration-and-identification-eori/introduction',
+    );
+    expect(hmrc.publisher).toBe('HM Revenue & Customs (GOV.UK)');
+    expect(hmrc).not.toHaveProperty('eli');
+  });
+
+  test('the real repository validates with no problem and no warning', () => {
+    expect(runValidation(REPO_ROOT)).toEqual([]);
+  });
+});
+
+describe('docs/gaps.md', () => {
+  const gaps = (): string => readFileSync(join(REPO_ROOT, 'docs', 'gaps.md'), 'utf8');
+
+  test('uses the four-part entry form and names the required gaps', () => {
+    expect(gaps()).toContain('Open question');
+    expect(gaps()).toContain('Why it is not in the model');
+    expect(gaps()).toContain('Owner or next step');
+    expect(gaps()).toMatch(/teu-art-52[\s\S]*ELI|ELI[\s\S]*teu-art-52/);
+    expect(gaps()).toContain('vat-directive-art-215');
+    expect(gaps()).toMatch(/United Kingdom[\s\S]*Great Britain|Great Britain[\s\S]*United Kingdom/);
+  });
+
+  test('holds no nine-digit number', () => {
+    expect(gaps()).not.toMatch(/(^|[^0-9])[0-9]{9}([^0-9]|$)/);
   });
 });
