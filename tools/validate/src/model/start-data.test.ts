@@ -207,6 +207,9 @@ describe('sources and gap entries (DAT-01, DEC-019, DEC-042)', () => {
     '## Elfproef of RSIN, BSN and fi-number rests on the workbook',
     '## RSIN long name differs between the workbook and the KVK',
     '## Union Customs Code succession (Regulation (EU) 2026/2108)',
+    '## Mod 97 check of the Dutch sole-proprietor VAT number',
+    '## Suffix after the B of the Dutch VAT number, and no RSIN-to-VAT rule (DEC-050)',
+    '## Workbook VAT format cells and the official structure',
   ])('the entry "%s" exists in the four-part form', (heading) => {
     const gaps = read('docs/gaps.md');
     const start = gaps.indexOf(heading);
@@ -284,5 +287,88 @@ describe('vat-nl and the VAT to EORI chain (DAT-01, DEC-003, DEC-004, DEC-050)',
     expect(tax.jurisdiction).toBe('NL');
     expect(tax.source).toBe('ondernemersplein-nummers-voor-de-btw');
     expect(tax.certainty).toBe('certain');
+  });
+});
+
+describe('vat-nl sole-proprietor mod 97 entry, Peppol code and statements (DAT-01, DEC-004, DEC-036, DEC-049)', () => {
+  test('accepts the legal-person value by elfproef and the official example by mod 97; rejects a wrong check digit', () => {
+    const format = formatOf(scheme('vat-nl'));
+    expect(checkValue(format, 'NL001469630B01')).toEqual({
+      patterns: [true],
+      checksums: ['pass', 'fail'],
+      accepted: true,
+    });
+    expect(checkValue(format, 'NL000099998B57')).toEqual({
+      patterns: [true],
+      checksums: ['fail', 'pass'],
+      accepted: true,
+    });
+    expect(checkValue(format, 'NL000099998B58').accepted).toBe(false);
+    expect(checkValue(format, 'NL001469630B1').accepted).toBe(false);
+  });
+
+  test('checksums are elfproef for legal persons, then mod 97-10 for sole proprietorships, both likely', () => {
+    const checksum = listOf((scheme('vat-nl').format as Json).checksum);
+    expect(checksum.map((entry) => entry.algorithm)).toEqual(['elfproef', 'iso7064-mod97-10']);
+    expect(checksum[0]).toEqual(
+      expect.objectContaining({
+        condition: { entity_form: 'legal-person' },
+        certainty: 'likely',
+        source: 'landscape-v1-2',
+      }),
+    );
+    expect(checksum[1]).toEqual(
+      expect.objectContaining({
+        over: ['uppercase'],
+        condition: { entity_form: 'sole-proprietorship' },
+        certainty: 'likely',
+        source: 'vat-nl-mod97-analysis',
+      }),
+    );
+  });
+
+  test('the mod 97 source is a computed analysis of the official example, dated 2026-10-12', () => {
+    const source = load('model/sources/vat-nl-mod97-analysis.yaml');
+    expect(source.type).toBe('analysis');
+    expect(source.date).toBe('2026-10-12');
+  });
+
+  test('peppol_eas is 9944 (certain, peppol-code-lists-9-7) and vat-nl has no iso6523_icd (DEC-036)', () => {
+    const vat = scheme('vat-nl');
+    expect(vat.peppol_eas).toEqual({
+      value: '9944',
+      source: 'peppol-code-lists-9-7',
+      certainty: 'certain',
+    });
+    expect(vat.iso6523_icd).toBeUndefined();
+  });
+
+  test('legal basis, validation source and applicability are sourced as the plan states', () => {
+    const vat = scheme('vat-nl');
+    expect(listOf(vat.legal_basis)).toEqual([
+      expect.objectContaining({ source: 'wet-op-de-omzetbelasting-1968', certainty: 'certain' }),
+    ]);
+    expect(vat.validation_source).toEqual(
+      expect.objectContaining({ source: 'vies', certainty: 'certain' }),
+    );
+    expect(listOf(vat.applicability)).toEqual([
+      expect.objectContaining({
+        jurisdiction: 'NL',
+        status: ['issued'],
+        certainty: 'certain',
+        source: 'ondernemersplein-nummers-voor-de-btw',
+      }),
+      expect.objectContaining({
+        jurisdiction: 'EU',
+        status: ['verifiable'],
+        certainty: 'certain',
+        source: 'vies',
+      }),
+    ]);
+  });
+
+  test('the issuer is belastingdienst, an NL instance of national-tax-authority reached through its class', () => {
+    expect(issuerOf(scheme('vat-nl'))).toBe('belastingdienst');
+    expect(load('model/authorities/national-tax-authority.yaml').kind).toBe('class');
   });
 });
