@@ -196,3 +196,21 @@ describe('the Dutch register schemes and the EORI carry the snapshot (DAT-08, pl
     expect(count('fi-number')).toBe(6);
   });
 });
+
+/** The VAT, EU and Peppol schemes (plan 03-14). vat and vat-nl share workbook column J (DEC-033). */
+const VAT_EU_PEPPOL = ['vat', 'vat-nl', 'euid', 'peppol-id'] as const;
+
+describe('the VAT, EU and Peppol schemes carry the snapshot (DAT-08, plan 03-14)', () => {
+  test.each(VAT_EU_PEPPOL)('%s declares trust and persistence equal to the snapshot', (id) => {
+    const data = loadScheme(id);
+    expectTrustMatches(id, data);
+    expectPersistenceMatches(id, data);
+  });
+
+  test('vat and vat-nl declare identical trust and persistence (shared column J, DEC-033)', () => {
+    const vat = loadScheme('vat');
+    const vatNl = loadScheme('vat-nl');
+    expect(vatNl.trust).toEqual(vat.trust);
+    expect(vatNl.persistence).toEqual(vat.persistence);
+  });
+});
