@@ -527,7 +527,7 @@ describe('euid with the Dutch form at possible, its EU legal basis and the five 
     );
   });
 
-  test('model/schemes holds exactly the scheme files written by plans 03-06 to 03-10', () => {
+  test('model/schemes holds exactly the scheme files written by plans 03-06 to 03-11 (so far)', () => {
     const files = readdirSync(join(REPO_ROOT, 'model', 'schemes'))
       .filter((name) => name.endsWith('.yaml'))
       .sort();
@@ -539,6 +539,7 @@ describe('euid with the Dutch form at possible, its EU legal basis and the five 
       'gln.yaml',
       'kvk-establishment-number.yaml',
       'kvk-number.yaml',
+      'lei.yaml',
       'oin.yaml',
       'peppol-id.yaml',
       'roo.yaml',

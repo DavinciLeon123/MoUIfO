@@ -1,0 +1,65 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/scheme.schema.json
+id: lei
+label:
+  en: Legal Entity Identifier
+abbreviation: LEI
+kind: identifier
+issuer:
+  value: local-operating-unit
+  source: landscape-v1-2
+  certainty: likely
+jurisdiction:
+  value: GLOBAL
+  source: landscape-v1-2
+  certainty: likely
+availability:
+  value: public
+  source: landscape-v1-2
+  certainty: likely
+iso6523_icd:
+  value: "0199"
+  source: peppol-code-lists-9-7
+  certainty: likely
+peppol_eas: "0199"
+sources:
+  default: peppol-code-lists-9-7
+scope:
+  en: "entities involved in financial transactions (stocks, bonds etc.), for risk assessment purposes (AML, CTF); natural persons are not required to have an LEI"
+notes:
+  en: "Workbook remarks: costly and cumbersome for SMEs; the workbook gives the validity as limited to 1 year, which the model has no field for. The workbook has one LEI column."
+format:
+  patterns:
+    - regex: "^[A-Z0-9]{18}[0-9]{2}$"
+      certainty: likely
+      source: peppol-code-lists-9-7
+      note: "Eighteen alphanumeric characters and two check digits (Peppol Code Lists v9.7, entry 0199, which quotes the ISO 17442 format). ISO 17442 itself was not read (docs/gaps.md)."
+  checksum:
+    - algorithm: iso7064-mod97-10
+      certainty: likely
+      source: peppol-code-lists-9-7
+      note: "The check digit scheme follows ISO/IEC 7064 (MOD 97-10), Peppol Code Lists v9.7, entry 0199. ISO 17442 was not read (docs/gaps.md)."
+  examples_valid:
+    - "724500G3PJTYPL2L9M11"
+  examples_invalid:
+    - "724500G3PJTYPL2L9M12"
+legal_basis:
+  - title: "Commission Implementing Regulation (EU) 2017/394, Article 11(5) and (6)"
+    url: "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32017R0394"
+    eli: "http://data.europa.eu/eli/reg_impl/2017/394/oj"
+    certainty: certain
+    source: csdr-its-2017-394
+    note: "Central securities depositories use an LEI in their records (Article 11(5) and (6)). This regulation is not the legal basis of the LEI system."
+roles:
+  - value: financial-counterparty
+    certainty: likely
+    source: landscape-v1-2
+relations:
+  - kind: references
+    target: kvk-number
+    certainty: likely
+    source: gleif-ra-list
+    note: "GLEIF Registration Authorities List v1.9: RA000463 is the Dutch Handelsregister (Kamer van Koophandel), so an LEI record can name the KVK number through its registration authority code."
+mandatory:
+  text: "yes, for engaging in financial transactions"
+  certainty: likely
+  source: landscape-v1-2
