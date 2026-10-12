@@ -67,3 +67,17 @@ rules:
     examples:
       - in: "NL001469630"
         out: "001469630"
+  - id: rsin-from-vat-nl
+    input: vat-nl
+    output: rsin
+    transform:
+      - capture:
+          regex: "^NL([0-9]{9})B[0-9]{2}$"
+          group: 1
+    condition:
+      entity_form: legal-person
+    certainty: certain
+    source: ondernemersplein-btw-vermelden
+    examples:
+      - in: "NL001469630B01"
+        out: "001469630"

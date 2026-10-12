@@ -1,0 +1,45 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/scheme.schema.json
+id: vat-nl
+label:
+  en: Dutch VAT identification number
+  nl: Btw-identificatienummer
+kind: identifier
+issuer: belastingdienst
+jurisdiction: NL
+availability:
+  value: public
+  source: landscape-v1-2
+  certainty: likely
+sources:
+  default: ondernemersplein-nummers-voor-de-btw
+scope:
+  en: "required for tax payments"
+format:
+  patterns:
+    - regex: "^NL[0-9]{9}B[0-9]{2}$"
+      certainty: certain
+      source: ondernemersplein-nummers-voor-de-btw
+      note: "NL, 9 digits, the letter B and 2 digits. A sole proprietor's number has this form too (Ondernemersplein)."
+  checksum:
+    - algorithm: elfproef
+      over:
+        - capture:
+            regex: "^NL([0-9]{9})B[0-9]{2}$"
+            group: 1
+      certainty: likely
+      source: landscape-v1-2
+      condition:
+        entity_form: legal-person
+      note: "Elfproef over the 9-digit core, which for a legal person is the RSIN. The workbook gives the check; no official source read states it (docs/gaps.md)."
+  examples_valid:
+    - "NL001469630B01"
+  examples_invalid:
+    - "NL001469630B1"
+    - "NL000099998B58"
+relations:
+  - kind: contains
+    target: rsin
+    condition:
+      entity_form: legal-person
+    certainty: certain
+    source: ondernemersplein-btw-vermelden

@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/authority.schema.json
+id: national-tax-authority
+kind: class
+label:
+  en: National tax authority
+  nl: Nationale belastingdienst
+definition:
+  en: The tax administration of a country that identifies taxable persons and assigns VAT identification numbers.

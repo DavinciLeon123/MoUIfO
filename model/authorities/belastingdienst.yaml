@@ -1,0 +1,10 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/authority.schema.json
+id: belastingdienst
+kind: instance
+label:
+  en: Netherlands Tax Administration
+  nl: Belastingdienst
+instance_of: national-tax-authority
+jurisdiction: NL
+source: ondernemersplein-nummers-voor-de-btw
+certainty: certain
