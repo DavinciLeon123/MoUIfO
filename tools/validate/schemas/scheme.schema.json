@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "scheme.schema.json",
+  "description": "A scheme: one kind of organisation identifier (SPEC 5.2, DEC-029). The header fields issuer, jurisdiction, kind, abbreviation, availability, iso6523_icd and peppol_eas are covered by sources.default with certainty certain when written as a bare value; any of them may use the long form { value, source, certainty }, which overrides the default for that field (D-07, D-08). Every statement carries its own source and certainty (DEC-029). label, scope and notes are descriptive text and need no source (D-09).",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "common.schema.json#/$defs/kebab-id"
+    },
+    "label": {
+      "$ref": "common.schema.json#/$defs/label"
+    },
+    "abbreviation": {
+      "$ref": "common.schema.json#/$defs/header-text"
+    },
+    "iso6523_icd": {
+      "$ref": "common.schema.json#/$defs/header-code"
+    },
+    "peppol_eas": {
+      "$ref": "common.schema.json#/$defs/header-code"
+    },
+    "kind": {
+      "$ref": "common.schema.json#/$defs/header-kind"
+    },
+    "issuer": {
+      "$ref": "common.schema.json#/$defs/header-authority"
+    },
+    "jurisdiction": {
+      "$ref": "common.schema.json#/$defs/header-jurisdiction"
+    },
+    "availability": {
+      "$ref": "common.schema.json#/$defs/header-kebab"
+    },
+    "sources": {
+      "description": "The default source for the bare header fields (D-07). Required even when every header field uses the long form.",
+      "type": "object",
+      "properties": {
+        "default": {
+          "$ref": "common.schema.json#/$defs/source-ref"
+        }
+      },
+      "required": ["default"],
+      "unevaluatedProperties": false
+    },
+    "scope": {
+      "$ref": "common.schema.json#/$defs/text"
+    },
+    "notes": {
+      "$ref": "common.schema.json#/$defs/text"
+    }
+  },
+  "required": ["id", "label", "kind", "issuer", "jurisdiction", "sources"],
+  "unevaluatedProperties": false
+}

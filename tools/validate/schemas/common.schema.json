@@ -12,8 +12,14 @@
       "description": "A short name; English is required, Dutch where available.",
       "type": "object",
       "properties": {
-        "en": { "type": "string", "minLength": 1 },
-        "nl": { "type": "string", "minLength": 1 }
+        "en": {
+          "type": "string",
+          "minLength": 1
+        },
+        "nl": {
+          "type": "string",
+          "minLength": 1
+        }
       },
       "required": ["en"],
       "unevaluatedProperties": false
@@ -22,8 +28,14 @@
       "description": "A longer text; English is required, Dutch where available.",
       "type": "object",
       "properties": {
-        "en": { "type": "string", "minLength": 1 },
-        "nl": { "type": "string", "minLength": 1 }
+        "en": {
+          "type": "string",
+          "minLength": 1
+        },
+        "nl": {
+          "type": "string",
+          "minLength": 1
+        }
       },
       "required": ["en"],
       "unevaluatedProperties": false
@@ -54,14 +66,196 @@
       "description": "Base of a vocabulary member; a cited source and a certainty come together. The closing unevaluatedProperties lives in the schema that uses this base.",
       "type": "object",
       "properties": {
-        "id": { "$ref": "#/$defs/kebab-id" },
-        "label": { "$ref": "#/$defs/label" },
-        "definition": { "$ref": "#/$defs/text" },
-        "source": { "$ref": "#/$defs/source-ref" },
-        "certainty": { "$ref": "#/$defs/certainty-ref" }
+        "id": {
+          "$ref": "#/$defs/kebab-id"
+        },
+        "label": {
+          "$ref": "#/$defs/label"
+        },
+        "definition": {
+          "$ref": "#/$defs/text"
+        },
+        "source": {
+          "$ref": "#/$defs/source-ref"
+        },
+        "certainty": {
+          "$ref": "#/$defs/certainty-ref"
+        }
       },
       "required": ["id", "label", "definition"],
-      "dependentRequired": { "source": ["certainty"], "certainty": ["source"] }
+      "dependentRequired": {
+        "source": ["certainty"],
+        "certainty": ["source"]
+      }
+    },
+    "scheme-ref": {
+      "description": "The id of a scheme file under model/schemes/.",
+      "type": "string",
+      "$ref": "#/$defs/kebab-id",
+      "uioRef": "scheme"
+    },
+    "authority-ref": {
+      "description": "The id of an authority class or instance under model/authorities/ (DEC-031).",
+      "type": "string",
+      "$ref": "#/$defs/kebab-id",
+      "uioRef": "authority"
+    },
+    "icd-code": {
+      "description": "An ISO 6523 ICD code or a Peppol EAS code: exactly four ASCII digits, always quoted so leading zeros survive (DEC-036); null or absent means no code is recorded.",
+      "type": ["string", "null"],
+      "pattern": "^[0-9]{4}$"
+    },
+    "header-authority": {
+      "description": "A scheme issuer: an authority class, or an instance for a national-only scheme. A bare value is covered by the scheme default source with certainty certain; the long form { value, source, certainty } overrides that for this field only (DEC-029).",
+      "if": {
+        "type": "object"
+      },
+      "then": {
+        "type": "object",
+        "required": ["value", "source", "certainty"],
+        "properties": {
+          "value": {
+            "$ref": "#/$defs/authority-ref"
+          },
+          "source": {
+            "$ref": "#/$defs/source-ref"
+          },
+          "certainty": {
+            "$ref": "#/$defs/certainty-ref"
+          }
+        },
+        "unevaluatedProperties": false
+      },
+      "else": {
+        "$ref": "#/$defs/authority-ref"
+      }
+    },
+    "header-jurisdiction": {
+      "description": "A scheme jurisdiction. A bare value is covered by the scheme default source with certainty certain; the long form { value, source, certainty } overrides that for this field only (DEC-029).",
+      "if": {
+        "type": "object"
+      },
+      "then": {
+        "type": "object",
+        "required": ["value", "source", "certainty"],
+        "properties": {
+          "value": {
+            "$ref": "#/$defs/jurisdiction-ref"
+          },
+          "source": {
+            "$ref": "#/$defs/source-ref"
+          },
+          "certainty": {
+            "$ref": "#/$defs/certainty-ref"
+          }
+        },
+        "unevaluatedProperties": false
+      },
+      "else": {
+        "$ref": "#/$defs/jurisdiction-ref"
+      }
+    },
+    "header-kind": {
+      "description": "The kind of a scheme. A bare value is covered by the scheme default source with certainty certain; the long form { value, source, certainty } overrides that for this field only (DEC-029).",
+      "if": {
+        "type": "object"
+      },
+      "then": {
+        "type": "object",
+        "required": ["value", "source", "certainty"],
+        "properties": {
+          "value": {
+            "enum": ["identifier", "register", "composite"]
+          },
+          "source": {
+            "$ref": "#/$defs/source-ref"
+          },
+          "certainty": {
+            "$ref": "#/$defs/certainty-ref"
+          }
+        },
+        "unevaluatedProperties": false
+      },
+      "else": {
+        "enum": ["identifier", "register", "composite"]
+      }
+    },
+    "header-text": {
+      "description": "A short free-text header value, for example an abbreviation. A bare value is covered by the scheme default source with certainty certain; the long form { value, source, certainty } overrides that for this field only (DEC-029).",
+      "if": {
+        "type": "object"
+      },
+      "then": {
+        "type": "object",
+        "required": ["value", "source", "certainty"],
+        "properties": {
+          "value": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source": {
+            "$ref": "#/$defs/source-ref"
+          },
+          "certainty": {
+            "$ref": "#/$defs/certainty-ref"
+          }
+        },
+        "unevaluatedProperties": false
+      },
+      "else": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "header-kebab": {
+      "description": "A kebab-case header value, for example availability. A bare value is covered by the scheme default source with certainty certain; the long form { value, source, certainty } overrides that for this field only (DEC-029).",
+      "if": {
+        "type": "object"
+      },
+      "then": {
+        "type": "object",
+        "required": ["value", "source", "certainty"],
+        "properties": {
+          "value": {
+            "$ref": "#/$defs/kebab-id"
+          },
+          "source": {
+            "$ref": "#/$defs/source-ref"
+          },
+          "certainty": {
+            "$ref": "#/$defs/certainty-ref"
+          }
+        },
+        "unevaluatedProperties": false
+      },
+      "else": {
+        "$ref": "#/$defs/kebab-id"
+      }
+    },
+    "header-code": {
+      "description": "An ISO 6523 ICD or Peppol EAS code, or null. A bare value is covered by the scheme default source with certainty certain; the long form { value, source, certainty } overrides that for this field only (DEC-029).",
+      "if": {
+        "type": "object"
+      },
+      "then": {
+        "type": "object",
+        "required": ["value", "source", "certainty"],
+        "properties": {
+          "value": {
+            "$ref": "#/$defs/icd-code"
+          },
+          "source": {
+            "$ref": "#/$defs/source-ref"
+          },
+          "certainty": {
+            "$ref": "#/$defs/certainty-ref"
+          }
+        },
+        "unevaluatedProperties": false
+      },
+      "else": {
+        "$ref": "#/$defs/icd-code"
+      }
     }
   }
 }
