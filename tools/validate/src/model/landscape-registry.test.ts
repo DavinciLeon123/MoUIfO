@@ -3,7 +3,6 @@ import { join } from 'node:path';
 import { REPO_ROOT } from 'uio-config';
 import { describe, expect, test } from 'vitest';
 import { parse } from 'yaml';
-import { PENDING_CITATION } from './testing.ts';
 
 // Coverage between the committed landscape snapshot and the model sources (DAT-05, DEC-043).
 
@@ -48,14 +47,8 @@ function sourceIds(): string[] {
 }
 
 describe('landscape snapshot and model sources (DAT-05, DEC-043)', () => {
-  test('PENDING_CITATION is the sorted list of the 20 registered source ids of the snapshot', () => {
+  test('the snapshot registers 20 distinct workbook-link sources', () => {
     expect(registeredIds()).toHaveLength(20);
-    expect(PENDING_CITATION).toEqual(registeredIds());
-  });
-
-  test('every pending id is a registered source id of the snapshot', () => {
-    const registered = registeredIds();
-    for (const id of PENDING_CITATION) expect(registered, id).toContain(id);
   });
 
   test('every model source whose url is a workbook link URL is the registered source of that link and is a law or register-doc', () => {

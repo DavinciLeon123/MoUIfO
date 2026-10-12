@@ -7,7 +7,6 @@ import { REPO_ROOT } from 'uio-config';
 import { afterAll, describe, expect, test, vi } from 'vitest';
 import { parse, stringify } from 'yaml';
 import { RULE_COUNT, report, runValidation } from './index.ts';
-import { expectRealModelClean } from './model/testing.ts';
 import { EXPECTED_RUN_STEPS } from './workflow-rules.ts';
 
 vi.setConfig({ testTimeout: 60_000 });
@@ -72,8 +71,8 @@ function runCli(
 }
 
 describe('runValidation', () => {
-  test('returns no problem other than pending citations on the real repository', () => {
-    expectRealModelClean(runValidation(REPO_ROOT));
+  test('returns no problems on the real repository', () => {
+    expect(runValidation(REPO_ROOT)).toEqual([]);
   });
 });
 

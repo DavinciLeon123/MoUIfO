@@ -8,7 +8,7 @@ import { parse } from 'yaml';
 import { checkModel, checkModelFiles } from './check-model.ts';
 import { type ModelFile, parseModelFile } from './load.ts';
 import { buildRegistry } from './refs.ts';
-import { expectRealModelClean, fixture, realModelFiles, withSeedModel } from './testing.ts';
+import { fixture, realModelFiles, withSeedModel } from './testing.ts';
 
 const APPLICABILITY_STATUS = 'model/vocab/applicability-status.yaml';
 
@@ -89,8 +89,8 @@ describe('the real applicability-status vocabulary (DEC-041)', () => {
     }
   });
 
-  test('the repository validates with no problem other than pending citations', () => {
-    expectRealModelClean(checkModel(REPO_ROOT));
+  test('the repository validates with no problem', () => {
+    expect(checkModel(REPO_ROOT)).toEqual([]);
   });
 });
 
@@ -244,8 +244,8 @@ describe('the closed lists of SPEC 5.1 and DEC-003', () => {
     expect(registry.get('vocab:condition-context') ?? new Set()).toEqual(new Set());
   });
 
-  test('the repository validates with no problem other than pending citations', () => {
-    expectRealModelClean(checkModel(REPO_ROOT));
+  test('the repository validates with no problem', () => {
+    expect(checkModel(REPO_ROOT)).toEqual([]);
   });
 });
 
