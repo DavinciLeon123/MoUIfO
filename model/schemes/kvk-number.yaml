@@ -65,6 +65,39 @@ applicability:
     status: [verifiable]
     certainty: certain
     source: kvk-zoeken
+trust:
+  legal_basis: 2
+  registration_quality: 1
+  verifiability: 1
+  crosswalks: 1
+  lifecycle: 1
+  certainty: likely
+  source: landscape-v1-2
+persistence:
+  - event: merger
+    behaviour: "New number for merged entity"
+    certainty: likely
+    source: landscape-v1-2
+  - event: acquisition-without-merger
+    behaviour: "Unchanged"
+    certainty: likely
+    source: landscape-v1-2
+  - event: split
+    behaviour: "New numbers for split entities"
+    certainty: likely
+    source: landscape-v1-2
+  - event: dissolution
+    behaviour: "Ceases"
+    certainty: likely
+    source: landscape-v1-2
+  - event: move-within-country
+    behaviour: "Unchanged"
+    certainty: likely
+    source: landscape-v1-2
+  - event: move-to-other-country
+    behaviour: "New number"
+    certainty: likely
+    source: landscape-v1-2
 rules:
   - id: kvk-number-from-oin
     input: oin
