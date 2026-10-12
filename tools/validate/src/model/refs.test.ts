@@ -7,7 +7,7 @@ import { REPO_ROOT } from 'uio-config';
 import { afterAll, describe, expect, test } from 'vitest';
 import { parse } from 'yaml';
 import { checkModel, checkModelFiles } from './check-model.ts';
-import { type ModelFile, parseModelFile } from './load.ts';
+import { type ModelFile, parseModelFile, VOCAB_SCHEMAS } from './load.ts';
 import {
   buildRegistry,
   checkRequiredVocabs,
@@ -315,11 +315,14 @@ describe('required vocabulary files', () => {
   });
 
   test('checkRequiredVocabs reports each known vocabulary whose file is absent, sorted', () => {
-    expect(checkRequiredVocabs([CERTAINTY, RELATION_KIND])).toEqual([]);
-    expect(checkRequiredVocabs([CERTAINTY])).toEqual([
+    const known = Object.keys(VOCAB_SCHEMAS)
+      .map((stem) => `model/vocab/${stem}.yaml`)
+      .sort();
+    expect(checkRequiredVocabs(known)).toEqual([]);
+    expect(checkRequiredVocabs(known.filter((path) => path !== RELATION_KIND))).toEqual([
       { file: RELATION_KIND, message: 'required vocabulary file is missing' },
     ]);
-    expect(checkRequiredVocabs([]).map((p) => p.file)).toEqual([CERTAINTY, RELATION_KIND]);
+    expect(checkRequiredVocabs([]).map((p) => p.file)).toEqual(known);
   });
 
   test('checkModel on a copy without relation-kind.yaml reports the missing file', () => {
