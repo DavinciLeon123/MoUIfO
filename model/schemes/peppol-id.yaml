@@ -88,3 +88,36 @@ roles:
   - value: e-invoicing-participant
     certainty: likely
     source: landscape-v1-2
+trust:
+  legal_basis: 1
+  registration_quality: 1
+  verifiability: 1
+  crosswalks: 0
+  lifecycle: 0
+  certainty: likely
+  source: landscape-v1-2
+persistence:
+  - event: merger
+    behaviour: "Depends on underlying ID"
+    certainty: likely
+    source: landscape-v1-2
+  - event: acquisition-without-merger
+    behaviour: "Unchanged"
+    certainty: likely
+    source: landscape-v1-2
+  - event: split
+    behaviour: "New ID"
+    certainty: likely
+    source: landscape-v1-2
+  - event: dissolution
+    behaviour: "Inactive"
+    certainty: likely
+    source: landscape-v1-2
+  - event: move-within-country
+    behaviour: "Unchanged"
+    certainty: likely
+    source: landscape-v1-2
+  - event: move-to-other-country
+    behaviour: "New ID"
+    certainty: likely
+    source: landscape-v1-2

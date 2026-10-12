@@ -65,3 +65,36 @@ applicability:
     status: [verifiable]
     certainty: certain
     source: e-justice-business-registers
+trust:
+  legal_basis: 2
+  registration_quality: 0
+  verifiability: 0
+  crosswalks: 1
+  lifecycle: 1
+  certainty: likely
+  source: landscape-v1-2
+persistence:
+  - event: merger
+    behaviour: "Follows national register behaviour"
+    certainty: likely
+    source: landscape-v1-2
+  - event: acquisition-without-merger
+    behaviour: "Unchanged"
+    certainty: likely
+    source: landscape-v1-2
+  - event: split
+    behaviour: "New EUIDs"
+    certainty: likely
+    source: landscape-v1-2
+  - event: dissolution
+    behaviour: "Ceases"
+    certainty: likely
+    source: landscape-v1-2
+  - event: move-within-country
+    behaviour: "Unchanged"
+    certainty: likely
+    source: landscape-v1-2
+  - event: move-to-other-country
+    behaviour: "New EUID"
+    certainty: likely
+    source: landscape-v1-2
