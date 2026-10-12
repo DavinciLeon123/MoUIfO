@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/authority.schema.json
+id: dun-bradstreet
+kind: class
+label:
+  en: Dun & Bradstreet
+definition:
+  en: The company that assigns D-U-N-S numbers.

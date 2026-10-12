@@ -132,15 +132,15 @@ Every seeded membership, prefix and source was read on its live page while the s
 
 ## ICD codes stated only by the Peppol code list
 
-- **Item:** the ICD code `0106` of `kvk-number`, held as `iso6523_icd` at likely from `peppol-code-lists-9-7`, and any other ICD code that only the Peppol Code Lists v9.7 state. The ICD code `0088` of `gln` is held the same way, at likely from the same list. The EAS code `0106` is certain from the same list, because the list is the only source for both values.
+- **Item:** the ICD code `0106` of `kvk-number`, held as `iso6523_icd` at likely from `peppol-code-lists-9-7`, and any other ICD code that only the Peppol Code Lists v9.7 state. The ICD code `0088` of `gln` is held the same way, at likely from the same list, as are `0060` of `duns` and `0199` of `lei` (plan 03-11). The EAS code `0106` is certain from the same list, because the list is the only source for both values.
 - **Why it is not in the model:** it is in the model at likely, not certain. The ISO/IEC 6523 ICD registry (iso6523.info) could not be read on 2026-10-12, because its certificate has expired, so no read source confirms the ICD value beyond the Peppol list. The Peppol list also gives a RegEx note for 0106 (17 digits) that does not match the KVK number's 8 digits; that note is not used.
 - **Open question:** does the ISO/IEC 6523 ICD registry list 0106 as the code of the Netherlands Chamber of Commerce, as the Peppol list states?
 - **Owner or next step:** a human check of the ISO 6523 registry once its certificate is readable (G8). If the registry differs, the `iso6523_icd` statement of `kvk-number` changes or is removed.
 
 ## Levels and roles without a source
 
-- **Item:** the level and role statements that the model omits for lack of a source. `kvk-number` declares neither a level nor a role. `oin` and `fi-number` declare no level either. `vat` and `peppol-id` declare no level either; the workbook gives `vat` the role `taxpayer` and `peppol-id` the role `e-invoicing-participant`, both at likely (DEC-046). The `euid` level `legal-entity` is modelled at likely on the workbook's scope text alone, with no primary source behind it.
-- **Why it is not in the model:** no read source states the level of a KVK number or the role it plays. The KVK page says that "your business or organisation" has an 8-digit KVK number, which does not name a level. The research (G13) finds no sourced level or role for `kvk-number`, `oin`, `fi-number` or `duns`, and no sourced level for `vat` or `peppol-id`; a statement without a source is not written (DEC-019). The `roo` level (KOOP page) and the `bsn` level (Wabb Article 1) are sourced and so are not listed. The `euid` level rests on the workbook (DEC-046) and is marked likely for that reason.
+- **Item:** the level and role statements that the model omits for lack of a source. `kvk-number` declares neither a level nor a role. `oin` and `fi-number` declare no level either. `vat` and `peppol-id` declare no level either; the workbook gives `vat` the role `taxpayer` and `peppol-id` the role `e-invoicing-participant`, both at likely (DEC-046). `lei` declares no level either: its Peppol entry speaks of the legal entity whose official name an LEI records, but no level statement is written for it in plan 03-11; its role `financial-counterparty` is the workbook's, at likely. The `euid` level `legal-entity` is modelled at likely on the workbook's scope text alone, with no primary source behind it.
+- **Why it is not in the model:** no read source states the level of a KVK number or the role it plays. The KVK page says that "your business or organisation" has an 8-digit KVK number, which does not name a level. The research (G13) finds no sourced level or role for `kvk-number`, `oin`, `fi-number` or `duns`, and no sourced level for `vat`, `peppol-id` or `lei`; a statement without a source is not written (DEC-019). The `roo` level (KOOP page) and the `bsn` level (Wabb Article 1) are sourced and so are not listed. The `euid` level rests on the workbook (DEC-046) and is marked likely for that reason.
 - **Open question:** does a read source state whether a KVK number identifies a legal entity or an establishment, and what role the KVK number and the EUID play in a transaction?
 - **Owner or next step:** the owner names a source for each level and role, or accepts the omission. Later plans add their own levels and roles with their sources (G13).
 
@@ -178,3 +178,31 @@ Every seeded membership, prefix and source was read on its live page while the s
 - **Why it is not in the model:** the GS1 General Specifications, section 7.9, where GS1 gives the check digit calculation, was not extracted (research assumption A2). The GS1 GLN Allocation Rules Standard 3.0.2 was read; it does not state the length or the check digit. The example pair in the model is synthetic: the value that passes and the value with a wrong check digit were computed for the test.
 - **Open question:** do GS1 General Specifications section 7.9 and the length statement agree with the Peppol entry?
 - **Owner or next step:** the end-of-phase human check (G7) reads GS1 General Specifications section 7.9. If it differs, the pattern or the checksum of `gln` changes.
+
+## ISO 17442 not read
+
+- **Item:** the LEI format and check digits of `lei`: the pattern `^[A-Z0-9]{18}[0-9]{2}$` and the ISO 7064 mod 97-10 check, both at likely. Their source is the Peppol Code Lists v9.7 (`peppol-code-lists-9-7`, entry 0199), which quotes the ISO 17442 format and check rule. The standard itself was not read.
+- **Why it is not in the model:** ISO 17442 is a paid standard, and no free copy was read on 2026-10-12. Under DEC-049 the status of this item is "not confirmed" by the standard. It is in the model at likely because the Peppol list states it, and the workbook example `724500G3PJTYPL2L9M11` passes the check (executed), while the same value with a changed last digit fails it. The research table marked the check "confirmed" on the Peppol text alone; the status recorded here is the stricter one.
+- **Open question:** does ISO 17442 state the same 18 alphanumeric characters and two digits, and the same ISO/IEC 7064 mod 97-10 check, as the Peppol list?
+- **Owner or next step:** a human check of ISO 17442, or of a free GLEIF statement of the check. If it differs, the `format` and `checksum` statements of `lei` change, and the status in this entry is updated.
+
+## LEI validation page not readable
+
+- **Item:** the `validation_source` of `lei`. The workbook gives "GLEIF index / API" as its validation source. The page proposed for it, https://search.gleif.org/, answered HTTP 200 on 2026-10-12, but its static HTML carries only the title "LEI Search" and no statement text, so what the page checks could not be read.
+- **Why it is not in the model:** a validation source needs a page whose statement can be read (DEC-019). `lei` is therefore written without a `validation_source`. The workbook is not cited as a validation source for it, because the workbook's own source (`landscape-v1-2`) does not name a page that can be checked.
+- **Open question:** which GLEIF page (the search page as rendered in a browser, or the GLEIF API documentation) states that an LEI can be checked there?
+- **Owner or next step:** a human opens https://search.gleif.org/ in a browser, names the page that states the check, and confirms its date. Then `lei` gets a `validation_source` (label, url, certainty certain) with a source file for that page.
+
+## LEI columns of the workbook
+
+- **Item:** the LEI column of the workbook. SPEC §9 says the workbook has two LEI columns that may contradict each other; the plan checked this before modelling `lei`.
+- **Why it is not in the model:** nothing contradicts. The workbook has one LEI column (in the snapshot: Overview column M, Persistence column J), and both tabs rate its persistence "medium". No conflict is recorded, and `lei` takes its one column, as DEC-023 states. The check is logged so that the question is closed rather than dropped.
+- **Open question:** does the two-column statement of SPEC §9 describe another version of the workbook?
+- **Owner or next step:** the owner confirms that the statement is out of date (DEC-023 already corrects it), or names the other workbook version in which two LEI columns occur.
+
+## D-U-N-S check digit stated both ways by the Peppol list
+
+- **Item:** whether a D-U-N-S number carries a check digit. `duns` holds `checksum: none` at likely, from the Peppol Code Lists v9.7 (entry 0060). Its usage text says "Check digits were removed to get a bigger number area". The same entry's structure text still says "Eight identification digits and a check digit", and its display rule ends in a check digit C.
+- **Why it is not in the model:** the usage text is the statement about the nine-digit form, so `none` is modelled at likely on it; the structure text is an older description and is not followed. The D&B page (`dnb-duns`) calls the number "a unique nine-digit identifier" and states no check rule, so it does not settle the question. A `none` entry is a claim that the values carry no check digit; the Peppol list contradicts itself on that claim, so it stays at likely (T-03-26).
+- **Open question:** does a current D&B or Peppol statement say whether the nine-digit D-U-N-S number carries a check digit?
+- **Owner or next step:** a human check of the D&B documentation and of the Peppol entry. If a check digit is confirmed, `duns` gets the matching checksum entry and its examples are re-checked (rule 6). If no source states that the values carry no check digit, the `none` entry is removed.
