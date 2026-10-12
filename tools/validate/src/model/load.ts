@@ -25,6 +25,7 @@ export const VOCAB_SCHEMAS: Readonly<Record<string, string>> = {
   certainty: 'vocab-certainty.schema.json',
   checksum: 'vocab-simple.schema.json',
   'condition-context': 'vocab-simple.schema.json',
+  'country-prefix': 'vocab-country-prefix.schema.json',
   'entity-form': 'vocab-simple.schema.json',
   level: 'vocab-simple.schema.json',
   'persistence-event': 'vocab-simple.schema.json',

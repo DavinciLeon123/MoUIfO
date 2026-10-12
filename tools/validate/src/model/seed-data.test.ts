@@ -141,6 +141,10 @@ type PrefixEntry = {
 const realRecord = (path: string): Record<string, unknown> =>
   parse(readReal(path), { schema: 'core' }) as Record<string, unknown>;
 
+/** Errors only: a fixture map that stops citing Article 215 leaves it uncited, a designed warning. */
+const errorsOf = (files: ModelFile | readonly ModelFile[]) =>
+  check(files).filter((problem) => problem.severity !== 'warning');
+
 const prefixFile = (entries: string): ModelFile =>
   fixture(PREFIX, `id: country-prefix\nlabel:\n  en: Country prefix\nvalues:\n${entries}`);
 const prefixEntry = (prefix: string, jurisdiction: string, source = 'vat-directive-art-215') =>
@@ -196,7 +200,7 @@ describe('the country-prefix vocabulary contract', () => {
     const file = prefixFile(`${prefixEntry('NL', 'NL')}${prefixEntry('NL', 'BE')}`);
     const second = file.text.lastIndexOf('prefix: NL');
     const before = file.text.slice(0, second).split('\n');
-    expect(check(file)).toEqual([
+    expect(errorsOf(file)).toEqual([
       {
         file: PREFIX,
         line: before.length,
@@ -209,7 +213,7 @@ describe('the country-prefix vocabulary contract', () => {
   test('an entry that maps to an unknown jurisdiction fails at that value', () => {
     const file = prefixFile(prefixEntry('DE', 'DE'));
     const at = where(file.text, 'jurisdiction: DE');
-    expect(check(file)).toEqual([
+    expect(errorsOf(file)).toEqual([
       {
         file: PREFIX,
         line: at.line,
@@ -221,7 +225,7 @@ describe('the country-prefix vocabulary contract', () => {
 
   test('an entry without a source fails with the missing property', () => {
     const file = prefixFile('  - prefix: NL\n    jurisdiction: NL\n    certainty: certain\n');
-    const problems = check(file);
+    const problems = errorsOf(file);
     expect(problems.map((p) => p.message)).toEqual(['missing required property "source"']);
     expect(problems[0]).toMatchObject({ file: PREFIX, ...where(file.text, 'prefix: NL') });
   });
@@ -229,7 +233,7 @@ describe('the country-prefix vocabulary contract', () => {
   test.each(['ELL', 'el', 'E', '1L'])('the prefix %s fails the pattern at its value', (prefix) => {
     const file = prefixFile(prefixEntry(prefix, 'GR'));
     const at = where(file.text, `prefix: ${prefix}`);
-    const problems = check(file);
+    const problems = errorsOf(file);
     expect(problems).toHaveLength(1);
     expect(problems[0]).toMatchObject({
       file: PREFIX,
@@ -241,7 +245,7 @@ describe('the country-prefix vocabulary contract', () => {
 
   test('an unknown property on an entry is rejected (the schema is closed)', () => {
     const file = prefixFile(`${prefixEntry('NL', 'NL')}    extra: 1\n`);
-    expect(check(file).map((p) => p.message)).toEqual(['unknown property "extra"']);
+    expect(errorsOf(file).map((p) => p.message)).toEqual(['unknown property "extra"']);
   });
 
   describe('the map is a required vocabulary', () => {

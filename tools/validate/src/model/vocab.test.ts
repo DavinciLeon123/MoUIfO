@@ -192,12 +192,13 @@ describe('the closed lists of SPEC 5.1 and DEC-003', () => {
     expect(idsOf(id)).toEqual(ids);
   });
 
-  test('model/vocab holds exactly the nine vocabulary files', () => {
+  test('model/vocab holds exactly the ten vocabulary files (nine closed lists and the country-prefix map)', () => {
     expect(readdirSync(join(REPO_ROOT, 'model', 'vocab')).sort()).toEqual([
       'applicability-status.yaml',
       'certainty.yaml',
       'checksum.yaml',
       'condition-context.yaml',
+      'country-prefix.yaml',
       'entity-form.yaml',
       'level.yaml',
       'persistence-event.yaml',

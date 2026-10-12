@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/jurisdiction.schema.json
+id: BE
+label:
+  en: Belgium
+  nl: België
+part_of:
+  - jurisdiction: EU
+    source: teu-art-52
+    certainty: certain
