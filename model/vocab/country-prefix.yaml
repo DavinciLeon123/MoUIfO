@@ -18,3 +18,13 @@ values:
     certainty: certain
     note:
       en: Greece may use the prefix EL (Art. 215)
+  - prefix: XI
+    jurisdiction: XI
+    source: vat-directive-art-215
+    certainty: certain
+    note:
+      en: "'XI' shall be used for Northern Ireland (Art. 215, as amended by Directive (EU) 2020/1756)"
+  - prefix: GB
+    jurisdiction: GB
+    source: hmrc-eori-introduction
+    certainty: certain

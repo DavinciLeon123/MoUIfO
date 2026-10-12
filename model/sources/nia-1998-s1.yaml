@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/source.schema.json
+id: nia-1998-s1
+title: Northern Ireland Act 1998, section 1 (Status of Northern Ireland)
+type: law
+date: 1998-11-19
+url: https://www.legislation.gov.uk/ukpga/1998/47/section/1
+publisher: The National Archives (legislation.gov.uk)
