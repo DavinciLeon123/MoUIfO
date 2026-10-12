@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/source.schema.json
+id: vat-nl-mod97-analysis
+title: ISO 7064 mod 97-10 check of the official Dutch VAT number example
+type: analysis
+date: 2026-10-12
+url: https://ondernemersplein.overheid.nl/nummers-voor-de-btw/
+method: "Computed by the project with the engine's own ISO 7064 mod 97-10 kernel (DEC-037), over the whole example that the Ondernemersplein page publishes, with the letters converted to numbers. The remainder is 1, so the check passes. The same example fails the elfproef on its 9-digit core. No official text read states this check; a claim that rests only on this computation has certainty likely (DEC-049)."
