@@ -372,3 +372,60 @@ describe('vat-nl sole-proprietor mod 97 entry, Peppol code and statements (DAT-0
     expect(load('model/authorities/national-tax-authority.yaml').kind).toBe('class');
   });
 });
+
+describe('kvk-number and the RSIN prerequisite (DAT-01, DEC-036, research Pitfalls 5 and 6)', () => {
+  test('accepts 05058078 and 08024285, rejects 0505807 and A5058078; no checksum (no source says either way)', () => {
+    const format = formatOf(scheme('kvk-number'));
+    expect(checkValue(format, '05058078').accepted).toBe(true);
+    expect(checkValue(format, '08024285').accepted).toBe(true);
+    expect(checkValue(format, '0505807').accepted).toBe(false);
+    expect(checkValue(format, 'A5058078').accepted).toBe(false);
+    expect((scheme('kvk-number').format as Json).checksum).toBeUndefined();
+  });
+
+  test('the pattern is certain and sourced to the KVK numbers page, which is dated 2026-09-18', () => {
+    const patterns = listOf((scheme('kvk-number').format as Json).patterns);
+    expect(patterns).toEqual([
+      expect.objectContaining({ certainty: 'certain', source: 'kvk-numbers' }),
+    ]);
+    expect(load('model/sources/kvk-numbers.yaml')).toEqual(
+      expect.objectContaining({ type: 'register-doc', date: '2026-09-18' }),
+    );
+  });
+
+  test('iso6523_icd 0106 is likely (stated only by the Peppol list); peppol_eas 0106 is certain', () => {
+    const kvk = scheme('kvk-number');
+    expect(kvk.iso6523_icd).toEqual({
+      value: '0106',
+      source: 'peppol-code-lists-9-7',
+      certainty: 'likely',
+    });
+    expect(kvk.peppol_eas).toEqual({
+      value: '0106',
+      source: 'peppol-code-lists-9-7',
+      certainty: 'certain',
+    });
+  });
+
+  test('legal basis cites Handelsregisterwet 2007 Article 12(a) and Handelsregisterbesluit 2008, both certain', () => {
+    expect(listOf(scheme('kvk-number').legal_basis)).toEqual([
+      expect.objectContaining({
+        source: 'handelsregisterwet-2007',
+        title: expect.stringContaining('Article 12(a)'),
+        certainty: 'certain',
+      }),
+      expect.objectContaining({ source: 'handelsregisterbesluit-2008', certainty: 'certain' }),
+    ]);
+  });
+
+  test('rsin has the relation prerequisite kvk-number, likely, sourced to kvk-rsin', () => {
+    expect(listOf(scheme('rsin').relations)).toEqual([
+      expect.objectContaining({
+        kind: 'prerequisite',
+        target: 'kvk-number',
+        certainty: 'likely',
+        source: 'kvk-rsin',
+      }),
+    ]);
+  });
+});
