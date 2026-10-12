@@ -43,6 +43,14 @@ legal_basis:
     url: "https://wetten.overheid.nl/BWBR0022428/2025-11-11"
     certainty: certain
     source: wabb
+trust:
+  legal_basis: null
+  registration_quality: null
+  verifiability: null
+  crosswalks: null
+  lifecycle: null
+  certainty: likely
+  source: landscape-v1-2
 mandatory:
   text: "yes, for natural persons"
   certainty: likely

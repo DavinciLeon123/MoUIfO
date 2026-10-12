@@ -54,6 +54,39 @@ roles:
   - value: economic-operator
     certainty: certain
     source: commission-eori
+trust:
+  legal_basis: 1
+  registration_quality: 1
+  verifiability: 0
+  crosswalks: 1
+  lifecycle: 1
+  certainty: likely
+  source: landscape-v1-2
+persistence:
+  - event: merger
+    behaviour: "Unchanged if entity persists"
+    certainty: likely
+    source: landscape-v1-2
+  - event: acquisition-without-merger
+    behaviour: "Unchanged"
+    certainty: likely
+    source: landscape-v1-2
+  - event: split
+    behaviour: "New EORI"
+    certainty: likely
+    source: landscape-v1-2
+  - event: dissolution
+    behaviour: "Ceases"
+    certainty: likely
+    source: landscape-v1-2
+  - event: move-within-country
+    behaviour: "Unchanged"
+    certainty: likely
+    source: landscape-v1-2
+  - event: move-to-other-country
+    behaviour: "New EORI"
+    certainty: likely
+    source: landscape-v1-2
 mandatory:
   text: "yes, for cross-border trading involving EU customs"
   certainty: likely

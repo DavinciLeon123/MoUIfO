@@ -39,6 +39,39 @@ format:
   examples_invalid:
     - "123456789"
     - "1234567890"
+trust:
+  legal_basis: null
+  registration_quality: null
+  verifiability: null
+  crosswalks: null
+  lifecycle: null
+  certainty: likely
+  source: landscape-v1-2
+persistence:
+  - event: merger
+    behaviour: "New number for merged entity"
+    certainty: likely
+    source: landscape-v1-2
+  - event: acquisition-without-merger
+    behaviour: "Unchanged"
+    certainty: likely
+    source: landscape-v1-2
+  - event: split
+    behaviour: "New numbers for split entities"
+    certainty: likely
+    source: landscape-v1-2
+  - event: dissolution
+    behaviour: "Ceases"
+    certainty: likely
+    source: landscape-v1-2
+  - event: move-within-country
+    behaviour: "Unchanged"
+    certainty: likely
+    source: landscape-v1-2
+  - event: move-to-other-country
+    behaviour: "New number"
+    certainty: likely
+    source: landscape-v1-2
 mandatory:
   text: "yes, for organisations with VAT duty"
   certainty: likely

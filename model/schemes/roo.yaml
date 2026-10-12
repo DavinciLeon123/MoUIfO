@@ -22,6 +22,35 @@ level:
     certainty: certain
     source: koop-roo
     note: "The ROO page: the register holds data about and from government bodies."
+trust:
+  legal_basis: 1
+  registration_quality: 0
+  verifiability: 0
+  crosswalks: 0
+  lifecycle: 0
+  certainty: likely
+  source: landscape-v1-2
+persistence:
+  - event: merger
+    behaviour: "New number"
+    certainty: likely
+    source: landscape-v1-2
+  - event: acquisition-without-merger
+    behaviour: "Unchanged"
+    certainty: likely
+    source: landscape-v1-2
+  - event: split
+    behaviour: "New number"
+    certainty: likely
+    source: landscape-v1-2
+  - event: dissolution
+    behaviour: "Ceases"
+    certainty: likely
+    source: landscape-v1-2
+  - event: move-within-country
+    behaviour: "Unchanged"
+    certainty: likely
+    source: landscape-v1-2
 mandatory:
   text: "no"
   certainty: likely
