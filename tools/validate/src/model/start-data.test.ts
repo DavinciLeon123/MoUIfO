@@ -1405,8 +1405,8 @@ describe('kbo, the Belgian enterprise number as a light scheme (DAT-03, plan 03-
 
   test('accepts a ten-digit value that starts with 0 or 1, and rejects a leading 2 and the two invalid examples of the file', () => {
     const format = formatOf(scheme('kbo'));
-    expect(checkValue(format, '1' + '0'.repeat(9)).accepted).toBe(true);
-    expect(checkValue(format, '2' + '0'.repeat(9)).accepted).toBe(false);
+    expect(checkValue(format, `1${'0'.repeat(9)}`).accepted).toBe(true);
+    expect(checkValue(format, `2${'0'.repeat(9)}`).accepted).toBe(false);
     expect(checkValue(format, '2123456789').accepted).toBe(false);
     expect(checkValue(format, '01234567').accepted).toBe(false);
   });
