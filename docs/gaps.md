@@ -1,14 +1,54 @@
 # Gaps
 
-This file lists knowledge that is not in the model, or is in it with a caveat, and the open question behind each item (DEC-019, strict sourcing). A statement without a source or with an unverified claim is left out of `model/` and logged here instead of being invented. Each entry has four parts: the item, why it is not in the model, the open question, and who or what resolves it. The entries below come from the Phase 2 seed (plans 02-08 and 02-09).
+This file lists knowledge that is not in the model, or is in it with a caveat, and the open question behind each item (DEC-019, strict sourcing). A statement without a source or with an unverified claim is left out of `model/` and logged here instead of being invented. Each entry has four parts: the item, why it is not in the model, the open question, and who or what resolves it. The Appendix B verification table and the end-of-phase human check come first. The other entries come from the Phase 2 seed (plans 02-08 and 02-09) and the Phase 3 plans (03-04 to 03-15).
 
 Every seeded membership, prefix and source was read on its live page while the seed was written. No membership or prefix claim was omitted in plans 02-08 and 02-09, so the list below holds only identifier and label gaps and the interpretations that a human check should look at.
+
+## Appendix B verification (DEC-049)
+
+Each row names the source actually read, the status of the item and the certainty at which the item is in the model (DEC-049). An item that no source states is omitted and logged below. An item stated only by the workbook (DEC-046) or by a documented computation is in the model at the certainty its row gives and is logged as well. A Peppol-code-list-only item is never plain `confirmed`: only ICD 0190 is confirmed, by the scheme owner's own standard. The date is the day the item was read.
+
+| Item | Status | Source | Date checked |
+|------|--------|--------|--------------|
+| ICD 0106 (KVK number) | not confirmed by the ISO 6523 registry (unreadable, its certificate has expired); stated by the Peppol code list; in the model at likely (long form) | peppol-code-lists-9-7 | 2026-10-12 |
+| ICD 0190 (OIN) | confirmed by the scheme owner's standard (OIN Stelsel 2.1.0, section 3.12.1; the ISO 6523 registry was not read); in the model at certain | oin-stelsel-2-1-0, peppol-code-lists-9-7 | 2026-10-12 |
+| ICD 0088 (GLN) | not confirmed by the ISO 6523 registry (unreadable, its certificate has expired); stated by the Peppol code list; in the model at likely (long form) | peppol-code-lists-9-7 | 2026-10-12 |
+| ICD 0060 (D-U-N-S) | not confirmed by the ISO 6523 registry (unreadable, its certificate has expired); stated by the Peppol code list; in the model at likely (long form) | peppol-code-lists-9-7 | 2026-10-12 |
+| ICD 0199 (LEI) | not confirmed by the ISO 6523 registry (unreadable, its certificate has expired); stated by the Peppol code list; in the model at likely (long form) | peppol-code-lists-9-7 | 2026-10-12 |
+| ICD 0208 (Belgian enterprise number) | not confirmed by the ISO 6523 registry (unreadable, its certificate has expired); stated by the Peppol code list; in the model at likely (long form) | peppol-code-lists-9-7 | 2026-10-12 |
+| Peppol EAS 9944 (Dutch VAT number) | not confirmed by the ISO 6523 registry (an EAS code is not an ICD; the Peppol code list is the only source read); stated by the Peppol code list; in the model at certain as `peppol_eas` only (DEC-036) | peppol-code-lists-9-7 | 2026-10-12 |
+| Peppol EAS 0106, 0190, 0088, 0060, 0199, 0208 | not confirmed by the ISO 6523 registry (an EAS code is not an ICD; the Peppol code list is the only source read); stated by the Peppol code list; in the model at certain as `peppol_eas` (DEC-036) | peppol-code-lists-9-7 | 2026-10-12 |
+| Elfproef of BSN, RSIN and fi-number | not confirmed by a primary source; in the model at likely on workbook authority (DEC-046) | landscape-v1-2 | 2026-10-12 |
+| LEI ISO 7064 mod 97-10 | not confirmed by ISO 17442 (paid, not read); stated by the Peppol code list and passes on the workbook example; in the model at likely | peppol-code-lists-9-7 | 2026-10-12 |
+| GLN GS1 mod 10 | not confirmed by the GS1 General Specifications (section 7.9 not extracted); stated by the Peppol code list; in the model at likely | peppol-code-lists-9-7 | 2026-10-12 |
+| Mod 97 of the Dutch sole-proprietor VAT number | not confirmed as an official rule (the structure is confirmed by Ondernemersplein, and the rule is computed on its example); in the model at likely (DEC-004, DEC-038, DEC-049) | ondernemersplein-nummers-voor-de-btw, vat-nl-mod97-analysis | 2026-10-12 |
+| Dutch EUID format | not confirmed (Implementing Regulation (EU) 2021/1042, Annex point 9, fixes only the structure); in the model at possible on workbook authority (DEC-047) | reg-2021-1042, landscape-v1-2 | 2026-10-12 |
+| OIN prefixes 00000001 and 00000003 | confirmed by OIN Stelsel 2.1.0, section 6.2; in the model as rule prefixes (forward rules likely, reverse rules certain) | oin-stelsel-2-1-0 | 2026-10-12 |
+| Suffix after the B of the Dutch VAT number | not confirmed; not in the model (no rule to the VAT number, DEC-050) | — | 2026-10-12 |
+| GLEIF RA entries RA000463 and RA000025 | confirmed by the GLEIF Registration Authorities List v1.9; in the model as references relations at likely | gleif-ra-list | 2026-10-12 |
+| EORI structure | confirmed by the Commission and Douane pages (the Douane page conflicts with the sole-proprietor pattern, see its entry); in the model at certain for the EU and Dutch legal-person patterns and at likely for the sole-proprietor pattern (DEC-046) | commission-eori, douane-eori-nl, landscape-v1-2 | 2026-10-12 |
+
+## End-of-phase human check
+
+These checks need a browser or a human reading, because the build environment cannot read them automatically or the source is paid, gated or unreadable. Each one names the entry that holds its open question.
+
+- ELI resolution on EUR-Lex: open `http://data.europa.eu/eli/reg_impl/2017/394/oj` (`csdr-its-2017-394`), `http://data.europa.eu/eli/reg_impl/2021/1042/oj` (`reg-2021-1042`) and `http://data.europa.eu/eli/dir/2017/1132/oj` (`dir-2017-1132`), and confirm that each resolves to the act named (entry "EUR-Lex ELI of Commission Implementing Regulation (EU) 2017/394 not confirmed"). Also confirm the ELIs of `ucc-952-2013` and `ucc-2026-2108` (entry "Union Customs Code succession (Regulation (EU) 2026/2108)").
+- Fallback dates (DEC-042): open each page of the entry "Source dates not stated on the page (DEC-042)" and the page of `hmrc-eori-introduction` (entry "Version date of a seeded source"), look for a visible version date (for example "Bijgewerkt" or "Last update"), and correct the `date` where the page shows one.
+- Titles and publisher (plan 03-05): the titles of `eori-validation`, `oin-register` and `dnb-duns-lookup`, and the publisher of `organisaties-overheid` (entry "Titles and publisher of pages read in plan 03-05").
+- Belgian sources: the FOD Economie pages and Book III of the Code of Economic Law (entry "Official Belgian KBO sources not readable"), the Belgian enterprise-number check digit (entry "Belgian enterprise-number check digit (DEC-048)"), and the KBO Public Search statements behind `availability` and `applicability` of `kbo` (entry "KBO availability and applicability rest on an inference").
+- GS1: GS1 General Specifications section 7.9, the check digit of the GLN (entry "GS1 check digit text").
+- ISO 17442: the format and check of the LEI (entry "ISO 17442 not read").
+- ISO 6523 registry: the ICD codes 0106, 0088, 0060, 0199 and 0208 and the EAS codes (entry "ICD codes stated only by the Peppol code list"). The registry certificate has expired, so the check needs a readable copy.
+- TEU date: the version date 2025-03-15 of `teu-art-52` and its Article 52(1) wording in the consolidated text (entry "EUR-Lex text of the two EU sources not re-read").
+- Adoption date of the Handelsregisterwet: taken from the wetten page, not from the Staatsblad PDF text (plan 03-04; `handelsregisterwet-2007`).
+- LEI validation page: which GLEIF page states the check (entry "LEI validation page not readable").
+- Dutch EUID register identifier: the e-Justice or BRIS documentation (entry "Dutch EUID register identifier (Implementing Regulation (EU) 2021/1042 annex)").
 
 ## EUR-Lex text of the two EU sources not re-read
 
 - **Item:** `teu-art-52` (ELI `http://data.europa.eu/eli/treaty/teu_2016/2025-03-15`) and `vat-directive-art-215` (ELI `http://data.europa.eu/eli/dir/2006/112/2025-04-14`) now cite EUR-Lex, with the ELIs supplied by the owner on 2026-10-12.
-- **Why it is a caveat:** EUR-Lex cannot be read automatically from the build environment (HTTP 202 with an empty body), so the cited wording (TEU Art. 52(1) naming the Netherlands, Belgium and Greece; Directive Art. 215 with the "EL" and "XI" prefix sentences) was read earlier on the legislation.gov.uk mirror and not yet on EUR-Lex. The `teu-art-52` `url` is its ELI (the owner's CELEX link pointed at the 2016 text, not the 2025-03-15 consolidated version), and its date 2025-03-15 is the version date in that ELI.
-- **Open question:** does the EUR-Lex text read the same for those claims, and is the ELI version date the right `date` for `teu-art-52`?
+- **Why it is not in the model:** the EUR-Lex pages themselves cannot be read automatically from the build environment (HTTP 202 with an empty body), so the EUR-Lex reading is not in the model as confirmed. On 2026-10-12 the Publications Office Cellar was read instead. The consolidated VAT Directive (CELEX 02006L0112-20250414) has Article 215 with the sentence that Greece may use the prefix "EL" and the sentence that the prefix "XI" shall be used for Northern Ireland, so `vat-directive-art-215` is confirmed for those two claims. For the TEU the Cellar returned the 2016 text (CELEX 12016M052), which does not show the 2025-03-15 version named by the ELI. The TEU Art. 52(1) wording (the Netherlands, Belgium and Greece) was read earlier on the legislation.gov.uk mirror. The `teu-art-52` `url` is its ELI (the owner's CELEX link pointed at the 2016 text), and its date 2025-03-15 is the version date in that ELI, so that date is not confirmed.
+- **Open question:** does the consolidated TEU of 2025-03-15 state the Art. 52(1) wording that `teu-art-52` cites, and is 2025-03-15 the right `date` for `teu-art-52`?
 - **Owner or next step:** the end-of-phase human check opens both EUR-Lex pages and confirms text and date; adjust the files if they differ.
 
 ## GB means the United Kingdom, but the GB EORI prefix covers Great Britain only
@@ -34,7 +74,7 @@ Every seeded membership, prefix and source was read on its live page while the s
 
 ## Source dates not stated on the page (DEC-042)
 
-- **Item:** the `date` of these registry sources is a DEC-042 fallback, with the kind of date used: kvk-home (JSON-LD `dateModified`), kvk-zoeken (JSON-LD `dateModified`, 2026-01-20 read on 2026-10-12), koop-roo (`DCTERMS.modified`), gs1-nl-gln (read date), dnb-duns (HTTP `Last-Modified`), oin-register (HTTP `Last-Modified`), vies (read date), organisaties-overheid (read date), e-justice-business-registers (HTTP `Last-Modified`), eori-validation (read date), peppol-test-tool (HTTP `Last-Modified`), gs1-verified (read date), dnb-duns-lookup (HTTP `Last-Modified`), commission-eori (JSON-LD `dateModified`, 2026-06-03; the page shows no visible date), ondernemersplein-nummers-voor-de-btw (JSON-LD `dateModified`, 2026-08-04; no visible date found on the page), and gs1-gln-allocation-rules (month stated, day not stated: the cover reads "Aug 2022"; the date used is 2022-08-01).
+- **Item:** the date of these registry sources is a DEC-042 fallback, with the kind of date used: `kvk-home` (JSON-LD dateModified), `kvk-zoeken` (JSON-LD dateModified, 2026-01-20 read on 2026-10-12), `koop-roo` (DCTERMS.modified), `gs1-nl-gln` (read date), `dnb-duns` (HTTP Last-Modified), `oin-register` (HTTP Last-Modified), `vies` (read date), `organisaties-overheid` (read date), `e-justice-business-registers` (HTTP Last-Modified), `eori-validation` (read date), `peppol-test-tool` (HTTP Last-Modified), `gs1-verified` (read date), `dnb-duns-lookup` (HTTP Last-Modified), `commission-eori` (JSON-LD dateModified, 2026-06-03; the page shows no visible date), `ondernemersplein-nummers-voor-de-btw` (JSON-LD dateModified, 2026-08-04; no visible date found on the page), and `gs1-gln-allocation-rules` (month stated, day not stated: the cover reads "Aug 2022"; the date used is 2022-08-01).
 - **Why it is not in the model:** the source schema dates a register-doc by the page's last-updated date, and the schema needs a date for every source. DEC-042 takes the machine-readable modification date, then the date the page was read, when the page states no date. Whether each page also shows a visible version date was not checked for every page.
 - **Open question:** does each page show a version date a person can read (for example "Bijgewerkt" or "Last update")? If it does, that date replaces the fallback.
 - **Owner or next step:** the end-of-phase human check opens each page and confirms or corrects its `date`; the affected files are adjusted if it differs. Later plans append the ids of their own fallback-dated sources to this entry.
@@ -241,3 +281,52 @@ Every seeded membership, prefix and source was read on its live page while the s
 - **Why it is not in the model:** each scheme of the persistence tab carries a summary rating (high, medium, low-medium, low, variable; the OIN reads "high within NL" and the GLN "Low"). The model has no schema field for such a rating, and a composite or summary score is out of scope, so no rating is stored. Cells that read `n/a` or are empty are not modelled: all six events for `bsn`, and "move to another country" for `kvk-establishment-number` and `roo`. The trust cells of `bsn` and `fi-number` are blank in the workbook, so their five sub-scores are null, never 0.
 - **Open question:** does the owner want the workbook's summary ratings in the model, and if so, in which field and with which vocabulary?
 - **Owner or next step:** a schema decision if the ratings are wanted (a DECISIONS row and a schema field). Until then the ratings stay out of the model, and the not-assessed cells stay unmodelled.
+
+## Workbook references row has no scheme field (plan 03-15)
+
+- **Item:** the workbook's Overview row 25, "references", gives one search or register page for most identifiers: "Zoeken bij KVK" for the KvK number, "OIN Register" for the OIN, "Register van Overheidsorganisaties" for the ROO, "NPa Peppol Test Tool" for the Peppol-ID, "GLEIF Registration Authorities List" for the LEI, "Verified by GS1 (NL)" for the GLN, "European e-Justice Portal" for the EUID, "EORI number validation" for the EORI and "D&B D-U-N-S Number Lookup" for the D-U-N-S number. The scheme schema has no field for this row.
+- **Why it is not in the model:** a page is cited only where a statement needs it (DEC-043). The model takes these pages through `validation_source` where the validation row (Overview row 16, "where can the UID be validated") names the same page, or as the source of a statement, as the GLEIF Registration Authorities List backs the `references` relations of `lei` (DEC-043). Where row 16 names another page, the row 25 page is not a validation source and no field holds it. For the LEI, row 16 names "GLEIF index / API", whose page cannot be read (entry "LEI validation page not readable"), while row 25 names the Registration Authorities List. The planning notes called row 25 "where can the ID be searched"; that wording belongs to row 16, and row 25 is "references".
+- **Open question:** should a scheme carry its reference pages in a field of their own, so that the row 25 page sits beside the validation source of row 16?
+- **Owner or next step:** the owner decides on a schema field through a new DECISIONS row. Until then the reference pages are cited only where a statement needs them.
+
+## Workbook claims checked against primary sources (DAT-06)
+
+- **Item:** each workbook claim that the Phase 3 plans used was compared with the primary source read for it (the EU texts, the Dutch and Belgian legal texts, the standards and the register pages named in the model). Four workbook claims are contradicted by a primary source: the sole-proprietor VAT format in cells J10 and J11 (entry "Workbook VAT format cells and the official structure"), the hyperlinks whose target does not back their label (entry "Workbook hyperlinks whose target does not back their label"), the RSIN long name (entry "RSIN long name differs between the workbook and the KVK"), and the sole-proprietor EORI pattern that the Douane page contradicts (entry "Dutch sole-proprietor EORI and the non-Dutch NL plus fi-number form").
+- **Why it is not in the model:** the model follows the primary source where the two disagree. The VAT structure follows Ondernemersplein, the RSIN name follows the KVK page, and the hyperlinks are kept only where they back their claim. The sole-proprietor EORI pattern stays in the model at likely, because the owner accepted it, and its Douane conflict is logged. No other workbook claim was found to contradict a primary source that was read. Claims that no primary source states stay at likely on workbook authority (DEC-046), and each has its own entry.
+- **Open question:** does the next workbook version correct the four claims, and does it state the sole-proprietor EORI form in line with Douane?
+- **Owner or next step:** the workbook authors, at the next workbook version; the owner confirms the replacements.
+
+## EUID abbreviation and the issuing-country condition of its prerequisite (plan 03-08)
+
+- **Item:** two points on `euid`. (a) The scheme has no `abbreviation`. A bare header `EUID` would need the default source `dir-2017-1132` to state it at certain, and the Directive's text, read through the Publications Office Cellar, does not name the EUID or "European Unique Identifier". (b) The `prerequisite` relation from `euid` to `kvk-number` carries the condition `issuing_country: NL`. The schema and the validator accept it, but the model does not say how the issuing country of an EUID value is read, because `euid` has no `context_from`.
+- **Why it is not in the model:** (a) no read source states the abbreviation at certain (DEC-019), so the field is left unset. The workbook gives an abbreviation only at likely, so the long form at likely, as the BSN has it, is an option the owner decides. (b) The engine has no handling of `issuing_country` yet, so the condition is data only and no reader applies it.
+- **Open question:** does an e-Justice or BRIS document state the abbreviation EUID? How does the engine read the issuing country of an EUID value, and should `euid` gain a `context_from` for it?
+- **Owner or next step:** the owner decides the abbreviation form, after the e-Justice check. The phase that builds `recognise` adds the issuing-country reader, or the condition is removed.
+
+## Certainty of the OIN forward rules (plan 03-09)
+
+- **Item:** the two forward rules of `oin`, `oin-from-kvk-number` and `oin-from-rsin`, are at likely. Their relations and both reverse rules are at certain. OIN Stelsel 2.1.0, sections 6.1 and 6.2, state the prefix and suffix that the forward rules use.
+- **Why it is not in the model:** the rule file gives no reason for the lower certainty of the forward rules, although the standard states the transform in the sections named. The rules stay at likely until the owner decides, and the reverse rules keep the full prefix at certain.
+- **Open question:** should the forward rules be raised to certain on sections 6.1 and 6.2, or is there a reason the forward direction is less certain, for example a case the standard leaves open?
+- **Owner or next step:** the owner decides. A change raises the two certainty values, or the reason is written into the rule notes.
+
+## BSN abbreviation and issuer in the long form, Wabb not read (plan 03-09)
+
+- **Item:** the `bsn` scheme's abbreviation `BSN` and issuer `rvig` are written in the long form at likely, sourced to the workbook (`landscape-v1-2`).
+- **Why it is not in the model:** the Wabb page (`wabb`, Article 1) returned an empty reply on 2026-10-12, so neither value could be checked against its text. A bare value needs the default source at certain (authoring rule 3), and no text read so far states the abbreviation or names RvIG as the issuer.
+- **Open question:** does the Wabb text, or another RvIG or Logius page, state the abbreviation BSN and name RvIG as the issuer?
+- **Owner or next step:** a human reads the Wabb page in a browser, or the read is retried. If the page states both, the two values become bare at certain, with `wabb` as the default source.
+
+## KBO availability and applicability rest on an inference (plan 03-12)
+
+- **Item:** the `kbo` scheme's `availability: public`, written as a bare value on the default source `kbo-public-search` at certain, and its applicability `BE issued`.
+- **Why it is not in the model:** both come from the KBO Public Search page, which states that the CBE Public Search "displays the public data of all registered entities". That sentence does not literally say that enterprise numbers are public, and the page does not use the word "issued", so both values are inferred from it while the header carries them at certain. The page's "situation in the CBE database on 11/10/2026" was read as 11 October 2026 (day, month, year) and was not re-opened in plan 03-12.
+- **Open question:** does the KBO Public Search page, or an official Belgian text, state that enterprise numbers are public and that the register issues them?
+- **Owner or next step:** the owner, or a human reading the page, decides. If the reading is not supported, `availability` and `applicability` change or are removed.
+
+## Titles and publisher of pages read in plan 03-05
+
+- **Item:** the titles of three registry sources and the publisher of one. The page title of `eori-validation` is "EOS" and that of `oin-register` is "COR"; the titles used in the model, "EU EORI number validation" and "OIN register (Logius)", are the plan's examples. `dnb-duns-lookup` returned no `<title>`, so its title is taken from the workbook label. The publisher of `organisaties-overheid` is KOOP, an inference: the page is rendered by JavaScript and does not name its operator in the fetched HTML.
+- **Why it is not in the model:** a title and a publisher are content that a test cannot prove, and the fetched pages give no more than their own title or a sibling page. The publisher KOOP follows the sibling ROO page, which is the register that `organisaties-overheid` belongs to.
+- **Open question:** does each page state its own title, and does `organisaties-overheid` name KOOP or another operator as its publisher?
+- **Owner or next step:** the end-of-phase human check opens the three pages and the `organisaties-overheid` page; the title or publisher changes where a page says otherwise.
