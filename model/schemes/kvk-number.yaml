@@ -1,0 +1,67 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/scheme.schema.json
+id: kvk-number
+label:
+  en: KVK number
+  nl: KVK-nummer
+kind: identifier
+issuer: kvk
+jurisdiction: NL
+availability:
+  value: public
+  source: landscape-v1-2
+  certainty: likely
+iso6523_icd:
+  value: "0106"
+  source: peppol-code-lists-9-7
+  certainty: likely
+peppol_eas:
+  value: "0106"
+  source: peppol-code-lists-9-7
+  certainty: certain
+sources:
+  default: kvk-numbers
+scope:
+  en: "required in many formal activities"
+format:
+  patterns:
+    - regex: "^[0-9]{8}$"
+      certainty: certain
+      source: kvk-numbers
+      note: "An 8-digit KVK number. The Peppol list's RegEx note (17 digits) is not used (research Pitfall 6)."
+  examples_valid:
+    - "05058078"
+    - "08024285"
+  examples_invalid:
+    - "0505807"
+    - "A5058078"
+legal_basis:
+  - title: "Handelsregisterwet 2007, Article 12(a) (a unique number assigned by a chamber of commerce)"
+    url: "https://zoek.officielebekendmakingen.nl/stb-2007-153.pdf"
+    certainty: certain
+    source: handelsregisterwet-2007
+  - title: "Handelsregisterbesluit 2008 (refers to the unique number of Article 12(a) of the Handelsregisterwet)"
+    url: "https://wetten.overheid.nl/BWBR0024067/2021-04-30/"
+    certainty: certain
+    source: handelsregisterbesluit-2008
+validation_source:
+  label: Business Register search (KVK)
+  url: https://www.kvk.nl/zoeken/
+  certainty: certain
+  source: kvk-zoeken
+mandatory:
+  text: "yes, for all organizations engaging in entrepreneurial activities"
+  certainty: likely
+  source: landscape-v1-2
+applicability:
+  - jurisdiction: NL
+    status: [issued]
+    certainty: certain
+    source: kvk-numbers
+  - jurisdiction: NL
+    status: [recognised]
+    certainty: certain
+    source: handelsregisterwet-2007
+  - jurisdiction: NL
+    status: [verifiable]
+    certainty: certain
+    source: kvk-zoeken

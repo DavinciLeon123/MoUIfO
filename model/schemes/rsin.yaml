@@ -54,6 +54,12 @@ applicability:
     status: [verifiable]
     certainty: certain
     source: kvk-zoeken
+relations:
+  - kind: prerequisite
+    target: kvk-number
+    certainty: likely
+    source: kvk-rsin
+    note: "The RSIN is issued with the KvK number; only sole proprietorships receive none (KVK RSIN page)."
 rules:
   - id: rsin-from-eori-nl
     input: eori
