@@ -10,6 +10,7 @@ import {
 } from './load.ts';
 import { buildRegistry, checkRequiredVocabs, checkVocabMembers } from './refs.ts';
 import { createAjv, schemaProblems } from './schema.ts';
+import { checkSchemes } from './schemes.ts';
 
 const compare = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
 
@@ -84,6 +85,7 @@ export function runModelChecks(files: readonly ModelFile[]): {
     clean.map(({ parsed }) => parsed).filter(({ path }) => path.startsWith(`model/${directory}/`));
   problems.push(
     ...checkPartOf(inDirectory('jurisdictions')),
+    ...checkSchemes(inDirectory('schemes')),
     ...uncitedSourceWarnings(inDirectory('sources'), cited),
   );
   return { problems, cited };

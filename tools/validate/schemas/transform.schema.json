@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "transform.schema.json",
+  "description": "The closed transform set of SPEC 5.3 (MOD-11): a transform is a non-empty list of steps, each the bare string uppercase or an object with exactly one operation. Nothing else is accepted, and no code is evaluated. The engine compileTransform enforces the same set and the same argument rules (DEC-037); a test keeps the operation names of both equal.",
+  "$defs": {
+    "step": {
+      "description": "One transform step.",
+      "if": {
+        "type": "string"
+      },
+      "then": {
+        "const": "uppercase"
+      },
+      "else": {
+        "type": "object",
+        "minProperties": 1,
+        "maxProperties": 1,
+        "properties": {
+          "strip_prefix": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "strip_suffix": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "add_prefix": {
+            "type": "string",
+            "minLength": 1
+          },
+          "add_suffix": {
+            "type": "string",
+            "minLength": 1
+          },
+          "pad_left": {
+            "type": "object",
+            "properties": {
+              "length": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "char": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1
+              }
+            },
+            "required": ["length", "char"],
+            "unevaluatedProperties": false
+          },
+          "remove": {
+            "type": "string",
+            "minLength": 1
+          },
+          "capture": {
+            "$ref": "common.schema.json#/$defs/capture"
+          },
+          "template": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "unevaluatedProperties": false
+      }
+    },
+    "list": {
+      "description": "A non-empty list of transform steps.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/step"
+      }
+    }
+  }
+}

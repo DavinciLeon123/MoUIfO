@@ -118,7 +118,11 @@ describe('a vat-nl-style scheme (D-18, D-21, D-22, D-23)', () => {
   test('checksum null fails: it must be an array (DEC-004)', () => {
     const file = scheme('format:\n  checksum: null\n');
     expect(check(file)).toEqual([
-      { file: SCHEME, ...where(file.text, 'null\n'), message: 'must be array' },
+      {
+        file: SCHEME,
+        ...where(file.text, 'checksum: null', 'checksum: '.length),
+        message: 'must be array',
+      },
     ]);
   });
 
@@ -353,7 +357,7 @@ describe('rules and the closed transform schema (D-22, MOD-11)', () => {
     expect(check(file)).toEqual([
       {
         file: SCHEME,
-        ...where(file.text, 'pad_left:', 'pad_left: '.length),
+        ...where(file.text, 'pad_left:'),
         message: 'missing required property "char"',
       },
     ]);

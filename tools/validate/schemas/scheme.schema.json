@@ -242,6 +242,149 @@
       },
       "required": ["text"],
       "unevaluatedProperties": false
+    },
+    "format": {
+      "description": "What a valid value looks like (SPEC 5.2). A value is valid when some pattern matches and, if checksum entries exist, some entry passes (any-of, DEC-038). Neither list is required.",
+      "type": "object",
+      "properties": {
+        "patterns": {
+          "type": "array",
+          "items": {
+            "description": "A regular expression the value may match. Carries its own source and certainty (DEC-029).",
+            "$ref": "common.schema.json#/$defs/statement",
+            "type": "object",
+            "properties": {
+              "regex": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": ["regex"],
+            "unevaluatedProperties": false
+          }
+        },
+        "checksum": {
+          "type": "array",
+          "items": {
+            "description": "A checksum algorithm; optional over is a transform list that extracts the part the algorithm applies to (D-23). Carries its own source and certainty (DEC-029).",
+            "$ref": "common.schema.json#/$defs/statement",
+            "type": "object",
+            "properties": {
+              "algorithm": {
+                "type": "string",
+                "uioRef": "vocab:checksum"
+              },
+              "over": {
+                "$ref": "transform.schema.json#/$defs/list"
+              }
+            },
+            "required": ["algorithm"],
+            "unevaluatedProperties": false
+          }
+        },
+        "examples_valid": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "examples_invalid": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "context_from": {
+      "description": "Where the engine reads the issuing country from a value (D-18). Only issuing_country exists.",
+      "type": "object",
+      "properties": {
+        "issuing_country": {
+          "description": "Capture the country prefix and map it with the country-prefix vocabulary. Carries its own source and certainty (DEC-029).",
+          "$ref": "common.schema.json#/$defs/statement",
+          "type": "object",
+          "properties": {
+            "capture": {
+              "$ref": "common.schema.json#/$defs/capture"
+            },
+            "map": {
+              "type": "string",
+              "const": "country-prefix",
+              "uioRef": "vocab"
+            }
+          },
+          "required": ["capture", "map"],
+          "unevaluatedProperties": false
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "components": {
+      "description": "The schemes a composite scheme delegates to (D-19, DEC-036); allowed, and required, only for kind composite.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "description": "One component scheme and the prefix that selects it. Carries its own source and certainty (DEC-029).",
+        "$ref": "common.schema.json#/$defs/statement",
+        "type": "object",
+        "properties": {
+          "prefix": {
+            "type": "string",
+            "minLength": 1
+          },
+          "scheme": {
+            "$ref": "common.schema.json#/$defs/scheme-ref"
+          }
+        },
+        "required": ["prefix", "scheme"],
+        "unevaluatedProperties": false
+      }
+    },
+    "rules": {
+      "description": "Derivation rules from another scheme to this one (SPEC 5.2).",
+      "type": "array",
+      "items": {
+        "description": "A derivation rule. Carries its own source and certainty (DEC-029).",
+        "$ref": "common.schema.json#/$defs/statement",
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "common.schema.json#/$defs/kebab-id"
+          },
+          "input": {
+            "$ref": "common.schema.json#/$defs/scheme-ref"
+          },
+          "output": {
+            "$ref": "common.schema.json#/$defs/scheme-ref"
+          },
+          "transform": {
+            "$ref": "transform.schema.json#/$defs/list"
+          },
+          "examples": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "properties": {
+                "in": {
+                  "type": "string"
+                },
+                "out": {
+                  "type": "string"
+                }
+              },
+              "required": ["in", "out"],
+              "unevaluatedProperties": false
+            }
+          }
+        },
+        "required": ["id", "input", "output", "transform"],
+        "unevaluatedProperties": false
+      }
     }
   },
   "required": ["id", "label", "kind", "issuer", "jurisdiction", "sources"],
