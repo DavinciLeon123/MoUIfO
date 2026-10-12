@@ -65,3 +65,16 @@ applicability:
     status: [verifiable]
     certainty: certain
     source: kvk-zoeken
+rules:
+  - id: kvk-number-from-oin
+    input: oin
+    output: kvk-number
+    transform:
+      - capture:
+          regex: "^00000003([0-9]{8})0000$"
+          group: 1
+    certainty: certain
+    source: oin-stelsel-2-1-0
+    examples:
+      - in: "00000003080242850000"
+        out: "08024285"

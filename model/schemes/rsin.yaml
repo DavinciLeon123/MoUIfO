@@ -87,3 +87,15 @@ rules:
     examples:
       - in: "NL001469630B01"
         out: "001469630"
+  - id: rsin-from-oin
+    input: oin
+    output: rsin
+    transform:
+      - capture:
+          regex: "^00000001([0-9]{9})000$"
+          group: 1
+    certainty: certain
+    source: oin-stelsel-2-1-0
+    examples:
+      - in: "00000001001469630000"
+        out: "001469630"

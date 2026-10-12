@@ -1,0 +1,92 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/scheme.schema.json
+id: oin
+label:
+  en: Organisation Identification Number
+  nl: Organisatie-identificatienummer
+abbreviation: OIN
+kind: identifier
+issuer: logius
+jurisdiction: NL
+availability:
+  value: partially-public
+  source: landscape-v1-2
+  certainty: likely
+iso6523_icd: "0190"
+peppol_eas:
+  value: "0190"
+  source: peppol-code-lists-9-7
+  certainty: certain
+sources:
+  default: oin-stelsel-2-1-0
+scope:
+  en: "Everyone engaged in digital communication with the Dutch government (eHerkenning)"
+notes:
+  en: "Based on the RSIN if there is no KvK number. OINs assigned by a TSP are not publicly searchable."
+format:
+  patterns:
+    - regex: "^[0-9]{20}$"
+      certainty: certain
+      source: oin-stelsel-2-1-0
+      note: "Prefix of 8 digits, main number of 8 or 9 digits, suffix of 4 or 3 digits (OIN Stelsel 2.1.0 section 6.1), so 20 digits in all."
+  checksum:
+    - algorithm: none
+      certainty: likely
+      source: peppol-code-lists-9-7
+      note: "The Peppol Code Lists v9.7 entry 0190 states that the OIN has no check digit."
+  examples_valid:
+    - "00000003080242850000"
+    - "00000001001469630000"
+  examples_invalid:
+    - "0000000308024285000"
+mandatory:
+  text: "no"
+  certainty: likely
+  source: landscape-v1-2
+validation_source:
+  label: OIN register (Logius)
+  url: "https://oinregister.logius.nl/oin-register"
+  certainty: certain
+  source: oin-register
+applicability:
+  - jurisdiction: NL
+    status: [issued]
+    certainty: certain
+    source: oin-stelsel-2-1-0
+  - jurisdiction: NL
+    status: [verifiable]
+    certainty: certain
+    source: oin-register
+relations:
+  - kind: derived-from
+    target: kvk-number
+    certainty: certain
+    source: oin-stelsel-2-1-0
+    note: "Prefix 00000003 (KVK-nummer), OIN Stelsel 2.1.0 section 6.2."
+  - kind: derived-from
+    target: rsin
+    certainty: certain
+    source: oin-stelsel-2-1-0
+    note: "Prefix 00000001 (RSIN), OIN Stelsel 2.1.0 section 6.2."
+rules:
+  - id: oin-from-kvk-number
+    input: kvk-number
+    output: oin
+    transform:
+      - add_prefix: "00000003"
+      - add_suffix: "0000"
+    certainty: likely
+    source: oin-stelsel-2-1-0
+    examples:
+      - in: "08024285"
+        out: "00000003080242850000"
+  - id: oin-from-rsin
+    input: rsin
+    output: oin
+    transform:
+      - add_prefix: "00000001"
+      - add_suffix: "000"
+    certainty: likely
+    source: oin-stelsel-2-1-0
+    examples:
+      - in: "001469630"
+        out: "00000001001469630000"

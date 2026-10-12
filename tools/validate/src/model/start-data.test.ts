@@ -451,10 +451,12 @@ describe('euid with the Dutch form at possible, its EU legal basis and the five 
     expect(format.checksum).toBeUndefined();
   });
 
-  test('no rule has output euid, and no rule starts from kvk-number (DEC-047)', () => {
+  test('no rule has output euid, and no rule derives an EUID from a kvk-number (DEC-047)', () => {
     const rules = loadAll('schemes').flatMap((s) => listOf(s.rules));
     expect(rules.filter((rule) => rule.output === 'euid')).toEqual([]);
-    expect(rules.filter((rule) => rule.input === 'kvk-number')).toEqual([]);
+    expect(rules.filter((rule) => rule.input === 'kvk-number' && rule.output === 'euid')).toEqual(
+      [],
+    );
   });
 
   test('the kvk-number relation is prerequisite, likely, and applies to the Dutch form only', () => {
@@ -517,7 +519,7 @@ describe('euid with the Dutch form at possible, its EU legal basis and the five 
     );
   });
 
-  test('model/schemes holds exactly the five EORI-case schemes', () => {
+  test('model/schemes holds exactly the scheme files written by plans 03-06 to 03-09', () => {
     const files = readdirSync(join(REPO_ROOT, 'model', 'schemes'))
       .filter((name) => name.endsWith('.yaml'))
       .sort();
@@ -525,6 +527,7 @@ describe('euid with the Dutch form at possible, its EU legal basis and the five 
       'eori.yaml',
       'euid.yaml',
       'kvk-number.yaml',
+      'oin.yaml',
       'rsin.yaml',
       'vat-nl.yaml',
     ]);

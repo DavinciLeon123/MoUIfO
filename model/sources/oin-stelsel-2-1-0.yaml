@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/source.schema.json
+id: oin-stelsel-2-1-0
+title: OIN Stelsel 2.1.0
+type: standard
+date: 2024-01-19
+url: https://gitdocumentatie.logius.nl/publicatie/dk/oin/2.1.0/
+publisher: Logius
+reference: "OIN Stelsel 2.1.0 (Vastgestelde versie 19 januari 2024)"
