@@ -1,3 +1,8 @@
+import { execFileSync, spawn, spawnSync } from 'node:child_process';
+import { cpSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { REPO_ROOT } from 'uio-config';
 import { discoverModelFiles, expectedHeader, type ModelFile } from './load.ts';
 
@@ -77,4 +82,112 @@ export function minimalSchemeBody(
     .map(([key, value]) => `${key}: ${value}\n`)
     .join('');
   return `${lines}${extra}`;
+}
+
+const CLI = fileURLToPath(new URL('../index.ts', import.meta.url));
+
+const copies: string[] = [];
+
+/** Test helper: the process environment without the `GIT_*` variables a git hook may have set. */
+function cleanEnv(): NodeJS.ProcessEnv {
+  const env: NodeJS.ProcessEnv = {};
+  for (const [key, value] of Object.entries(process.env)) {
+    if (!key.startsWith('GIT_')) env[key] = value;
+  }
+  return env;
+}
+
+/**
+ * Test helper: a git-initialised copy of every tracked and untracked-but-not-ignored file of the
+ * repository, in a fresh temporary directory registered for `cleanupCopies`.
+ */
+export function copyOfRepo(): string {
+  const root = mkdtempSync(join(tmpdir(), 'validate-cli-'));
+  copies.push(root);
+  const listed = execFileSync(
+    'git',
+    ['ls-files', '-z', '--cached', '--others', '--exclude-standard'],
+    { cwd: REPO_ROOT, env: cleanEnv(), encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 },
+  );
+  for (const rel of listed.split('\0').filter((entry) => entry !== '')) {
+    mkdirSync(dirname(join(root, rel)), { recursive: true });
+    cpSync(join(REPO_ROOT, rel), join(root, rel));
+  }
+  execFileSync('git', ['init', '-q'], { cwd: root, env: cleanEnv() });
+  return root;
+}
+
+/** Test helper: remove every copy made by `copyOfRepo` (call from `afterAll`). */
+export function cleanupCopies(): void {
+  for (const directory of copies.splice(0)) rmSync(directory, { recursive: true, force: true });
+}
+
+function cliInvocation(
+  root: string | undefined,
+  env: Readonly<Record<string, string | undefined>>,
+): { args: string[]; env: NodeJS.ProcessEnv } {
+  const childEnv = cleanEnv();
+  for (const [key, value] of Object.entries(env)) {
+    if (value === undefined) delete childEnv[key];
+    else childEnv[key] = value;
+  }
+  return {
+    args: ['--conditions=uio-source', CLI, ...(root === undefined ? [] : ['--root', root])],
+    env: childEnv,
+  };
+}
+
+/**
+ * Test helper: run the validate CLI on `root` (default: the real repository). `env` overrides the
+ * cleaned environment; an `undefined` value deletes the key (the GitHub runner sets
+ * GITHUB_ACTIONS=true while `npm test` runs there too).
+ */
+export function runValidateCli(
+  root?: string,
+  env: Readonly<Record<string, string | undefined>> = {},
+): { status: number | null; stdout: string } {
+  const invocation = cliInvocation(root, env);
+  const result = spawnSync(process.execPath, invocation.args, {
+    cwd: REPO_ROOT,
+    env: invocation.env,
+    encoding: 'utf8',
+  });
+  return { status: result.status, stdout: result.stdout };
+}
+
+/** Test helper: like `runValidateCli`, asynchronous, so two runs can overlap. */
+export function runValidateCliAsync(
+  root?: string,
+  env: Readonly<Record<string, string | undefined>> = {},
+): Promise<{ status: number | null; stdout: string }> {
+  const invocation = cliInvocation(root, env);
+  return new Promise((resolve, reject) => {
+    const child = spawn(process.execPath, invocation.args, {
+      cwd: REPO_ROOT,
+      env: invocation.env,
+    });
+    let stdout = '';
+    child.stdout.setEncoding('utf8');
+    child.stdout.on('data', (chunk: string) => {
+      stdout += chunk;
+    });
+    child.on('error', reject);
+    child.on('close', (status) => resolve({ status, stdout }));
+  });
+}
+
+/** Test helper: the 1-based line and column of the first character of the `occurrence`-th `token`. */
+export function positionOfToken(
+  text: string,
+  token: string,
+  occurrence = 1,
+): { line: number; column: number } {
+  let index = -1;
+  for (let seen = 0; seen < occurrence; seen++) {
+    index = text.indexOf(token, index + 1);
+    if (index < 0)
+      throw new Error(`token ${JSON.stringify(token)} occurrence ${occurrence} not found`);
+  }
+  const before = text.slice(0, index).split('\n');
+  return { line: before.length, column: (before.at(-1) ?? '').length + 1 };
 }

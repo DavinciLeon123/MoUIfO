@@ -60,14 +60,16 @@ rules:
     input: no-such-scheme
     output: fixture-dangling
     transform: [uppercase]
-    ${OK}
+    certainty: likely
+    source: fixture-source
     examples:
       - { in: "ab", out: "AB" }
   - id: dangling-output
     input: fixture-dangling
     output: no-such-scheme
     transform: [uppercase]
-    ${OK}
+    certainty: likely
+    source: fixture-source
     examples:
       - { in: "ab", out: "AB" }
 `,
@@ -80,7 +82,15 @@ rules:
       { abbreviation: 'UNS' },
       `level:
   - { value: legal-entity, certainty: likely }
-roles:
+`,
+    ),
+  ),
+  schemeFixture(
+    'fixture-certainty',
+    minimalSchemeBody(
+      'fixture-certainty',
+      { abbreviation: 'CER' },
+      `roles:
   - { value: taxpayer, certainty: sure, source: fixture-source }
 `,
     ),
@@ -97,7 +107,8 @@ rules:
     input: fixture-examples
     output: fixture-examples
     transform: [{ add_prefix: "NL" }, { add_suffix: "B01" }]
-    ${OK}
+    certainty: likely
+    source: fixture-source
     examples:
       - { in: "${BARE_CORE}", out: "NL001469630B02" }
 `,
@@ -113,7 +124,8 @@ rules:
     input: fixture-shout
     output: fixture-shout
     transform: [{ shout: 1 }]
-    ${OK}
+    certainty: likely
+    source: fixture-source
     examples:
       - { in: "ab", out: "AB" }
 `,
@@ -188,7 +200,7 @@ const DEFECTS: Defect[] = [
   },
   {
     name: 'invalid certainty',
-    file: scheme('fixture-unsourced'),
+    file: scheme('fixture-certainty'),
     token: 'sure',
     message: 'is not a known member of vocabulary certainty',
   },
@@ -213,7 +225,7 @@ const DEFECTS: Defect[] = [
   {
     name: 'transform outside the SPEC 5.3 set',
     file: scheme('fixture-shout'),
-    token: 'shout',
+    token: 'shout: 1',
     message: 'unknown property "shout"',
   },
 ];
