@@ -23,7 +23,13 @@ export const MODEL_KINDS = ['vocab', 'jurisdictions', 'authorities', 'sources', 
 export const VOCAB_SCHEMAS: Readonly<Record<string, string>> = {
   'applicability-status': 'vocab-applicability-status.schema.json',
   certainty: 'vocab-certainty.schema.json',
+  checksum: 'vocab-simple.schema.json',
+  'condition-context': 'vocab-simple.schema.json',
+  'entity-form': 'vocab-simple.schema.json',
+  level: 'vocab-simple.schema.json',
+  'persistence-event': 'vocab-simple.schema.json',
   'relation-kind': 'vocab-simple.schema.json',
+  role: 'vocab-simple.schema.json',
 };
 
 const KIND_SCHEMAS: Readonly<Record<string, string>> = {

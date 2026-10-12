@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/vocab-simple.schema.json
+id: entity-form
+label:
+  en: Entity form
+  nl: Rechtsvorm
+values:
+  - id: legal-person
+    label:
+      en: Legal person
+      nl: rechtspersoon
+    definition:
+      en: "As used by this model: an organisation with legal personality. The Dutch EORI of a legal person is derived from its RSIN (DEC-003)."
+  - id: sole-proprietorship
+    label:
+      en: Sole proprietorship
+      nl: eenmanszaak
+    definition:
+      en: "As used by this model: a business run by one natural person without separate legal personality. It takes a different route to its EORI than a legal person (DEC-003)."
+  - id: fiscal-unit
+    label:
+      en: Fiscal unit
+      nl: fiscale eenheid
+    definition:
+      en: "As used by this model: a group of legal persons that is treated as one taxpayer, for example for VAT. It is part of the VAT-to-EORI chain (DEC-003)."

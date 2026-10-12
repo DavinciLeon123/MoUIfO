@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/vocab-simple.schema.json
+# This list is empty on purpose: no source names a context tag yet (DEC-019), so none is invented.
+# SPEC section 5.3 documents context tags here; add a member only together with its source.
+id: condition-context
+label:
+  en: Condition context
+  nl: Context van een voorwaarde
+values: []

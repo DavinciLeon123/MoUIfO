@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/vocab-simple.schema.json
+id: checksum
+label:
+  en: Checksum algorithm
+  nl: Controlecijferalgoritme
+values:
+  - id: elfproef
+    label:
+      en: Elfproef (11-proof)
+      nl: Elfproef
+    definition:
+      en: "The Dutch 11-proof with weights 9 down to 2 and -1 for the last digit. It applies to BSN and RSIN, which therefore cannot be told apart by checksum (SPEC section 6.4)."
+  - id: iso7064-mod97-10
+    label:
+      en: ISO 7064 mod 97-10
+    definition:
+      en: "The ISO 7064 mod 97-10 check, used for the LEI and for the VAT id of sole proprietorships (SPEC section 6.4)."
+  - id: gs1-mod10
+    label:
+      en: GS1 mod 10
+    definition:
+      en: "The GS1 mod 10 check digit, used for the GLN (SPEC section 6.4)."
+  - id: none
+    label:
+      en: None
+      nl: Geen
+    definition:
+      en: "No checksum applies. A scheme that names this id claims, with a source, that its values carry no check digit (SPEC section 6.4)."

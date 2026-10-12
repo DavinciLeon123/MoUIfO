@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/vocab-simple.schema.json
+id: persistence-event
+label:
+  en: Persistence event
+  nl: Gebeurtenis voor persistentie
+values:
+  - id: merger
+    label:
+      en: Merger
+    definition:
+      en: "Two or more entities merge into one (SPEC section 5.1). Matches the workbook row \"Behaviour on merger\" of the persistence tab."
+  - id: acquisition-without-merger
+    label:
+      en: Acquisition without legal merger
+    definition:
+      en: "One entity is acquired and no legal merger follows (SPEC section 5.1). Matches the workbook row \"Behaviour on acquisition no legal merger\"."
+  - id: split
+    label:
+      en: Split
+    definition:
+      en: "One entity is split into two or more entities (SPEC section 5.1). Matches the workbook row \"Behaviour on split\"."
+  - id: dissolution
+    label:
+      en: Dissolution
+    definition:
+      en: "An entity is dissolved and ceases to exist (SPEC section 5.1). Matches the workbook row \"Behaviour on dissolution\"."
+  - id: move-within-country
+    label:
+      en: Move within the country
+    definition:
+      en: "An entity moves to another address in the same country (SPEC section 5.1). Matches the workbook row \"Move within country\"."
+  - id: move-to-other-country
+    label:
+      en: Move to another country
+    definition:
+      en: "An entity moves to another country (SPEC section 5.1). Matches the workbook row \"Move to other country\"."
