@@ -710,3 +710,109 @@ describe('kvk-establishment-number and roo as a register (DAT-02, SPEC §9, DEC-
     );
   });
 });
+
+describe('bsn and fi-number without valid examples (DAT-02, SPEC §10, DEC-022, DEC-025, DEC-039)', () => {
+  test.each(['bsn', 'fi-number'])(
+    '%s has the 9-digit pattern and the elfproef, both likely, and no examples_valid',
+    (id) => {
+      const format = formatOf(scheme(id));
+      expect(listOf(format.patterns)).toEqual([
+        expect.objectContaining({
+          regex: '^[0-9]{9}$',
+          certainty: 'likely',
+          source: 'landscape-v1-2',
+        }),
+      ]);
+      expect(listOf(format.checksum)).toEqual([
+        expect.objectContaining({
+          algorithm: 'elfproef',
+          certainty: 'likely',
+          source: 'landscape-v1-2',
+        }),
+      ]);
+      expect((format as Json).examples_valid).toBeUndefined();
+    },
+  );
+
+  test.each(['bsn', 'fi-number'])(
+    '%s rejects its invalid examples: a well-formed value fails the elfproef, a short value fails the pattern',
+    (id) => {
+      const format = formatOf(scheme(id));
+      expect(checkValue(format, '123456789').accepted).toBe(false);
+      expect(checkValue(format, '12345678').accepted).toBe(false);
+    },
+  );
+
+  test('bsn is the natural-person level (certain, Wabb Article 1) with its Wabb legal basis and a restricted availability', () => {
+    const bsn = scheme('bsn');
+    expect(listOf(bsn.level)).toEqual([
+      expect.objectContaining({ value: 'natural-person', certainty: 'certain', source: 'wabb' }),
+    ]);
+    expect(listOf(bsn.legal_basis)).toEqual([
+      expect.objectContaining({
+        source: 'wabb',
+        certainty: 'certain',
+        title: expect.stringContaining('Article 1'),
+      }),
+    ]);
+    expect(bsn.availability).toEqual({
+      value: 'restricted',
+      source: 'landscape-v1-2',
+      certainty: 'likely',
+    });
+  });
+
+  test('bsn has its header in the long form where the default source does not carry it: issuer rvig, abbreviation BSN (likely, workbook)', () => {
+    const bsn = scheme('bsn');
+    expect(bsn.issuer).toEqual({ value: 'rvig', source: 'landscape-v1-2', certainty: 'likely' });
+    expect(bsn.abbreviation).toEqual({
+      value: 'BSN',
+      source: 'landscape-v1-2',
+      certainty: 'likely',
+    });
+    expect(bsn.validation_source).toBeUndefined();
+  });
+
+  test('fi-number has every bare header field in the long form at likely from the workbook, and no legal basis', () => {
+    const fi = scheme('fi-number');
+    expect(fi.kind).toEqual({ value: 'identifier', source: 'landscape-v1-2', certainty: 'likely' });
+    expect(fi.issuer).toEqual({
+      value: 'belastingdienst',
+      source: 'landscape-v1-2',
+      certainty: 'likely',
+    });
+    expect(fi.jurisdiction).toEqual({ value: 'NL', source: 'landscape-v1-2', certainty: 'likely' });
+    expect(fi.availability).toEqual({
+      value: 'internal',
+      source: 'landscape-v1-2',
+      certainty: 'likely',
+    });
+    expect(fi.legal_basis).toBeUndefined();
+  });
+
+  test('the rvig class is the issuer of bsn and has no instance (DEC-045)', () => {
+    expect(issuerOf(scheme('bsn'))).toBe('rvig');
+    expect(load('model/authorities/rvig.yaml')).toEqual(expect.objectContaining({ kind: 'class' }));
+  });
+
+  test.each([
+    '## BSN and fi-number have no valid example',
+    '## BSN validation register without a URL',
+  ])('the entry "%s" exists in the four-part form', (heading) => {
+    const gaps = read('docs/gaps.md');
+    const start = gaps.indexOf(heading);
+    expect(start, heading).toBeGreaterThanOrEqual(0);
+    const section = gaps.slice(start).split('\n## ')[0] ?? '';
+    let at = 0;
+    for (const part of [
+      '- **Item:**',
+      '- **Why it is not in the model:**',
+      '- **Open question:**',
+      '- **Owner or next step:**',
+    ]) {
+      const found = section.indexOf(part, at);
+      expect(found, `${heading}: ${part}`).toBeGreaterThanOrEqual(0);
+      at = found + part.length;
+    }
+  });
+});
