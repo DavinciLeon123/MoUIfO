@@ -74,7 +74,7 @@ describe('part_of cycles', () => {
   test('an unknown parent is left to the reference check and forms no cycle', () => {
     const zz = jurisdiction('ZZ', ['XX']);
     expect(check(zz).map((problem) => problem.message)).toEqual([
-      '"XX" is not a known jurisdiction',
+      'the value is not a known jurisdiction',
     ]);
   });
 
@@ -104,7 +104,7 @@ describe('several parents and GLOBAL', () => {
       {
         file: 'model/jurisdictions/ZY.yaml',
         ...atParent(zy, 'GLOBAL'),
-        message: '"GLOBAL" is not a known jurisdiction',
+        message: 'the value is not a known jurisdiction',
       },
     ]);
   });
@@ -163,7 +163,7 @@ describe('authority classes and instances', () => {
       {
         file: INSTANCE,
         ...atValue(instance, 'instance_of', 'no-such-class'),
-        message: '"no-such-class" is not a known authority class',
+        message: 'the value is not a known authority class',
       },
     ]);
   });
@@ -177,7 +177,7 @@ describe('authority classes and instances', () => {
       {
         file: 'model/authorities/douane-be.yaml',
         ...atValue(other, 'instance_of', 'douane-nl'),
-        message: '"douane-nl" is not a known authority class',
+        message: 'the value is not a known authority class',
       },
     ]);
   });
@@ -188,7 +188,7 @@ describe('authority classes and instances', () => {
       {
         file: INSTANCE,
         ...atValue(instance, 'jurisdiction', 'DE'),
-        message: '"DE" is not a known jurisdiction',
+        message: 'the value is not a known jurisdiction',
       },
     ]);
   });

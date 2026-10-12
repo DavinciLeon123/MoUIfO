@@ -73,7 +73,7 @@ describe('references and self-reference', () => {
       {
         file: NL,
         ...where(file.text, 'XX'),
-        message: '"XX" is not a known jurisdiction',
+        message: 'the value is not a known jurisdiction',
       },
     ]);
   });
@@ -85,7 +85,7 @@ describe('references and self-reference', () => {
     expect(problems).toContainEqual({
       file: NL,
       ...at,
-      message: '"teu-art-99" is not a known source',
+      message: 'the value is not a known source',
     });
   });
 
@@ -225,7 +225,7 @@ describe('the country-prefix vocabulary contract', () => {
         file: PREFIX,
         line: at.line,
         column: at.column + 'jurisdiction: '.length,
-        message: '"DE" is not a known jurisdiction',
+        message: 'the value is not a known jurisdiction',
       },
     ]);
   });

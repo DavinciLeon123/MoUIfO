@@ -266,7 +266,7 @@ describe('check 5: rule examples run through the transform and the target format
   test('a rule whose output scheme is missing is skipped: only the reference error remains', () => {
     const problems = check(withRule(ruleBlock(ADD_NL_B01, undefined, 'no-such-scheme')));
     expect(problems).toHaveLength(1);
-    expect(problems[0]?.message).toContain('no-such-scheme');
+    expect(problems[0]?.message).toBe('the value is not a known scheme');
   });
 });
 

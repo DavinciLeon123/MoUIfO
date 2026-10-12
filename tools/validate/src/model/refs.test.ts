@@ -75,9 +75,9 @@ describe('uioRef on a vocabulary member', () => {
     const certainty = problems.find((p) => p.message.includes('vocabulary certainty'));
     const source = problems.find((p) => p.message.includes('source'));
     expect(certainty).toMatchObject({ file: RELATION_KIND, ...where(file.text, 'sure') });
-    expect(certainty?.message).toBe('"sure" is not a known member of vocabulary certainty');
+    expect(certainty?.message).toBe('the value is not a known member of vocabulary certainty');
     expect(source).toMatchObject({ file: RELATION_KIND, ...where(file.text, 'no-such-source') });
-    expect(source?.message).toBe('"no-such-source" is not a known source');
+    expect(source?.message).toBe('the value is not a known source');
   });
 
   test('a source without a certainty is one error at the member naming certainty', () => {
@@ -116,12 +116,14 @@ describe('uioRef on a vocabulary member', () => {
     );
     const problems = checkModelFiles(withRealModel([broken, file]));
     expect(problems.map((p) => p.message)).toContain('unknown property "rnak"');
-    const likely = problems.find((p) => p.file === RELATION_KIND && p.message.includes('"likely"'));
+    const likely = problems.find(
+      (p) => p.file === RELATION_KIND && p.message.includes('member of vocabulary certainty'),
+    );
     expect(likely).toMatchObject(where(file.text, 'likely'));
-    expect(likely?.message).toBe('"likely" is not a known member of vocabulary certainty');
+    expect(likely?.message).toBe('the value is not a known member of vocabulary certainty');
   });
 
-  test('a reference value that is not id-shaped is reported without being echoed', () => {
+  test('a reference value is never echoed, whatever its shape', () => {
     const file = relationKind(member('contains', '    certainty: "12 34"\n    source: x\n'));
     const problems = check(file);
     expect(problems).toHaveLength(2);
@@ -152,7 +154,7 @@ describe('refKeyword', () => {
     const plain = compile('jurisdiction');
     expect(plain('NL')).toBe(true);
     expect(plain('!NL')).toBe(false);
-    expect(plain.errors?.[0]?.message).toBe('"!NL" is not a known jurisdiction');
+    expect(plain.errors?.[0]?.message).toBe('the value is not a known jurisdiction');
     expect(compile('jurisdiction-negatable')('!!NL')).toBe(false);
   });
 

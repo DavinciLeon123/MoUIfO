@@ -47,7 +47,7 @@ describe('the minimal scheme: header fields under the default source (D-07, D-08
       {
         file: SCHEME,
         ...atValue(file, 'issuer', 'no-such-authority'),
-        message: '"no-such-authority" is not a known authority',
+        message: 'the value is not a known authority',
       },
     ]);
   });
@@ -62,7 +62,7 @@ describe('the minimal scheme: header fields under the default source (D-07, D-08
       {
         file: SCHEME,
         ...atValue(file, 'jurisdiction', 'XX'),
-        message: '"XX" is not a known jurisdiction',
+        message: 'the value is not a known jurisdiction',
       },
     ]);
   });
@@ -118,7 +118,7 @@ describe('the default source (D-07)', () => {
       {
         file: SCHEME,
         ...where(file.text, 'default: nope', 'default: '.length),
-        message: '"nope" is not a known source',
+        message: 'the value is not a known source',
       },
     ]);
   });
@@ -152,7 +152,7 @@ describe('the long form { value, source, certainty } (D-07)', () => {
       {
         file: SCHEME,
         ...where(file.text, 'value: XX', 'value: '.length),
-        message: '"XX" is not a known jurisdiction',
+        message: 'the value is not a known jurisdiction',
       },
     ]);
   });
@@ -185,7 +185,7 @@ describe('the long form { value, source, certainty } (D-07)', () => {
       {
         file: SCHEME,
         ...where(file.text, 'certainty: sure', 'certainty: '.length),
-        message: '"sure" is not a known member of vocabulary certainty',
+        message: 'the value is not a known member of vocabulary certainty',
       },
     ]);
   });
@@ -407,7 +407,7 @@ describe('every statement kind carries its own source and certainty (D-07, DEC-0
         {
           file: SCHEME,
           ...where(file.text, 'certainty: sure', 'certainty: '.length),
-          message: '"sure" is not a known member of vocabulary certainty',
+          message: 'the value is not a known member of vocabulary certainty',
         },
       ]);
     },
@@ -421,7 +421,7 @@ describe('every statement kind carries its own source and certainty (D-07, DEC-0
         {
           file: SCHEME,
           ...where(file.text, 'source: nope', 'source: '.length),
-          message: '"nope" is not a known source',
+          message: 'the value is not a known source',
         },
       ]);
     },
@@ -446,7 +446,7 @@ describe('every statement kind carries its own source and certainty (D-07, DEC-0
       {
         file: SCHEME,
         ...where(level.text, 'value: company', 'value: '.length),
-        message: '"company" is not a known member of vocabulary level',
+        message: 'the value is not a known member of vocabulary level',
       },
     ]);
     const role = scheme({}, `roles:\n  - { value: wizard, ${OK} }\n`);
@@ -454,7 +454,7 @@ describe('every statement kind carries its own source and certainty (D-07, DEC-0
       {
         file: SCHEME,
         ...where(role.text, 'value: wizard', 'value: '.length),
-        message: '"wizard" is not a known member of vocabulary role',
+        message: 'the value is not a known member of vocabulary role',
       },
     ]);
   });
@@ -479,7 +479,7 @@ describe('conditions (SPEC 5.3)', () => {
       {
         file: SCHEME,
         ...where(file.text, '"!XX"'),
-        message: '"!XX" is not a known jurisdiction',
+        message: 'the value is not a known jurisdiction',
       },
     ]);
   });
@@ -490,7 +490,7 @@ describe('conditions (SPEC 5.3)', () => {
       {
         file: SCHEME,
         ...where(file.text, 'trust-fund'),
-        message: '"trust-fund" is not a known member of vocabulary entity-form',
+        message: 'the value is not a known member of vocabulary entity-form',
       },
     ]);
   });
@@ -501,7 +501,7 @@ describe('conditions (SPEC 5.3)', () => {
       {
         file: SCHEME,
         ...where(file.text, 'anything'),
-        message: '"anything" is not a known member of vocabulary condition-context',
+        message: 'the value is not a known member of vocabulary condition-context',
       },
     ]);
   });
@@ -532,7 +532,7 @@ describe('relations (MOD-03)', () => {
       {
         file: SCHEME,
         ...where(file.text, 'target: no-such-scheme', 'target: '.length),
-        message: '"no-such-scheme" is not a known scheme',
+        message: 'the value is not a known scheme',
       },
     ]);
   });
@@ -543,7 +543,7 @@ describe('relations (MOD-03)', () => {
       {
         file: SCHEME,
         ...where(file.text, 'kind: cousin-of', 'kind: '.length),
-        message: '"cousin-of" is not a known member of vocabulary relation-kind',
+        message: 'the value is not a known member of vocabulary relation-kind',
       },
     ]);
   });
@@ -619,7 +619,7 @@ describe('applicability status', () => {
       {
         file: SCHEME,
         ...where(file.text, 'granted'),
-        message: '"granted" is not a known member of vocabulary applicability-status',
+        message: 'the value is not a known member of vocabulary applicability-status',
       },
     ]);
   });
@@ -630,7 +630,7 @@ describe('applicability status', () => {
       {
         file: SCHEME,
         ...where(file.text, 'jurisdiction: XX', 'jurisdiction: '.length),
-        message: '"XX" is not a known jurisdiction',
+        message: 'the value is not a known jurisdiction',
       },
     ]);
   });

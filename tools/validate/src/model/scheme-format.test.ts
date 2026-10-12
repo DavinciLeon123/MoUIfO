@@ -132,7 +132,7 @@ describe('a vat-nl-style scheme (D-18, D-21, D-22, D-23)', () => {
       {
         file: SCHEME,
         ...where(file.text, 'algorithm: luhn', 'algorithm: '.length),
-        message: '"luhn" is not a known member of vocabulary checksum',
+        message: 'the value is not a known member of vocabulary checksum',
       },
     ]);
   });
@@ -222,7 +222,7 @@ describe('every format, context_from, component and rule statement carries sourc
         {
           file: SCHEME,
           ...where(file.text, 'certainty: sure', 'certainty: '.length),
-          message: '"sure" is not a known member of vocabulary certainty',
+          message: 'the value is not a known member of vocabulary certainty',
         },
       ]);
     },
@@ -285,7 +285,7 @@ describe('rules and the closed transform schema (D-22, MOD-11)', () => {
       {
         file: SCHEME,
         ...where(file.text, 'input: no-such-scheme', 'input: '.length),
-        message: '"no-such-scheme" is not a known scheme',
+        message: 'the value is not a known scheme',
       },
     ]);
   });
@@ -298,7 +298,7 @@ describe('rules and the closed transform schema (D-22, MOD-11)', () => {
       {
         file: SCHEME,
         ...where(file.text, 'output: no-such-scheme', 'output: '.length),
-        message: '"no-such-scheme" is not a known scheme',
+        message: 'the value is not a known scheme',
       },
     ]);
   });
@@ -429,7 +429,7 @@ describe('composites and components (D-19)', () => {
       {
         file: SCHEME,
         ...where(file.text, 'scheme: no-such-scheme', 'scheme: '.length),
-        message: '"no-such-scheme" is not a known scheme',
+        message: 'the value is not a known scheme',
       },
     ]);
   });

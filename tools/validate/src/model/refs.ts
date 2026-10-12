@@ -79,16 +79,14 @@ function kindLabel(kind: string): string {
   return KIND_LABELS[kind] ?? kind;
 }
 
-/** Values that look like an id (or a negated id) are safe to echo; anything else may be an identifier. */
-const ID_SHAPED = /^!?[A-Za-z][A-Za-z0-9-]*$/;
-
 /**
  * The Ajv keyword `uioRef`: its schema value names the registry kind a string must belong to
  * (`source`, `jurisdiction`, `jurisdiction-negatable`, `authority`, `authority-class`, `scheme`,
  * `vocab` or `vocab:<id>`). With no registry every value passes; with one, every `source` value
  * is recorded in `cited` and a miss is an error at the referring value. A leading `!` is stripped
- * only for `jurisdiction-negatable` (conditions negate a jurisdiction, SPEC 5.3). A value that is
- * not id-shaped is never echoed in the message.
+ * only for `jurisdiction-negatable` (conditions negate a jurisdiction, SPEC 5.3). The message
+ * never contains the value, because file, line and column locate it and any value may be an
+ * identifier of a natural person (CI logs are public).
  */
 export function refKeyword(registry: Registry | undefined, cited: Set<string>): KeywordDefinition {
   const check: SchemaValidateFunction = (
@@ -103,11 +101,10 @@ export function refKeyword(registry: Registry | undefined, cited: Set<string>): 
     const key = negatable ? 'jurisdiction' : kind;
     const bare = negatable && value.startsWith('!') ? value.slice(1) : value;
     if (registry.get(key)?.has(bare) === true) return true;
-    const subject = ID_SHAPED.test(value) ? `"${value}"` : 'the value';
     check.errors = [
       {
         keyword: 'uioRef',
-        message: `${subject} is not a known ${kindLabel(kind)}`,
+        message: `the value is not a known ${kindLabel(kind)}`,
         params: { ref: kind },
         instancePath: context?.instancePath ?? '',
       },
