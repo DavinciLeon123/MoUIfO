@@ -559,7 +559,7 @@ describe('peppol-id, gln and GLOBAL (DAT-02, plan 03-10, DEC-033, DEC-036, DEC-0
     expect(global.part_of).toBeUndefined();
   });
 
-  test('peppol-id is composite and names its four components in order, each sourced by the Peppol list at certain (DEC-036)', () => {
+  test('peppol-id is composite and names its five components in order, each sourced by the Peppol list at certain (DEC-036, plan 03-12)', () => {
     const peppol = scheme('peppol-id');
     expect(peppol.kind).toBe('composite');
     const components = listOf(peppol.components);
@@ -568,6 +568,7 @@ describe('peppol-id, gln and GLOBAL (DAT-02, plan 03-10, DEC-033, DEC-036, DEC-0
       '0190:oin',
       '9944:vat-nl',
       '0088:gln',
+      '0208:kbo',
     ]);
     for (const component of components) {
       expect(component).toEqual(
@@ -576,10 +577,10 @@ describe('peppol-id, gln and GLOBAL (DAT-02, plan 03-10, DEC-033, DEC-036, DEC-0
     }
   });
 
-  test('peppol-id has one contains relation per component target, certain and sourced to the Peppol list', () => {
+  test('peppol-id has one contains relation per component target, certain and sourced to the Peppol list (kbo added in plan 03-12)', () => {
     const relations = listOf(scheme('peppol-id').relations);
     expect(relations).toEqual(
-      ['kvk-number', 'oin', 'vat-nl', 'gln'].map((target) =>
+      ['kvk-number', 'oin', 'vat-nl', 'gln', 'kbo'].map((target) =>
         expect.objectContaining({
           kind: 'contains',
           target,
@@ -1141,11 +1142,17 @@ describe('lei, the LEI with ISO 7064 mod 97-10 and its registration-authority re
     ]);
   });
 
-  test('references kvk-number through the GLEIF registration authority list (likely; RA000463 is the Dutch register)', () => {
+  test('references kvk-number and kbo through the GLEIF registration authority list (likely; RA000463 is the Dutch register, RA000025 the Belgian one, plan 03-12)', () => {
     expect(listOf(scheme('lei').relations)).toEqual([
       expect.objectContaining({
         kind: 'references',
         target: 'kvk-number',
+        certainty: 'likely',
+        source: 'gleif-ra-list',
+      }),
+      expect.objectContaining({
+        kind: 'references',
+        target: 'kbo',
         certainty: 'likely',
         source: 'gleif-ra-list',
       }),
@@ -1460,5 +1467,56 @@ describe('kbo, the Belgian enterprise number as a light scheme (DAT-03, plan 03-
   test('kbo has no trust and no persistence, since the workbook has no KBO column (plan 03-12)', () => {
     expect(scheme('kbo').trust).toBeUndefined();
     expect(scheme('kbo').persistence).toBeUndefined();
+  });
+});
+
+describe('docs/gaps.md entries of plan 03-12 (DAT-03, DEC-019, DEC-048)', () => {
+  test.each([
+    '## KBO equivalent-in relation to the KVK number (DEC-048)',
+    '## Belgian enterprise-number check digit (DEC-048)',
+    '## Official Belgian KBO sources not readable',
+    '## KBO trust and persistence',
+  ])('the entry "%s" exists in the four-part form', (heading) => {
+    const section = gapSection(heading);
+    let at = 0;
+    for (const part of [
+      '- **Item:**',
+      '- **Why it is not in the model:**',
+      '- **Open question:**',
+      '- **Owner or next step:**',
+    ]) {
+      const found = section.indexOf(part, at);
+      expect(found, `${heading}: ${part}`).toBeGreaterThanOrEqual(0);
+      at = found + part.length;
+    }
+  });
+
+  test('the equivalent-in entry names the relation, the KVK number and the owner decision DEC-048', () => {
+    const section = gapSection('## KBO equivalent-in relation to the KVK number (DEC-048)');
+    expect(section).toContain('equivalent-in');
+    expect(section).toContain('kvk-number');
+    expect(section).toContain('DEC-048');
+  });
+
+  test('the check-digit entry states the Belgian rule as DEC-048 does, and names the Peppol mod 97 statement it differs from', () => {
+    const section = gapSection('## Belgian enterprise-number check digit (DEC-048)');
+    expect(section).toContain('97 minus the first eight digits mod 97');
+    expect(section).toContain('mod97');
+    expect(section).toContain('iso7064-mod97-10');
+  });
+
+  test('the Belgian sources entry names the CAPTCHA gate and the unread Code of Economic Law Book III', () => {
+    const section = gapSection('## Official Belgian KBO sources not readable');
+    expect(section).toContain('CAPTCHA');
+    expect(section).toContain('Book III');
+  });
+
+  test('the KBO trust and persistence entry says that the workbook has no KBO column', () => {
+    expect(gapSection('## KBO trust and persistence')).toContain('no KBO column');
+  });
+
+  test('the ICD entry names 0208 beside the other Peppol-only codes; the levels entry names kbo', () => {
+    expect(gapSection('## ICD codes stated only by the Peppol code list')).toContain('`0208`');
+    expect(gapSection('## Levels and roles without a source')).toContain('`kbo` declares');
   });
 });
