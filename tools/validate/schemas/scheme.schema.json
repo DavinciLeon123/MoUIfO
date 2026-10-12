@@ -201,12 +201,10 @@
             "minLength": 1
           },
           "eli": {
-            "type": "string",
-            "format": "uri"
+            "$ref": "common.schema.json#/$defs/http-url"
           },
           "url": {
-            "type": "string",
-            "format": "uri"
+            "$ref": "common.schema.json#/$defs/http-url"
           }
         },
         "required": ["title"],
@@ -223,8 +221,7 @@
           "minLength": 1
         },
         "url": {
-          "type": "string",
-          "format": "uri"
+          "$ref": "common.schema.json#/$defs/http-url"
         }
       },
       "required": ["label", "url"],

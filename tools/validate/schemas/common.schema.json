@@ -8,6 +8,12 @@
       "type": "string",
       "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$"
     },
+    "http-url": {
+      "description": "An absolute web address a person may follow: scheme http or https, nothing else. One definition for every URL and ELI field, so that a script, data, file, ftp or mail URI never enters the model.",
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https?://"
+    },
     "label": {
       "description": "A short name; English is required, Dutch where available.",
       "type": "object",
