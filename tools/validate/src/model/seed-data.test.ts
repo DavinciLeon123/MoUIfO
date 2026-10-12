@@ -59,9 +59,9 @@ describe('the real seed: NL is part of the EU, sourced by TEU Article 52', () =>
   test('teu-art-52 is a law source on EUR-Lex with its ELI', () => {
     const data = parse(readReal(TEU), { schema: 'core' }) as Record<string, unknown>;
     expect(data.type).toBe('law');
-    expect(String(data.url)).toMatch(/^https:\/\/eur-lex\.europa\.eu\//);
-    expect(data.eli).toBe('http://data.europa.eu/eli/treaty/teu_2016/oj');
-    expect(data.date).toBe('2016-06-07');
+    expect(data.eli).toBe('http://data.europa.eu/eli/treaty/teu_2016/2025-03-15');
+    expect(data.url).toBe(data.eli);
+    expect(data.date).toBe('2025-03-15');
   });
 });
 
