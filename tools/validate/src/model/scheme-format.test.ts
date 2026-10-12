@@ -111,7 +111,7 @@ describe('a vat-nl-style scheme (D-18, D-21, D-22, D-23)', () => {
   });
 
   test('format needs no pattern and no checksum (no mandatory-pattern rule)', () => {
-    expect(check(scheme('format:\n  examples_valid: ["x"]\n'))).toEqual([]);
+    expect(check(scheme('format:\n  examples_invalid: ["x"]\n'))).toEqual([]);
     expect(check(scheme('format: {}\n'))).toEqual([]);
   });
 

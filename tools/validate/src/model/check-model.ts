@@ -1,5 +1,6 @@
 import type { Problem } from 'uio-config';
 import { checkPartOf, uncitedSourceWarnings } from './cross-file.ts';
+import { checkExamples, checkFormats } from './examples.ts';
 import {
   discoverModelFiles,
   type ModelFile,
@@ -42,7 +43,7 @@ export function uniqueProblems(problems: readonly Problem[]): Problem[] {
 }
 
 /**
- * Passes A to C over the given files. A: parse and structure with a registry-free Ajv. B: build
+ * Passes A to E over the given files. A: parse and structure with a registry-free Ajv. B: build
  * the registry from files with no parse or schema problem, so a broken file never vouches for a
  * reference. C: re-validate those same files with the registry-backed Ajv and keep only `uioRef`
  * errors, so a file with structural errors is never reference-checked (no cascade). Then the
@@ -83,9 +84,15 @@ export function runModelChecks(files: readonly ModelFile[]): {
   }
   const inDirectory = (directory: string): ParsedFile[] =>
     clean.map(({ parsed }) => parsed).filter(({ path }) => path.startsWith(`model/${directory}/`));
+  // Passes D and E run on structurally valid scheme files only: formats compile through the engine,
+  // then the examples run through the compiled format.
+  const schemes = inDirectory('schemes');
+  const formats = checkFormats(schemes);
   problems.push(
     ...checkPartOf(inDirectory('jurisdictions')),
-    ...checkSchemes(inDirectory('schemes')),
+    ...checkSchemes(schemes),
+    ...formats.problems,
+    ...checkExamples(schemes, formats.compiled),
     ...uncitedSourceWarnings(inDirectory('sources'), cited),
   );
   return { problems, cited };
