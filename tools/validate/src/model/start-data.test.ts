@@ -1080,3 +1080,98 @@ describe('vat, the generic EU VAT identifier, and vat-nl specializes vat (DAT-02
     expect(read('docs/gaps.md')).not.toMatch(/(^|[^0-9])[0-9]{9}([^0-9]|$)/m);
   });
 });
+
+describe('lei, the LEI with ISO 7064 mod 97-10 and its registration-authority relation (DAT-02, plan 03-11, DEC-036, DEC-045, DEC-049)', () => {
+  test('accepts the workbook example with a passing mod 97-10 check and rejects a wrong check digit', () => {
+    const lei = scheme('lei');
+    const accepted = checkValue(formatOf(lei), '724500G3PJTYPL2L9M11');
+    expect(accepted.accepted).toBe(true);
+    expect(accepted.checksums).toEqual(['pass']);
+    expect(checkValue(formatOf(lei), '724500G3PJTYPL2L9M12').accepted).toBe(false);
+  });
+
+  test('its pattern and its iso7064-mod97-10 entry are both likely and sourced to the Peppol list (ISO 17442 not read, DEC-049)', () => {
+    const format = formatOf(scheme('lei'));
+    expect(listOf(format.patterns)).toEqual([
+      expect.objectContaining({
+        regex: '^[A-Z0-9]{18}[0-9]{2}$',
+        certainty: 'likely',
+        source: 'peppol-code-lists-9-7',
+      }),
+    ]);
+    expect(listOf(format.checksum)).toEqual([
+      expect.objectContaining({
+        algorithm: 'iso7064-mod97-10',
+        certainty: 'likely',
+        source: 'peppol-code-lists-9-7',
+      }),
+    ]);
+  });
+
+  test('is a GLOBAL identifier issued by the local-operating-unit class, with its ICD 0199 at likely and EAS 0199 from the default source', () => {
+    const lei = scheme('lei');
+    expect(lei.jurisdiction).toEqual({
+      value: 'GLOBAL',
+      source: 'landscape-v1-2',
+      certainty: 'likely',
+    });
+    expect(issuerOf(lei)).toBe('local-operating-unit');
+    expect(lei.iso6523_icd).toEqual({
+      value: '0199',
+      source: 'peppol-code-lists-9-7',
+      certainty: 'likely',
+    });
+    expect(lei.peppol_eas).toBe('0199');
+    expect(lei.sources).toEqual({ default: 'peppol-code-lists-9-7' });
+  });
+
+  test('legal basis is Regulation 2017/394 Article 11(5) and (6), certain, with the note that it is not the legal basis of the LEI system', () => {
+    const basis = listOf(scheme('lei').legal_basis);
+    expect(basis).toEqual([
+      expect.objectContaining({
+        title: 'Commission Implementing Regulation (EU) 2017/394, Article 11(5) and (6)',
+        eli: 'http://data.europa.eu/eli/reg_impl/2017/394/oj',
+        certainty: 'certain',
+        source: 'csdr-its-2017-394',
+        note: expect.stringContaining('not the legal basis of the LEI system'),
+      }),
+    ]);
+  });
+
+  test('references kvk-number through the GLEIF registration authority list (likely; RA000463 is the Dutch register)', () => {
+    expect(listOf(scheme('lei').relations)).toEqual([
+      expect.objectContaining({
+        kind: 'references',
+        target: 'kvk-number',
+        certainty: 'likely',
+        source: 'gleif-ra-list',
+      }),
+    ]);
+    expect(load('model/sources/gleif-ra-list.yaml')).toEqual(
+      expect.objectContaining({ publisher: 'GLEIF' }),
+    );
+  });
+
+  test('its roles are financial-counterparty (likely, workbook); it declares no level, since no read source gives one', () => {
+    const lei = scheme('lei');
+    expect(listOf(lei.roles)).toEqual([
+      expect.objectContaining({
+        value: 'financial-counterparty',
+        certainty: 'likely',
+        source: 'landscape-v1-2',
+      }),
+    ]);
+    expect(lei.level).toBeUndefined();
+  });
+
+  test('the local-operating-unit class needs no source and has no instance (DEC-045)', () => {
+    expect(load('model/authorities/local-operating-unit.yaml')).toEqual(
+      expect.objectContaining({ id: 'local-operating-unit', kind: 'class' }),
+    );
+    expect(load('model/authorities/local-operating-unit.yaml').source).toBeUndefined();
+  });
+
+  test('no validation_source is written: the GLEIF search page carries no statement that a static read can find (plan 03-11 fallback)', () => {
+    expect(scheme('lei').validation_source).toBeUndefined();
+  });
+});
