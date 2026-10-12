@@ -210,6 +210,11 @@ describe('sources and gap entries (DAT-01, DEC-019, DEC-042)', () => {
     '## Mod 97 check of the Dutch sole-proprietor VAT number',
     '## Suffix after the B of the Dutch VAT number, and no RSIN-to-VAT rule (DEC-050)',
     '## Workbook VAT format cells and the official structure',
+    '## Dutch EUID register identifier (Implementing Regulation (EU) 2021/1042 annex)',
+    '## ICD codes stated only by the Peppol code list',
+    '## Levels and roles without a source',
+    '## One validation source per scheme',
+    '## EUID participating countries (BRIS)',
   ])('the entry "%s" exists in the four-part form', (heading) => {
     const gaps = read('docs/gaps.md');
     const start = gaps.indexOf(heading);
@@ -426,6 +431,102 @@ describe('kvk-number and the RSIN prerequisite (DAT-01, DEC-036, research Pitfal
         certainty: 'likely',
         source: 'kvk-rsin',
       }),
+    ]);
+  });
+});
+
+describe('euid with the Dutch form at possible, its EU legal basis and the five EORI-case schemes (DAT-01, DEC-047, D-07)', () => {
+  test('accepts NL.KVK.05058078 and rejects NL.KVK.0505807 and nl.kvk.05058078', () => {
+    const format = formatOf(scheme('euid'));
+    expect(checkValue(format, 'NL.KVK.05058078').accepted).toBe(true);
+    expect(checkValue(format, 'NL.KVK.0505807').accepted).toBe(false);
+    expect(checkValue(format, 'nl.kvk.05058078').accepted).toBe(false);
+  });
+
+  test('its only pattern is certainty possible and sourced to the workbook alone; no checksum (DEC-047)', () => {
+    const format = scheme('euid').format as Json;
+    expect(listOf(format.patterns)).toEqual([
+      expect.objectContaining({ certainty: 'possible', source: 'landscape-v1-2' }),
+    ]);
+    expect(format.checksum).toBeUndefined();
+  });
+
+  test('no rule has output euid, and no rule starts from kvk-number (DEC-047)', () => {
+    const rules = loadAll('schemes').flatMap((s) => listOf(s.rules));
+    expect(rules.filter((rule) => rule.output === 'euid')).toEqual([]);
+    expect(rules.filter((rule) => rule.input === 'kvk-number')).toEqual([]);
+  });
+
+  test('the kvk-number relation is prerequisite, likely, and applies to the Dutch form only', () => {
+    expect(listOf(scheme('euid').relations)).toEqual([
+      expect.objectContaining({
+        kind: 'prerequisite',
+        target: 'kvk-number',
+        condition: { issuing_country: 'NL' },
+        certainty: 'likely',
+        source: 'landscape-v1-2',
+      }),
+    ]);
+  });
+
+  test('legal basis cites Directive 2017/1132 Article 16(1) and Regulation 2021/1042 Annex point 9, both certain', () => {
+    expect(listOf(scheme('euid').legal_basis)).toEqual([
+      expect.objectContaining({
+        source: 'dir-2017-1132',
+        title: expect.stringContaining('Article 16(1)'),
+        certainty: 'certain',
+      }),
+      expect.objectContaining({
+        source: 'reg-2021-1042',
+        title: expect.stringContaining('point 9'),
+        certainty: 'certain',
+      }),
+    ]);
+  });
+
+  test('the validation source is the e-Justice business registers search, certain', () => {
+    expect(scheme('euid').validation_source).toEqual(
+      expect.objectContaining({ source: 'e-justice-business-registers', certainty: 'certain' }),
+    );
+  });
+
+  test('the level legal-entity is likely and sourced to the workbook', () => {
+    expect(listOf(scheme('euid').level)).toEqual([
+      expect.objectContaining({
+        value: 'legal-entity',
+        certainty: 'likely',
+        source: 'landscape-v1-2',
+      }),
+    ]);
+  });
+
+  test('the two EU acts are the adopted texts with their ELIs and adoption dates (read through Cellar, 2026-10-12)', () => {
+    expect(load('model/sources/reg-2021-1042.yaml')).toEqual(
+      expect.objectContaining({
+        type: 'law',
+        date: '2021-06-18',
+        eli: 'http://data.europa.eu/eli/reg_impl/2021/1042/oj',
+      }),
+    );
+    expect(load('model/sources/dir-2017-1132.yaml')).toEqual(
+      expect.objectContaining({
+        type: 'law',
+        date: '2017-06-14',
+        eli: 'http://data.europa.eu/eli/dir/2017/1132/oj',
+      }),
+    );
+  });
+
+  test('model/schemes holds exactly the five EORI-case schemes', () => {
+    const files = readdirSync(join(REPO_ROOT, 'model', 'schemes'))
+      .filter((name) => name.endsWith('.yaml'))
+      .sort();
+    expect(files).toEqual([
+      'eori.yaml',
+      'euid.yaml',
+      'kvk-number.yaml',
+      'rsin.yaml',
+      'vat-nl.yaml',
     ]);
   });
 });
