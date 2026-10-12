@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/source.schema.json
+id: reg-2021-1042
+title: "Commission Implementing Regulation (EU) 2021/1042 of 18 June 2021 laying down rules for the application of Directive (EU) 2017/1132 as regards technical specifications and procedures for the system of interconnection of registers"
+type: law
+date: 2021-06-18
+url: https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32021R1042
+eli: http://data.europa.eu/eli/reg_impl/2021/1042/oj
+publisher: Publications Office of the European Union (EUR-Lex)

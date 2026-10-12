@@ -1,0 +1,67 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/scheme.schema.json
+id: euid
+label:
+  en: European Unique Identifier
+  nl: Europese unieke identificatiecode
+kind: identifier
+issuer: national-business-register
+jurisdiction: EU
+availability:
+  value: public
+  source: landscape-v1-2
+  certainty: likely
+sources:
+  default: dir-2017-1132
+scope:
+  en: "only applicable for \"companies\" (in Dutch: vennootschappen); main use: communication between national registers about structural changes in the company"
+format:
+  patterns:
+    - regex: '^NL\.KVK\.[0-9]{8}$'
+      certainty: possible
+      source: landscape-v1-2
+      note: "The Dutch form of the workbook example, admitted at the owner's 'low certainty' (DEC-047). Regulation (EU) 2021/1042, Annex point 9, confirms only the structure; the register identifier KVK is not confirmed (docs/gaps.md)."
+  examples_valid:
+    - "NL.KVK.05058078"
+  examples_invalid:
+    - "NL.KVK.0505807"
+    - "nl.kvk.05058078"
+level:
+  - value: legal-entity
+    certainty: likely
+    source: landscape-v1-2
+    note: "The workbook scope says the EUID is only applicable for companies."
+mandatory:
+  text: "yes, for cross-border trading"
+  certainty: likely
+  source: landscape-v1-2
+legal_basis:
+  - title: "Directive (EU) 2017/1132, Article 16(1) (companies have a unique identifier for communication between registers)"
+    url: "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32017L1132"
+    certainty: certain
+    source: dir-2017-1132
+  - title: "Commission Implementing Regulation (EU) 2021/1042, Annex, point 9 (structure and use of the EUID)"
+    url: "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32021R1042"
+    certainty: certain
+    source: reg-2021-1042
+validation_source:
+  label: Business registers search (e-Justice, BRIS)
+  url: "https://e-justice.europa.eu/topics/registers-business-insolvency-land/business-registers-search-company-eu_en"
+  certainty: certain
+  source: e-justice-business-registers
+relations:
+  - kind: prerequisite
+    target: kvk-number
+    condition:
+      issuing_country: NL
+    certainty: likely
+    source: landscape-v1-2
+    note: "The workbook gives 'presence of CoC-nr' as the prerequisite. No rule derives an EUID from a KVK number (DEC-047)."
+applicability:
+  - jurisdiction: EU
+    status: [issued, recognised]
+    certainty: certain
+    source: dir-2017-1132
+  - jurisdiction: EU
+    status: [verifiable]
+    certainty: certain
+    source: e-justice-business-registers

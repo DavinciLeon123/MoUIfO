@@ -101,3 +101,38 @@ Every seeded membership, prefix and source was read on its live page while the s
 - **Why it is not in the model:** the sole-proprietor form in J10 (NL plus 10 random digits) contradicts the official structure, which the Ondernemersplein page states as NL, 9 digits, the letter B and 2 digits, and which J11 also gives for the sole proprietor. J11's legal-person form omits the letter B and the two digits that the Ondernemersplein page states for other legal forms. The model follows the Ondernemersplein pages; the workbook gives the VAT rule only at `likely` (DEC-046). The page "Btw-identificatienummer opvragen, controleren en vermelden" also describes a different number, the omzetbelasting-nummer (ob-nummer), which for a sole proprietor is built from the BSN with the letter B and 2 digits. That number is not the VAT identification number and is not modelled.
 - **Open question:** does the next workbook version correct J10 and J11 to the official structure?
 - **Owner or next step:** the workbook authors, at the next workbook version. The model keeps the official structure until then.
+
+## Dutch EUID register identifier (Implementing Regulation (EU) 2021/1042 annex)
+
+- **Item:** the Dutch form of the EUID, `NL.KVK.` followed by the 8-digit KVK number, which the `euid` scheme admits as its only format pattern at certainty `possible` (DEC-047, the owner's "low certainty" of 2026-10-12). The same entry covers the `prerequisite` relation from `euid` to `kvk-number`, at likely, which rests on the workbook's prerequisite row ("presence of CoC-nr") and applies to the Dutch form only.
+- **Why it is not in the model:** only the structure is confirmed. Regulation (EU) 2021/1042, Annex point 9 (read through the Publications Office Cellar on 2026-10-12), gives the country code, the register identifier, the registration number and an optional verification digit; it names neither `NL.KVK` nor `NLNHR`, the form the SPEC mentions. Directive (EU) 2017/1132, Article 16(1), does not name the form either. The workbook's example is the only source of the form. No rule derives an EUID from a KVK number (DEC-047), because no source states that the registration number of a Dutch EUID equals the KVK number.
+- **Open question:** which register identifier does a Dutch EUID carry, `KVK`, `NLNHR` or another code? Does its registration number equal the 8-digit KVK number? Does the e-Justice portal or BRIS documentation state the Dutch format?
+- **Owner or next step:** the owner checks the e-Justice or BRIS documentation for the Dutch format. The EUID part of the release stays gated on this (DEC-047). A sourced pattern replaces the workbook form through a new DECISIONS row; the owner decides.
+
+## ICD codes stated only by the Peppol code list
+
+- **Item:** the ICD code `0106` of `kvk-number`, held as `iso6523_icd` at likely from `peppol-code-lists-9-7`, and any other ICD code that only the Peppol Code Lists v9.7 state. The EAS code `0106` is certain from the same list, because the list is the only source for both values.
+- **Why it is not in the model:** it is in the model at likely, not certain. The ISO/IEC 6523 ICD registry (iso6523.info) could not be read on 2026-10-12, because its certificate has expired, so no read source confirms the ICD value beyond the Peppol list. The Peppol list also gives a RegEx note for 0106 (17 digits) that does not match the KVK number's 8 digits; that note is not used.
+- **Open question:** does the ISO/IEC 6523 ICD registry list 0106 as the code of the Netherlands Chamber of Commerce, as the Peppol list states?
+- **Owner or next step:** a human check of the ISO 6523 registry once its certificate is readable (G8). If the registry differs, the `iso6523_icd` statement of `kvk-number` changes or is removed.
+
+## Levels and roles without a source
+
+- **Item:** the level and role statements that the model omits for lack of a source. `kvk-number` declares neither a level nor a role. The `euid` level `legal-entity` is modelled at likely on the workbook's scope text alone, with no primary source behind it.
+- **Why it is not in the model:** no read source states the level of a KVK number or the role it plays. The KVK page says that "your business or organisation" has an 8-digit KVK number, which does not name a level. The research (G13) finds no sourced level or role for `kvk-number`, `oin`, `vat`, `duns`, `roo` or `peppol-id`, and a statement without a source is not written (DEC-019). The `euid` level rests on the workbook (DEC-046) and is marked likely for that reason.
+- **Open question:** does a read source state whether a KVK number identifies a legal entity or an establishment, and what role the KVK number and the EUID play in a transaction?
+- **Owner or next step:** the owner names a source for each level and role, or accepts the omission. Later plans add their own levels and roles with their sources (G13).
+
+## One validation source per scheme
+
+- **Item:** the workbook names two validation sources for the KVK number: "NL/D: Handelsregister / B: Kruispuntbank" (the Belgian Kruispuntbank for a Belgian enterprise number). The model holds one `validation_source` for `kvk-number`: the KVK Business Register search (`kvk-zoeken`).
+- **Why it is not in the model:** the scheme schema takes one `validation_source`, so the Belgian source cannot sit beside the Dutch one. The Belgian half belongs with the KBO scheme (DEC-048), whose official Belgian sources are CAPTCHA-gated (G5).
+- **Open question:** should `validation_source` take a list, so that a scheme can name more than one register search, for example the Handelsregister and the Kruispuntbank for the KVK number?
+- **Owner or next step:** the owner decides on a schema change through a new DECISIONS row. Until then the Handelsregister search stays the single validation source of `kvk-number`.
+
+## EUID participating countries (BRIS)
+
+- **Item:** the number of countries in which the Business Registers Interconnection System (BRIS) applies. The workbook's glossary gives BRIS as "applies in 31 participating countries". The model states the jurisdiction of `euid` as `EU` only.
+- **Why it is not in the model:** no read source lists the 31 countries. The model's jurisdiction vocabulary has EU and no area that could hold the non-EU participants, and the jurisdictions may not change in Phase 3. The EU jurisdiction is the claim the Directive (Article 16(1)) and the Regulation (Annex point 9) support, because both apply to the registers of the Member States.
+- **Open question:** which countries take part in BRIS, and should the EUID be stated for an EEA or other area, with a new jurisdiction?
+- **Owner or next step:** the owner or the BRIS documentation names the participating countries. A jurisdiction change is a new DECISIONS row, since the vocabulary is not changed in Phase 3.

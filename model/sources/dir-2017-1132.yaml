@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/source.schema.json
+id: dir-2017-1132
+title: "Directive (EU) 2017/1132 of 14 June 2017 relating to certain aspects of company law (codification)"
+type: law
+date: 2017-06-14
+url: https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32017L1132
+eli: http://data.europa.eu/eli/dir/2017/1132/oj
+publisher: Publications Office of the European Union (EUR-Lex)
