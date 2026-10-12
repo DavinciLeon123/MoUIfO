@@ -50,6 +50,50 @@ format:
     - "001469630"
     - "NL1469630123456789"
     - "nl001469630"
+roles:
+  - value: economic-operator
+    certainty: certain
+    source: commission-eori
+mandatory:
+  text: "yes, for cross-border trading involving EU customs"
+  certainty: likely
+  source: landscape-v1-2
+legal_basis:
+  - title: "Regulation (EU) No 952/2013 (Union Customs Code), Article 9"
+    eli: "http://data.europa.eu/eli/reg/2013/952/oj"
+    certainty: certain
+    source: ucc-952-2013
+    note: "Article 9 requires registration with the customs authorities. The text does not name the EORI number; Regulation (EU) 2026/2108, Article 26 does."
+  - title: "Regulation (EU) 2026/2108 (Union Customs Code), Article 26"
+    eli: "http://data.europa.eu/eli/reg/2026/2108/oj"
+    certainty: certain
+    source: ucc-2026-2108
+    note: "Registration to obtain an EORI number. The regulation applies from 21 September 2027 (Article 287(2)) and repeals Regulation (EU) No 952/2013."
+validation_source:
+  label: EU EORI number validation
+  url: "https://ec.europa.eu/taxation_customs/dds2/eos/eori_validation.jsp?Lang=en"
+  certainty: certain
+  source: eori-validation
+applicability:
+  - jurisdiction: EU
+    status: [issued, recognised]
+    certainty: certain
+    source: commission-eori
+    note: "EORI numbers are assigned by the national customs authority of the EU country of establishment; the number is mandatory for customs operations in the EU customs territory."
+  - jurisdiction: EU
+    status: [verifiable]
+    certainty: certain
+    source: eori-validation
+  - jurisdiction: XI
+    status: [issued, recognised]
+    certainty: certain
+    source: hmrc-eori-introduction
+    note: "Northern Ireland, under EU customs legislation. Stated here, not inherited from GB (DEC-041)."
+  - jurisdiction: GB
+    status: [issued, recognised]
+    certainty: certain
+    source: hmrc-eori-introduction
+    note: "England, Scotland and Wales, under UK legislation (see the gap entry on the GB prefix)."
 relations:
   - kind: derived-from
     target: rsin

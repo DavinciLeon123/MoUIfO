@@ -31,3 +31,39 @@ format:
   examples_invalid:
     - "001469631"
     - "00146963"
+level:
+  - value: legal-entity
+    certainty: likely
+    source: kvk-rsin
+    note: "Companies and organisations that register with KVK receive an RSIN; only eenmanszaken do not."
+mandatory:
+  text: "yes, for legal persons"
+  certainty: likely
+  source: landscape-v1-2
+validation_source:
+  label: Business Register search (KVK)
+  url: https://www.kvk.nl/zoeken/
+  certainty: certain
+  source: kvk-zoeken
+applicability:
+  - jurisdiction: NL
+    status: [issued]
+    certainty: certain
+    source: kvk-rsin
+  - jurisdiction: NL
+    status: [verifiable]
+    certainty: certain
+    source: kvk-zoeken
+rules:
+  - id: rsin-from-eori-nl
+    input: eori
+    output: rsin
+    transform:
+      - strip_prefix: 2
+    condition:
+      entity_form: legal-person
+    certainty: certain
+    source: douane-eori-nl
+    examples:
+      - in: "NL001469630"
+        out: "001469630"

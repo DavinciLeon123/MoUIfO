@@ -1,0 +1,10 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/authority.schema.json
+id: douane-nl
+kind: instance
+label:
+  en: Netherlands Customs
+  nl: Douane
+instance_of: national-customs-authority
+jurisdiction: NL
+source: douane-eori-nl
+certainty: certain

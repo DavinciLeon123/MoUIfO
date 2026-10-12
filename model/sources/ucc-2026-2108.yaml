@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/source.schema.json
+id: ucc-2026-2108
+title: Regulation (EU) 2026/2108 establishing the Union Customs Code and the European Union Customs Authority
+type: law
+date: 2026-09-16
+url: https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32026R2108
+eli: http://data.europa.eu/eli/reg/2026/2108/oj
+publisher: Publications Office of the European Union (EUR-Lex)
