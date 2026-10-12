@@ -8,7 +8,7 @@ import { parse } from 'yaml';
 import { checkModel, checkModelFiles } from './check-model.ts';
 import { type ModelFile, parseModelFile } from './load.ts';
 import { buildRegistry } from './refs.ts';
-import { fixture, realModelFiles, withRealModel } from './testing.ts';
+import { fixture, realModelFiles, withSeedModel } from './testing.ts';
 
 const APPLICABILITY_STATUS = 'model/vocab/applicability-status.yaml';
 
@@ -44,7 +44,7 @@ const member = (id: string, extra = ''): string =>
   `  - id: ${id}\n    label:\n      en: Label\n    definition:\n      en: Definition\n${extra}`;
 const applicability = (members: string): ModelFile =>
   fixture(APPLICABILITY_STATUS, `${HEAD}${members}`);
-const check = (file: ModelFile) => checkModelFiles(withRealModel(file));
+const check = (file: ModelFile) => checkModelFiles(withSeedModel(file));
 
 const copies: string[] = [];
 afterAll(() => {

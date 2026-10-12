@@ -7,13 +7,13 @@ import { parse } from 'yaml';
 import { report, runValidation } from '../index.ts';
 import { checkModel, checkModelFiles } from './check-model.ts';
 import type { ModelFile } from './load.ts';
-import { fixture, withRealModel } from './testing.ts';
+import { fixture, SEED_JURISDICTIONS, SEED_SOURCES, withSeedModel } from './testing.ts';
 
 const NL = 'model/jurisdictions/NL.yaml';
 const TEU = 'model/sources/teu-art-52.yaml';
 
 const readReal = (path: string): string => readFileSync(join(REPO_ROOT, path), 'utf8');
-const check = (files: ModelFile | readonly ModelFile[]) => checkModelFiles(withRealModel(files));
+const check = (files: ModelFile | readonly ModelFile[]) => checkModelFiles(withSeedModel(files));
 
 /** 1-based line and column of the first occurrence of `needle` in `text`. */
 function where(text: string, needle: string): { line: number; column: number } {
@@ -278,24 +278,28 @@ const list = (directory: string): string[] =>
   readdirSync(join(REPO_ROOT, 'model', directory)).sort();
 
 describe('the complete Phase 2 seed: six jurisdictions, four sources', () => {
-  test('model/jurisdictions holds exactly BE, EU, GB, GR, NL and XI', () => {
-    expect(list('jurisdictions')).toEqual([
-      'BE.yaml',
-      'EU.yaml',
-      'GB.yaml',
-      'GR.yaml',
-      'NL.yaml',
-      'XI.yaml',
-    ]);
+  test('withSeedModel([]) lists exactly the vocabulary files and the seed jurisdictions and sources', () => {
+    expect(
+      withSeedModel([])
+        .map((file) => file.path)
+        .sort(),
+    ).toEqual(
+      [
+        ...list('vocab').map((file) => `model/vocab/${file}`),
+        ...SEED_JURISDICTIONS.map((id) => `model/jurisdictions/${id}.yaml`),
+        ...SEED_SOURCES.map((id) => `model/sources/${id}.yaml`),
+      ].sort(),
+    );
   });
 
-  test('model/sources holds exactly the four seeded sources', () => {
-    expect(list('sources')).toEqual([
-      'hmrc-eori-introduction.yaml',
-      'nia-1998-s1.yaml',
-      'teu-art-52.yaml',
-      'vat-directive-art-215.yaml',
-    ]);
+  test('model/jurisdictions contains the six seed jurisdictions', () => {
+    expect(list('jurisdictions')).toEqual(
+      expect.arrayContaining(SEED_JURISDICTIONS.map((id) => `${id}.yaml`)),
+    );
+  });
+
+  test('model/sources contains the four seeded sources', () => {
+    expect(list('sources')).toEqual(expect.arrayContaining(SEED_SOURCES.map((id) => `${id}.yaml`)));
   });
 
   test('every part_of claim is one of the four sourced memberships', () => {

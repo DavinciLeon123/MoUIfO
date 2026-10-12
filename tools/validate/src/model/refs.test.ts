@@ -16,7 +16,7 @@ import {
   refKeyword,
 } from './refs.ts';
 import { SCHEMA_DIR } from './schema.ts';
-import { fixture, realModelFiles, withRealModel } from './testing.ts';
+import { fixture, realModelFiles, withSeedModel } from './testing.ts';
 
 const RELATION_KIND = 'model/vocab/relation-kind.yaml';
 const CERTAINTY = 'model/vocab/certainty.yaml';
@@ -34,7 +34,7 @@ const member = (id: string, extra = ''): string =>
   `  - id: ${id}\n    label:\n      en: Label\n    definition:\n      en: Definition\n${extra}`;
 
 const relationKind = (members: string): ModelFile => fixture(RELATION_KIND, `${HEAD}${members}`);
-const check = (file: ModelFile) => checkModelFiles(withRealModel(file));
+const check = (file: ModelFile) => checkModelFiles(withSeedModel(file));
 const realFile = (path: string): ModelFile => {
   const found = realModelFiles().find((file) => file.path === path);
   if (found === undefined) throw new Error(`missing real file ${path}`);
@@ -114,7 +114,7 @@ describe('uioRef on a vocabulary member', () => {
     const file = relationKind(
       member('contains', '    certainty: likely\n    source: no-such-source\n'),
     );
-    const problems = checkModelFiles(withRealModel([broken, file]));
+    const problems = checkModelFiles(withSeedModel([broken, file]));
     expect(problems.map((p) => p.message)).toContain('unknown property "rnak"');
     const likely = problems.find(
       (p) => p.file === RELATION_KIND && p.message.includes('member of vocabulary certainty'),
@@ -257,7 +257,7 @@ describe('vocabulary integrity', () => {
   test('a duplicate certainty rank is one error at the second rank value', () => {
     const real = realFile(CERTAINTY);
     const text = real.text.replace('rank: 3\n', 'rank: 2\n');
-    const problems = checkModelFiles(withRealModel({ path: CERTAINTY, text }));
+    const problems = checkModelFiles(withSeedModel({ path: CERTAINTY, text }));
     expect(problems).toHaveLength(1);
     expect(problems[0]).toMatchObject({
       file: CERTAINTY,
@@ -305,7 +305,7 @@ describe('vocabulary integrity', () => {
     const text = real.text.replace('rank: 2\n', 'rank: 2\n    source: x\n');
     // Real files that cite a certainty (NL.yaml) report the vocabulary as unvouched: only the
     // problems of the certainty file itself are the subject here.
-    const problems = checkModelFiles(withRealModel({ path: CERTAINTY, text })).filter(
+    const problems = checkModelFiles(withSeedModel({ path: CERTAINTY, text })).filter(
       (problem) => problem.file === CERTAINTY,
     );
     expect(problems).toHaveLength(1);
