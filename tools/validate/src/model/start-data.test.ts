@@ -527,12 +527,13 @@ describe('euid with the Dutch form at possible, its EU legal basis and the five 
     );
   });
 
-  test('model/schemes holds exactly the scheme files written by plans 03-06 to 03-11 (so far)', () => {
+  test('model/schemes holds exactly the scheme files written by plans 03-06 to 03-11', () => {
     const files = readdirSync(join(REPO_ROOT, 'model', 'schemes'))
       .filter((name) => name.endsWith('.yaml'))
       .sort();
     expect(files).toEqual([
       'bsn.yaml',
+      'duns.yaml',
       'eori.yaml',
       'euid.yaml',
       'fi-number.yaml',
@@ -1174,5 +1175,182 @@ describe('lei, the LEI with ISO 7064 mod 97-10 and its registration-authority re
 
   test('no validation_source is written: the GLEIF search page carries no statement that a static read can find (plan 03-11 fallback)', () => {
     expect(scheme('lei').validation_source).toBeUndefined();
+  });
+});
+
+describe('duns, the D-U-N-S number with its Peppol check statement, and the last registry sources (DAT-02, DAT-05, plan 03-11, DEC-022, DEC-049)', () => {
+  test('accepts 362596397 and rejects 36259639; its only checksum is none, likely from the Peppol list', () => {
+    const duns = scheme('duns');
+    expect(checkValue(formatOf(duns), '362596397').accepted).toBe(true);
+    expect(checkValue(formatOf(duns), '36259639').accepted).toBe(false);
+    expect(listOf(formatOf(duns).checksum)).toEqual([
+      expect.objectContaining({
+        algorithm: 'none',
+        certainty: 'likely',
+        source: 'peppol-code-lists-9-7',
+      }),
+    ]);
+    expect(listOf(formatOf(duns).patterns)).toEqual([
+      expect.objectContaining({ regex: '^[0-9]{9}$', certainty: 'certain', source: 'dnb-duns' }),
+    ]);
+  });
+
+  test('the workbook example fails the Dutch elfproef, so it is not a personal number (DEC-022); 001469630 passes it', () => {
+    const elfproef = {
+      patterns: [{ regex: '^[0-9]{9}$', certainty: 'certain', source: 'dnb-duns' }],
+      checksum: [{ algorithm: 'elfproef', certainty: 'certain', source: 'dnb-duns' }],
+    } as unknown as FormatSpec;
+    expect(checkValue(elfproef, '362596397').accepted).toBe(false);
+    expect(checkValue(elfproef, '001469630').accepted).toBe(true);
+  });
+
+  test('ICD 0060 is likely and EAS 0060 is certain, both from the Peppol list; the default source is the D&B page', () => {
+    const duns = scheme('duns');
+    expect(duns.sources).toEqual({ default: 'dnb-duns' });
+    expect(duns.iso6523_icd).toEqual({
+      value: '0060',
+      source: 'peppol-code-lists-9-7',
+      certainty: 'likely',
+    });
+    expect(duns.peppol_eas).toEqual({
+      value: '0060',
+      source: 'peppol-code-lists-9-7',
+      certainty: 'certain',
+    });
+  });
+
+  test('is GLOBAL, issued by the dun-bradstreet class (bare, from the D&B page), with availability public-within-restrictions (likely, workbook)', () => {
+    const duns = scheme('duns');
+    expect(duns.jurisdiction).toEqual({
+      value: 'GLOBAL',
+      source: 'landscape-v1-2',
+      certainty: 'likely',
+    });
+    expect(issuerOf(duns)).toBe('dun-bradstreet');
+    expect(duns.availability).toEqual({
+      value: 'public-within-restrictions',
+      source: 'landscape-v1-2',
+      certainty: 'likely',
+    });
+    expect(load('model/authorities/dun-bradstreet.yaml')).toEqual(
+      expect.objectContaining({ id: 'dun-bradstreet', kind: 'class' }),
+    );
+    expect(load('model/authorities/dun-bradstreet.yaml').source).toBeUndefined();
+  });
+
+  test('may identify the same party as kvk-number, lei and vat, each likely from the workbook (may-identify-same-party, DEC-046)', () => {
+    expect(listOf(scheme('duns').relations)).toEqual([
+      expect.objectContaining({
+        kind: 'may-identify-same-party',
+        target: 'kvk-number',
+        certainty: 'likely',
+        source: 'landscape-v1-2',
+      }),
+      expect.objectContaining({
+        kind: 'may-identify-same-party',
+        target: 'lei',
+        certainty: 'likely',
+        source: 'landscape-v1-2',
+      }),
+      expect.objectContaining({
+        kind: 'may-identify-same-party',
+        target: 'vat',
+        certainty: 'likely',
+        source: 'landscape-v1-2',
+      }),
+    ]);
+  });
+
+  test('its validation source is the D&B D-U-N-S number lookup, certain, sourced to dnb-duns-lookup; mandatoriness is the workbook text', () => {
+    const duns = scheme('duns');
+    expect(duns.validation_source).toEqual({
+      label: 'D&B D-U-N-S Number lookup',
+      url: 'https://www.dnb.com/duns-number/lookup.html',
+      certainty: 'certain',
+      source: 'dnb-duns-lookup',
+    });
+    expect(duns.mandatory).toEqual({
+      text: 'mostly optional',
+      certainty: 'likely',
+      source: 'landscape-v1-2',
+    });
+  });
+
+  test('the D&B page states the nine-digit form as a unique identifier used exclusively for businesses (dnb-duns, certain)', () => {
+    expect(load('model/sources/dnb-duns.yaml')).toEqual(
+      expect.objectContaining({ publisher: 'Dun & Bradstreet', type: 'register-doc' }),
+    );
+    expect(listOf(formatOf(scheme('duns')).patterns)[0]).toEqual(
+      expect.objectContaining({ source: 'dnb-duns', certainty: 'certain' }),
+    );
+  });
+
+  test('model/schemes holds exactly the 15 scheme ids of the workbook snapshot (kbo follows in plan 03-12)', () => {
+    const snapshot = JSON.parse(read('sources/landscape-snapshot-v1.2.json')) as {
+      schemes: Record<string, unknown>;
+    };
+    const ids = readdirSync(join(REPO_ROOT, 'model', 'schemes'))
+      .filter((name) => name.endsWith('.yaml'))
+      .map((name) => name.replace(/\.yaml$/, ''))
+      .sort();
+    expect(ids).toHaveLength(15);
+    expect(ids).toEqual(Object.keys(snapshot.schemes).sort());
+  });
+});
+
+describe('docs/gaps.md entries of plan 03-11 (DAT-02, DAT-05, DEC-019, DEC-049)', () => {
+  test.each([
+    '## ISO 17442 not read',
+    '## LEI validation page not readable',
+    '## LEI columns of the workbook',
+    '## D-U-N-S check digit stated both ways by the Peppol list',
+  ])('the entry "%s" exists in the four-part form', (heading) => {
+    const section = gapSection(heading);
+    let at = 0;
+    for (const part of [
+      '- **Item:**',
+      '- **Why it is not in the model:**',
+      '- **Open question:**',
+      '- **Owner or next step:**',
+    ]) {
+      const found = section.indexOf(part, at);
+      expect(found, `${heading}: ${part}`).toBeGreaterThanOrEqual(0);
+      at = found + part.length;
+    }
+  });
+
+  test('the ISO 17442 entry records that the LEI format and check are not confirmed by the standard, and names the Peppol list as the source', () => {
+    const section = gapSection('## ISO 17442 not read');
+    expect(section).toContain('ISO 17442');
+    expect(section).toContain('not confirmed');
+    expect(section).toContain('peppol-code-lists-9-7');
+    expect(section).toContain('724500G3PJTYPL2L9M11');
+  });
+
+  test('the LEI validation entry names the GLEIF search page and says that no validation_source is written', () => {
+    const section = gapSection('## LEI validation page not readable');
+    expect(section).toContain('https://search.gleif.org/');
+    expect(section).toContain('validation_source');
+  });
+
+  test('the D-U-N-S check entry names the usage text that removes the check digit and the structure text that still describes one', () => {
+    const section = gapSection('## D-U-N-S check digit stated both ways by the Peppol list');
+    expect(section).toContain('Check digits were removed');
+    expect(section).toContain('a check digit');
+  });
+
+  test('the ICD entry names 0060 and 0199 beside 0088; the levels entry names duns and lei', () => {
+    const icd = gapSection('## ICD codes stated only by the Peppol code list');
+    expect(icd).toContain('`0060`');
+    expect(icd).toContain('`0199`');
+    const levels = gapSection('## Levels and roles without a source');
+    expect(levels).toContain('`lei` declares no level');
+  });
+
+  test('the workbook LEI column entry records one LEI column and no contradiction (DEC-023, DEC-046)', () => {
+    const section = gapSection('## LEI columns of the workbook');
+    expect(section).toContain('one LEI column');
+    expect(section).toContain('DEC-023');
+    expect(section).toContain('medium');
   });
 });
