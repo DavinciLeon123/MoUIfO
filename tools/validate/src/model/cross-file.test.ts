@@ -98,7 +98,7 @@ describe('several parents and GLOBAL', () => {
     expect(check(jurisdiction('GLOBAL', []))).toEqual([]);
   });
 
-  test('a reference to GLOBAL fails as an unknown jurisdiction while no GLOBAL file exists', () => {
+  test('a reference to GLOBAL fails as an unknown jurisdiction in the seed model, which has no GLOBAL file', () => {
     const zy = jurisdiction('ZY', ['GLOBAL']);
     expect(check(zy)).toEqual([
       {

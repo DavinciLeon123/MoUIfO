@@ -588,9 +588,9 @@ describe('peppol-id, gln and GLOBAL (DAT-02, plan 03-10, DEC-033, DEC-036, DEC-0
     const peppol = scheme('peppol-id');
     expect(peppol.iso6523_icd).toBeUndefined();
     expect(peppol.peppol_eas).toBeUndefined();
-    expect(checkValue(formatOf(peppol), 'iso6523-actorid-upis::9918:nl23rabo0137300425').accepted).toBe(
-      true,
-    );
+    expect(
+      checkValue(formatOf(peppol), 'iso6523-actorid-upis::9918:nl23rabo0137300425').accepted,
+    ).toBe(true);
     expect(checkValue(formatOf(peppol), '9918:nl23rabo0137300425').accepted).toBe(false);
   });
 
@@ -601,10 +601,18 @@ describe('peppol-id, gln and GLOBAL (DAT-02, plan 03-10, DEC-033, DEC-036, DEC-0
     expect(accepted.checksums).toEqual(['pass']);
     expect(checkValue(formatOf(gln), '6291041500214').accepted).toBe(false);
     expect(listOf((gln.format as Json).patterns)).toEqual([
-      expect.objectContaining({ regex: '^[0-9]{13}$', certainty: 'likely', source: 'peppol-code-lists-9-7' }),
+      expect.objectContaining({
+        regex: '^[0-9]{13}$',
+        certainty: 'likely',
+        source: 'peppol-code-lists-9-7',
+      }),
     ]);
     expect(listOf((gln.format as Json).checksum)).toEqual([
-      expect.objectContaining({ algorithm: 'gs1-mod10', certainty: 'likely', source: 'peppol-code-lists-9-7' }),
+      expect.objectContaining({
+        algorithm: 'gs1-mod10',
+        certainty: 'likely',
+        source: 'peppol-code-lists-9-7',
+      }),
     ]);
   });
 

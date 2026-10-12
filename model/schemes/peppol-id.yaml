@@ -1,0 +1,81 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/scheme.schema.json
+id: peppol-id
+label:
+  en: Peppol participant identifier
+  nl: Peppol-ID
+kind: composite
+issuer:
+  value: openpeppol
+  source: peppol-code-lists-9-7
+  certainty: likely
+jurisdiction:
+  value: NL
+  source: landscape-v1-2
+  certainty: likely
+sources:
+  default: peppol-code-lists-9-7
+scope:
+  en: "(inter)national e-invoicing through the Peppol network"
+notes:
+  en: "not relevant for identification"
+components:
+  - prefix: "0106"
+    scheme: kvk-number
+    certainty: certain
+    source: peppol-code-lists-9-7
+    note: "NL:KVK, Peppol Code Lists v9.7"
+  - prefix: "0190"
+    scheme: oin
+    certainty: certain
+    source: peppol-code-lists-9-7
+    note: "NL:OINO, Peppol Code Lists v9.7"
+  - prefix: "9944"
+    scheme: vat-nl
+    certainty: certain
+    source: peppol-code-lists-9-7
+    note: "NL:VAT, Peppol Code Lists v9.7"
+  - prefix: "0088"
+    scheme: gln
+    certainty: certain
+    source: peppol-code-lists-9-7
+    note: "GLN, Peppol Code Lists v9.7"
+relations:
+  - kind: contains
+    target: kvk-number
+    certainty: certain
+    source: peppol-code-lists-9-7
+  - kind: contains
+    target: oin
+    certainty: certain
+    source: peppol-code-lists-9-7
+  - kind: contains
+    target: vat-nl
+    certainty: certain
+    source: peppol-code-lists-9-7
+  - kind: contains
+    target: gln
+    certainty: certain
+    source: peppol-code-lists-9-7
+format:
+  patterns:
+    - regex: "^iso6523-actorid-upis::[0-9]{4}:[A-Za-z0-9]+$"
+      certainty: likely
+      source: landscape-v1-2
+      note: "The wrapper iso6523-actorid-upis::<code>:<value> rests on the workbook example only; the OpenPeppol policy was not read (docs/gaps.md)."
+  examples_valid:
+    - "iso6523-actorid-upis::9918:nl23rabo0137300425"
+  examples_invalid:
+    - "9918:nl23rabo0137300425"
+mandatory:
+  text: "no"
+  certainty: likely
+  source: landscape-v1-2
+validation_source:
+  label: NPa Peppol Test Tool
+  url: "https://test.peppolautoriteit.nl/discover"
+  certainty: certain
+  source: peppol-test-tool
+roles:
+  - value: e-invoicing-participant
+    certainty: likely
+    source: landscape-v1-2
