@@ -262,7 +262,9 @@ describe('the CLI on a repository copy prints positions, never values (D-04, MOD
     expect(plain.stdout).toContain('validate: 4 problems');
     const problems = plain.stdout
       .split('\n')
-      .filter((line) => line !== '' && !line.startsWith('validate:'));
+      .filter(
+        (line) => line !== '' && !line.startsWith('validate:') && !line.includes(' warning:'),
+      );
     expect(problems).toHaveLength(CLI_DEFECTS.length);
   });
 

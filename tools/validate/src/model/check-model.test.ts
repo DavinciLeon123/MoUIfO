@@ -22,9 +22,9 @@ function where(text: string, needle: string): { line: number; column: number } {
 }
 
 describe('checkModel on the real repository', () => {
-  test('the certainty vocabulary produces no problem', () => {
+  test('the certainty vocabulary produces no problem, and the repository none but pending citations', () => {
     expect(checkModelFiles([{ path: PATH, text: REAL }])).toEqual([]);
-    expect(checkModel(REPO_ROOT)).toEqual([]);
+    expectRealModelClean(checkModel(REPO_ROOT));
   });
 });
 

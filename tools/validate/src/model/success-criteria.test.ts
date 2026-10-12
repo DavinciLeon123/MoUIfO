@@ -6,6 +6,7 @@ import type { ModelFile } from './load.ts';
 import {
   cleanupCopies,
   copyOfRepo,
+  expectOnlyPendingWarningLines,
   fixtureAuthorities,
   fixtureSource,
   minimalSchemeBody,
@@ -330,10 +331,10 @@ describe('success criteria 1 and 5 through the CLI on a repository copy (D-04, M
 });
 
 describe('the real repository', () => {
-  test('npm run validate passes with ten rules and no warning line', () => {
+  test('npm run validate passes with ten rules and no warning other than pending citations', () => {
     const real = runValidateCli(undefined, { GITHUB_ACTIONS: undefined });
     expect(real.status).toBe(0);
     expect(real.stdout).toContain('validate: repository rules passed (10 rules)');
-    expect(real.stdout).not.toMatch(/warning:/);
+    expectOnlyPendingWarningLines(real.stdout);
   });
 });

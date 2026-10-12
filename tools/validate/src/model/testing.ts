@@ -3,7 +3,8 @@ import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { REPO_ROOT } from 'uio-config';
+import { type Problem, REPO_ROOT } from 'uio-config';
+import { expect } from 'vitest';
 import { discoverModelFiles, expectedHeader, type ModelFile } from './load.ts';
 
 /**
@@ -218,4 +219,56 @@ export function positionOfToken(
   }
   const before = text.slice(0, index).split('\n');
   return { line: before.length, column: (before.at(-1) ?? '').length + 1 };
+}
+
+/**
+ * Source ids that a statement may cite only later. A workbook-link source is registered before the
+ * plans that cite it, so until then it is an uncited-source warning. Empty in this plan, so the
+ * real-repository assertions are exactly as strict as before. Plan 03-04 fills it from the committed
+ * snapshot's registered link dispositions; plan 03-15 removes it together with the two helpers below.
+ */
+export const PENDING_CITATION: readonly string[] = [];
+
+const UNCITED_MESSAGE = /^source "([^"]+)" is not cited by any statement$/;
+
+/** The uncited-source warning of `problem` names an id in `pending` and sits at its source file. */
+function isPendingCitationWarning(problem: Problem, pending: readonly string[]): boolean {
+  if (problem.severity !== 'warning') return false;
+  const id = UNCITED_MESSAGE.exec(problem.message)?.[1];
+  return id !== undefined && pending.includes(id) && problem.file === `model/sources/${id}.yaml`;
+}
+
+/**
+ * Real-repository assertion: no problem is an error, and every warning is an uncited-source warning
+ * for an id in `pending`. Line and column are ignored.
+ */
+export function expectRealModelClean(
+  problems: readonly Problem[],
+  pending: readonly string[] = PENDING_CITATION,
+): void {
+  expect(problems.filter((problem) => !isPendingCitationWarning(problem, pending))).toEqual([]);
+}
+
+const PLAIN_UNCITED_LINE =
+  /^model\/sources\/([^/\s]+)\.yaml:\d+:\d+ warning: source "([^"]+)" is not cited by any statement$/;
+
+/** A plain CLI warning line that is an uncited-source warning for an id in `pending`. */
+function isPendingWarningLine(line: string, pending: readonly string[]): boolean {
+  const match = PLAIN_UNCITED_LINE.exec(line);
+  const fileId = match?.[1];
+  return fileId !== undefined && fileId === match?.[2] && pending.includes(fileId);
+}
+
+/**
+ * Real-repository assertion on CLI output: every line with ` warning: ` is an uncited-source
+ * warning for an id in `pending`, in the plain form `<file>:<line>:<col> warning: <message>`.
+ */
+export function expectOnlyPendingWarningLines(
+  stdout: string,
+  pending: readonly string[] = PENDING_CITATION,
+): void {
+  const unexpected = stdout
+    .split('\n')
+    .filter((line) => line.includes(' warning: ') && !isPendingWarningLine(line, pending));
+  expect(unexpected).toEqual([]);
 }

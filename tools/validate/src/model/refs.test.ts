@@ -16,7 +16,7 @@ import {
   refKeyword,
 } from './refs.ts';
 import { SCHEMA_DIR } from './schema.ts';
-import { fixture, realModelFiles, withSeedModel } from './testing.ts';
+import { expectRealModelClean, fixture, realModelFiles, withSeedModel } from './testing.ts';
 
 const RELATION_KIND = 'model/vocab/relation-kind.yaml';
 const CERTAINTY = 'model/vocab/certainty.yaml';
@@ -43,7 +43,7 @@ const realFile = (path: string): ModelFile => {
 
 describe('the real relation-kind vocabulary', () => {
   test('the repository validates and lists the nine kinds in SPEC order with specializes last', () => {
-    expect(checkModel(REPO_ROOT)).toEqual([]);
+    expectRealModelClean(checkModel(REPO_ROOT));
     const data = parse(realFile(RELATION_KIND).text, { schema: 'core' }) as {
       values: { id: string }[];
     };

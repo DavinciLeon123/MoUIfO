@@ -7,7 +7,13 @@ import { parse } from 'yaml';
 import { report, runValidation } from '../index.ts';
 import { checkModel, checkModelFiles } from './check-model.ts';
 import type { ModelFile } from './load.ts';
-import { fixture, SEED_JURISDICTIONS, SEED_SOURCES, withSeedModel } from './testing.ts';
+import {
+  expectRealModelClean,
+  fixture,
+  SEED_JURISDICTIONS,
+  SEED_SOURCES,
+  withSeedModel,
+} from './testing.ts';
 
 const NL = 'model/jurisdictions/NL.yaml';
 const TEU = 'model/sources/teu-art-52.yaml';
@@ -35,8 +41,8 @@ const entry = (jurisdiction: string, source = 'teu-art-52'): string =>
   `  - jurisdiction: ${jurisdiction}\n    source: ${source}\n    certainty: certain\n`;
 
 describe('the real seed: NL is part of the EU, sourced by TEU Article 52', () => {
-  test('the repository validates with no problem and no warning', () => {
-    expect(checkModel(REPO_ROOT)).toEqual([]);
+  test('the repository validates with no problem other than pending citations', () => {
+    expectRealModelClean(checkModel(REPO_ROOT));
   });
 
   test('NL.yaml holds one sourced part_of claim for EU', () => {
@@ -344,8 +350,8 @@ describe('the complete Phase 2 seed: six jurisdictions, four sources', () => {
     expect(hmrc).not.toHaveProperty('eli');
   });
 
-  test('the real repository validates with no problem and no warning', () => {
-    expect(runValidation(REPO_ROOT)).toEqual([]);
+  test('the real repository validates with no problem other than pending citations', () => {
+    expectRealModelClean(runValidation(REPO_ROOT));
   });
 });
 
