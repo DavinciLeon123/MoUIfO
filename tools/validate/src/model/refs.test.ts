@@ -1,12 +1,20 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import { cpSync, mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Ajv2020 } from 'ajv/dist/2020.js';
 import { REPO_ROOT } from 'uio-config';
-import { describe, expect, test } from 'vitest';
+import { afterAll, describe, expect, test } from 'vitest';
 import { parse } from 'yaml';
 import { checkModel, checkModelFiles } from './check-model.ts';
 import { type ModelFile, parseModelFile } from './load.ts';
-import { buildRegistry, refKeyword } from './refs.ts';
+import {
+  buildRegistry,
+  checkRequiredVocabs,
+  checkVocabMembers,
+  EMPTY_VOCABS_ALLOWED,
+  refKeyword,
+} from './refs.ts';
 import { SCHEMA_DIR } from './schema.ts';
 import { fixture, realModelFiles, withRealModel } from './testing.ts';
 
@@ -222,5 +230,111 @@ describe('schema hygiene', () => {
       walk(name, JSON.parse(readFileSync(`${dir}${name}`, 'utf8')));
     }
     expect(offenders).toEqual([]);
+  });
+});
+
+/** 1-based line and column of the last occurrence of `needle` in `text`, plus `offset` columns. */
+function whereLast(text: string, needle: string, offset = 0): { line: number; column: number } {
+  const index = text.lastIndexOf(needle);
+  expect(index).toBeGreaterThanOrEqual(0);
+  const before = text.slice(0, index).split('\n');
+  return { line: before.length, column: (before.at(-1) ?? '').length + 1 + offset };
+}
+
+describe('vocabulary integrity', () => {
+  test('a duplicate member id is one error at the second id value', () => {
+    const file = relationKind(`${member('contains')}${member('contains')}`);
+    const problems = check(file);
+    expect(problems).toHaveLength(1);
+    expect(problems[0]).toMatchObject({
+      file: RELATION_KIND,
+      ...whereLast(file.text, 'id: contains', 'id: '.length),
+    });
+  });
+
+  test('a duplicate certainty rank is one error at the second rank value', () => {
+    const real = realFile(CERTAINTY);
+    const text = real.text.replace('rank: 3\n', 'rank: 2\n');
+    const problems = checkModelFiles(withRealModel({ path: CERTAINTY, text }));
+    expect(problems).toHaveLength(1);
+    expect(problems[0]).toMatchObject({
+      file: CERTAINTY,
+      ...whereLast(text, 'rank: 2', 'rank: '.length),
+    });
+  });
+
+  test('values: [] is an error at the values key', () => {
+    const file = fixture(
+      RELATION_KIND,
+      'id: relation-kind\nlabel:\n  en: Relation kind\nvalues: []\n',
+    );
+    const problems = check(file);
+    expect(problems).toHaveLength(1);
+    expect(problems[0]).toMatchObject({ file: RELATION_KIND, ...where(file.text, 'values: []') });
+    expect(problems[0]?.message).toBe('a vocabulary needs at least one value');
+  });
+
+  test('condition-context is the single vocabulary allowed to be empty', () => {
+    expect(EMPTY_VOCABS_ALLOWED).toEqual(['condition-context']);
+    const empty = (id: string) =>
+      parseModelFile({
+        path: `model/vocab/${id}.yaml`,
+        text: `id: ${id}\nlabel:\n  en: X\nvalues: []\n`,
+      }).parsed;
+    expect(checkVocabMembers(empty('condition-context'))).toEqual([]);
+    expect(checkVocabMembers(empty('level')).map((p) => p.message)).toEqual([
+      'a vocabulary needs at least one value',
+    ]);
+  });
+
+  test('a duplicate prefix in a prefix-valued vocabulary is an error at the second prefix', () => {
+    const text = 'id: country-prefix\nvalues:\n  - prefix: NL\n  - prefix: BE\n  - prefix: NL\n';
+    const parsed = parseModelFile({ path: 'model/vocab/country-prefix.yaml', text }).parsed;
+    const problems = checkVocabMembers(parsed);
+    expect(problems).toHaveLength(1);
+    expect(problems[0]).toMatchObject({
+      file: 'model/vocab/country-prefix.yaml',
+      ...whereLast(text, 'prefix: NL', 'prefix: '.length),
+    });
+  });
+
+  test('a certainty member with a source and no certainty gives the dependentRequired error', () => {
+    const real = realFile(CERTAINTY);
+    const text = real.text.replace('rank: 2\n', 'rank: 2\n    source: x\n');
+    const problems = checkModelFiles(withRealModel({ path: CERTAINTY, text }));
+    expect(problems).toHaveLength(1);
+    expect(problems[0]?.message).toContain('certainty');
+    expect(problems[0]).toMatchObject(where(text, 'id: likely'));
+  });
+});
+
+describe('required vocabulary files', () => {
+  const roots: string[] = [];
+  afterAll(() => {
+    for (const root of roots) rmSync(root, { recursive: true, force: true });
+  });
+
+  test('checkRequiredVocabs reports each known vocabulary whose file is absent, sorted', () => {
+    expect(checkRequiredVocabs([CERTAINTY, RELATION_KIND])).toEqual([]);
+    expect(checkRequiredVocabs([CERTAINTY])).toEqual([
+      { file: RELATION_KIND, message: 'required vocabulary file is missing' },
+    ]);
+    expect(checkRequiredVocabs([]).map((p) => p.file)).toEqual([CERTAINTY, RELATION_KIND]);
+  });
+
+  test('checkModel on a copy without relation-kind.yaml reports the missing file', () => {
+    const root = mkdtempSync(join(tmpdir(), 'uio-model-'));
+    roots.push(root);
+    cpSync(join(REPO_ROOT, 'model'), join(root, 'model'), { recursive: true });
+    rmSync(join(root, RELATION_KIND));
+    expect(checkModel(root)).toContainEqual({
+      file: RELATION_KIND,
+      message: 'required vocabulary file is missing',
+    });
+  });
+
+  test('checkModelFiles on a single fixture file never reports a missing vocabulary', () => {
+    const problems = checkModelFiles([realFile(CERTAINTY)]);
+    expect(problems.map((p) => p.message)).not.toContain('required vocabulary file is missing');
   });
 });
