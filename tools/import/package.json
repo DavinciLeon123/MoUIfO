@@ -8,10 +8,8 @@
     "node": ">=22.18"
   },
   "dependencies": {
+    "csv-parse": "7.0.3",
     "csv-stringify": "6.9.0",
     "xlsx": "file:vendor/xlsx-0.20.3.tgz"
-  },
-  "devDependencies": {
-    "csv-parse": "7.0.3"
   }
 }

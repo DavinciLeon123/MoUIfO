@@ -24,7 +24,8 @@
     "build": "npm run build:dist && npm run build:packages",
     "test": "vitest run",
     "config:sync": "node tools/config/src/sync.ts",
-    "export:landscape": "node tools/import/src/export-landscape.ts"
+    "export:landscape": "node tools/import/src/export-landscape.ts",
+    "import:snapshot": "node tools/import/src/snapshot.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",

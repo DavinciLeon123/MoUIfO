@@ -1,0 +1,574 @@
+{
+  "format": 1,
+  "inputs": {
+    "landscape-v1.2-links.csv": "b80141d0abb2fb89a5d95ed2335e2a99523185597742efe757f0c720c7f7b8fe",
+    "landscape-v1.2-overview-uids.csv": "bfa804553ee5b2d65d38aea7ed616f600e17611f4a8b3745bd54cce77b6ea717",
+    "landscape-v1.2-persistence.csv": "60a64e2dd3e72462e1071182be302c9ac13584a3ffb639301e78e7a739fc9f45"
+  },
+  "links": [
+    {
+      "cell": "F13",
+      "column": "F",
+      "field": "legal_basis",
+      "row": 13,
+      "schemes": [
+        "kvk-number"
+      ],
+      "tab": "Overview UIDs",
+      "text": "NL: Handelswet",
+      "url": "https://zoek.officielebekendmakingen.nl/stb-2007-153.pdf"
+    },
+    {
+      "cell": "G13",
+      "column": "G",
+      "field": "legal_basis",
+      "row": 13,
+      "schemes": [
+        "kvk-establishment-number"
+      ],
+      "tab": "Overview UIDs",
+      "text": "NL: Handelswet",
+      "url": "https://zoek.officielebekendmakingen.nl/stb-2007-153.pdf"
+    },
+    {
+      "cell": "I13",
+      "column": "I",
+      "field": "legal_basis",
+      "row": 13,
+      "schemes": [
+        "rsin"
+      ],
+      "tab": "Overview UIDs",
+      "text": "Tax legislation",
+      "url": "https://wetten.overheid.nl/BWBR0024067/2021-04-30/"
+    },
+    {
+      "cell": "J13",
+      "column": "J",
+      "field": "legal_basis",
+      "row": 13,
+      "schemes": [
+        "vat",
+        "vat-nl"
+      ],
+      "tab": "Overview UIDs",
+      "text": "Tax legislation",
+      "url": "https://wetten.overheid.nl/BWBR0002629/2026-01-01"
+    },
+    {
+      "cell": "M13",
+      "column": "M",
+      "field": "legal_basis",
+      "row": 13,
+      "schemes": [
+        "lei"
+      ],
+      "tab": "Overview UIDs",
+      "text": "Implementing regulation - 2017/394 - EN - EUR-Lex",
+      "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32017R0394"
+    },
+    {
+      "cell": "O13",
+      "column": "O",
+      "field": "legal_basis",
+      "row": 13,
+      "schemes": [
+        "euid"
+      ],
+      "tab": "Overview UIDs",
+      "text": "Digital Single Market (EU)",
+      "url": "https://ec.europa.eu/commission/presscorner/api/files/attachment/8210/DSM_communication.pdf"
+    },
+    {
+      "cell": "P13",
+      "column": "P",
+      "field": "legal_basis",
+      "row": 13,
+      "schemes": [
+        "eori"
+      ],
+      "tab": "Overview UIDs",
+      "text": "Union Customs Code (Regulation (EU) No 952/2013)",
+      "url": "https://eur-lex.europa.eu/eli/reg/2013/952/oj/eng"
+    },
+    {
+      "cell": "R13",
+      "column": "R",
+      "field": "legal_basis",
+      "row": 13,
+      "schemes": [
+        "bsn"
+      ],
+      "tab": "Overview UIDs",
+      "text": "Dutch law",
+      "url": "https://wetten.overheid.nl/BWBR0022428/2025-11-11"
+    },
+    {
+      "cell": "S13",
+      "column": "S",
+      "field": "legal_basis",
+      "row": 13,
+      "schemes": [
+        "fi-number"
+      ],
+      "tab": "Overview UIDs",
+      "text": "Tax legislation",
+      "url": "https://wetten.overheid.nl/BWBR0024067/2021-04-30/"
+    },
+    {
+      "cell": "F15",
+      "column": "F",
+      "field": "issuing_authority",
+      "row": 15,
+      "schemes": [
+        "kvk-number"
+      ],
+      "tab": "Overview UIDs",
+      "text": "Kamer van Koophandel",
+      "url": "https://www.kvk.nl/"
+    },
+    {
+      "cell": "G15",
+      "column": "G",
+      "field": "issuing_authority",
+      "row": 15,
+      "schemes": [
+        "kvk-establishment-number"
+      ],
+      "tab": "Overview UIDs",
+      "text": "Kamer van Koophandel",
+      "url": "https://www.kvk.nl/"
+    },
+    {
+      "cell": "H15",
+      "column": "H",
+      "field": "issuing_authority",
+      "row": 15,
+      "schemes": [
+        "oin"
+      ],
+      "tab": "Overview UIDs",
+      "text": "Logius",
+      "url": "https://www.logius.nl/"
+    },
+    {
+      "cell": "I15",
+      "column": "I",
+      "field": "issuing_authority",
+      "row": 15,
+      "schemes": [
+        "rsin"
+      ],
+      "tab": "Overview UIDs",
+      "text": "Kamer van Koophandel",
+      "url": "https://www.kvk.nl/"
+    },
+    {
+      "cell": "K15",
+      "column": "K",
+      "field": "issuing_authority",
+      "row": 15,
+      "schemes": [
+        "roo"
+      ],
+      "tab": "Overview UIDs",
+      "text": "Logius / KOOP",
+      "url": "https://www.koopoverheid.nl/diensten/register-van-overheidsorganisaties"
+    },
+    {
+      "cell": "N15",
+      "column": "N",
+      "field": "issuing_authority",
+      "row": 15,
+      "schemes": [
+        "gln"
+      ],
+      "tab": "Overview UIDs",
+      "text": "GS1 - GLN",
+      "url": "https://www.gs1.nl/producten-services/digital-identity/gln/"
+    },
+    {
+      "cell": "Q15",
+      "column": "Q",
+      "field": "issuing_authority",
+      "row": 15,
+      "schemes": [
+        "duns"
+      ],
+      "tab": "Overview UIDs",
+      "text": "Dun & Bradstreet",
+      "url": "https://www.dnb.com/en-us/smb/duns.html"
+    },
+    {
+      "cell": "H16",
+      "column": "H",
+      "field": "validation_source",
+      "row": 16,
+      "schemes": [
+        "oin"
+      ],
+      "tab": "Overview UIDs",
+      "text": "Logius",
+      "url": "https://oinregister.logius.nl/oin-register"
+    },
+    {
+      "cell": "J16",
+      "column": "J",
+      "field": "validation_source",
+      "row": 16,
+      "schemes": [
+        "vat",
+        "vat-nl"
+      ],
+      "tab": "Overview UIDs",
+      "text": "Vies on-the-Web - European Commission",
+      "url": "https://ec.europa.eu/taxation_customs/vies/#/vat-validation"
+    },
+    {
+      "cell": "K16",
+      "column": "K",
+      "field": "validation_source",
+      "row": 16,
+      "schemes": [
+        "roo"
+      ],
+      "tab": "Overview UIDs",
+      "text": "Register van Overheidsorganisaties",
+      "url": "https://organisaties.overheid.nl/"
+    },
+    {
+      "cell": "O16",
+      "column": "O",
+      "field": "validation_source",
+      "row": 16,
+      "schemes": [
+        "euid"
+      ],
+      "tab": "Overview UIDs",
+      "text": "BRIS",
+      "url": "https://e-justice.europa.eu/topics/registers-business-insolvency-land/business-registers-search-company-eu_en"
+    },
+    {
+      "cell": "P16",
+      "column": "P",
+      "field": "validation_source",
+      "row": 16,
+      "schemes": [
+        "eori"
+      ],
+      "tab": "Overview UIDs",
+      "text": "EORI number validation",
+      "url": "https://ec.europa.eu/taxation_customs/dds2/eos/eori_validation.jsp?Lang=en"
+    },
+    {
+      "cell": "F25",
+      "column": "F",
+      "field": "references",
+      "row": 25,
+      "schemes": [
+        "kvk-number"
+      ],
+      "tab": "Overview UIDs",
+      "text": "Zoeken bij KVK | KVK",
+      "url": "https://www.kvk.nl/zoeken/"
+    },
+    {
+      "cell": "H25",
+      "column": "H",
+      "field": "references",
+      "row": 25,
+      "schemes": [
+        "oin"
+      ],
+      "tab": "Overview UIDs",
+      "text": "OIN Register",
+      "url": "https://oinregister.logius.nl/oin-register"
+    },
+    {
+      "cell": "I25",
+      "column": "I",
+      "field": "references",
+      "row": 25,
+      "schemes": [
+        "rsin"
+      ],
+      "tab": "Overview UIDs",
+      "text": "Zoeken bij KVK | KVK",
+      "url": "https://www.kvk.nl/zoeken/"
+    },
+    {
+      "cell": "J25",
+      "column": "J",
+      "field": "references",
+      "row": 25,
+      "schemes": [
+        "vat",
+        "vat-nl"
+      ],
+      "tab": "Overview UIDs",
+      "text": "Zoeken bij KVK | KvK",
+      "url": "https://www.kvk.nl/zoeken/"
+    },
+    {
+      "cell": "K25",
+      "column": "K",
+      "field": "references",
+      "row": 25,
+      "schemes": [
+        "roo"
+      ],
+      "tab": "Overview UIDs",
+      "text": "Register van Overheidsorganisaties",
+      "url": "https://organisaties.overheid.nl/"
+    },
+    {
+      "cell": "L25",
+      "column": "L",
+      "field": "references",
+      "row": 25,
+      "schemes": [
+        "peppol-id"
+      ],
+      "tab": "Overview UIDs",
+      "text": "NPa Peppol Test Tool",
+      "url": "https://test.peppolautoriteit.nl/discover"
+    },
+    {
+      "cell": "M25",
+      "column": "M",
+      "field": "references",
+      "row": 25,
+      "schemes": [
+        "lei"
+      ],
+      "tab": "Overview UIDs",
+      "text": "GLEIF Registration Authorities List",
+      "url": "https://www.gleif.org/en/lei-data/code-lists/gleif-registration-authorities-list"
+    },
+    {
+      "cell": "N25",
+      "column": "N",
+      "field": "references",
+      "row": 25,
+      "schemes": [
+        "gln"
+      ],
+      "tab": "Overview UIDs",
+      "text": "Verified by GS1 (NL)",
+      "url": "https://www.gs1.nl/producten-services/codes-verifieren/verified-by-gs1/"
+    },
+    {
+      "cell": "O25",
+      "column": "O",
+      "field": "references",
+      "row": 25,
+      "schemes": [
+        "euid"
+      ],
+      "tab": "Overview UIDs",
+      "text": "European e-Justice Portal",
+      "url": "https://e-justice.europa.eu/topics/registers-business-insolvency-land/business-registers-search-company-eu_en"
+    },
+    {
+      "cell": "P25",
+      "column": "P",
+      "field": "references",
+      "row": 25,
+      "schemes": [
+        "eori"
+      ],
+      "tab": "Overview UIDs",
+      "text": "EORI number validation",
+      "url": "https://ec.europa.eu/taxation_customs/dds2/eos/eori_validation.jsp?Lang=en"
+    },
+    {
+      "cell": "Q25",
+      "column": "Q",
+      "field": "references",
+      "row": 25,
+      "schemes": [
+        "duns"
+      ],
+      "tab": "Overview UIDs",
+      "text": "D&B D-U-N-S Number Lookup",
+      "url": "https://www.dnb.com/duns-number/lookup.html"
+    },
+    {
+      "cell": "D48",
+      "column": "D",
+      "field": "glossary",
+      "row": 48,
+      "schemes": [],
+      "tab": "Overview UIDs",
+      "text": "",
+      "url": "https://www.dnb.nl/voor-de-sector/open-boek-toezicht/wet-regelgeving/emir/"
+    },
+    {
+      "cell": "H48",
+      "column": "H",
+      "field": "glossary",
+      "row": 48,
+      "schemes": [],
+      "tab": "Overview UIDs",
+      "text": "European Market Infrastructure Regulation (EMIR) | DNB",
+      "url": "https://www.dnb.nl/voor-de-sector/open-boek-toezicht/wet-regelgeving/emir/"
+    },
+    {
+      "cell": "D49",
+      "column": "D",
+      "field": "glossary",
+      "row": 49,
+      "schemes": [],
+      "tab": "Overview UIDs",
+      "text": "",
+      "url": "https://www.afm.nl/nl-nl/sector/banken-en-verzekeraars/toezicht/mifid-ii"
+    },
+    {
+      "cell": "H49",
+      "column": "H",
+      "field": "glossary",
+      "row": 49,
+      "schemes": [],
+      "tab": "Overview UIDs",
+      "text": "MiFID II",
+      "url": "https://www.afm.nl/nl-nl/sector/banken-en-verzekeraars/toezicht/mifid-ii"
+    },
+    {
+      "cell": "D52",
+      "column": "D",
+      "field": "glossary",
+      "row": 52,
+      "schemes": [],
+      "tab": "Overview UIDs",
+      "text": "",
+      "url": "https://www.gleif.org/en/about/gleif-management-of-the-global-lei-system"
+    },
+    {
+      "cell": "H52",
+      "column": "H",
+      "field": "glossary",
+      "row": 52,
+      "schemes": [],
+      "tab": "Overview UIDs",
+      "text": "The Global LEI System - GLEIF – GLEIF",
+      "url": "https://www.gleif.org/en/about/gleif-management-of-the-global-lei-system"
+    },
+    {
+      "cell": "D54",
+      "column": "D",
+      "field": "glossary",
+      "row": 54,
+      "schemes": [],
+      "tab": "Overview UIDs",
+      "text": "",
+      "url": "https://ec.europa.eu/digital-building-blocks/sites/spaces/DIGITAL/blog/2017/09/19/533365899/Business+Register+Interconnection+System+BRIS"
+    },
+    {
+      "cell": "H54",
+      "column": "H",
+      "field": "glossary",
+      "row": 54,
+      "schemes": [],
+      "tab": "Overview UIDs",
+      "text": "Business Register Interconnection System (BRIS)",
+      "url": "https://ec.europa.eu/digital-building-blocks/sites/spaces/DIGITAL/blog/2017/09/19/533365899/Business+Register+Interconnection+System+BRIS"
+    }
+  ],
+  "schemes": {
+    "bsn": {
+      "columns": {
+        "overview": "R",
+        "persistence": "O"
+      }
+    },
+    "duns": {
+      "columns": {
+        "overview": "Q",
+        "persistence": "N"
+      }
+    },
+    "eori": {
+      "columns": {
+        "overview": "P",
+        "persistence": "M"
+      }
+    },
+    "euid": {
+      "columns": {
+        "overview": "O",
+        "persistence": "L"
+      }
+    },
+    "fi-number": {
+      "columns": {
+        "overview": "S",
+        "persistence": "P"
+      }
+    },
+    "gln": {
+      "columns": {
+        "overview": "N",
+        "persistence": "K"
+      }
+    },
+    "kvk-establishment-number": {
+      "columns": {
+        "overview": "G",
+        "persistence": "D"
+      }
+    },
+    "kvk-number": {
+      "columns": {
+        "overview": "F",
+        "persistence": "C"
+      }
+    },
+    "lei": {
+      "columns": {
+        "overview": "M",
+        "persistence": "J"
+      }
+    },
+    "oin": {
+      "columns": {
+        "overview": "H",
+        "persistence": "E"
+      }
+    },
+    "peppol-id": {
+      "columns": {
+        "overview": "L",
+        "persistence": "I"
+      }
+    },
+    "roo": {
+      "columns": {
+        "overview": "K",
+        "persistence": "H"
+      }
+    },
+    "rsin": {
+      "columns": {
+        "overview": "I",
+        "persistence": "F"
+      }
+    },
+    "vat": {
+      "columns": {
+        "overview": "J",
+        "persistence": "G"
+      }
+    },
+    "vat-nl": {
+      "columns": {
+        "overview": "J",
+        "persistence": "G"
+      }
+    }
+  },
+  "workbook": {
+    "date": "July 3rd, 2026",
+    "title": "Analysis of Unique Identifiers for Organisations",
+    "version": "1.2"
+  }
+}
