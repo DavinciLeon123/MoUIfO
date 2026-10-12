@@ -534,13 +534,117 @@ describe('euid with the Dutch form at possible, its EU legal basis and the five 
       'eori.yaml',
       'euid.yaml',
       'fi-number.yaml',
+      'gln.yaml',
       'kvk-establishment-number.yaml',
       'kvk-number.yaml',
       'oin.yaml',
+      'peppol-id.yaml',
       'roo.yaml',
       'rsin.yaml',
       'vat-nl.yaml',
     ]);
+  });
+});
+
+describe('peppol-id, gln and GLOBAL (DAT-02, plan 03-10, DEC-033, DEC-036, DEC-045)', () => {
+  test('GLOBAL is a jurisdiction file with the id GLOBAL and no parent', () => {
+    const global = load('model/jurisdictions/GLOBAL.yaml');
+    expect(global.id).toBe('GLOBAL');
+    expect(global.part_of).toBeUndefined();
+  });
+
+  test('peppol-id is composite and names its four components in order, each sourced by the Peppol list at certain (DEC-036)', () => {
+    const peppol = scheme('peppol-id');
+    expect(peppol.kind).toBe('composite');
+    const components = listOf(peppol.components);
+    expect(components.map((c) => `${String(c.prefix)}:${String(c.scheme)}`)).toEqual([
+      '0106:kvk-number',
+      '0190:oin',
+      '9944:vat-nl',
+      '0088:gln',
+    ]);
+    for (const component of components) {
+      expect(component).toEqual(
+        expect.objectContaining({ source: 'peppol-code-lists-9-7', certainty: 'certain' }),
+      );
+    }
+  });
+
+  test('peppol-id has one contains relation per component target, certain and sourced to the Peppol list', () => {
+    const relations = listOf(scheme('peppol-id').relations);
+    expect(relations).toEqual(
+      ['kvk-number', 'oin', 'vat-nl', 'gln'].map((target) =>
+        expect.objectContaining({
+          kind: 'contains',
+          target,
+          certainty: 'certain',
+          source: 'peppol-code-lists-9-7',
+        }),
+      ),
+    );
+  });
+
+  test('peppol-id has no ICD or EAS code, and its pattern accepts the workbook example but not the example without the wrapper', () => {
+    const peppol = scheme('peppol-id');
+    expect(peppol.iso6523_icd).toBeUndefined();
+    expect(peppol.peppol_eas).toBeUndefined();
+    expect(checkValue(formatOf(peppol), 'iso6523-actorid-upis::9918:nl23rabo0137300425').accepted).toBe(
+      true,
+    );
+    expect(checkValue(formatOf(peppol), '9918:nl23rabo0137300425').accepted).toBe(false);
+  });
+
+  test('gln: 13 digits and the GS1 mod 10 check, both likely from the Peppol list; accepts a passing value and rejects a wrong check digit', () => {
+    const gln = scheme('gln');
+    const accepted = checkValue(formatOf(gln), '6291041500213');
+    expect(accepted.accepted).toBe(true);
+    expect(accepted.checksums).toEqual(['pass']);
+    expect(checkValue(formatOf(gln), '6291041500214').accepted).toBe(false);
+    expect(listOf((gln.format as Json).patterns)).toEqual([
+      expect.objectContaining({ regex: '^[0-9]{13}$', certainty: 'likely', source: 'peppol-code-lists-9-7' }),
+    ]);
+    expect(listOf((gln.format as Json).checksum)).toEqual([
+      expect.objectContaining({ algorithm: 'gs1-mod10', certainty: 'likely', source: 'peppol-code-lists-9-7' }),
+    ]);
+  });
+
+  test('gln has ICD 0088 at likely and EAS 0088 at certain, and its level location is certain from the GS1 Nederland page', () => {
+    const gln = scheme('gln');
+    expect(gln.iso6523_icd).toEqual({
+      value: '0088',
+      source: 'peppol-code-lists-9-7',
+      certainty: 'likely',
+    });
+    expect(gln.peppol_eas).toEqual({
+      value: '0088',
+      source: 'peppol-code-lists-9-7',
+      certainty: 'certain',
+    });
+    expect(listOf(gln.level)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ value: 'location', certainty: 'certain', source: 'gs1-nl-gln' }),
+      ]),
+    );
+  });
+
+  test('gln is GLOBAL, issued by gs1, and its default source is the GS1 GLN Allocation Rules standard dated 2022-08-01', () => {
+    const gln = scheme('gln');
+    expect(gln.jurisdiction).toBe('GLOBAL');
+    expect(issuerOf(gln)).toBe('gs1');
+    expect(gln.sources).toEqual({ default: 'gs1-gln-allocation-rules' });
+    expect(load('model/sources/gs1-gln-allocation-rules.yaml')).toEqual(
+      expect.objectContaining({ type: 'standard', date: '2022-08-01' }),
+    );
+  });
+
+  test('gs1 and openpeppol are authority classes with no instance, and each is the issuer of a scheme (DEC-045)', () => {
+    expect(load('model/authorities/gs1.yaml')).toEqual(
+      expect.objectContaining({ id: 'gs1', kind: 'class' }),
+    );
+    expect(load('model/authorities/openpeppol.yaml')).toEqual(
+      expect.objectContaining({ id: 'openpeppol', kind: 'class' }),
+    );
+    expect(issuerOf(scheme('peppol-id'))).toBe('openpeppol');
   });
 });
 
