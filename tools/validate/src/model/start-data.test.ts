@@ -611,3 +611,100 @@ describe('oin and the reverse rules to the KVK number and the RSIN (DAT-02, DEC-
     );
   });
 });
+
+describe('kvk-establishment-number and roo as a register (DAT-02, SPEC §9, DEC-046)', () => {
+  test('the establishment number accepts 000019478445 and rejects 00001947844; no check digit', () => {
+    const format = formatOf(scheme('kvk-establishment-number'));
+    expect(checkValue(format, '000019478445').accepted).toBe(true);
+    expect(checkValue(format, '00001947844').accepted).toBe(false);
+    expect((scheme('kvk-establishment-number').format as Json).checksum).toBeUndefined();
+  });
+
+  test('its level is establishment, certain, and the KVK branch-number page states it', () => {
+    expect(listOf(scheme('kvk-establishment-number').level)).toEqual([
+      expect.objectContaining({
+        value: 'establishment',
+        certainty: 'certain',
+        source: 'kvk-establishment',
+      }),
+    ]);
+  });
+
+  test('it is a prerequisite of the KVK number (likely, workbook) and a different level from it (likely, KVK page)', () => {
+    expect(listOf(scheme('kvk-establishment-number').relations)).toEqual([
+      expect.objectContaining({
+        kind: 'prerequisite',
+        target: 'kvk-number',
+        certainty: 'likely',
+        source: 'landscape-v1-2',
+      }),
+      expect.objectContaining({
+        kind: 'different-level',
+        target: 'kvk-number',
+        certainty: 'likely',
+        source: 'kvk-establishment',
+      }),
+    ]);
+  });
+
+  test('its legal basis is Handelsregisterwet 2007 (certain) and it has no validation source', () => {
+    expect(listOf(scheme('kvk-establishment-number').legal_basis)).toEqual([
+      expect.objectContaining({ source: 'handelsregisterwet-2007', certainty: 'certain' }),
+    ]);
+    expect(scheme('kvk-establishment-number').validation_source).toBeUndefined();
+  });
+
+  test('the KVK branch-number page is a register-doc with its url and the date it states', () => {
+    expect(load('model/sources/kvk-establishment.yaml')).toEqual(
+      expect.objectContaining({
+        type: 'register-doc',
+        date: '2026-07-07',
+        url: 'https://www.kvk.nl/en/about-the-business-register/branch-number/',
+      }),
+    );
+  });
+
+  test('roo is a register with no format: a register is identified by a URL, not by an identifier (SPEC §9)', () => {
+    const roo = scheme('roo');
+    expect(roo.kind).toBe('register');
+    expect(roo.format).toBeUndefined();
+  });
+
+  test('roo is the government-organisation level, certain, stated by the KOOP ROO page; its issuer is the KOOP class', () => {
+    const roo = scheme('roo');
+    expect(listOf(roo.level)).toEqual([
+      expect.objectContaining({
+        value: 'government-organisation',
+        certainty: 'certain',
+        source: 'koop-roo',
+      }),
+    ]);
+    expect(issuerOf(roo)).toBe('koop');
+    expect(load('model/authorities/koop.yaml')).toEqual(expect.objectContaining({ kind: 'class' }));
+  });
+
+  test('roo references the KVK number and the OIN (likely, workbook) and is validated at organisaties.overheid.nl (certain)', () => {
+    const roo = scheme('roo');
+    expect(listOf(roo.relations)).toEqual([
+      expect.objectContaining({
+        kind: 'references',
+        target: 'kvk-number',
+        certainty: 'likely',
+        source: 'landscape-v1-2',
+      }),
+      expect.objectContaining({
+        kind: 'references',
+        target: 'oin',
+        certainty: 'likely',
+        source: 'landscape-v1-2',
+      }),
+    ]);
+    expect(roo.validation_source).toEqual(
+      expect.objectContaining({
+        url: 'https://organisaties.overheid.nl/',
+        certainty: 'certain',
+        source: 'organisaties-overheid',
+      }),
+    );
+  });
+});
