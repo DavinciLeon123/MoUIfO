@@ -479,90 +479,811 @@
       "columns": {
         "overview": "R",
         "persistence": "O"
+      },
+      "examples": [
+        {
+          "label": "ABN AMRO Schadeverzekering N.V.",
+          "row": 39,
+          "value": "?"
+        },
+        {
+          "label": "ABN AMRO Hypotheken Groep B.V.",
+          "row": 40,
+          "value": "?"
+        },
+        {
+          "label": "various / other",
+          "row": 41,
+          "value": "?"
+        }
+      ],
+      "fields": {
+        "assurance": null,
+        "availability": "restricted",
+        "format": "unique ID - num(9) (11-proof)",
+        "issuing_authority": "Ministerie van BZK (RvIG)",
+        "jurisdiction": "Netherlands",
+        "legal_basis": "Dutch law",
+        "legal_basis_continued": null,
+        "mandatoriness": "yes, for natural persons",
+        "name": "BSN",
+        "name_in_full": "Burger Service Nummer",
+        "persistence": null,
+        "prerequisites": null,
+        "references": "n/a",
+        "related_to": null,
+        "remarks": null,
+        "scope": null,
+        "specification": null,
+        "structure": null,
+        "trust_anchor": "civil registry extract",
+        "validation_source": "BRP",
+        "validity": "unlimited"
+      },
+      "persistence": {
+        "acquisition-without-merger": "n/a",
+        "dissolution": "n/a",
+        "merger": "n/a",
+        "move-to-other-country": "n/a",
+        "move-within-country": "n/a",
+        "notes": [],
+        "split": "n/a",
+        "summary": "n/a"
+      },
+      "trust": {
+        "crosswalks": null,
+        "legal_basis": null,
+        "lifecycle": null,
+        "registration_quality": null,
+        "verifiability": null
       }
     },
     "duns": {
       "columns": {
         "overview": "Q",
         "persistence": "N"
+      },
+      "examples": [
+        {
+          "label": "various / other",
+          "row": 41,
+          "value": "362596397"
+        }
+      ],
+      "fields": {
+        "assurance": null,
+        "availability": "publicly (within restrictions)",
+        "format": "num(9)",
+        "issuing_authority": "Dun & Bradstreet",
+        "jurisdiction": "global",
+        "legal_basis": "none",
+        "legal_basis_continued": null,
+        "mandatoriness": "mostly optional",
+        "name": "D-U-N-S",
+        "name_in_full": "Data Universal Numbering System",
+        "persistence": "high",
+        "prerequisites": "proof of existence (e.g. CoC-nr)",
+        "references": "D&B D-U-N-S Number Lookup",
+        "related_to": "CoC number, LEI, VAT-nr",
+        "remarks": null,
+        "scope": "international trading, government assignments, app development, credit checks",
+        "specification": "numeric",
+        "structure": null,
+        "trust_anchor": "-",
+        "validation_source": "very limited (US only)",
+        "validity": "intentionally permanent and not to be reused"
+      },
+      "persistence": {
+        "acquisition-without-merger": "Unchanged",
+        "dissolution": "Inactive",
+        "merger": "Often new, but can persist",
+        "move-to-other-country": "Can persist",
+        "move-within-country": "Unchanged",
+        "notes": [],
+        "split": "New DUNS for new entities",
+        "summary": "high"
+      },
+      "trust": {
+        "crosswalks": 0,
+        "legal_basis": 0,
+        "lifecycle": 1,
+        "registration_quality": 1,
+        "verifiability": 0
       }
     },
     "eori": {
       "columns": {
         "overview": "P",
         "persistence": "M"
+      },
+      "examples": [
+        {
+          "label": "ABN AMRO Schadeverzekering N.V.",
+          "row": 39,
+          "value": "NL001469630"
+        }
+      ],
+      "fields": {
+        "assurance": null,
+        "availability": "public (details are  restricted)",
+        "format": "NL + RSIN\nfor EMZ: NL + 10 random digits (no BSN)\nnon-Dutch: NL + fi-nummer",
+        "issuing_authority": "National customs authorities in EU Member States",
+        "jurisdiction": "EU",
+        "legal_basis": "Union Customs Code (Regulation (EU) No 952/2013)",
+        "legal_basis_continued": "implementing/delegated acts",
+        "mandatoriness": "yes, for cross-border trading involving EU costoms",
+        "name": "EORI",
+        "name_in_full": "Economic Operators Registration and Identification",
+        "persistence": "medium",
+        "prerequisites": "VAT-nr",
+        "references": "EORI number validation",
+        "related_to": "VAT-nr, CoC number",
+        "remarks": "not a general business ID, often derived from one.",
+        "scope": "required for international trade with EU and UK involving customs;\nfor legal persons as well as single person enterprises",
+        "specification": null,
+        "structure": "-",
+        "trust_anchor": "-",
+        "validation_source": "EORI number validation",
+        "validity": "valid while the economic operator remains registered for customs purposes"
+      },
+      "persistence": {
+        "acquisition-without-merger": "Unchanged",
+        "dissolution": "Ceases",
+        "merger": "Unchanged if entity persists",
+        "move-to-other-country": "New EORI",
+        "move-within-country": "Unchanged",
+        "notes": [],
+        "split": "New EORI",
+        "summary": "medium"
+      },
+      "trust": {
+        "crosswalks": 1,
+        "legal_basis": 1,
+        "lifecycle": 1,
+        "registration_quality": 1,
+        "verifiability": 0
       }
     },
     "euid": {
       "columns": {
         "overview": "O",
         "persistence": "L"
+      },
+      "examples": [
+        {
+          "label": "ABN AMRO Schadeverzekering N.V.",
+          "row": 39,
+          "value": "NL.KVK.05058078"
+        }
+      ],
+      "fields": {
+        "assurance": null,
+        "availability": "public",
+        "format": "[Country Code(2)][Register Identifier(3?)][National registration number]<Verification Digit(1)>",
+        "issuing_authority": "national CoC, according to EU standards",
+        "jurisdiction": "Europe (BRIS)",
+        "legal_basis": "Digital Single Market (EU)",
+        "legal_basis_continued": null,
+        "mandatoriness": "yes, for cross-border trading",
+        "name": "EUID",
+        "name_in_full": "European Unique Identifier",
+        "persistence": "low-medium",
+        "prerequisites": "presence of CoC-nr",
+        "references": "European e-Justice Portal",
+        "related_to": "-",
+        "remarks": "limited to EU, so less valuable for multinational companies\nCountry code is according to ISO3166",
+        "scope": "only applicable for \"companies\" (in Dutch: vennootschappen)\nmain use: communication between national registers about structural changes in the company",
+        "specification": null,
+        "structure": "ISO6523",
+        "trust_anchor": "-",
+        "validation_source": "BRIS",
+        "validity": "following CoC-nr"
+      },
+      "persistence": {
+        "acquisition-without-merger": "Unchanged",
+        "dissolution": "Ceases",
+        "merger": "Follows national register behaviour",
+        "move-to-other-country": "New EUID",
+        "move-within-country": "Unchanged",
+        "notes": [],
+        "split": "New EUIDs",
+        "summary": "low-medium"
+      },
+      "trust": {
+        "crosswalks": 1,
+        "legal_basis": 2,
+        "lifecycle": 1,
+        "registration_quality": 0,
+        "verifiability": 0
       }
     },
     "fi-number": {
       "columns": {
         "overview": "S",
         "persistence": "P"
+      },
+      "examples": [
+        {
+          "label": "ABN AMRO Schadeverzekering N.V.",
+          "row": 39,
+          "value": "?"
+        },
+        {
+          "label": "ABN AMRO Hypotheken Groep B.V.",
+          "row": 40,
+          "value": "?"
+        },
+        {
+          "label": "various / other",
+          "row": 41,
+          "value": "?"
+        }
+      ],
+      "fields": {
+        "assurance": null,
+        "availability": "internal",
+        "format": "unique ID - num(9) (11-proof)",
+        "issuing_authority": "National Tax Service",
+        "jurisdiction": "Netherlands",
+        "legal_basis": "Tax legislation",
+        "legal_basis_continued": null,
+        "mandatoriness": "yes, for organisations with VAT duty",
+        "name": "fi-nummer",
+        "name_in_full": "fiscaal nummer",
+        "persistence": null,
+        "prerequisites": "CoC number (1 on 1)",
+        "references": "n/a",
+        "related_to": "CoC number",
+        "remarks": "issued by Tax Service until 2010, when CoC started issuing RSIN instead.",
+        "scope": "all parties being assigned an RSIN now were assigned a fi-nummer in the past.\nForeign parties are assigned a fi-nummer if they:\n- apply for an EORI in NL\n- must pay VAT in NL",
+        "specification": null,
+        "structure": null,
+        "trust_anchor": null,
+        "validation_source": null,
+        "validity": "unlimited"
+      },
+      "persistence": {
+        "acquisition-without-merger": "Unchanged",
+        "dissolution": "Ceases",
+        "merger": "New number for merged entity",
+        "move-to-other-country": "New number",
+        "move-within-country": "Unchanged",
+        "notes": [],
+        "split": "New numbers for split entities",
+        "summary": "medium"
+      },
+      "trust": {
+        "crosswalks": null,
+        "legal_basis": null,
+        "lifecycle": null,
+        "registration_quality": null,
+        "verifiability": null
       }
     },
     "gln": {
       "columns": {
         "overview": "N",
         "persistence": "K"
+      },
+      "examples": [],
+      "fields": {
+        "assurance": null,
+        "availability": "public",
+        "format": "internal numbering",
+        "issuing_authority": "GS1 - GLN",
+        "jurisdiction": "global",
+        "legal_basis": "-",
+        "legal_basis_continued": null,
+        "mandatoriness": "no",
+        "name": "GLN",
+        "name_in_full": "Global Location Number",
+        "persistence": "low",
+        "prerequisites": "-",
+        "references": "Verified by GS1 (NL)",
+        "related_to": "none",
+        "remarks": "not relevant for identification, but possibly  for search purposes",
+        "scope": "legal entities, locations, functions;\nmainly for EDI and e-invoicing",
+        "specification": "n/a",
+        "structure": "-",
+        "trust_anchor": "-",
+        "validation_source": "-",
+        "validity": "-"
+      },
+      "persistence": {
+        "acquisition-without-merger": "Unchanged",
+        "dissolution": "Ceases",
+        "merger": "Recommended new",
+        "move-to-other-country": "New GLN",
+        "move-within-country": "Unchanged",
+        "notes": [
+          "'Recommended new' because a GLN is not legally bound to the register. GLN identifies a location, not necessarily a legal entity.",
+          "Still, it is strongly recommended not to reuse any GLN."
+        ],
+        "split": "New GLNs",
+        "summary": "Low"
+      },
+      "trust": {
+        "crosswalks": 0,
+        "legal_basis": 0,
+        "lifecycle": 0,
+        "registration_quality": 0,
+        "verifiability": 0
       }
     },
     "kvk-establishment-number": {
       "columns": {
         "overview": "G",
         "persistence": "D"
+      },
+      "examples": [
+        {
+          "label": "ABN AMRO Schadeverzekering N.V.",
+          "row": 39,
+          "value": "000019478445"
+        }
+      ],
+      "fields": {
+        "assurance": null,
+        "availability": "public",
+        "format": "NL: unique ID - num(12)",
+        "issuing_authority": "Kamer van Koophandel",
+        "jurisdiction": "Netherlands",
+        "legal_basis": "NL: Handelswet",
+        "legal_basis_continued": null,
+        "mandatoriness": "no",
+        "name": "vestigingsnummer",
+        "name_in_full": "vestigingsnummer",
+        "persistence": "low",
+        "prerequisites": "sub-number of a KvK number",
+        "references": "not searchable in itself",
+        "related_to": "KvK number (randomly assigned)",
+        "remarks": null,
+        "scope": "multiple subsidiaries of a company in different locations",
+        "specification": null,
+        "structure": null,
+        "trust_anchor": null,
+        "validation_source": null,
+        "validity": null
+      },
+      "persistence": {
+        "acquisition-without-merger": "Unchanged",
+        "dissolution": "Ceases",
+        "merger": "New numbers for new establishments",
+        "move-to-other-country": "N/A",
+        "move-within-country": "New number",
+        "notes": [],
+        "split": "New numbers",
+        "summary": "low"
+      },
+      "trust": {
+        "crosswalks": 0,
+        "legal_basis": 2,
+        "lifecycle": 0,
+        "registration_quality": 1,
+        "verifiability": 1
       }
     },
     "kvk-number": {
       "columns": {
         "overview": "F",
         "persistence": "C"
+      },
+      "examples": [
+        {
+          "label": "ABN AMRO Schadeverzekering N.V.",
+          "row": 39,
+          "value": "05058078"
+        },
+        {
+          "label": "ABN AMRO Hypotheken Groep B.V.",
+          "row": 40,
+          "value": "08024285"
+        }
+      ],
+      "fields": {
+        "assurance": "backed by national government",
+        "availability": "public",
+        "format": "NL: unique ID - num(8)",
+        "issuing_authority": "Kamer van Koophandel",
+        "jurisdiction": "national",
+        "legal_basis": "NL: Handelswet",
+        "legal_basis_continued": null,
+        "mandatoriness": "yes, for all organizations engaging in entrepreneurial activities",
+        "name": "KvK number",
+        "name_in_full": "Kamer van Koophandel number",
+        "persistence": "medium",
+        "prerequisites": "see below",
+        "references": "Zoeken bij KVK | KVK",
+        "related_to": "origin for many other ID's",
+        "remarks": "in NL: mandatory for all organizations engaging in entrepreneurial activities. Specific exceptions apply.\nDutch Chamber of Commerce now uses 'Kamer van Koophandel' as formal name",
+        "scope": "required in many formal activities",
+        "specification": null,
+        "structure": null,
+        "trust_anchor": "extract (digital or hardcopy)",
+        "validation_source": "NL/D: Handelsregister / B: Kruispuntbank",
+        "validity": "unlimited (recent extract often required)"
+      },
+      "persistence": {
+        "acquisition-without-merger": "Unchanged",
+        "dissolution": "Ceases",
+        "merger": "New number for merged entity",
+        "move-to-other-country": "New number",
+        "move-within-country": "Unchanged",
+        "notes": [],
+        "split": "New numbers for split entities",
+        "summary": "medium"
+      },
+      "trust": {
+        "crosswalks": 1,
+        "legal_basis": 2,
+        "lifecycle": 1,
+        "registration_quality": 1,
+        "verifiability": 1
       }
     },
     "lei": {
       "columns": {
         "overview": "M",
         "persistence": "J"
+      },
+      "examples": [
+        {
+          "label": "ABN AMRO Schadeverzekering N.V.",
+          "row": 39,
+          "value": "724500G3PJTYPL2L9M11"
+        }
+      ],
+      "fields": {
+        "assurance": null,
+        "availability": "public",
+        "format": "str(20)",
+        "issuing_authority": "GLEIF supervised local institutions (LOU's)",
+        "jurisdiction": "global",
+        "legal_basis": "Implementing regulation - 2017/394 - EN - EUR-Lex",
+        "legal_basis_continued": "EU: EMIR, MiFID II\nUS: DFA",
+        "mandatoriness": "yes, for engaging in financial transactions",
+        "name": "LEI",
+        "name_in_full": "Legal Entity Identifier",
+        "persistence": "medium",
+        "prerequisites": "legal entity must be registered by an official source",
+        "references": "GLEIF Registration Authorities List",
+        "related_to": "CoC number via RA codes (RA = Registration Authority)",
+        "remarks": "costly and cumbersome for SME",
+        "scope": "entities involved in financial transactions(stocks, bonds etc.)\nfor risk assessment purposes (AML,CTF)\nnatural persons are NOT required to have a LEI.",
+        "specification": "[LOU-id(4)][unique ID LP (14)][verification(2)]",
+        "structure": "ISO 17442",
+        "trust_anchor": "Deed of Incorporation",
+        "validation_source": "GLEIF index / API",
+        "validity": "limited to 1 year"
+      },
+      "persistence": {
+        "acquisition-without-merger": "Unchanged",
+        "dissolution": "Lapsed",
+        "merger": "New LEI for merged entity",
+        "move-to-other-country": "New registration",
+        "move-within-country": "Unchanged",
+        "notes": [],
+        "split": "New LEIs",
+        "summary": "medium"
+      },
+      "trust": {
+        "crosswalks": 1,
+        "legal_basis": 1,
+        "lifecycle": 1,
+        "registration_quality": 1,
+        "verifiability": 1
       }
     },
     "oin": {
       "columns": {
         "overview": "H",
         "persistence": "E"
+      },
+      "examples": [
+        {
+          "label": "ABN AMRO Hypotheken Groep B.V.",
+          "row": 40,
+          "value": "00000003080242850000"
+        }
+      ],
+      "fields": {
+        "assurance": null,
+        "availability": "partially public",
+        "format": "unique ID - num(20)",
+        "issuing_authority": "Logius",
+        "jurisdiction": "Netherlands",
+        "legal_basis": "-",
+        "legal_basis_continued": null,
+        "mandatoriness": "no",
+        "name": "OIN",
+        "name_in_full": "Organisatie Identificatie Nummer",
+        "persistence": "high within NL",
+        "prerequisites": null,
+        "references": "OIN Register",
+        "related_to": "KvK number (randomly assigned) or RSIN",
+        "remarks": "based on RSIN if there is no KvK-nr;\nOINs assiged by a TSP are not publically searchable",
+        "scope": "Everyone engaged in digital communication with the Dutch government (eHerkenning)",
+        "specification": "[prefix(8)][CoC-number(8/9)][suffix(4/3)]",
+        "structure": null,
+        "trust_anchor": "-",
+        "validation_source": "Logius",
+        "validity": "unlimited"
+      },
+      "persistence": {
+        "acquisition-without-merger": "Unchanged",
+        "dissolution": "Ceases",
+        "merger": "Unchanged if entity persists; otherwise new",
+        "move-to-other-country": "New OIN",
+        "move-within-country": "Unchanged",
+        "notes": [],
+        "split": "New OIN",
+        "summary": "high within NL"
+      },
+      "trust": {
+        "crosswalks": 1,
+        "legal_basis": 1,
+        "lifecycle": 0,
+        "registration_quality": 1,
+        "verifiability": 0
       }
     },
     "peppol-id": {
       "columns": {
         "overview": "L",
         "persistence": "I"
+      },
+      "examples": [
+        {
+          "label": "various / other",
+          "row": 41,
+          "value": "iso6523-actorid-upis::9918:nl23rabo0137300425"
+        }
+      ],
+      "fields": {
+        "assurance": null,
+        "availability": null,
+        "format": "either one of KvK-nr, OIN, VAT-nr,\nIBAN, GLN",
+        "issuing_authority": null,
+        "jurisdiction": "Netherlands",
+        "legal_basis": "-",
+        "legal_basis_continued": null,
+        "mandatoriness": "no",
+        "name": "Peppol-ID",
+        "name_in_full": "Peppol-ID",
+        "persistence": "variable",
+        "prerequisites": null,
+        "references": "NPa Peppol Test Tool",
+        "related_to": "RSIN; OIN; VAT-nr",
+        "remarks": "not relevant for identification",
+        "scope": "(inter)national e-invoicing through the Peppol network",
+        "specification": null,
+        "structure": null,
+        "trust_anchor": null,
+        "validation_source": null,
+        "validity": null
+      },
+      "persistence": {
+        "acquisition-without-merger": "Unchanged",
+        "dissolution": "Inactive",
+        "merger": "Depends on underlying ID",
+        "move-to-other-country": "New ID",
+        "move-within-country": "Unchanged",
+        "notes": [],
+        "split": "New ID",
+        "summary": "variable"
+      },
+      "trust": {
+        "crosswalks": 0,
+        "legal_basis": 1,
+        "lifecycle": 0,
+        "registration_quality": 1,
+        "verifiability": 1
       }
     },
     "roo": {
       "columns": {
         "overview": "K",
         "persistence": "H"
+      },
+      "examples": [],
+      "fields": {
+        "assurance": null,
+        "availability": "public",
+        "format": "n/a",
+        "issuing_authority": "Logius / KOOP",
+        "jurisdiction": "Netherlands",
+        "legal_basis": "-",
+        "legal_basis_continued": null,
+        "mandatoriness": "no",
+        "name": "ROO",
+        "name_in_full": "Register Overheidsorganisaties",
+        "persistence": "low-medium",
+        "prerequisites": null,
+        "references": "Register van Overheidsorganisaties",
+        "related_to": "KvK number, OIN",
+        "remarks": "ROO is a register, not an ID.\nA URL is used for identification",
+        "scope": "information on governmental organisations only",
+        "specification": null,
+        "structure": "n/a",
+        "trust_anchor": "n/a",
+        "validation_source": "Register van Overheidsorganisaties",
+        "validity": "unlimited"
+      },
+      "persistence": {
+        "acquisition-without-merger": "Unchanged",
+        "dissolution": "Ceases",
+        "merger": "New number",
+        "move-to-other-country": "N/A",
+        "move-within-country": "Unchanged",
+        "notes": [],
+        "split": "New number",
+        "summary": "low-medium"
+      },
+      "trust": {
+        "crosswalks": 0,
+        "legal_basis": 1,
+        "lifecycle": 0,
+        "registration_quality": 0,
+        "verifiability": 0
       }
     },
     "rsin": {
       "columns": {
         "overview": "I",
         "persistence": "F"
+      },
+      "examples": [
+        {
+          "label": "ABN AMRO Schadeverzekering N.V.",
+          "row": 39,
+          "value": "001469630"
+        }
+      ],
+      "fields": {
+        "assurance": "issued by KvK",
+        "availability": "public",
+        "format": "unique ID - num(9) (11-proof)",
+        "issuing_authority": "Kamer van Koophandel",
+        "jurisdiction": "Netherlands",
+        "legal_basis": "Tax legislation",
+        "legal_basis_continued": null,
+        "mandatoriness": "yes, for legal persons",
+        "name": "RSIN",
+        "name_in_full": "Rechtspersonen en Samenwerkingsverbanden Identificatie Nummer",
+        "persistence": "low-medium",
+        "prerequisites": "KvK number",
+        "references": "Zoeken bij KVK | KVK",
+        "related_to": "KvK number",
+        "remarks": "(predecessed by fi-number)",
+        "scope": "legal person equivalent of BSN; used for digital communication with Dutch government",
+        "specification": null,
+        "structure": null,
+        "trust_anchor": null,
+        "validation_source": "Handelsregister",
+        "validity": "unlimited"
+      },
+      "persistence": {
+        "acquisition-without-merger": "Unchanged",
+        "dissolution": "Ceases",
+        "merger": "Usually new for merged entity",
+        "move-to-other-country": "New RSIN",
+        "move-within-country": "Unchanged",
+        "notes": [],
+        "split": "New RSINs",
+        "summary": "low-medium"
+      },
+      "trust": {
+        "crosswalks": 1,
+        "legal_basis": 2,
+        "lifecycle": 0,
+        "registration_quality": 1,
+        "verifiability": 1
       }
     },
     "vat": {
       "columns": {
         "overview": "J",
         "persistence": "G"
+      },
+      "examples": [
+        {
+          "label": "ABN AMRO Schadeverzekering N.V.",
+          "row": 39,
+          "value": "NL001469630B01"
+        }
+      ],
+      "fields": {
+        "assurance": null,
+        "availability": "public",
+        "format": "in NL: NL + num(9) + B + [subnummer]\nfor EMZ: NL + 10 random digits (no BSN)",
+        "issuing_authority": "National Tax Service",
+        "jurisdiction": "global",
+        "legal_basis": "Tax legislation",
+        "legal_basis_continued": null,
+        "mandatoriness": "yes; in NL: determined by Tax Service",
+        "name": "VAT-nr",
+        "name_in_full": "Value Added Tax number",
+        "persistence": "low",
+        "prerequisites": "KvK number",
+        "references": "Zoeken bij KVK | KvK",
+        "related_to": "RSIN",
+        "remarks": "in Dutch: BTW-nummer, BTW-identificatienummer",
+        "scope": "required for tax payments",
+        "specification": "Dutch single person enterprise: [NL][unique ID(9)][B][[verification(2)]\nother Dutch enterprises: [NL][RSIN]",
+        "structure": null,
+        "trust_anchor": "n/a",
+        "validation_source": "Vies on-the-Web - European Commission",
+        "validity": "unlimited"
+      },
+      "persistence": {
+        "acquisition-without-merger": "Unchanged",
+        "dissolution": "Ceases",
+        "merger": "Usually new",
+        "move-to-other-country": "Always new",
+        "move-within-country": "Sometimes new",
+        "notes": [],
+        "split": "New VAT numbers",
+        "summary": "low"
+      },
+      "trust": {
+        "crosswalks": 1,
+        "legal_basis": 2,
+        "lifecycle": 0,
+        "registration_quality": 1,
+        "verifiability": 1
       }
     },
     "vat-nl": {
       "columns": {
         "overview": "J",
         "persistence": "G"
+      },
+      "examples": [
+        {
+          "label": "ABN AMRO Schadeverzekering N.V.",
+          "row": 39,
+          "value": "NL001469630B01"
+        }
+      ],
+      "fields": {
+        "assurance": null,
+        "availability": "public",
+        "format": "in NL: NL + num(9) + B + [subnummer]\nfor EMZ: NL + 10 random digits (no BSN)",
+        "issuing_authority": "National Tax Service",
+        "jurisdiction": "global",
+        "legal_basis": "Tax legislation",
+        "legal_basis_continued": null,
+        "mandatoriness": "yes; in NL: determined by Tax Service",
+        "name": "VAT-nr",
+        "name_in_full": "Value Added Tax number",
+        "persistence": "low",
+        "prerequisites": "KvK number",
+        "references": "Zoeken bij KVK | KvK",
+        "related_to": "RSIN",
+        "remarks": "in Dutch: BTW-nummer, BTW-identificatienummer",
+        "scope": "required for tax payments",
+        "specification": "Dutch single person enterprise: [NL][unique ID(9)][B][[verification(2)]\nother Dutch enterprises: [NL][RSIN]",
+        "structure": null,
+        "trust_anchor": "n/a",
+        "validation_source": "Vies on-the-Web - European Commission",
+        "validity": "unlimited"
+      },
+      "persistence": {
+        "acquisition-without-merger": "Unchanged",
+        "dissolution": "Ceases",
+        "merger": "Usually new",
+        "move-to-other-country": "Always new",
+        "move-within-country": "Sometimes new",
+        "notes": [],
+        "split": "New VAT numbers",
+        "summary": "low"
+      },
+      "trust": {
+        "crosswalks": 1,
+        "legal_basis": 2,
+        "lifecycle": 0,
+        "registration_quality": 1,
+        "verifiability": 1
       }
     }
   },

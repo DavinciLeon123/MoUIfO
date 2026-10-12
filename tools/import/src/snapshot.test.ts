@@ -134,9 +134,19 @@ describe('inputs and schemes', () => {
 });
 
 describe('content hygiene (T-03-02, D-11)', () => {
-  test('the serialized snapshot has no personal path, no timestamp and no model source id', () => {
+  test('the snapshot holds no personal path, no timestamp and no model source id', () => {
     const text = committedText();
-    expect(PERSONAL_PATH_PATTERN.test(text)).toBe(false);
+    // PERSONAL_PATH_PATTERN is applied to the decoded string values, not the JSON text: its
+    // case-insensitive drive-letter alternative would match the escaped line break after "they:"
+    // (serialized as `:\n`) in a verbatim cell. The decoded values hold no such false positive.
+    const values: string[] = [];
+    const walk = (node: unknown): void => {
+      if (typeof node === 'string') values.push(node);
+      else if (Array.isArray(node)) node.forEach(walk);
+      else if (node !== null && typeof node === 'object') Object.values(node).forEach(walk);
+    };
+    walk(JSON.parse(text));
+    expect(PERSONAL_PATH_PATTERN.test(values.join('\n'))).toBe(false);
     expect(text).not.toMatch(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/);
     expect(text).not.toContain('.yaml');
   });
@@ -155,6 +165,113 @@ describe('source discipline (DEC-014)', () => {
       expect(specifiers.filter((s) => /xlsx|export-landscape/.test(s))).toEqual([]);
     },
   );
+});
+
+describe('workbook values per scheme (D-03, D-11)', () => {
+  const TRUST_KEYS = [
+    'legal_basis',
+    'registration_quality',
+    'verifiability',
+    'crosswalks',
+    'lifecycle',
+  ];
+  const EVENTS = [
+    'merger',
+    'acquisition-without-merger',
+    'split',
+    'dissolution',
+    'move-within-country',
+    'move-to-other-country',
+  ];
+
+  test('the workbook title, version and date are copied verbatim', () => {
+    expect(build().workbook).toEqual({
+      title: 'Analysis of Unique Identifiers for Organisations',
+      version: '1.2',
+      date: 'July 3rd, 2026',
+    });
+  });
+
+  test('kvk-number carries its format, legal basis, trust, persistence and examples', () => {
+    const kvk = build().schemes['kvk-number'];
+    expect(kvk?.fields.format).toBe('NL: unique ID - num(8)');
+    expect(kvk?.fields.legal_basis).toBe('NL: Handelswet');
+    expect(kvk?.trust).toEqual({
+      legal_basis: 2,
+      registration_quality: 1,
+      verifiability: 1,
+      crosswalks: 1,
+      lifecycle: 1,
+    });
+    expect(kvk?.persistence.merger).toBe('New number for merged entity');
+    expect(kvk?.persistence.summary).toBe('medium');
+    expect(kvk?.examples).toEqual([
+      { row: 39, label: 'ABN AMRO Schadeverzekering N.V.', value: '05058078' },
+      { row: 40, label: 'ABN AMRO Hypotheken Groep B.V.', value: '08024285' },
+    ]);
+  });
+
+  test('bsn and fi-number hold null for every trust score, never 0', () => {
+    const schemes = build().schemes;
+    for (const id of ['bsn', 'fi-number']) {
+      for (const key of TRUST_KEYS) expect(schemes[id]?.trust[key], `${id} ${key}`).toBeNull();
+    }
+  });
+
+  test('bsn reads n/a in its six events and summary, fi-number summary is medium', () => {
+    const schemes = build().schemes;
+    for (const key of [...EVENTS, 'summary']) {
+      expect(schemes.bsn?.persistence[key], key).toBe('n/a');
+    }
+    expect(schemes['fi-number']?.persistence.summary).toBe('medium');
+  });
+
+  test('gln carries the two persistence notes verbatim and a summary of Low', () => {
+    const gln = build().schemes.gln;
+    expect(gln?.persistence.summary).toBe('Low');
+    expect(gln?.persistence.notes).toEqual([
+      "'Recommended new' because a GLN is not legally bound to the register. GLN identifies a location, not necessarily a legal entity.",
+      'Still, it is strongly recommended not to reuse any GLN.',
+    ]);
+  });
+
+  test('vat and vat-nl are deep-equal and every other entry differs from every other', () => {
+    const schemes = build().schemes;
+    expect(schemes['vat-nl']).toEqual(schemes.vat);
+    const seen = new Map<string, string>();
+    for (const id of SCHEME_IDS.filter((x) => x !== 'vat-nl')) {
+      const key = JSON.stringify(schemes[id]);
+      expect(seen.has(key), `${id} repeats ${seen.get(key)}`).toBe(false);
+      seen.set(key, id);
+    }
+  });
+
+  test('for the twelve assessed columns the five sub-scores sum to the row-36 total', () => {
+    const grid = parse(readFileSync(join(SOURCES, CSV_FILES.overview), 'utf8'), {
+      relax_column_count: true,
+    }) as string[][];
+    const assessed = Object.entries(build().schemes).filter(([, e]) =>
+      'FGHIJKLMNOPQ'.includes(e.columns.overview),
+    );
+    expect(assessed).toHaveLength(13);
+    for (const [id, entry] of assessed) {
+      const total = Number(grid[35]?.[entry.columns.overview.charCodeAt(0) - 65]);
+      const sum = Object.values(entry.trust).reduce<number>((acc, v) => acc + (v ?? 0), 0);
+      expect(sum, id).toBe(total);
+    }
+  });
+
+  test('an empty Overview cell is null and a multi-line cell keeps its line feeds', () => {
+    const schemes = build().schemes;
+    expect(schemes['kvk-number']?.fields.legal_basis_continued).toBeNull();
+    expect(schemes.vat?.fields.format).toContain('\n');
+  });
+
+  test('kvk-establishment-number and roo read N/A verbatim for a move to another country', () => {
+    const schemes = build().schemes;
+    expect(schemes['kvk-establishment-number']?.persistence['move-to-other-country']).toBe('N/A');
+    expect(schemes.roo?.persistence['move-to-other-country']).toBe('N/A');
+  });
 });
 
 describe('import:snapshot CLI', () => {

@@ -8,6 +8,8 @@ import { parseArgs } from 'node:util';
 import { parse } from 'csv-parse/sync';
 import {
   CSV_FILES,
+  EXAMPLE_ROWS,
+  FIELD_ROWS,
   GLOSSARY_LINK_ROWS,
   LINK_FIELDS,
   OVERVIEW_COLUMNS,
@@ -17,16 +19,26 @@ import {
   PERSISTENCE_COLUMNS,
   PERSISTENCE_NAME_ROW,
   PERSISTENCE_NAMES,
+  PERSISTENCE_NOTE_ROWS,
+  PERSISTENCE_ROWS,
+  PERSISTENCE_TAB,
   PRIMARY_LINK_ROWS,
   SNAPSHOT_FILE,
+  TRUST_ROWS,
 } from './snapshot-map.ts';
 
 export type CsvKey = keyof typeof CSV_FILES;
 export type CsvBytes = { name: string; bytes: Uint8Array };
 export type LandscapeCsvs = Record<CsvKey, CsvBytes>;
 
+export type Example = { row: number; label: string; value: string };
+
 export type SchemeEntry = {
   columns: { overview: string; persistence: string };
+  fields: Record<string, string | null>;
+  trust: Record<string, number | null>;
+  persistence: Record<string, string | string[] | null>;
+  examples: Example[];
 };
 
 export type LinkEntry = {
@@ -113,6 +125,62 @@ function checkNames(
   }
 }
 
+/** Empty cell text is null; any other text is kept exactly as written. */
+function nullable(text: string): string | null {
+  return text === '' ? null : text;
+}
+
+/** A trust score is an integer within 0..max; an empty cell (not assessed) is null, anything else throws. */
+function trustScore(text: string, max: number, at: string): number | null {
+  if (text === '') return null;
+  if (!/^[0-9]+$/.test(text) || Number(text) > max) {
+    throw new Error(`${at} is not a trust score within 0..${max}`);
+  }
+  return Number(text);
+}
+
+function buildScheme(
+  overviewColumn: string,
+  persistenceColumn: string,
+  overview: Grid,
+  persistence: Grid,
+): SchemeEntry {
+  const fields = Object.fromEntries(
+    Object.entries(FIELD_ROWS).map(([row, key]) => [
+      key,
+      nullable(cellAt(overview, overviewColumn, Number(row))),
+    ]),
+  );
+  const trust = Object.fromEntries(
+    Object.entries(TRUST_ROWS).map(([row, { key, max }]) => [
+      key,
+      trustScore(
+        cellAt(overview, overviewColumn, Number(row)),
+        max,
+        address(OVERVIEW_TAB, overviewColumn, Number(row)),
+      ),
+    ]),
+  );
+  const events = Object.entries(PERSISTENCE_ROWS).map(([row, key]) => [
+    key,
+    nullable(cellAt(persistence, persistenceColumn, Number(row))),
+  ]);
+  const notes = PERSISTENCE_NOTE_ROWS.map((row) =>
+    cellAt(persistence, persistenceColumn, row),
+  ).filter((text) => text !== '');
+  const examples = EXAMPLE_ROWS.flatMap((row) => {
+    const value = cellAt(overview, overviewColumn, row);
+    return value === '' ? [] : [{ row, label: cellAt(overview, 'D', row), value }];
+  });
+  return {
+    columns: { overview: overviewColumn, persistence: persistenceColumn },
+    fields,
+    trust,
+    persistence: { ...Object.fromEntries(events), notes },
+    examples,
+  };
+}
+
 function parseLinks(csv: CsvBytes): Grid {
   return parse(decode(csv)) as Grid;
 }
@@ -152,7 +220,7 @@ export function buildSnapshot(csvs: LandscapeCsvs): Snapshot {
   const overview = parseTab(csvs.overview);
   const persistence = parseTab(csvs.persistence);
   checkNames(overview, OVERVIEW_TAB, OVERVIEW_NAME_ROW, OVERVIEW_NAMES);
-  checkNames(persistence, 'Persistence', PERSISTENCE_NAME_ROW, PERSISTENCE_NAMES);
+  checkNames(persistence, PERSISTENCE_TAB, PERSISTENCE_NAME_ROW, PERSISTENCE_NAMES);
 
   const overviewOf = invert(OVERVIEW_COLUMNS);
   const persistenceOf = invert(PERSISTENCE_COLUMNS);
@@ -160,9 +228,7 @@ export function buildSnapshot(csvs: LandscapeCsvs): Snapshot {
   for (const [id, overviewColumn] of overviewOf) {
     const persistenceColumn = persistenceOf.get(id);
     if (persistenceColumn === undefined) throw new Error(`scheme ${id} has no persistence column`);
-    schemes[id] = {
-      columns: { overview: overviewColumn, persistence: persistenceColumn },
-    };
+    schemes[id] = buildScheme(overviewColumn, persistenceColumn, overview, persistence);
   }
 
   return {
