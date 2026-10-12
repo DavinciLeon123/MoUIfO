@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/source.schema.json
+id: douane-eori-nl
+title: Gratis EORI-nummer aanvragen
+type: register-doc
+date: 2026-08-13
+url: https://www.douane.nl/onderwerpen/invoer-en-uitvoer/nodig-bij-aangifte/eori-nummer/eori-nummer-aanvragen/
+publisher: Douane Nederland

@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/authority.schema.json
+id: national-business-register
+kind: class
+label:
+  en: National business register
+  nl: Nationaal handelsregister
+definition:
+  en: The register of a country that registers enterprises and legal entities and assigns their registration numbers.

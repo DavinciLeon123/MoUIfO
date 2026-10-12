@@ -1,0 +1,72 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/scheme.schema.json
+id: eori
+label:
+  en: Economic Operators Registration and Identification number
+  nl: EORI-nummer
+abbreviation: EORI
+kind: identifier
+issuer: national-customs-authority
+jurisdiction: EU
+availability:
+  value: public-restricted-details
+  source: landscape-v1-2
+  certainty: likely
+sources:
+  default: commission-eori
+scope:
+  en: "required for international trade with EU and UK involving customs; for legal persons as well as single person enterprises"
+notes:
+  en: "not a general business ID, often derived from one."
+context_from:
+  issuing_country:
+    capture:
+      regex: "^([A-Z]{2})"
+      group: 1
+    map: country-prefix
+    certainty: certain
+    source: commission-eori
+format:
+  patterns:
+    - regex: "^[A-Z]{2}[A-Z0-9]{1,15}$"
+      certainty: certain
+      source: commission-eori
+    - regex: "^NL[0-9]{9}$"
+      certainty: certain
+      source: douane-eori-nl
+      condition:
+        issuing_country: NL
+        entity_form: legal-person
+    - regex: "^NL[0-9]{10}$"
+      certainty: likely
+      source: landscape-v1-2
+      condition:
+        issuing_country: NL
+        entity_form: sole-proprietorship
+      note: "Workbook only (DEC-046), owner-accepted at likely on 2026-10-12. No rule derives it from the RSIN (D-08)."
+  examples_valid:
+    - "NL001469630"
+    - "DE123456789012345"
+  examples_invalid:
+    - "001469630"
+    - "NL1469630123456789"
+    - "nl001469630"
+relations:
+  - kind: derived-from
+    target: rsin
+    condition:
+      entity_form: legal-person
+    certainty: certain
+    source: douane-eori-nl
+rules:
+  - id: eori-nl-from-rsin
+    input: rsin
+    output: eori
+    transform:
+      - add_prefix: "NL"
+    condition:
+      entity_form: legal-person
+    certainty: certain
+    source: douane-eori-nl
+    examples:
+      - in: "001469630"
+        out: "NL001469630"

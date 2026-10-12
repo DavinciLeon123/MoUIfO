@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/scheme.schema.json
+id: rsin
+label:
+  en: Legal Entities and Partnerships Information Number
+  nl: Rechtspersonen en Samenwerkingsverbanden Informatienummer
+abbreviation: RSIN
+kind: identifier
+issuer: kvk
+jurisdiction: NL
+availability:
+  value: public
+  source: landscape-v1-2
+  certainty: likely
+sources:
+  default: kvk-rsin
+scope:
+  en: "legal person equivalent of BSN; used for digital communication with Dutch government"
+format:
+  patterns:
+    - regex: "^[0-9]{9}$"
+      certainty: likely
+      source: landscape-v1-2
+      note: "The workbook gives 'unique ID - num(9)'; no primary source read states the digit count."
+  checksum:
+    - algorithm: elfproef
+      certainty: likely
+      source: landscape-v1-2
+      note: "The workbook gives 11-proof; no primary source read states the check (gap G9)."
+  examples_valid:
+    - "001469630"
+  examples_invalid:
+    - "001469631"
+    - "00146963"
