@@ -221,13 +221,22 @@ export function positionOfToken(
   return { line: before.length, column: (before.at(-1) ?? '').length + 1 };
 }
 
+/** The distinct `source` ids of the committed snapshot's links with `registered: true`, sorted. */
+function registeredLinkSources(): string[] {
+  const snapshot = JSON.parse(
+    readFileSync(join(REPO_ROOT, 'sources', 'landscape-snapshot-v1.2.json'), 'utf8'),
+  ) as { links: { registered: boolean; source?: string }[] };
+  const ids = snapshot.links.filter((link) => link.registered).map((link) => link.source as string);
+  return [...new Set(ids)].sort();
+}
+
 /**
- * Source ids that a statement may cite only later. A workbook-link source is registered before the
- * plans that cite it, so until then it is an uncited-source warning. Empty in this plan, so the
- * real-repository assertions are exactly as strict as before. Plan 03-04 fills it from the committed
- * snapshot's registered link dispositions; plan 03-15 removes it together with the two helpers below.
+ * Source ids that a statement may cite only later: the registered workbook-link sources of the
+ * committed snapshot, sorted. A workbook-link source is registered before the plans that cite it
+ * (plans 03-06 to 03-11), so until then it is an uncited-source warning. The tolerance covers only
+ * these ids; plan 03-15 removes it together with the two helpers below.
  */
-export const PENDING_CITATION: readonly string[] = [];
+export const PENDING_CITATION: readonly string[] = registeredLinkSources();
 
 const UNCITED_MESSAGE = /^source "([^"]+)" is not cited by any statement$/;
 

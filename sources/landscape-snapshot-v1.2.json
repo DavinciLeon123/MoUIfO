@@ -10,10 +10,12 @@
       "cell": "F13",
       "column": "F",
       "field": "legal_basis",
+      "registered": true,
       "row": 13,
       "schemes": [
         "kvk-number"
       ],
+      "source": "handelsregisterwet-2007",
       "tab": "Overview UIDs",
       "text": "NL: Handelswet",
       "url": "https://zoek.officielebekendmakingen.nl/stb-2007-153.pdf"
@@ -22,10 +24,12 @@
       "cell": "G13",
       "column": "G",
       "field": "legal_basis",
+      "registered": true,
       "row": 13,
       "schemes": [
         "kvk-establishment-number"
       ],
+      "source": "handelsregisterwet-2007",
       "tab": "Overview UIDs",
       "text": "NL: Handelswet",
       "url": "https://zoek.officielebekendmakingen.nl/stb-2007-153.pdf"
@@ -34,10 +38,12 @@
       "cell": "I13",
       "column": "I",
       "field": "legal_basis",
+      "registered": true,
       "row": 13,
       "schemes": [
         "rsin"
       ],
+      "source": "handelsregisterbesluit-2008",
       "tab": "Overview UIDs",
       "text": "Tax legislation",
       "url": "https://wetten.overheid.nl/BWBR0024067/2021-04-30/"
@@ -46,11 +52,13 @@
       "cell": "J13",
       "column": "J",
       "field": "legal_basis",
+      "registered": true,
       "row": 13,
       "schemes": [
         "vat",
         "vat-nl"
       ],
+      "source": "wet-op-de-omzetbelasting-1968",
       "tab": "Overview UIDs",
       "text": "Tax legislation",
       "url": "https://wetten.overheid.nl/BWBR0002629/2026-01-01"
@@ -59,10 +67,12 @@
       "cell": "M13",
       "column": "M",
       "field": "legal_basis",
+      "registered": true,
       "row": 13,
       "schemes": [
         "lei"
       ],
+      "source": "csdr-its-2017-394",
       "tab": "Overview UIDs",
       "text": "Implementing regulation - 2017/394 - EN - EUR-Lex",
       "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32017R0394"
@@ -71,6 +81,8 @@
       "cell": "O13",
       "column": "O",
       "field": "legal_basis",
+      "reason": "Commission policy communication, not a legal act, so it cannot back the EUID legal basis (DEC-043). The EUID legal basis is Directive (EU) 2017/1132 and Implementing Regulation (EU) 2021/1042, which are not workbook links.",
+      "registered": false,
       "row": 13,
       "schemes": [
         "euid"
@@ -83,10 +95,12 @@
       "cell": "P13",
       "column": "P",
       "field": "legal_basis",
+      "registered": true,
       "row": 13,
       "schemes": [
         "eori"
       ],
+      "source": "ucc-952-2013",
       "tab": "Overview UIDs",
       "text": "Union Customs Code (Regulation (EU) No 952/2013)",
       "url": "https://eur-lex.europa.eu/eli/reg/2013/952/oj/eng"
@@ -95,10 +109,12 @@
       "cell": "R13",
       "column": "R",
       "field": "legal_basis",
+      "registered": true,
       "row": 13,
       "schemes": [
         "bsn"
       ],
+      "source": "wabb",
       "tab": "Overview UIDs",
       "text": "Dutch law",
       "url": "https://wetten.overheid.nl/BWBR0022428/2025-11-11"
@@ -107,10 +123,12 @@
       "cell": "S13",
       "column": "S",
       "field": "legal_basis",
+      "registered": true,
       "row": 13,
       "schemes": [
         "fi-number"
       ],
+      "source": "handelsregisterbesluit-2008",
       "tab": "Overview UIDs",
       "text": "Tax legislation",
       "url": "https://wetten.overheid.nl/BWBR0024067/2021-04-30/"
@@ -119,10 +137,12 @@
       "cell": "F15",
       "column": "F",
       "field": "issuing_authority",
+      "registered": true,
       "row": 15,
       "schemes": [
         "kvk-number"
       ],
+      "source": "kvk-home",
       "tab": "Overview UIDs",
       "text": "Kamer van Koophandel",
       "url": "https://www.kvk.nl/"
@@ -131,10 +151,12 @@
       "cell": "G15",
       "column": "G",
       "field": "issuing_authority",
+      "registered": true,
       "row": 15,
       "schemes": [
         "kvk-establishment-number"
       ],
+      "source": "kvk-home",
       "tab": "Overview UIDs",
       "text": "Kamer van Koophandel",
       "url": "https://www.kvk.nl/"
@@ -143,6 +165,8 @@
       "cell": "H15",
       "column": "H",
       "field": "issuing_authority",
+      "reason": "Landing page of Logius, an issuer modelled as an authority class that carries no source (DEC-045). The OIN issuer claim is backed by the OIN Stelsel 2.1.0 standard, not by this page.",
+      "registered": false,
       "row": 15,
       "schemes": [
         "oin"
@@ -155,10 +179,12 @@
       "cell": "I15",
       "column": "I",
       "field": "issuing_authority",
+      "registered": true,
       "row": 15,
       "schemes": [
         "rsin"
       ],
+      "source": "kvk-home",
       "tab": "Overview UIDs",
       "text": "Kamer van Koophandel",
       "url": "https://www.kvk.nl/"
@@ -167,10 +193,12 @@
       "cell": "K15",
       "column": "K",
       "field": "issuing_authority",
+      "registered": true,
       "row": 15,
       "schemes": [
         "roo"
       ],
+      "source": "koop-roo",
       "tab": "Overview UIDs",
       "text": "Logius / KOOP",
       "url": "https://www.koopoverheid.nl/diensten/register-van-overheidsorganisaties"
@@ -179,10 +207,12 @@
       "cell": "N15",
       "column": "N",
       "field": "issuing_authority",
+      "registered": true,
       "row": 15,
       "schemes": [
         "gln"
       ],
+      "source": "gs1-nl-gln",
       "tab": "Overview UIDs",
       "text": "GS1 - GLN",
       "url": "https://www.gs1.nl/producten-services/digital-identity/gln/"
@@ -191,10 +221,12 @@
       "cell": "Q15",
       "column": "Q",
       "field": "issuing_authority",
+      "registered": true,
       "row": 15,
       "schemes": [
         "duns"
       ],
+      "source": "dnb-duns",
       "tab": "Overview UIDs",
       "text": "Dun & Bradstreet",
       "url": "https://www.dnb.com/en-us/smb/duns.html"
@@ -203,10 +235,12 @@
       "cell": "H16",
       "column": "H",
       "field": "validation_source",
+      "registered": true,
       "row": 16,
       "schemes": [
         "oin"
       ],
+      "source": "oin-register",
       "tab": "Overview UIDs",
       "text": "Logius",
       "url": "https://oinregister.logius.nl/oin-register"
@@ -215,11 +249,13 @@
       "cell": "J16",
       "column": "J",
       "field": "validation_source",
+      "registered": true,
       "row": 16,
       "schemes": [
         "vat",
         "vat-nl"
       ],
+      "source": "vies",
       "tab": "Overview UIDs",
       "text": "Vies on-the-Web - European Commission",
       "url": "https://ec.europa.eu/taxation_customs/vies/#/vat-validation"
@@ -228,10 +264,12 @@
       "cell": "K16",
       "column": "K",
       "field": "validation_source",
+      "registered": true,
       "row": 16,
       "schemes": [
         "roo"
       ],
+      "source": "organisaties-overheid",
       "tab": "Overview UIDs",
       "text": "Register van Overheidsorganisaties",
       "url": "https://organisaties.overheid.nl/"
@@ -240,10 +278,12 @@
       "cell": "O16",
       "column": "O",
       "field": "validation_source",
+      "registered": true,
       "row": 16,
       "schemes": [
         "euid"
       ],
+      "source": "e-justice-business-registers",
       "tab": "Overview UIDs",
       "text": "BRIS",
       "url": "https://e-justice.europa.eu/topics/registers-business-insolvency-land/business-registers-search-company-eu_en"
@@ -252,10 +292,12 @@
       "cell": "P16",
       "column": "P",
       "field": "validation_source",
+      "registered": true,
       "row": 16,
       "schemes": [
         "eori"
       ],
+      "source": "eori-validation",
       "tab": "Overview UIDs",
       "text": "EORI number validation",
       "url": "https://ec.europa.eu/taxation_customs/dds2/eos/eori_validation.jsp?Lang=en"
@@ -264,10 +306,12 @@
       "cell": "F25",
       "column": "F",
       "field": "references",
+      "registered": true,
       "row": 25,
       "schemes": [
         "kvk-number"
       ],
+      "source": "kvk-zoeken",
       "tab": "Overview UIDs",
       "text": "Zoeken bij KVK | KVK",
       "url": "https://www.kvk.nl/zoeken/"
@@ -276,10 +320,12 @@
       "cell": "H25",
       "column": "H",
       "field": "references",
+      "registered": true,
       "row": 25,
       "schemes": [
         "oin"
       ],
+      "source": "oin-register",
       "tab": "Overview UIDs",
       "text": "OIN Register",
       "url": "https://oinregister.logius.nl/oin-register"
@@ -288,10 +334,12 @@
       "cell": "I25",
       "column": "I",
       "field": "references",
+      "registered": true,
       "row": 25,
       "schemes": [
         "rsin"
       ],
+      "source": "kvk-zoeken",
       "tab": "Overview UIDs",
       "text": "Zoeken bij KVK | KVK",
       "url": "https://www.kvk.nl/zoeken/"
@@ -300,11 +348,13 @@
       "cell": "J25",
       "column": "J",
       "field": "references",
+      "registered": true,
       "row": 25,
       "schemes": [
         "vat",
         "vat-nl"
       ],
+      "source": "kvk-zoeken",
       "tab": "Overview UIDs",
       "text": "Zoeken bij KVK | KvK",
       "url": "https://www.kvk.nl/zoeken/"
@@ -313,10 +363,12 @@
       "cell": "K25",
       "column": "K",
       "field": "references",
+      "registered": true,
       "row": 25,
       "schemes": [
         "roo"
       ],
+      "source": "organisaties-overheid",
       "tab": "Overview UIDs",
       "text": "Register van Overheidsorganisaties",
       "url": "https://organisaties.overheid.nl/"
@@ -325,10 +377,12 @@
       "cell": "L25",
       "column": "L",
       "field": "references",
+      "registered": true,
       "row": 25,
       "schemes": [
         "peppol-id"
       ],
+      "source": "peppol-test-tool",
       "tab": "Overview UIDs",
       "text": "NPa Peppol Test Tool",
       "url": "https://test.peppolautoriteit.nl/discover"
@@ -337,10 +391,12 @@
       "cell": "M25",
       "column": "M",
       "field": "references",
+      "registered": true,
       "row": 25,
       "schemes": [
         "lei"
       ],
+      "source": "gleif-ra-list",
       "tab": "Overview UIDs",
       "text": "GLEIF Registration Authorities List",
       "url": "https://www.gleif.org/en/lei-data/code-lists/gleif-registration-authorities-list"
@@ -349,10 +405,12 @@
       "cell": "N25",
       "column": "N",
       "field": "references",
+      "registered": true,
       "row": 25,
       "schemes": [
         "gln"
       ],
+      "source": "gs1-verified",
       "tab": "Overview UIDs",
       "text": "Verified by GS1 (NL)",
       "url": "https://www.gs1.nl/producten-services/codes-verifieren/verified-by-gs1/"
@@ -361,10 +419,12 @@
       "cell": "O25",
       "column": "O",
       "field": "references",
+      "registered": true,
       "row": 25,
       "schemes": [
         "euid"
       ],
+      "source": "e-justice-business-registers",
       "tab": "Overview UIDs",
       "text": "European e-Justice Portal",
       "url": "https://e-justice.europa.eu/topics/registers-business-insolvency-land/business-registers-search-company-eu_en"
@@ -373,10 +433,12 @@
       "cell": "P25",
       "column": "P",
       "field": "references",
+      "registered": true,
       "row": 25,
       "schemes": [
         "eori"
       ],
+      "source": "eori-validation",
       "tab": "Overview UIDs",
       "text": "EORI number validation",
       "url": "https://ec.europa.eu/taxation_customs/dds2/eos/eori_validation.jsp?Lang=en"
@@ -385,10 +447,12 @@
       "cell": "Q25",
       "column": "Q",
       "field": "references",
+      "registered": true,
       "row": 25,
       "schemes": [
         "duns"
       ],
+      "source": "dnb-duns-lookup",
       "tab": "Overview UIDs",
       "text": "D&B D-U-N-S Number Lookup",
       "url": "https://www.dnb.com/duns-number/lookup.html"
@@ -397,6 +461,8 @@
       "cell": "D48",
       "column": "D",
       "field": "glossary",
+      "reason": "Glossary link, not a primary hyperlink (DEC-043). The page refused automated clients (HTTP 403 on 2026-10-12).",
+      "registered": false,
       "row": 48,
       "schemes": [],
       "tab": "Overview UIDs",
@@ -407,6 +473,8 @@
       "cell": "H48",
       "column": "H",
       "field": "glossary",
+      "reason": "Glossary link, not a primary hyperlink (DEC-043). The page refused automated clients (HTTP 403 on 2026-10-12).",
+      "registered": false,
       "row": 48,
       "schemes": [],
       "tab": "Overview UIDs",
@@ -417,6 +485,8 @@
       "cell": "D49",
       "column": "D",
       "field": "glossary",
+      "reason": "Glossary link, not a primary hyperlink (DEC-043). The link is dead: it redirects to the AFM \"Pagina niet gevonden\" page (checked 2026-10-12).",
+      "registered": false,
       "row": 49,
       "schemes": [],
       "tab": "Overview UIDs",
@@ -427,6 +497,8 @@
       "cell": "H49",
       "column": "H",
       "field": "glossary",
+      "reason": "Glossary link, not a primary hyperlink (DEC-043). The link is dead: it redirects to the AFM \"Pagina niet gevonden\" page (checked 2026-10-12).",
+      "registered": false,
       "row": 49,
       "schemes": [],
       "tab": "Overview UIDs",
@@ -437,6 +509,8 @@
       "cell": "D52",
       "column": "D",
       "field": "glossary",
+      "reason": "Glossary link, not a primary hyperlink (DEC-043).",
+      "registered": false,
       "row": 52,
       "schemes": [],
       "tab": "Overview UIDs",
@@ -447,6 +521,8 @@
       "cell": "H52",
       "column": "H",
       "field": "glossary",
+      "reason": "Glossary link, not a primary hyperlink (DEC-043).",
+      "registered": false,
       "row": 52,
       "schemes": [],
       "tab": "Overview UIDs",
@@ -457,6 +533,8 @@
       "cell": "D54",
       "column": "D",
       "field": "glossary",
+      "reason": "Glossary link, not a primary hyperlink (DEC-043).",
+      "registered": false,
       "row": 54,
       "schemes": [],
       "tab": "Overview UIDs",
@@ -467,6 +545,8 @@
       "cell": "H54",
       "column": "H",
       "field": "glossary",
+      "reason": "Glossary link, not a primary hyperlink (DEC-043).",
+      "registered": false,
       "row": 54,
       "schemes": [],
       "tab": "Overview UIDs",

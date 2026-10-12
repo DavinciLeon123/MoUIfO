@@ -77,8 +77,9 @@ describe('the pending-citation helpers (self-test with an explicit pending list)
     expect(() => expectRealModelClean([misplaced], PENDING)).toThrow();
   });
 
-  test('the default pending list is PENDING_CITATION, empty in this plan', () => {
-    expect(PENDING_CITATION).toEqual([]);
+  test('the default pending list is PENDING_CITATION: the 20 registered workbook-link sources', () => {
+    expect(PENDING_CITATION).toHaveLength(20);
+    expect(PENDING_CITATION).toContain('kvk-zoeken');
     expect(() => expectRealModelClean([uncited('pending-source')])).toThrow();
   });
 

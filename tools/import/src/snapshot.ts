@@ -6,6 +6,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
 import { parse } from 'csv-parse/sync';
+import { LINK_DISPOSITIONS, type LinkDisposition } from './link-registry.ts';
 import {
   CSV_FILES,
   EXAMPLE_ROWS,
@@ -50,6 +51,11 @@ export type LinkEntry = {
   schemes: string[];
   text: string;
   url: string;
+  /** True when the URL's disposition names a model source; then `source` is set and `reason` is not. */
+  registered: boolean;
+  source?: string;
+  /** Set only when the URL is not registered: why it does not back a claim (DEC-043). */
+  reason?: string;
 };
 
 export type Snapshot = {
@@ -185,7 +191,54 @@ function parseLinks(csv: CsvBytes): Grid {
   return parse(decode(csv)) as Grid;
 }
 
-function buildLinks(grid: Grid): LinkEntry[] {
+/** The disposition of a link URL: a source for a registered URL, a reason otherwise. */
+function dispositionFields(
+  url: string,
+  dispositions: Readonly<Record<string, LinkDisposition>>,
+): Pick<LinkEntry, 'registered' | 'source' | 'reason'> {
+  const disposition = Object.hasOwn(dispositions, url) ? dispositions[url] : undefined;
+  if (disposition === undefined) {
+    throw new Error(`link ${url} has no disposition in LINK_DISPOSITIONS`);
+  }
+  if ('source' in disposition) {
+    if (disposition.source.length === 0) throw new Error(`link ${url} has an empty source id`);
+    return { registered: true, source: disposition.source };
+  }
+  if (disposition.reason.length === 0) throw new Error(`link ${url} has an empty reason`);
+  return { registered: false, reason: disposition.reason };
+}
+
+/**
+ * Every distinct link URL has exactly one disposition, every disposition names a link URL, and
+ * one source id is registered for one URL only (D-02, DEC-043).
+ */
+function checkDispositions(
+  links: readonly LinkEntry[],
+  dispositions: Readonly<Record<string, LinkDisposition>>,
+): void {
+  const urls = new Set(links.map((link) => link.url));
+  for (const url of Object.keys(dispositions)) {
+    if (!urls.has(url)) throw new Error(`disposition for ${url} matches no workbook link`);
+  }
+  const sourceUrl = new Map<string, string>();
+  for (const url of urls) {
+    const disposition = dispositions[url];
+    if (disposition !== undefined && 'source' in disposition) {
+      const other = sourceUrl.get(disposition.source);
+      if (other !== undefined) {
+        throw new Error(
+          `source ${disposition.source} is registered for two URLs: ${other} and ${url}`,
+        );
+      }
+      sourceUrl.set(disposition.source, url);
+    }
+  }
+}
+
+function buildLinks(
+  grid: Grid,
+  dispositions: Readonly<Record<string, LinkDisposition>>,
+): LinkEntry[] {
   const [header, ...rows] = grid;
   if (header?.join(',') !== 'tab,cell,text,url') {
     throw new Error(`${CSV_FILES.links} header is not tab,cell,text,url`);
@@ -211,12 +264,28 @@ function buildLinks(grid: Grid): LinkEntry[] {
     }
     const field = LINK_FIELDS[row];
     if (field === undefined) throw new Error(`${where} has no field mapping`);
-    return { tab, cell, column, row, field, schemes, text, url };
+    return {
+      tab,
+      cell,
+      column,
+      row,
+      field,
+      schemes,
+      text,
+      url,
+      ...dispositionFields(url, dispositions),
+    };
   });
 }
 
-/** Build the snapshot from the three CSVs. Every mismatch with the expected export layout throws. */
-export function buildSnapshot(csvs: LandscapeCsvs): Snapshot {
+/**
+ * Build the snapshot from the three CSVs. Every mismatch with the expected export layout throws,
+ * and so does a link URL without a disposition or a disposition without a link URL.
+ */
+export function buildSnapshot(
+  csvs: LandscapeCsvs,
+  dispositions: Readonly<Record<string, LinkDisposition>> = LINK_DISPOSITIONS,
+): Snapshot {
   const overview = parseTab(csvs.overview);
   const persistence = parseTab(csvs.persistence);
   checkNames(overview, OVERVIEW_TAB, OVERVIEW_NAME_ROW, OVERVIEW_NAMES);
@@ -231,6 +300,9 @@ export function buildSnapshot(csvs: LandscapeCsvs): Snapshot {
     schemes[id] = buildScheme(overviewColumn, persistenceColumn, overview, persistence);
   }
 
+  const links = buildLinks(parseLinks(csvs.links), dispositions);
+  checkDispositions(links, dispositions);
+
   return {
     format: 1,
     workbook: {
@@ -242,7 +314,7 @@ export function buildSnapshot(csvs: LandscapeCsvs): Snapshot {
       [csvs.overview, csvs.persistence, csvs.links].map((csv) => [csv.name, sha256(csv.bytes)]),
     ),
     schemes,
-    links: buildLinks(parseLinks(csvs.links)),
+    links,
   };
 }
 

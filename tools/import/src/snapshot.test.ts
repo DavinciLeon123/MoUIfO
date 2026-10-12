@@ -6,11 +6,13 @@ import { fileURLToPath } from 'node:url';
 import { parse } from 'csv-parse/sync';
 import { describe, expect, test } from 'vitest';
 import { cleanUrl, MANIFEST_FILE } from './export-landscape.ts';
+import { LINK_DISPOSITIONS } from './link-registry.ts';
 import { PERSONAL_PATH_PATTERN, parseManifest } from './manifest.ts';
 import {
   buildSnapshot,
   type CsvKey,
   type LandscapeCsvs,
+  type LinkEntry,
   readLandscapeCsvs,
   type Snapshot,
   serializeSnapshot,
@@ -327,5 +329,71 @@ describe('buildSnapshot refuses inputs it cannot map (T-03-01, T-03-03)', () => 
   test('a shifted overview export fails on the first column whose name differs', () => {
     const csvs = withCsv('overview', (t) => t.replace('OIN,RSIN,VAT-nr', 'RSIN,OIN,VAT-nr'));
     expect(() => buildSnapshot(csvs)).toThrow(/Overview UIDs!H7/);
+  });
+});
+
+describe('registry dispositions (DAT-05, DEC-043)', () => {
+  test('every link has a boolean registered; a registered link has a source and no reason, an unregistered link a reason and no source', () => {
+    for (const link of build().links) {
+      expect(typeof link.registered, link.cell).toBe('boolean');
+      if (link.registered) {
+        expect(link.source, link.cell).toMatch(/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/);
+        expect(link.reason, link.cell).toBeUndefined();
+      } else {
+        expect(link.reason?.length ?? 0, link.cell).toBeGreaterThan(0);
+        expect(link.source, link.cell).toBeUndefined();
+      }
+    }
+  });
+
+  test('links with the same URL share one disposition', () => {
+    const shapes = new Map<string, string>();
+    for (const link of build().links) {
+      const shape = JSON.stringify([link.registered, link.source ?? null, link.reason ?? null]);
+      expect(shapes.get(link.url) ?? shape, link.cell).toBe(shape);
+      shapes.set(link.url, shape);
+    }
+  });
+
+  test('exactly 20 distinct source ids are registered, one per URL; 6 of the 26 URLs are not', () => {
+    const byUrl = new Map<string, LinkEntry>(build().links.map((l) => [l.url, l]));
+    const registered = [...byUrl.values()].filter((l) => l.registered);
+    expect(byUrl.size).toBe(26);
+    expect(registered).toHaveLength(20);
+    expect(new Set(registered.map((l) => l.source)).size).toBe(20);
+    expect([...byUrl.values()].filter((l) => !l.registered)).toHaveLength(6);
+  });
+
+  test('primary links are registered except O13 and H15; all eight glossary links are not', () => {
+    for (const link of build().links) {
+      if (link.field === 'glossary') {
+        expect(link.registered, link.cell).toBe(false);
+      } else {
+        expect(link.registered, link.cell).toBe(link.cell !== 'O13' && link.cell !== 'H15');
+      }
+    }
+  });
+
+  test('buildSnapshot refuses a link URL with no disposition and names the URL', () => {
+    const dispositions = { ...LINK_DISPOSITIONS };
+    delete dispositions['https://www.kvk.nl/zoeken/'];
+    expect(() => buildSnapshot(readLandscapeCsvs(SOURCES), dispositions)).toThrow(
+      'https://www.kvk.nl/zoeken/',
+    );
+  });
+
+  test('buildSnapshot refuses a disposition whose URL matches no link and names the URL', () => {
+    const dispositions = {
+      ...LINK_DISPOSITIONS,
+      'https://example.org/not-in-workbook': { source: 'not-in-workbook' },
+    };
+    expect(() => buildSnapshot(readLandscapeCsvs(SOURCES), dispositions)).toThrow(
+      'https://example.org/not-in-workbook',
+    );
+  });
+
+  test('buildSnapshot refuses one source id registered for two URLs and names the id', () => {
+    const dispositions = { ...LINK_DISPOSITIONS, 'https://www.kvk.nl/': { source: 'kvk-zoeken' } };
+    expect(() => buildSnapshot(readLandscapeCsvs(SOURCES), dispositions)).toThrow('kvk-zoeken');
   });
 });
