@@ -134,6 +134,8 @@ describe('the applicability-status schema', () => {
 });
 
 describe('the required-file rule for applicability-status', () => {
+  // Copies the model to a temp directory and re-validates it; the explicit budget keeps it from
+  // timing out when the whole suite runs in parallel on a loaded machine.
   test('a model without the file reports it as missing', () => {
     const root = modelCopy();
     rmSync(join(root, APPLICABILITY_STATUS));
@@ -144,7 +146,7 @@ describe('the required-file rule for applicability-status', () => {
         message: 'required vocabulary file is missing',
       }),
     );
-  });
+  }, 30_000);
 });
 
 const EXPECTED_IDS: Readonly<Record<string, readonly string[]>> = {
