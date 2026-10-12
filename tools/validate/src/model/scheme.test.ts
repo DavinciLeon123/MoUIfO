@@ -292,3 +292,346 @@ describe('ICD and EAS codes (D-19, DEC-036)', () => {
     expect(check(scheme({ iso6523_icd: 'null', peppol_eas: 'null' }))).toEqual([]);
   });
 });
+
+/** A second scheme, the target of relations and rules in the statement tests. */
+const target = (): ModelFile =>
+  schemeFixture('fixture-target', minimalSchemeBody('fixture-target', { abbreviation: 'TGT' }));
+
+const checkWithTarget = (file: ModelFile) => check([target(), file]);
+
+const OK = 'certainty: likely, source: fixture-source';
+
+/** One valid entry per statement kind; certainty and source come last so the table can edit them. */
+const KINDS: readonly {
+  key: string;
+  yaml: string;
+  /** What the entry starts with, for its position. */
+  needle: string;
+  shift: number;
+}[] = [
+  {
+    key: 'level',
+    yaml: `level:\n  - { value: legal-entity-top-level, condition: { issuing_country: NL }, ${OK} }\n`,
+    needle: '- {',
+    shift: 2,
+  },
+  {
+    key: 'roles',
+    yaml: `roles:\n  - { value: economic-operator, ${OK} }\n`,
+    needle: '- {',
+    shift: 2,
+  },
+  {
+    key: 'applicability',
+    yaml: `applicability:\n  - { jurisdiction: EU, status: [issued, recognised, verifiable], certainty: certain, source: fixture-source, note: "free text" }\n`,
+    needle: '- {',
+    shift: 2,
+  },
+  {
+    key: 'persistence',
+    yaml: `persistence:\n  - { event: merger, behaviour: "Unchanged if the entity persists", ${OK} }\n`,
+    needle: '- {',
+    shift: 2,
+  },
+  {
+    key: 'trust',
+    yaml: `trust: { legal_basis: 1, registration_quality: 1, verifiability: 0, crosswalks: 1, lifecycle: null, certainty: certain, source: fixture-source }\n`,
+    needle: 'trust:',
+    shift: 0,
+  },
+  {
+    key: 'relations',
+    yaml: `relations:\n  - { kind: specializes, target: fixture-target, ${OK} }\n`,
+    needle: '- {',
+    shift: 2,
+  },
+  {
+    key: 'legal_basis',
+    yaml: `legal_basis:\n  - { title: "A law", url: "https://example.org/law", eli: "http://data.europa.eu/eli/reg/2013/952/oj", ${OK} }\n`,
+    needle: '- {',
+    shift: 2,
+  },
+  {
+    key: 'validation_source',
+    yaml: `validation_source: { label: "A check page", url: "https://example.org/check", ${OK} }\n`,
+    needle: 'validation_source:',
+    shift: 0,
+  },
+  {
+    key: 'mandatory',
+    yaml: `mandatory: { text: "Required for exporters", ${OK} }\n`,
+    needle: 'mandatory:',
+    shift: 0,
+  },
+];
+
+describe('every statement kind carries its own source and certainty (D-07, DEC-029)', () => {
+  test('one valid entry of each kind gives no problem', () => {
+    const body = KINDS.map((kind) => kind.yaml).join('');
+    expect(checkWithTarget(scheme({}, body))).toEqual([]);
+  });
+
+  test.for(KINDS.map((kind) => [kind.key, kind] as const))(
+    '%s without source fails at the entry',
+    ([, kind]) => {
+      const file = scheme({}, kind.yaml.replace(/, source: fixture-source/, ''));
+      expect(checkWithTarget(file)).toEqual([
+        {
+          file: SCHEME,
+          ...where(file.text, kind.needle, kind.shift),
+          message: 'missing required property "source"',
+        },
+      ]);
+    },
+  );
+
+  test.for(KINDS.map((kind) => [kind.key, kind] as const))(
+    '%s without certainty fails at the entry',
+    ([, kind]) => {
+      const file = scheme({}, kind.yaml.replace(/certainty: (likely|certain), /, ''));
+      expect(checkWithTarget(file)).toEqual([
+        {
+          file: SCHEME,
+          ...where(file.text, kind.needle, kind.shift),
+          message: 'missing required property "certainty"',
+        },
+      ]);
+    },
+  );
+
+  test.for(KINDS.map((kind) => [kind.key, kind] as const))(
+    '%s with certainty sure fails at the sure value',
+    ([, kind]) => {
+      const file = scheme({}, kind.yaml.replace(/certainty: (likely|certain)/, 'certainty: sure'));
+      expect(checkWithTarget(file)).toEqual([
+        {
+          file: SCHEME,
+          ...where(file.text, 'certainty: sure', 'certainty: '.length),
+          message: '"sure" is not a known member of vocabulary certainty',
+        },
+      ]);
+    },
+  );
+
+  test.for(KINDS.map((kind) => [kind.key, kind] as const))(
+    '%s with a source that names no source fails at that value',
+    ([, kind]) => {
+      const file = scheme({}, kind.yaml.replace(/source: fixture-source/, 'source: nope'));
+      expect(checkWithTarget(file)).toEqual([
+        {
+          file: SCHEME,
+          ...where(file.text, 'source: nope', 'source: '.length),
+          message: '"nope" is not a known source',
+        },
+      ]);
+    },
+  );
+
+  test('a statement note is free text covered by the statement source', () => {
+    const body = `roles:\n  - { value: taxpayer, ${OK}, note: "Any text here" }\n`;
+    expect(checkWithTarget(scheme({}, body))).toEqual([]);
+  });
+
+  test('a statement with an unknown key is an unknown-property error', () => {
+    const body = `roles:\n  - { value: taxpayer, ${OK}, extra: 1 }\n`;
+    const file = scheme({}, body);
+    expect(checkWithTarget(file)).toEqual([
+      { file: SCHEME, ...where(file.text, 'extra: 1'), message: 'unknown property "extra"' },
+    ]);
+  });
+
+  test('level and role values come from their vocabularies', () => {
+    const level = scheme({}, `level:\n  - { value: company, ${OK} }\n`);
+    expect(checkWithTarget(level)).toEqual([
+      {
+        file: SCHEME,
+        ...where(level.text, 'value: company', 'value: '.length),
+        message: '"company" is not a known member of vocabulary level',
+      },
+    ]);
+    const role = scheme({}, `roles:\n  - { value: wizard, ${OK} }\n`);
+    expect(checkWithTarget(role)).toEqual([
+      {
+        file: SCHEME,
+        ...where(role.text, 'value: wizard', 'value: '.length),
+        message: '"wizard" is not a known member of vocabulary role',
+      },
+    ]);
+  });
+});
+
+describe('conditions (SPEC 5.3)', () => {
+  const withCondition = (condition: string): ModelFile =>
+    scheme({}, `roles:\n  - { value: taxpayer, condition: ${condition}, ${OK} }\n`);
+
+  test.for([
+    '{ issuing_country: "!NL" }',
+    '{ issuing_country: NL }',
+    '{ entity_form: sole-proprietorship }',
+    '{ issuing_country: EU, entity_form: legal-person }',
+  ])('%s is accepted', (condition) => {
+    expect(checkWithTarget(withCondition(condition))).toEqual([]);
+  });
+
+  test('a negated jurisdiction that does not exist fails at the value', () => {
+    const file = withCondition('{ issuing_country: "!XX" }');
+    expect(checkWithTarget(file)).toEqual([
+      {
+        file: SCHEME,
+        ...where(file.text, '"!XX"'),
+        message: '"!XX" is not a known jurisdiction',
+      },
+    ]);
+  });
+
+  test('an entity_form outside the vocabulary fails at the value', () => {
+    const file = withCondition('{ entity_form: trust-fund }');
+    expect(checkWithTarget(file)).toEqual([
+      {
+        file: SCHEME,
+        ...where(file.text, 'trust-fund'),
+        message: '"trust-fund" is not a known member of vocabulary entity-form',
+      },
+    ]);
+  });
+
+  test('a context tag fails while the condition-context vocabulary is empty', () => {
+    const file = withCondition('{ context: anything }');
+    expect(checkWithTarget(file)).toEqual([
+      {
+        file: SCHEME,
+        ...where(file.text, 'anything'),
+        message: '"anything" is not a known member of vocabulary condition-context',
+      },
+    ]);
+  });
+
+  test('an empty condition fails', () => {
+    const file = withCondition('{}');
+    const problems = checkWithTarget(file);
+    expect(problems).toHaveLength(1);
+    expect(problems[0]).toMatchObject({ ...where(file.text, '{}') });
+    expect(problems[0]?.message).toContain('fewer than 1');
+  });
+
+  test('an unknown condition key fails as an unknown property', () => {
+    const file = withCondition('{ region: NL }');
+    expect(checkWithTarget(file)).toEqual([
+      { file: SCHEME, ...where(file.text, 'region'), message: 'unknown property "region"' },
+    ]);
+  });
+});
+
+describe('relations (MOD-03)', () => {
+  test('a relation target that names no scheme fails at the value', () => {
+    const file = scheme(
+      {},
+      `relations:\n  - { kind: specializes, target: no-such-scheme, ${OK} }\n`,
+    );
+    expect(checkWithTarget(file)).toEqual([
+      {
+        file: SCHEME,
+        ...where(file.text, 'target: no-such-scheme', 'target: '.length),
+        message: '"no-such-scheme" is not a known scheme',
+      },
+    ]);
+  });
+
+  test('a relation kind outside the vocabulary fails at the value', () => {
+    const file = scheme({}, `relations:\n  - { kind: cousin-of, target: fixture-target, ${OK} }\n`);
+    expect(checkWithTarget(file)).toEqual([
+      {
+        file: SCHEME,
+        ...where(file.text, 'kind: cousin-of', 'kind: '.length),
+        message: '"cousin-of" is not a known member of vocabulary relation-kind',
+      },
+    ]);
+  });
+});
+
+describe('trust sub-scores (DAT-08)', () => {
+  const trust = (fields: string): ModelFile =>
+    scheme({}, `trust: { ${fields}, certainty: certain, source: fixture-source }\n`);
+  const FULL =
+    'legal_basis: 1, registration_quality: 1, verifiability: 0, crosswalks: 1, lifecycle: null';
+
+  test('all five sub-scores, some null, are accepted', () => {
+    expect(checkWithTarget(trust(FULL))).toEqual([]);
+    expect(
+      checkWithTarget(
+        trust(
+          'legal_basis: 2, registration_quality: null, verifiability: null, crosswalks: 0, lifecycle: 1',
+        ),
+      ),
+    ).toEqual([]);
+  });
+
+  test.for([
+    ['legal_basis: 3', 'legal_basis: 1', 'must be <= 2'],
+    ['legal_basis: -1', 'legal_basis: 1', 'must be >= 0'],
+    ['verifiability: 2', 'verifiability: 0', 'must be <= 1'],
+    ['crosswalks: 1.5', 'crosswalks: 1', 'must be integer'],
+    ['lifecycle: "high"', 'lifecycle: null', 'must be integer or null'],
+  ] as const)('%s fails at the value', ([bad, good, message]) => {
+    const file = trust(FULL.replace(good, bad));
+    const key = bad.split(':')[0] as string;
+    const problems = checkWithTarget(file);
+    expect(problems).toHaveLength(1);
+    expect(problems[0]).toMatchObject({
+      file: SCHEME,
+      ...where(file.text, `${key}: `, key.length + 2),
+      message,
+    });
+  });
+
+  test('a missing sub-score is a missing-property error', () => {
+    const file = trust(FULL.replace(', lifecycle: null', ''));
+    expect(checkWithTarget(file)).toEqual([
+      {
+        file: SCHEME,
+        ...where(file.text, 'trust:'),
+        message: 'missing required property "lifecycle"',
+      },
+    ]);
+  });
+});
+
+describe('applicability status', () => {
+  const applicability = (status: string): ModelFile =>
+    scheme({}, `applicability:\n  - { jurisdiction: NL, status: ${status}, ${OK} }\n`);
+
+  test('an empty status list fails', () => {
+    const file = applicability('[]');
+    const problems = checkWithTarget(file);
+    expect(problems).toHaveLength(1);
+    expect(problems[0]?.message).toContain('fewer than 1');
+  });
+
+  test('a repeated status fails', () => {
+    const problems = checkWithTarget(applicability('[issued, issued]'));
+    expect(problems).toHaveLength(1);
+    expect(problems[0]?.message).toContain('duplicate');
+  });
+
+  test('a status outside the vocabulary fails at the value', () => {
+    const file = applicability('[granted]');
+    expect(checkWithTarget(file)).toEqual([
+      {
+        file: SCHEME,
+        ...where(file.text, 'granted'),
+        message: '"granted" is not a known member of vocabulary applicability-status',
+      },
+    ]);
+  });
+
+  test('a jurisdiction that does not exist fails at the value', () => {
+    const file = scheme({}, `applicability:\n  - { jurisdiction: XX, status: [issued], ${OK} }\n`);
+    expect(checkWithTarget(file)).toEqual([
+      {
+        file: SCHEME,
+        ...where(file.text, 'jurisdiction: XX', 'jurisdiction: '.length),
+        message: '"XX" is not a known jurisdiction',
+      },
+    ]);
+  });
+});
