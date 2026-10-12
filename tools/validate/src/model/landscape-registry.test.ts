@@ -86,3 +86,66 @@ describe('landscape snapshot and model sources (DAT-05, DEC-043)', () => {
     expect(file.url).toBe(f25?.url);
   });
 });
+
+// The six law sources of the workbook links (rows 13: F, I, J, M, P, R), each with its link URL.
+const LAW_SOURCES: readonly (readonly [id: string, cell: string])[] = [
+  ['handelsregisterwet-2007', 'F13'],
+  ['handelsregisterbesluit-2008', 'I13'],
+  ['wet-op-de-omzetbelasting-1968', 'J13'],
+  ['csdr-its-2017-394', 'M13'],
+  ['ucc-952-2013', 'P13'],
+  ['wabb', 'R13'],
+];
+
+function linkUrlAt(cell: string): string | undefined {
+  return snapshotLinks().find((link) => link.cell === cell)?.url;
+}
+
+describe('the law sources of the workbook links (DAT-05, DEC-042, DEC-043)', () => {
+  test.each(LAW_SOURCES)('%s is a law whose url is the URL of cell %s exactly', (id, cell) => {
+    const file = sourceFileOf(id);
+    expect(file.type).toBe('law');
+    expect(file.url).toBe(linkUrlAt(cell));
+  });
+
+  test('the two EUR-Lex laws carry an ELI under http://data.europa.eu/eli/', () => {
+    for (const id of ['ucc-952-2013', 'csdr-its-2017-394']) {
+      expect(sourceFileOf(id).eli, id).toMatch(/^http:\/\/data\.europa\.eu\/eli\//);
+    }
+  });
+
+  test('no workbook link URL carries a tracking parameter or a text fragment', () => {
+    const tracking =
+      /[?&](utm_[a-z0-9_]+|gclid|gbraid|wbraid|fbclid|msclkid|dclid|_gl|_ga|mc_cid|mc_eid)=/i;
+    for (const link of snapshotLinks()) {
+      expect(link.url, link.cell).not.toMatch(tracking);
+      expect(link.url, link.cell).not.toContain('#:~:');
+    }
+  });
+});
+
+describe('docs/gaps.md entries of plan 03-04', () => {
+  const gaps = readFileSync(join(REPO_ROOT, 'docs', 'gaps.md'), 'utf8');
+  const FOUR_PARTS = [
+    '- **Item:**',
+    '- **Why it is not in the model:**',
+    '- **Open question:**',
+    '- **Owner or next step:**',
+  ];
+
+  test.each([
+    'Workbook hyperlinks whose target does not back their label',
+    'Source dates not stated on the page (DEC-042)',
+    'EUR-Lex ELI of Commission Implementing Regulation (EU) 2017/394 not confirmed',
+  ])('the entry "%s" is in the four-part form', (heading) => {
+    const start = gaps.indexOf(`## ${heading}`);
+    expect(start, heading).toBeGreaterThanOrEqual(0);
+    const section = gaps.slice(start).split('\n## ')[0] ?? '';
+    let at = 0;
+    for (const part of FOUR_PARTS) {
+      const found = section.indexOf(part, at);
+      expect(found, `${heading}: ${part}`).toBeGreaterThanOrEqual(0);
+      at = found + part.length;
+    }
+  });
+});
