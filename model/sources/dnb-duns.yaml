@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/source.schema.json
+id: dnb-duns
+title: "D-U-N-S Number Questions: Start Here - Dun & Bradstreet"
+type: register-doc
+date: 2026-10-11
+url: https://www.dnb.com/en-us/smb/duns.html
+publisher: Dun & Bradstreet

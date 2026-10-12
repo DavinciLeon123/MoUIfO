@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/source.schema.json
+id: dnb-duns-lookup
+title: D-U-N-S Number lookup (Dun & Bradstreet)
+type: register-doc
+date: 2026-09-30
+url: https://www.dnb.com/duns-number/lookup.html
+publisher: Dun & Bradstreet
