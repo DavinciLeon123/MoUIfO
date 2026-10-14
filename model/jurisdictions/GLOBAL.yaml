@@ -1,0 +1,5 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/jurisdiction.schema.json
+id: GLOBAL
+label:
+  en: Worldwide
+  nl: Wereldwijd

@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/authority.schema.json
+id: gs1
+kind: class
+label:
+  en: GS1
+  nl: GS1
+definition:
+  en: The global standards organisation whose member organisations allocate GS1 identification keys, including the GLN.

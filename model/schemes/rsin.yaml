@@ -1,0 +1,139 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/scheme.schema.json
+id: rsin
+label:
+  en: Legal Entities and Partnerships Information Number
+  nl: Rechtspersonen en Samenwerkingsverbanden Informatienummer
+abbreviation: RSIN
+kind: identifier
+issuer: kvk
+jurisdiction: NL
+availability:
+  value: public
+  source: landscape-v1-2
+  certainty: likely
+sources:
+  default: kvk-rsin
+scope:
+  en: "legal person equivalent of BSN; used for digital communication with Dutch government"
+format:
+  patterns:
+    - regex: "^[0-9]{9}$"
+      certainty: likely
+      source: landscape-v1-2
+      note: "The workbook gives 'unique ID - num(9)'; no primary source read states the digit count."
+  checksum:
+    - algorithm: elfproef
+      certainty: likely
+      source: landscape-v1-2
+      note: "The workbook gives 11-proof; no primary source read states the check (gap G9)."
+  examples_valid:
+    - "001469630"
+  examples_invalid:
+    - "001469631"
+    - "00146963"
+level:
+  - value: legal-entity
+    certainty: likely
+    source: kvk-rsin
+    note: "Companies and organisations that register with KVK receive an RSIN; only eenmanszaken do not."
+trust:
+  legal_basis: 2
+  registration_quality: 1
+  verifiability: 1
+  crosswalks: 1
+  lifecycle: 0
+  certainty: likely
+  source: landscape-v1-2
+persistence:
+  - event: merger
+    behaviour: "Usually new for merged entity"
+    certainty: likely
+    source: landscape-v1-2
+  - event: acquisition-without-merger
+    behaviour: "Unchanged"
+    certainty: likely
+    source: landscape-v1-2
+  - event: split
+    behaviour: "New RSINs"
+    certainty: likely
+    source: landscape-v1-2
+  - event: dissolution
+    behaviour: "Ceases"
+    certainty: likely
+    source: landscape-v1-2
+  - event: move-within-country
+    behaviour: "Unchanged"
+    certainty: likely
+    source: landscape-v1-2
+  - event: move-to-other-country
+    behaviour: "New RSIN"
+    certainty: likely
+    source: landscape-v1-2
+mandatory:
+  text: "yes, for legal persons"
+  certainty: likely
+  source: landscape-v1-2
+validation_source:
+  label: Business Register search (KVK)
+  url: https://www.kvk.nl/zoeken/
+  certainty: certain
+  source: kvk-zoeken
+applicability:
+  - jurisdiction: NL
+    status: [issued]
+    certainty: certain
+    source: kvk-rsin
+  - jurisdiction: NL
+    status: [verifiable]
+    certainty: certain
+    source: kvk-zoeken
+relations:
+  - kind: prerequisite
+    target: kvk-number
+    certainty: likely
+    source: kvk-rsin
+    note: "The RSIN is issued with the KvK number; only sole proprietorships receive none (KVK RSIN page)."
+  - kind: may-identify-same-party
+    target: fi-number
+    certainty: likely
+    source: landscape-v1-2
+    note: "The workbook remark '(predecessed by fi-number)' and the fi-number scope: parties with an RSIN were assigned a fi-nummer in the past. No rule derives one from the other."
+rules:
+  - id: rsin-from-eori-nl
+    input: eori
+    output: rsin
+    transform:
+      - strip_prefix: 2
+    condition:
+      entity_form: legal-person
+    certainty: certain
+    source: douane-eori-nl
+    examples:
+      - in: "NL001469630"
+        out: "001469630"
+  - id: rsin-from-vat-nl
+    input: vat-nl
+    output: rsin
+    transform:
+      - capture:
+          regex: "^NL([0-9]{9})B[0-9]{2}$"
+          group: 1
+    condition:
+      entity_form: legal-person
+    certainty: certain
+    source: ondernemersplein-btw-vermelden
+    examples:
+      - in: "NL001469630B01"
+        out: "001469630"
+  - id: rsin-from-oin
+    input: oin
+    output: rsin
+    transform:
+      - capture:
+          regex: "^00000001([0-9]{9})000$"
+          group: 1
+    certainty: certain
+    source: oin-stelsel-2-1-0
+    examples:
+      - in: "00000001001469630000"
+        out: "001469630"

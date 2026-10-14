@@ -1,0 +1,123 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/scheme.schema.json
+id: vat-nl
+label:
+  en: Dutch VAT identification number
+  nl: Btw-identificatienummer
+kind: identifier
+issuer: belastingdienst
+jurisdiction: NL
+availability:
+  value: public
+  source: landscape-v1-2
+  certainty: likely
+peppol_eas:
+  value: "9944"
+  source: peppol-code-lists-9-7
+  certainty: likely
+sources:
+  default: ondernemersplein-nummers-voor-de-btw
+scope:
+  en: "required for tax payments"
+format:
+  patterns:
+    - regex: "^NL[0-9]{9}B[0-9]{2}$"
+      certainty: certain
+      source: ondernemersplein-nummers-voor-de-btw
+      note: "NL, 9 digits, the letter B and 2 digits. A sole proprietor's number has this form too (Ondernemersplein)."
+  checksum:
+    - algorithm: elfproef
+      over:
+        - capture:
+            regex: "^NL([0-9]{9})B[0-9]{2}$"
+            group: 1
+      certainty: likely
+      source: landscape-v1-2
+      condition:
+        entity_form: legal-person
+      note: "Elfproef over the 9-digit core, which for a legal person is the RSIN. The workbook gives the check; no official source read states it (docs/gaps.md)."
+    - algorithm: iso7064-mod97-10
+      over:
+        - uppercase
+      certainty: likely
+      source: vat-nl-mod97-analysis
+      condition:
+        entity_form: sole-proprietorship
+      note: "ISO 7064 mod 97-10 over the whole value. No official text read states this check; see docs/gaps.md (DEC-049)."
+  examples_valid:
+    - "NL001469630B01"
+    - "NL000099998B57"
+  examples_invalid:
+    - "NL001469630B1"
+    - "NL000099998B58"
+relations:
+  - kind: contains
+    target: rsin
+    condition:
+      entity_form: legal-person
+    certainty: certain
+    source: ondernemersplein-btw-vermelden
+  - kind: specializes
+    target: vat
+    certainty: certain
+    source: vat-directive-art-215
+    note: "The Dutch btw-identificatienummer is the national form of the generic EU VAT identifier (DEC-034)."
+legal_basis:
+  - title: "Wet op de omzetbelasting 1968, Article 1, under g (definition of the btw-identificatienummer)"
+    url: "https://wetten.overheid.nl/BWBR0002629/2026-01-01"
+    certainty: certain
+    source: wet-op-de-omzetbelasting-1968
+validation_source:
+  label: VIES VAT number validation (European Commission)
+  url: "https://ec.europa.eu/taxation_customs/vies/#/vat-validation"
+  certainty: certain
+  source: vies
+roles:
+  - value: taxpayer
+    certainty: likely
+    source: landscape-v1-2
+mandatory:
+  text: "yes; in NL: determined by Tax Service"
+  certainty: likely
+  source: landscape-v1-2
+applicability:
+  - jurisdiction: NL
+    status: [issued]
+    certainty: certain
+    source: ondernemersplein-nummers-voor-de-btw
+  - jurisdiction: EU
+    status: [verifiable]
+    certainty: certain
+    source: vies
+trust:
+  legal_basis: 2
+  registration_quality: 1
+  verifiability: 1
+  crosswalks: 1
+  lifecycle: 0
+  certainty: likely
+  source: landscape-v1-2
+persistence:
+  - event: merger
+    behaviour: "Usually new"
+    certainty: likely
+    source: landscape-v1-2
+  - event: acquisition-without-merger
+    behaviour: "Unchanged"
+    certainty: likely
+    source: landscape-v1-2
+  - event: split
+    behaviour: "New VAT numbers"
+    certainty: likely
+    source: landscape-v1-2
+  - event: dissolution
+    behaviour: "Ceases"
+    certainty: likely
+    source: landscape-v1-2
+  - event: move-within-country
+    behaviour: "Sometimes new"
+    certainty: likely
+    source: landscape-v1-2
+  - event: move-to-other-country
+    behaviour: "Always new"
+    certainty: likely
+    source: landscape-v1-2

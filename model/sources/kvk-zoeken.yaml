@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/source.schema.json
+id: kvk-zoeken
+title: Zoeken bij KVK (search in the Business Register)
+type: register-doc
+date: 2026-01-20
+url: https://www.kvk.nl/zoeken/
+publisher: Kamer van Koophandel (KVK)

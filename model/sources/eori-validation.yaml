@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/source.schema.json
+id: eori-validation
+title: EU EORI number validation
+type: register-doc
+date: 2026-10-12
+url: https://ec.europa.eu/taxation_customs/dds2/eos/eori_validation.jsp?Lang=en
+publisher: European Commission

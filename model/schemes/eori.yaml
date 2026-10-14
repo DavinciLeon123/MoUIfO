@@ -1,0 +1,149 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/scheme.schema.json
+id: eori
+label:
+  en: Economic Operators Registration and Identification number
+  nl: EORI-nummer
+abbreviation: EORI
+kind: identifier
+issuer: national-customs-authority
+jurisdiction: EU
+availability:
+  value: public-restricted-details
+  source: landscape-v1-2
+  certainty: likely
+sources:
+  default: commission-eori
+scope:
+  en: "required for international trade with EU and UK involving customs; for legal persons as well as single person enterprises"
+notes:
+  en: "not a general business ID, often derived from one."
+context_from:
+  issuing_country:
+    capture:
+      regex: "^([A-Z]{2})"
+      group: 1
+    map: country-prefix
+    certainty: certain
+    source: commission-eori
+format:
+  patterns:
+    - regex: "^[A-Z]{2}[A-Z0-9]{1,15}$"
+      certainty: certain
+      source: commission-eori
+    - regex: "^NL[0-9]{9}$"
+      certainty: certain
+      source: douane-eori-nl
+      condition:
+        issuing_country: NL
+        entity_form: legal-person
+    - regex: "^NL[0-9]{10}$"
+      certainty: likely
+      source: landscape-v1-2
+      condition:
+        issuing_country: NL
+        entity_form: sole-proprietorship
+      note: "Workbook only (DEC-046), owner-accepted at likely on 2026-10-12. No rule derives it from the RSIN (D-08)."
+  examples_valid:
+    - "NL001469630"
+    - "DE123456789012345"
+  examples_invalid:
+    - "001469630"
+    - "NL1469630123456789"
+    - "nl001469630"
+roles:
+  - value: economic-operator
+    certainty: certain
+    source: commission-eori
+trust:
+  legal_basis: 1
+  registration_quality: 1
+  verifiability: 0
+  crosswalks: 1
+  lifecycle: 1
+  certainty: likely
+  source: landscape-v1-2
+persistence:
+  - event: merger
+    behaviour: "Unchanged if entity persists"
+    certainty: likely
+    source: landscape-v1-2
+  - event: acquisition-without-merger
+    behaviour: "Unchanged"
+    certainty: likely
+    source: landscape-v1-2
+  - event: split
+    behaviour: "New EORI"
+    certainty: likely
+    source: landscape-v1-2
+  - event: dissolution
+    behaviour: "Ceases"
+    certainty: likely
+    source: landscape-v1-2
+  - event: move-within-country
+    behaviour: "Unchanged"
+    certainty: likely
+    source: landscape-v1-2
+  - event: move-to-other-country
+    behaviour: "New EORI"
+    certainty: likely
+    source: landscape-v1-2
+mandatory:
+  text: "yes, for cross-border trading involving EU customs"
+  certainty: likely
+  source: landscape-v1-2
+legal_basis:
+  - title: "Regulation (EU) No 952/2013 (Union Customs Code), Article 9"
+    eli: "http://data.europa.eu/eli/reg/2013/952/oj"
+    certainty: certain
+    source: ucc-952-2013
+    note: "Article 9 requires registration with the customs authorities. The text does not name the EORI number; Regulation (EU) 2026/2108, Article 26 does."
+  - title: "Regulation (EU) 2026/2108 (Union Customs Code), Article 26"
+    eli: "http://data.europa.eu/eli/reg/2026/2108/oj"
+    certainty: certain
+    source: ucc-2026-2108
+    note: "Registration to obtain an EORI number. The regulation applies from 21 September 2027 (Article 287(2)) and repeals Regulation (EU) No 952/2013."
+validation_source:
+  label: EU EORI number validation
+  url: "https://ec.europa.eu/taxation_customs/dds2/eos/eori_validation.jsp?Lang=en"
+  certainty: certain
+  source: eori-validation
+applicability:
+  - jurisdiction: EU
+    status: [issued, recognised]
+    certainty: certain
+    source: commission-eori
+    note: "EORI numbers are assigned by the national customs authority of the EU country of establishment; the number is mandatory for customs operations in the EU customs territory."
+  - jurisdiction: EU
+    status: [verifiable]
+    certainty: certain
+    source: eori-validation
+  - jurisdiction: XI
+    status: [issued, recognised]
+    certainty: certain
+    source: hmrc-eori-introduction
+    note: "Northern Ireland, under EU customs legislation. Stated here, not inherited from GB (DEC-041)."
+  - jurisdiction: GB
+    status: [issued, recognised]
+    certainty: certain
+    source: hmrc-eori-introduction
+    note: "England, Scotland and Wales, under UK legislation (see the gap entry on the GB prefix)."
+relations:
+  - kind: derived-from
+    target: rsin
+    condition:
+      entity_form: legal-person
+    certainty: certain
+    source: douane-eori-nl
+rules:
+  - id: eori-nl-from-rsin
+    input: rsin
+    output: eori
+    transform:
+      - add_prefix: "NL"
+    condition:
+      entity_form: legal-person
+    certainty: certain
+    source: douane-eori-nl
+    examples:
+      - in: "001469630"
+        out: "NL001469630"

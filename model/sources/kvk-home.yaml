@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/source.schema.json
+id: kvk-home
+title: KVK - Kamer van Koophandel
+type: register-doc
+date: 2026-09-30
+url: https://www.kvk.nl/
+publisher: Kamer van Koophandel (KVK)

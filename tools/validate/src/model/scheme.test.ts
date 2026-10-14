@@ -6,7 +6,7 @@ import {
   fixtureSource,
   minimalSchemeBody,
   schemeFixture,
-  withRealModel,
+  withSeedModel,
 } from './testing.ts';
 
 const SCHEME = 'model/schemes/fixture-scheme.yaml';
@@ -14,7 +14,7 @@ const SCHEME = 'model/schemes/fixture-scheme.yaml';
 /** The standard fixture set (source, authorities) plus `extra`, checked with the real model. */
 const check = (extra: ModelFile | readonly ModelFile[]) =>
   checkModelFiles(
-    withRealModel([
+    withSeedModel([
       fixtureSource(),
       ...fixtureAuthorities(),
       ...(Array.isArray(extra) ? extra : [extra as ModelFile]),

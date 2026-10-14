@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/source.schema.json
+id: e-justice-business-registers
+title: Business registers – search for a company in the EU
+type: register-doc
+date: 2026-10-12
+url: https://e-justice.europa.eu/topics/registers-business-insolvency-land/business-registers-search-company-eu_en
+publisher: European Commission (European e-Justice Portal)

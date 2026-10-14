@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/authority.schema.json
+id: logius
+kind: class
+label:
+  en: Logius
+  nl: Logius
+definition:
+  en: The Dutch government organisation that manages the OIN system and its register.

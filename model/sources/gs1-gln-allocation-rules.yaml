@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/source.schema.json
+id: gs1-gln-allocation-rules
+title: GS1 GLN Allocation Rules Standard, Release 3.0.2
+type: standard
+date: 2022-08-01
+url: https://ref.gs1.org/standards/gln-allocation/
+publisher: GS1
+reference: GS1 GLN Allocation Rules Standard, Release 3.0.2

@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/authority.schema.json
+id: local-operating-unit
+kind: class
+label:
+  en: LEI issuing organisation (Local Operating Unit)
+definition:
+  en: An organisation accredited by GLEIF to issue and maintain LEIs.

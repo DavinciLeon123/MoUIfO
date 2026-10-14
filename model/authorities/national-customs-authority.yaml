@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/authority.schema.json
+id: national-customs-authority
+kind: class
+label:
+  en: National customs authority
+  nl: Nationale douaneautoriteit
+definition:
+  en: The customs authority of a Member State that registers economic operators and assigns EORI numbers.

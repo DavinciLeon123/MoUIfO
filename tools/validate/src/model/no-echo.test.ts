@@ -16,7 +16,7 @@ import {
   positionOfToken,
   runValidateCli,
   schemeFixture,
-  withRealModel,
+  withSeedModel,
 } from './testing.ts';
 
 vi.setConfig({ testTimeout: 60_000 });
@@ -61,7 +61,7 @@ const SECRETS = [upper, lower, core];
 
 const check = (extra: string) =>
   checkModelFiles(
-    withRealModel([
+    withSeedModel([
       fixtureSource(),
       ...fixtureAuthorities(),
       schemeFixture('fixture-echo', minimalSchemeBody('fixture-echo', {}, extra)),
@@ -262,7 +262,9 @@ describe('the CLI on a repository copy prints positions, never values (D-04, MOD
     expect(plain.stdout).toContain('validate: 4 problems');
     const problems = plain.stdout
       .split('\n')
-      .filter((line) => line !== '' && !line.startsWith('validate:'));
+      .filter(
+        (line) => line !== '' && !line.startsWith('validate:') && !line.includes(' warning:'),
+      );
     expect(problems).toHaveLength(CLI_DEFECTS.length);
   });
 

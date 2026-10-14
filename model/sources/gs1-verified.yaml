@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/source.schema.json
+id: gs1-verified
+title: Verified by GS1 - GS1 Nederland
+type: register-doc
+date: 2026-10-12
+url: https://www.gs1.nl/producten-services/codes-verifieren/verified-by-gs1/
+publisher: GS1 Nederland

@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/authority.schema.json
+id: koop
+kind: class
+label:
+  en: KOOP (Kennis- en Exploitatiecentrum Officiële Overheidspublicaties)
+  nl: KOOP
+definition:
+  en: The Dutch government publications centre that runs the Register of Government Organisations (ROO).

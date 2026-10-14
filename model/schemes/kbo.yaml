@@ -1,0 +1,47 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/scheme.schema.json
+id: kbo
+label:
+  en: Belgian enterprise number (Crossroads Bank for Enterprises)
+  nl: Ondernemingsnummer (Kruispuntbank van Ondernemingen)
+abbreviation: KBO
+kind: identifier
+issuer: fod-economie
+jurisdiction: BE
+availability: public
+iso6523_icd:
+  value: "0208"
+  source: peppol-code-lists-9-7
+  certainty: likely
+peppol_eas:
+  value: "0208"
+  source: peppol-code-lists-9-7
+  certainty: likely
+sources:
+  default: kbo-public-search
+scope:
+  en: "the enterprise number of an entity registered in the Belgian Crossroads Bank for Enterprises (CBE); the CBE Public Search displays the public data of all registered entities, including their establishment units"
+notes:
+  en: "The workbook has no column for this scheme. The owner decided on 2026-10-12 to omit the equivalent-in relation to kvk-number and the Belgian check digit (DEC-048); both are logged in docs/gaps.md."
+format:
+  patterns:
+    - regex: "^[01][0-9]{9}$"
+      certainty: likely
+      source: peppol-code-lists-9-7
+      note: "Ten digits, the first one 0 or 1 (Peppol Code Lists v9.7, entry 0208, BE:EN). The same entry states a mod 97 check digit, which is not modelled (DEC-048, docs/gaps.md)."
+  examples_invalid:
+    - "2123456789"
+    - "01234567"
+validation_source:
+  label: KBO Public Search (FOD Economie)
+  url: "https://kbopub.economie.fgov.be/kbopub/zoeknummerform.html?lang=en"
+  certainty: certain
+  source: kbo-public-search
+applicability:
+  - jurisdiction: BE
+    status: [issued]
+    certainty: certain
+    source: kbo-public-search
+  - jurisdiction: BE
+    status: [verifiable]
+    certainty: certain
+    source: kbo-public-search

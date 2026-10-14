@@ -1,5 +1,5 @@
 import { execFileSync, spawn, spawnSync } from 'node:child_process';
-import { cpSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -20,11 +20,39 @@ export function realModelFiles(root: string = REPO_ROOT): ModelFile[] {
   return discoverModelFiles(root).files;
 }
 
-/** Test helper: the real model files with `extra` added, or replacing the file of the same path. */
-export function withRealModel(extra: ModelFile | readonly ModelFile[]): ModelFile[] {
+/** The six jurisdictions of the frozen Phase 2 seed, read as `model/jurisdictions/<id>.yaml`. */
+export const SEED_JURISDICTIONS = ['BE', 'EU', 'GB', 'GR', 'NL', 'XI'] as const;
+
+/** The four sources of the frozen Phase 2 seed, read as `model/sources/<id>.yaml`. */
+export const SEED_SOURCES = [
+  'hmrc-eori-introduction',
+  'nia-1998-s1',
+  'teu-art-52',
+  'vat-directive-art-215',
+] as const;
+
+/** Test helper: one model file read from the repository at `path`. */
+function readRepoFile(path: string): ModelFile {
+  return { path, text: readFileSync(join(REPO_ROOT, path), 'utf8') };
+}
+
+/**
+ * Test helper: the frozen Phase 2 seed with `extra` added, or replacing the file of the same path.
+ * The seed is every file under `model/vocab/`, the `SEED_JURISDICTIONS` and the `SEED_SOURCES`.
+ * Fixture tests run on this seed, not on the real model, so real Phase 3 schemes, authorities,
+ * jurisdictions and sources cannot add problems to or remove references from a fixture's expected
+ * result. The seed fixes which files are read (the ids above); their text comes from the
+ * repository, so an edit to a seed file would reach the fixtures too.
+ */
+export function withSeedModel(extra: ModelFile | readonly ModelFile[]): ModelFile[] {
   const added = Array.isArray(extra) ? extra : [extra as ModelFile];
   const paths = new Set(added.map((file) => file.path));
-  return [...realModelFiles().filter((file) => !paths.has(file.path)), ...added];
+  const seed = [
+    ...realModelFiles().filter((file) => file.path.startsWith('model/vocab/')),
+    ...SEED_JURISDICTIONS.map((id) => readRepoFile(`model/jurisdictions/${id}.yaml`)),
+    ...SEED_SOURCES.map((id) => readRepoFile(`model/sources/${id}.yaml`)),
+  ];
+  return [...seed.filter((file) => !paths.has(file.path)), ...added];
 }
 
 /** Test helper: a register-doc source with a placeholder url, for fixtures to cite. */

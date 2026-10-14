@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/source.schema.json
+id: csdr-its-2017-394
+title: Commission Implementing Regulation (EU) 2017/394 of 11 November 2016 (implementing technical standards for central securities depositories)
+type: law
+date: 2016-11-11
+url: https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32017R0394
+eli: http://data.europa.eu/eli/reg_impl/2017/394/oj
+publisher: Publications Office of the European Union (EUR-Lex)

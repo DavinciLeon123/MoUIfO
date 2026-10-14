@@ -10,7 +10,7 @@ import {
   fixtureSource,
   minimalSchemeBody,
   schemeFixture,
-  withRealModel,
+  withSeedModel,
 } from './testing.ts';
 
 const SCHEME = 'model/schemes/fixture-scheme.yaml';
@@ -23,10 +23,10 @@ const target = (extra = ''): ModelFile =>
     minimalSchemeBody('fixture-target', { abbreviation: 'TGT' }, extra),
   );
 
-/** The standard fixture set plus the target scheme and `files`, checked with the real model. */
+/** The standard fixture set plus the target scheme and `files`, checked with the seed model. */
 const check = (...files: ModelFile[]) =>
   checkModelFiles(
-    withRealModel([
+    withSeedModel([
       fixtureSource(),
       ...fixtureAuthorities(),
       ...(files.some((file) => file.path.endsWith('/fixture-target.yaml')) ? [] : [target()]),

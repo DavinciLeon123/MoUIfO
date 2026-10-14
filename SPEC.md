@@ -104,6 +104,8 @@ The engine reads **only** the generated `dist/model.json`, a compact, normalised
 
 > Amended by DECISIONS.md DEC-040: supersedes DEC-032 in part; GR (Greece, `part_of` EU) is seeded now as a sixth jurisdiction so that the prefix entry EL to GR resolves.
 
+> Amended by DECISIONS.md DEC-045: an authority file exists only for an issuer that a scheme names; a single-organisation issuer is an authority class only, and class plus per-country instance is used only where one authority per country exists.
+
 ```
 /
 ├─ SPEC.md                      # this document
@@ -175,6 +177,14 @@ Monorepo with npm workspaces. Node LTS. No backend, database or telemetry.
 > Amended by DECISIONS.md DEC-036: `iso6523_icd` and `peppol_eas` are separate nullable 4-digit string fields, and a composite scheme names its delegates with explicit `components` and a relation.
 
 > Amended by DECISIONS.md DEC-038: a checksum entry is `{ algorithm, over?, source, certainty }`, where `over` is an optional list of SPEC §5.3 transforms applied before the algorithm.
+
+> Amended by DECISIONS.md DEC-045: an authority counts as referenced when a scheme names it as issuer, when it is the class of such an issuer, or when it is a country instance that the scheme's issuing-country context reaches; no unreferenced authority file is written.
+
+> Amended by DECISIONS.md DEC-046: the workbook is the analysis source `landscape-v1-2` (not `landscape-v1.2`), and its claims have certainty `likely` unless a later row sets a lower one.
+
+> Amended by DECISIONS.md DEC-050: the EORI levels and the associated VAT number of a Dutch EORI or RSIN are not modelled or asserted, because no source states them, and are logged in `docs/gaps.md`.
+
+> Amended by DECISIONS.md DEC-052: a `peppol_eas` code whose only source is the Peppol code list is held at certainty `likely` in the long form, not at `certain`, and the meaning of the field (DEC-036) is unchanged.
 
 Validate with a JSON Schema in `tools/validate`. Fields:
 
@@ -264,6 +274,10 @@ A rule is either a **transformation** of a value, or an **if-then rule** over pr
 > Amended by DECISIONS.md DEC-029: a scheme's default source covers its bare header fields and every statement keeps its own `source` and explicit `certainty`; `label`, `notes` and `scope` need no source.
 
 > Amended by DECISIONS.md DEC-030: every source needs `id`, `title`, `date` and `type`, plus the fields of its type (`eli` or `url` for law, `publisher` and `reference` for a standard, `url` for a register document, `method` for an analysis, `role` and `organisation` for an expert).
+
+> Amended by DECISIONS.md DEC-042: a source whose page states no date takes the page's machine-readable modification date, or else the date it was read, and is listed in `docs/gaps.md`.
+
+> Amended by DECISIONS.md DEC-046: the workbook is an `analysis` source whose `method` states that its values are the authors' expert analysis, and its statements have certainty `likely` unless a later row sets a lower one.
 
 - Every statement (level, role, applicability, relation, rule, pattern, trust, persistence) has `source` (id in `model/sources/`) and `certainty` (default `certain` if it follows from law or a standard; otherwise fill in explicitly).
 - `model/sources/<id>.yaml`: `id`, `title`, `url?`, `publisher?`, `date`, `type` (`law` | `standard` | `register-doc` | `expert` | `analysis`). For an expert: role and organisation, never a personal name without consent.
@@ -422,6 +436,16 @@ REST API, a dedicated chat with a language model (for example Jev by TypeSafe AI
 
 > Amended by DECISIONS.md DEC-033: v0.1 has 16 schemes (the 15 ids plus KBO); `vat` is the generic EU VAT identifier and `vat-nl` the Dutch form, and both cite the workbook column `VAT-nr`.
 
+> Amended by DECISIONS.md DEC-043: each distinct cleaned URL among the 40 workbook hyperlinks becomes at most one source file, and each primary hyperlink is registered unless it cannot back a claim.
+
+> Amended by DECISIONS.md DEC-044: `npm run import:snapshot` writes the committed, byte-stable JSON snapshot `sources/landscape-snapshot-v1.2.json` from the committed CSVs, and the importer writes no draft YAML.
+
+> Amended by DECISIONS.md DEC-046: the workbook source id is `landscape-v1-2`, replacing `landscape-v1.2`, because a source id must be kebab-case.
+
+> Amended by DECISIONS.md DEC-048: `kbo` is a light scheme without the `equivalent-in` relation to `kvk-number` and without a checksum entry, because no readable official Belgian source supports either; both gaps are logged.
+
+> Amended by DECISIONS.md DEC-051: for now, DEC-043 with its two primary-row exceptions (the Digital Single Market communication PDF of cell O13 and the Logius landing page of cell H15) is accepted as registering every primary hyperlink URL, and registering or replacing both is deferred and logged in `docs/gaps.md`.
+
 **Source:** `sources/Analysis of Unique IDs for companies.xlsx` (tab *Overzicht UID* = landscape table, *Persistence*, *KvK in NL en buitenland*). Also deliver a conversion script `tools/import/excel.ts`, or transfer the values by hand. In both cases record `source: landscape-v1.2` per field.
 
 **Starter set of 14 schemes:** `kvk-number`, `kvk-establishment-number` (establishment number), `oin`, `rsin`, `vat` (generic) plus `vat-nl`, `roo`, `peppol-id`, `lei`, `gln`, `euid`, `eori`, `duns`, `bsn`, `fi-number`.
@@ -439,6 +463,8 @@ REST API, a dedicated chat with a language model (for example Jev by TypeSafe AI
 > Amended by DECISIONS.md DEC-003: the Dutch EORI is derived from the RSIN, and VAT to EORI is a two-step chain (VAT number to RSIN, then RSIN to EORI).
 
 > Amended by DECISIONS.md DEC-005: a bare 9-digit value (possibly a BSN) joins `check` only when another supplied value derives it.
+
+> Amended by DECISIONS.md DEC-050: the EORI levels and the associated VAT number of a Dutch EORI are not asserted by the acceptance test, because no source supports them, and are logged in `docs/gaps.md`.
 
 **Input:** `derive("NL001469630", "eori")` and `check(["NL001469630", "NL001469630B01", "001469630"])`.
 
@@ -530,6 +556,14 @@ REST API, a dedicated chat with a language model (for example Jev by TypeSafe AI
 > Amended by DECISIONS.md DEC-004: the checksum of a scheme is an any-of list with its own source and certainty per entry; for `vat-nl` the mod 97 entry is marked `likely`.
 
 > Amended by DECISIONS.md DEC-036: ICD codes and Peppol EAS codes are separate header fields `iso6523_icd` and `peppol_eas`; 9944 is a Peppol EAS value, not an ISO 6523 ICD.
+
+> Amended by DECISIONS.md DEC-047: the Dutch EUID form `NL.KVK.` plus the 8-digit KVK number is admitted at certainty `possible`, sourced to the workbook only.
+
+> Amended by DECISIONS.md DEC-049: each Appendix B item is verified in a table in `docs/gaps.md`; an item no source states is omitted and logged, and the Dutch sole-proprietor VAT mod 97 entry is modelled at `likely`.
+
+> Amended by DECISIONS.md DEC-051: for now, an item stated by one named source but not confirmed by a primary source may enter the model at the certainty DEC-049 gives it (`likely` or `possible`), and confirming each item against its primary source is deferred and logged in `docs/gaps.md`.
+
+> Amended by DECISIONS.md DEC-052: the Peppol EAS codes, 9944 included, are stated only by the Peppol code list and enter the model at certainty `likely`, as the ICD codes that list alone states do.
 
 These are commonly used values. They must first be confirmed with an authoritative source in `model/sources/` before they enter the model.
 

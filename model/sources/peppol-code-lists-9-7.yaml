@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/source.schema.json
+id: peppol-code-lists-9-7
+title: Peppol Code Lists - Participant identifier schemes v9.7
+type: standard
+date: 2026-07-02
+url: https://docs.peppol.eu/edelivery/codelists/
+publisher: OpenPeppol
+reference: Peppol Code Lists - Participant identifier schemes v9.7

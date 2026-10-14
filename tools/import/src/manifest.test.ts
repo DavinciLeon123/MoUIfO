@@ -189,9 +189,10 @@ describe('sources provenance (D-22)', () => {
   const readme = readFileSync(join(SOURCES, 'README.md'), 'utf8');
   const rows = parseProvenanceTable(readme);
 
-  test('the table lists the landscape export and the v0.9 ontology', () => {
+  test('the table lists the landscape export, its snapshot and the v0.9 ontology', () => {
     expect(rows.map((r) => r.File)).toEqual([
       'landscape-v1.2-overview-uids.csv, landscape-v1.2-persistence.csv, landscape-v1.2-links.csv',
+      'landscape-snapshot-v1.2.json',
       'uio-ontology-v0.9.ttl',
     ]);
   });

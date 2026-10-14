@@ -1,0 +1,10 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/authority.schema.json
+id: kvk
+kind: instance
+label:
+  en: Netherlands Chamber of Commerce (KVK)
+  nl: Kamer van Koophandel
+instance_of: national-business-register
+jurisdiction: NL
+source: kvk-home
+certainty: certain

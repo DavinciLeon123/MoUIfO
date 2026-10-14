@@ -1,0 +1,10 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/authority.schema.json
+id: fod-economie
+kind: instance
+label:
+  en: FPS Economy, Crossroads Bank for Enterprises
+  nl: FOD Economie, Kruispuntbank van Ondernemingen
+instance_of: national-business-register
+jurisdiction: BE
+source: kbo-public-search
+certainty: certain

@@ -1,0 +1,62 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/scheme.schema.json
+id: bsn
+label:
+  en: Citizen service number
+  nl: Burgerservicenummer
+abbreviation:
+  value: BSN
+  source: landscape-v1-2
+  certainty: likely
+kind: identifier
+issuer:
+  value: rvig
+  source: landscape-v1-2
+  certainty: likely
+jurisdiction: NL
+availability:
+  value: restricted
+  source: landscape-v1-2
+  certainty: likely
+sources:
+  default: wabb
+format:
+  patterns:
+    - regex: "^[0-9]{9}$"
+      certainty: likely
+      source: landscape-v1-2
+      note: "The workbook gives 'unique ID - num(9) (11-proof)'; no primary source read states the digit count (docs/gaps.md)."
+  checksum:
+    - algorithm: elfproef
+      certainty: likely
+      source: landscape-v1-2
+      note: "The workbook gives the 11-proof; the Wabb text read states no digit rule (docs/gaps.md)."
+  examples_invalid:
+    - "123456789"
+    - "12345678"
+level:
+  - value: natural-person
+    certainty: certain
+    source: wabb
+    note: "Article 1 of the Wabb: the burgerservicenummer is the number assigned to a natural person."
+legal_basis:
+  - title: "Wet algemene bepalingen burgerservicenummer, Article 1 (the number assigned to a natural person)"
+    url: "https://wetten.overheid.nl/BWBR0022428/2025-11-11"
+    certainty: certain
+    source: wabb
+trust:
+  legal_basis: null
+  registration_quality: null
+  verifiability: null
+  crosswalks: null
+  lifecycle: null
+  certainty: likely
+  source: landscape-v1-2
+mandatory:
+  text: "yes, for natural persons"
+  certainty: likely
+  source: landscape-v1-2
+applicability:
+  - jurisdiction: NL
+    status: [issued]
+    certainty: certain
+    source: wabb

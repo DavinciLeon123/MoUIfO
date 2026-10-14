@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/source.schema.json
+id: oin-register
+title: OIN register (Logius)
+type: register-doc
+date: 2026-07-07
+url: https://oinregister.logius.nl/oin-register
+publisher: Logius

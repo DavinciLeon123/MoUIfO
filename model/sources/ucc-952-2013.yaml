@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/source.schema.json
+id: ucc-952-2013
+title: Regulation (EU) No 952/2013 of 9 October 2013 laying down the Union Customs Code (recast)
+type: law
+date: 2013-10-09
+url: https://eur-lex.europa.eu/eli/reg/2013/952/oj/eng
+eli: http://data.europa.eu/eli/reg/2013/952/oj
+publisher: Publications Office of the European Union (EUR-Lex)

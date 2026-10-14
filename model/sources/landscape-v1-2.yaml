@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/source.schema.json
+id: landscape-v1-2
+title: Analysis of Unique Identifiers for Organisations, version 1.2 (UID table)
+type: analysis
+date: 2026-07-03
+url: https://github.com/DavinciLeon123/MoUIfO/tree/main/sources
+publisher: Davinci Conclusion, as produced for the CoE-DSC
+reference: UID table v1.2
+method: "Expert analysis by the workbook authors (DEC-046), exported to CSV (DEC-014) and transcribed verbatim from sources/landscape-snapshot-v1.2.json. A claim that rests only on this source has certainty likely."

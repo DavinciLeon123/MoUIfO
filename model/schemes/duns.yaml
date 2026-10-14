@@ -1,0 +1,103 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/scheme.schema.json
+id: duns
+label:
+  en: D-U-N-S Number
+  nl: D-U-N-S-nummer
+abbreviation: D-U-N-S
+kind: identifier
+issuer: dun-bradstreet
+jurisdiction:
+  value: GLOBAL
+  source: landscape-v1-2
+  certainty: likely
+availability:
+  value: public-within-restrictions
+  source: landscape-v1-2
+  certainty: likely
+iso6523_icd:
+  value: "0060"
+  source: peppol-code-lists-9-7
+  certainty: likely
+peppol_eas:
+  value: "0060"
+  source: peppol-code-lists-9-7
+  certainty: likely
+sources:
+  default: dnb-duns
+scope:
+  en: "international trading, government assignments, app development, credit checks"
+notes:
+  en: "Workbook remarks: the number is intentionally permanent and not to be reused; the prerequisite is proof of existence (for example a CoC number); the workbook rates validation as very limited (US only). The Peppol list's structure text still describes a check digit (docs/gaps.md)."
+format:
+  patterns:
+    - regex: "^[0-9]{9}$"
+      certainty: certain
+      source: dnb-duns
+      note: "A unique nine-digit identifier used exclusively for businesses (Dun & Bradstreet D-U-N-S Number page)."
+  checksum:
+    - algorithm: none
+      certainty: likely
+      source: peppol-code-lists-9-7
+      note: "Check digits were removed to get a bigger number area (Peppol Code Lists v9.7, entry 0060). The entry's structure text still describes a check digit; logged in docs/gaps.md."
+  examples_valid:
+    - "362596397"
+  examples_invalid:
+    - "36259639"
+mandatory:
+  text: "mostly optional"
+  certainty: likely
+  source: landscape-v1-2
+validation_source:
+  label: D&B D-U-N-S Number lookup
+  url: "https://www.dnb.com/duns-number/lookup.html"
+  certainty: certain
+  source: dnb-duns-lookup
+relations:
+  - kind: may-identify-same-party
+    target: kvk-number
+    certainty: likely
+    source: landscape-v1-2
+    note: "Workbook: related to CoC number, LEI, VAT-nr."
+  - kind: may-identify-same-party
+    target: lei
+    certainty: likely
+    source: landscape-v1-2
+    note: "Workbook: related to CoC number, LEI, VAT-nr."
+  - kind: may-identify-same-party
+    target: vat
+    certainty: likely
+    source: landscape-v1-2
+    note: "Workbook: related to CoC number, LEI, VAT-nr."
+trust:
+  legal_basis: 0
+  registration_quality: 1
+  verifiability: 0
+  crosswalks: 0
+  lifecycle: 1
+  certainty: likely
+  source: landscape-v1-2
+persistence:
+  - event: merger
+    behaviour: "Often new, but can persist"
+    certainty: likely
+    source: landscape-v1-2
+  - event: acquisition-without-merger
+    behaviour: "Unchanged"
+    certainty: likely
+    source: landscape-v1-2
+  - event: split
+    behaviour: "New DUNS for new entities"
+    certainty: likely
+    source: landscape-v1-2
+  - event: dissolution
+    behaviour: "Inactive"
+    certainty: likely
+    source: landscape-v1-2
+  - event: move-within-country
+    behaviour: "Unchanged"
+    certainty: likely
+    source: landscape-v1-2
+  - event: move-to-other-country
+    behaviour: "Can persist"
+    certainty: likely
+    source: landscape-v1-2

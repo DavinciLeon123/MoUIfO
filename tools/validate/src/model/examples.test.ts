@@ -10,7 +10,7 @@ import {
   fixtureSource,
   minimalSchemeBody,
   schemeFixture,
-  withRealModel,
+  withSeedModel,
 } from './testing.ts';
 
 const SCHEME = 'model/schemes/fixture-scheme.yaml';
@@ -52,7 +52,7 @@ const target = (): ModelFile =>
   schemeFixture('fixture-target', minimalSchemeBody('fixture-target', { abbreviation: 'TGT' }));
 
 const check = (...files: ModelFile[]) =>
-  checkModelFiles(withRealModel([fixtureSource(), ...fixtureAuthorities(), target(), ...files]));
+  checkModelFiles(withSeedModel([fixtureSource(), ...fixtureAuthorities(), target(), ...files]));
 
 /** 1-based line and column of the `occurrence`-th occurrence of `needle` in `text`. */
 function where(text: string, needle: string, occurrence = 1): { line: number; column: number } {

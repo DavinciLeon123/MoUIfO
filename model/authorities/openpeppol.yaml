@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/authority.schema.json
+id: openpeppol
+kind: class
+label:
+  en: OpenPeppol
+  nl: OpenPeppol
+definition:
+  en: The association that governs the Peppol network and its code lists.

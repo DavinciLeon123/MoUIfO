@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/source.schema.json
+id: ondernemersplein-nummers-voor-de-btw
+title: Nummers voor de btw
+type: register-doc
+date: 2026-08-04
+url: https://ondernemersplein.overheid.nl/nummers-voor-de-btw/
+publisher: Ondernemersplein (Belastingdienst)

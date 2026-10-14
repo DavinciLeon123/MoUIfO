@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/source.schema.json
+id: wabb
+title: Wet algemene bepalingen burgerservicenummer (BWBR0022428, version of 11 November 2025)
+type: law
+date: 2025-11-11
+url: https://wetten.overheid.nl/BWBR0022428/2025-11-11
+publisher: wetten.overheid.nl (Overheid.nl)

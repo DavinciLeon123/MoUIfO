@@ -2,9 +2,9 @@ import { describe, expect, test } from 'vitest';
 import { checkModelFiles } from './check-model.ts';
 import { checkPartOf } from './cross-file.ts';
 import { type ModelFile, parseModelFile } from './load.ts';
-import { fixture, withRealModel } from './testing.ts';
+import { fixture, withSeedModel } from './testing.ts';
 
-const check = (files: ModelFile | readonly ModelFile[]) => checkModelFiles(withRealModel(files));
+const check = (files: ModelFile | readonly ModelFile[]) => checkModelFiles(withSeedModel(files));
 
 /** 1-based line and column of the first occurrence of `needle` in `text`. */
 function where(text: string, needle: string): { line: number; column: number } {
@@ -79,7 +79,7 @@ describe('part_of cycles', () => {
   });
 
   test('checkPartOf is deterministic: the same input gives deep-equal output', () => {
-    const files = withRealModel([jurisdiction('XA', ['XB']), jurisdiction('XB', ['XA'])])
+    const files = withSeedModel([jurisdiction('XA', ['XB']), jurisdiction('XB', ['XA'])])
       .filter((file) => file.path.startsWith('model/jurisdictions/'))
       .map((file) => parseModelFile(file).parsed);
     const first = checkPartOf(files);
@@ -98,7 +98,7 @@ describe('several parents and GLOBAL', () => {
     expect(check(jurisdiction('GLOBAL', []))).toEqual([]);
   });
 
-  test('a reference to GLOBAL fails as an unknown jurisdiction while no GLOBAL file exists', () => {
+  test('a reference to GLOBAL fails as an unknown jurisdiction in the seed model, which has no GLOBAL file', () => {
     const zy = jurisdiction('ZY', ['GLOBAL']);
     expect(check(zy)).toEqual([
       {

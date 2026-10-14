@@ -1,0 +1,78 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/scheme.schema.json
+id: fi-number
+label:
+  en: Fiscal number (fi-nummer)
+  nl: Fiscaal nummer
+kind:
+  value: identifier
+  source: landscape-v1-2
+  certainty: likely
+issuer:
+  value: belastingdienst
+  source: landscape-v1-2
+  certainty: likely
+jurisdiction:
+  value: NL
+  source: landscape-v1-2
+  certainty: likely
+availability:
+  value: internal
+  source: landscape-v1-2
+  certainty: likely
+sources:
+  default: landscape-v1-2
+scope:
+  en: "all parties being assigned an RSIN now were assigned a fi-nummer in the past.\nForeign parties are assigned a fi-nummer if they:\n- apply for an EORI in NL\n- must pay VAT in NL"
+notes:
+  en: "Issued by the Tax Service until 2010, when the CoC (chamber of commerce) started issuing the RSIN instead."
+format:
+  patterns:
+    - regex: "^[0-9]{9}$"
+      certainty: likely
+      source: landscape-v1-2
+      note: "The workbook gives 'unique ID - num(9) (11-proof)'; no primary source read states the digit count (docs/gaps.md)."
+  checksum:
+    - algorithm: elfproef
+      certainty: likely
+      source: landscape-v1-2
+      note: "The workbook gives the 11-proof; no primary source read states the check (docs/gaps.md)."
+  examples_invalid:
+    - "123456789"
+    - "1234567890"
+trust:
+  legal_basis: null
+  registration_quality: null
+  verifiability: null
+  crosswalks: null
+  lifecycle: null
+  certainty: likely
+  source: landscape-v1-2
+persistence:
+  - event: merger
+    behaviour: "New number for merged entity"
+    certainty: likely
+    source: landscape-v1-2
+  - event: acquisition-without-merger
+    behaviour: "Unchanged"
+    certainty: likely
+    source: landscape-v1-2
+  - event: split
+    behaviour: "New numbers for split entities"
+    certainty: likely
+    source: landscape-v1-2
+  - event: dissolution
+    behaviour: "Ceases"
+    certainty: likely
+    source: landscape-v1-2
+  - event: move-within-country
+    behaviour: "Unchanged"
+    certainty: likely
+    source: landscape-v1-2
+  - event: move-to-other-country
+    behaviour: "New number"
+    certainty: likely
+    source: landscape-v1-2
+mandatory:
+  text: "yes, for organisations with VAT duty"
+  certainty: likely
+  source: landscape-v1-2
