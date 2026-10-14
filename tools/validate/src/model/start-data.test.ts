@@ -552,14 +552,14 @@ describe('euid with the Dutch form at possible, its EU legal basis and the five 
   });
 });
 
-describe('peppol-id, gln and GLOBAL (DAT-02, plan 03-10, DEC-033, DEC-036, DEC-045)', () => {
+describe('peppol-id, gln and GLOBAL (DAT-02, plan 03-10, DEC-033, DEC-036, DEC-053, DEC-045)', () => {
   test('GLOBAL is a jurisdiction file with the id GLOBAL and no parent', () => {
     const global = load('model/jurisdictions/GLOBAL.yaml');
     expect(global.id).toBe('GLOBAL');
     expect(global.part_of).toBeUndefined();
   });
 
-  test('peppol-id is composite and names its five components in order, each sourced by the Peppol list at certain (DEC-036, plan 03-12)', () => {
+  test('peppol-id is composite and names its five components in order, each sourced by the Peppol list at likely (DEC-036, DEC-053, plan 03-12)', () => {
     const peppol = scheme('peppol-id');
     expect(peppol.kind).toBe('composite');
     const components = listOf(peppol.components);
@@ -572,19 +572,19 @@ describe('peppol-id, gln and GLOBAL (DAT-02, plan 03-10, DEC-033, DEC-036, DEC-0
     ]);
     for (const component of components) {
       expect(component).toEqual(
-        expect.objectContaining({ source: 'peppol-code-lists-9-7', certainty: 'certain' }),
+        expect.objectContaining({ source: 'peppol-code-lists-9-7', certainty: 'likely' }),
       );
     }
   });
 
-  test('peppol-id has one contains relation per component target, certain and sourced to the Peppol list (kbo added in plan 03-12)', () => {
+  test('peppol-id has one contains relation per component target, likely and sourced to the Peppol list (DEC-053; kbo added in plan 03-12)', () => {
     const relations = listOf(scheme('peppol-id').relations);
     expect(relations).toEqual(
       ['kvk-number', 'oin', 'vat-nl', 'gln', 'kbo'].map((target) =>
         expect.objectContaining({
           kind: 'contains',
           target,
-          certainty: 'certain',
+          certainty: 'likely',
           source: 'peppol-code-lists-9-7',
         }),
       ),
@@ -1560,5 +1560,55 @@ describe('Peppol EAS codes held at likely (DEC-052)', () => {
       'oin:bare:0190',
     ]);
     expect(scheme('oin').sources).toEqual({ default: 'oin-stelsel-2-1-0' });
+  });
+});
+
+describe('Peppol code list statements held at likely (DEC-052, DEC-053)', () => {
+  const PEPPOL = 'peppol-code-lists-9-7';
+
+  /** Every object node citing the Peppol list as `<scheme id><pointer>:<certainty>`. */
+  function walk(id: string, value: unknown, pointer: string, out: string[]): void {
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        walk(id, item, `${pointer}/${index}`, out);
+      });
+      return;
+    }
+    if (value !== null && typeof value === 'object') {
+      const node = value as Json;
+      if (node.source === PEPPOL) out.push(`${id}${pointer}:${String(node.certainty)}`);
+      for (const [key, child] of Object.entries(node)) walk(id, child, `${pointer}/${key}`, out);
+    }
+  }
+
+  function peppolCitations(): string[] {
+    const out: string[] = [];
+    for (const s of loadAll('schemes')) walk(s.id, s, '', out);
+    return out;
+  }
+
+  test('no statement in model/schemes that cites peppol-code-lists-9-7 is at certain (DEC-052, DEC-053)', () => {
+    const citations = peppolCitations();
+    expect(citations.filter((entry) => entry.endsWith(':certain'))).toEqual([]);
+    expect(citations).toContain('vat-nl/peppol_eas:likely');
+    expect(citations).toContain('oin/peppol_eas:likely');
+  });
+
+  test('the ten peppol-id statements on the Peppol list are its components and contains relations, each at likely; the rest of peppol-id is unchanged (DEC-053)', () => {
+    const own = peppolCitations().filter(
+      (entry) =>
+        entry.startsWith('peppol-id/components/') || entry.startsWith('peppol-id/relations/'),
+    );
+    expect(own).toEqual([
+      ...[0, 1, 2, 3, 4].map((i) => `peppol-id/components/${i}:likely`),
+      ...[0, 1, 2, 3, 4].map((i) => `peppol-id/relations/${i}:likely`),
+    ]);
+    const peppol = scheme('peppol-id');
+    expect(peppol.kind).toBe('composite');
+    expect(peppol.sources).toEqual({ default: PEPPOL });
+    expect(peppol.issuer).toEqual({ value: 'openpeppol', source: PEPPOL, certainty: 'likely' });
+    expect(peppol.validation_source).toEqual(
+      expect.objectContaining({ source: 'peppol-test-tool', certainty: 'certain' }),
+    );
   });
 });

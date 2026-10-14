@@ -11,7 +11,7 @@ Each row names the source actually read, the status of the item and the certaint
 | Item | Status | Source | Date checked |
 |------|--------|--------|--------------|
 | ICD 0106 (KVK number) | not confirmed by the ISO 6523 registry (unreadable, its certificate has expired); stated by the Peppol code list; in the model at likely (long form) | peppol-code-lists-9-7 | 2026-10-12 |
-| ICD 0190 (OIN) | confirmed by the scheme owner's standard (OIN Stelsel 2.1.0, section 3.12.1; the ISO 6523 registry was not read); in the model at certain | oin-stelsel-2-1-0, peppol-code-lists-9-7 | 2026-10-12 |
+| ICD 0190 (OIN) | confirmed by the scheme owner's standard (OIN Stelsel 2.1.0, section 3.12.1; the ISO 6523 registry was not read); in the model at certain as `iso6523_icd` of `oin`, and the `peppol-id` component 0190 and its `contains` relation to `oin` at likely, because they cite the Peppol code list only (DEC-053) | oin-stelsel-2-1-0, peppol-code-lists-9-7 | 2026-10-12 |
 | ICD 0088 (GLN) | not confirmed by the ISO 6523 registry (unreadable, its certificate has expired); stated by the Peppol code list; in the model at likely (long form) | peppol-code-lists-9-7 | 2026-10-12 |
 | ICD 0060 (D-U-N-S) | not confirmed by the ISO 6523 registry (unreadable, its certificate has expired); stated by the Peppol code list; in the model at likely (long form) | peppol-code-lists-9-7 | 2026-10-12 |
 | ICD 0199 (LEI) | not confirmed by the ISO 6523 registry (unreadable, its certificate has expired); stated by the Peppol code list; in the model at likely (long form) | peppol-code-lists-9-7 | 2026-10-12 |
