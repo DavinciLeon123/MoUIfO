@@ -442,6 +442,8 @@ REST API, a dedicated chat with a language model (for example Jev by TypeSafe AI
 
 > Amended by DECISIONS.md DEC-048: `kbo` is a light scheme without the `equivalent-in` relation to `kvk-number` and without a checksum entry, because no readable official Belgian source supports either; both gaps are logged.
 
+> Amended by DECISIONS.md DEC-051: for now, DEC-043 with its two primary-row exceptions (the Digital Single Market communication PDF of cell O13 and the Logius landing page of cell H15) is accepted as registering every primary hyperlink URL, and registering or replacing both is deferred and logged in `docs/gaps.md`.
+
 **Source:** `sources/Analysis of Unique IDs for companies.xlsx` (tab *Overzicht UID* = landscape table, *Persistence*, *KvK in NL en buitenland*). Also deliver a conversion script `tools/import/excel.ts`, or transfer the values by hand. In both cases record `source: landscape-v1.2` per field.
 
 **Starter set of 14 schemes:** `kvk-number`, `kvk-establishment-number` (establishment number), `oin`, `rsin`, `vat` (generic) plus `vat-nl`, `roo`, `peppol-id`, `lei`, `gln`, `euid`, `eori`, `duns`, `bsn`, `fi-number`.
@@ -556,6 +558,8 @@ REST API, a dedicated chat with a language model (for example Jev by TypeSafe AI
 > Amended by DECISIONS.md DEC-047: the Dutch EUID form `NL.KVK.` plus the 8-digit KVK number is admitted at certainty `possible`, sourced to the workbook only.
 
 > Amended by DECISIONS.md DEC-049: each Appendix B item is verified in a table in `docs/gaps.md`; an item no source states is omitted and logged, and the Dutch sole-proprietor VAT mod 97 entry is modelled at `likely`.
+
+> Amended by DECISIONS.md DEC-051: for now, an item stated by one named source but not confirmed by a primary source may enter the model at the certainty DEC-049 gives it (`likely` or `possible`), and confirming each item against its primary source is deferred and logged in `docs/gaps.md`.
 
 These are commonly used values. They must first be confirmed with an authoritative source in `model/sources/` before they enter the model.
 
