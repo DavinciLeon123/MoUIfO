@@ -13,7 +13,7 @@ availability:
 peppol_eas:
   value: "9944"
   source: peppol-code-lists-9-7
-  certainty: certain
+  certainty: likely
 sources:
   default: ondernemersplein-nummers-voor-de-btw
 scope:

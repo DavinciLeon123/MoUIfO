@@ -297,7 +297,7 @@ describe('vat-nl and the VAT to EORI chain (DAT-01, DEC-003, DEC-004, DEC-050)',
   });
 });
 
-describe('vat-nl sole-proprietor mod 97 entry, Peppol code and statements (DAT-01, DEC-004, DEC-036, DEC-049)', () => {
+describe('vat-nl sole-proprietor mod 97 entry, Peppol code and statements (DAT-01, DEC-004, DEC-036, DEC-049, DEC-052)', () => {
   test('accepts the legal-person value by elfproef and the official example by mod 97; rejects a wrong check digit', () => {
     const format = formatOf(scheme('vat-nl'));
     expect(checkValue(format, 'NL001469630B01')).toEqual({
@@ -340,12 +340,12 @@ describe('vat-nl sole-proprietor mod 97 entry, Peppol code and statements (DAT-0
     expect(source.date).toBe('2026-10-12');
   });
 
-  test('peppol_eas is 9944 (certain, peppol-code-lists-9-7) and vat-nl has no iso6523_icd (DEC-036)', () => {
+  test('peppol_eas is 9944 (likely, long form, peppol-code-lists-9-7) and vat-nl has no iso6523_icd (DEC-036, DEC-052)', () => {
     const vat = scheme('vat-nl');
     expect(vat.peppol_eas).toEqual({
       value: '9944',
       source: 'peppol-code-lists-9-7',
-      certainty: 'certain',
+      certainty: 'likely',
     });
     expect(vat.iso6523_icd).toBeUndefined();
   });

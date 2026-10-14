@@ -184,6 +184,8 @@ Monorepo with npm workspaces. Node LTS. No backend, database or telemetry.
 
 > Amended by DECISIONS.md DEC-050: the EORI levels and the associated VAT number of a Dutch EORI or RSIN are not modelled or asserted, because no source states them, and are logged in `docs/gaps.md`.
 
+> Amended by DECISIONS.md DEC-052: a `peppol_eas` code whose only source is the Peppol code list is held at certainty `likely` in the long form, not at `certain`, and the meaning of the field (DEC-036) is unchanged.
+
 Validate with a JSON Schema in `tools/validate`. Fields:
 
 ```yaml
@@ -560,6 +562,8 @@ REST API, a dedicated chat with a language model (for example Jev by TypeSafe AI
 > Amended by DECISIONS.md DEC-049: each Appendix B item is verified in a table in `docs/gaps.md`; an item no source states is omitted and logged, and the Dutch sole-proprietor VAT mod 97 entry is modelled at `likely`.
 
 > Amended by DECISIONS.md DEC-051: for now, an item stated by one named source but not confirmed by a primary source may enter the model at the certainty DEC-049 gives it (`likely` or `possible`), and confirming each item against its primary source is deferred and logged in `docs/gaps.md`.
+
+> Amended by DECISIONS.md DEC-052: the Peppol EAS codes, 9944 included, are stated only by the Peppol code list and enter the model at certainty `likely`, as the ICD codes that list alone states do.
 
 These are commonly used values. They must first be confirmed with an authoritative source in `model/sources/` before they enter the model.
 
