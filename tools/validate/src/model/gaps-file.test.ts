@@ -164,6 +164,29 @@ describe('Appendix B verification (DEC-049)', () => {
     expect(row?.status.startsWith('confirmed')).toBe(true);
     expect(row?.source).toContain('oin-stelsel-2-1-0');
   });
+
+  test('the rows of the five peppol-id prefixes put the component and its contains relation at likely (DEC-053)', () => {
+    const expected = [
+      ['ICD 0106', '0106', 'kvk-number'],
+      ['ICD 0190', '0190', 'oin'],
+      ['ICD 0088', '0088', 'gln'],
+      ['ICD 0208', '0208', 'kbo'],
+      ['Peppol EAS 9944', '9944', 'vat-nl'],
+    ] as const;
+    const rows = tableRows(sectionBody(VERIFICATION));
+    for (const [prefix, code, scheme] of expected) {
+      const row = rows.find((candidate) => candidate.item.startsWith(`${prefix} `));
+      expect(row, prefix).toBeDefined();
+      expect(row?.status, prefix).toContain(
+        `the \`peppol-id\` component ${code} and its \`contains\` relation to \`${scheme}\` at likely`,
+      );
+      expect(row?.status, prefix).toContain('DEC-053');
+    }
+    const oin = rows.find((candidate) => candidate.item.startsWith('ICD 0190'));
+    expect(oin?.status.startsWith('confirmed')).toBe(true);
+    expect(oin?.status).toContain('in the model at certain as `iso6523_icd` of `oin`');
+    for (const row of rows) expect(row.status, row.item).not.toMatch(/component[^;.]* at certain/);
+  });
 });
 
 describe('End-of-phase human check', () => {
@@ -261,5 +284,27 @@ describe('the EAS certainty in the gap entries (DEC-052)', () => {
     const body = sectionBody('ICD codes stated only by the Peppol code list');
     expect(body).toContain('DEC-052');
     expect(body).not.toMatch(/EAS code[^.]*\bis certain\b/);
+  });
+});
+
+describe('the peppol-id certainty in the gap entries (DEC-053)', () => {
+  test('the DAT-06 reading entry lists the peppol-id components and contains relations at likely', () => {
+    const body = sectionBody(
+      'DAT-06 reading: items in the model without a primary confirmation (DEC-051)',
+    );
+    expect(body).toContain(
+      'the `peppol-id` components 0106, 0190, 9944, 0088 and 0208 and their `contains` relations at likely (DEC-053, `peppol-code-lists-9-7` only)',
+    );
+    expect(body).toContain('supersedes DEC-053');
+    expect(body).not.toMatch(/components[^.]* at certain/);
+  });
+
+  test('the ICD entry names the peppol-id components and their contains relations at likely and cites DEC-053', () => {
+    const body = sectionBody('ICD codes stated only by the Peppol code list');
+    expect(body).toContain('DEC-053');
+    expect(body).toContain(
+      'their `contains` relations to `kvk-number`, `oin`, `vat-nl`, `gln` and `kbo`',
+    );
+    expect(body).not.toMatch(/components[^.]* at certain/);
   });
 });
