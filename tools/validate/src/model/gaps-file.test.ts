@@ -145,6 +145,18 @@ describe('Appendix B verification (DEC-049)', () => {
     expect(plain).toEqual([]);
   });
 
+  test('every Peppol EAS row puts its codes in the model at likely, in the long form (DEC-052)', () => {
+    const rows = tableRows(sectionBody(VERIFICATION)).filter((row) =>
+      row.item.startsWith('Peppol EAS'),
+    );
+    expect(rows).toHaveLength(2);
+    for (const row of rows) {
+      expect(row.status, row.item).toContain('in the model at likely (long form)');
+      expect(row.status, row.item).toContain('DEC-052');
+      expect(row.status, row.item).not.toMatch(/\bat certain\b/);
+    }
+  });
+
   test('only ICD 0190 among the ICD rows is confirmed by its standard', () => {
     const row = tableRows(sectionBody(VERIFICATION)).find((candidate) =>
       candidate.item.startsWith('ICD 0190'),
@@ -233,4 +245,21 @@ describe('the topics the phase must log', () => {
       expect(headings.some((heading) => pattern.test(heading))).toBe(true);
     });
   }
+});
+
+describe('the EAS certainty in the gap entries (DEC-052)', () => {
+  test('the DAT-06 reading entry holds the Peppol EAS codes at likely', () => {
+    const body = sectionBody(
+      'DAT-06 reading: items in the model without a primary confirmation (DEC-051)',
+    );
+    expect(body).toContain('the Peppol EAS codes at likely as `peppol_eas`');
+    expect(body).toContain('DEC-052');
+    expect(body).not.toMatch(/EAS codes (at|sit at) certain/);
+  });
+
+  test('the ICD entry states the other EAS codes at likely and cites DEC-052', () => {
+    const body = sectionBody('ICD codes stated only by the Peppol code list');
+    expect(body).toContain('DEC-052');
+    expect(body).not.toMatch(/EAS code[^.]*\bis certain\b/);
+  });
 });
