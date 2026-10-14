@@ -400,7 +400,7 @@ describe('kvk-number and the RSIN prerequisite (DAT-01, DEC-036, research Pitfal
     );
   });
 
-  test('iso6523_icd 0106 is likely (stated only by the Peppol list); peppol_eas 0106 is certain', () => {
+  test('iso6523_icd 0106 and peppol_eas 0106 are both likely, stated only by the Peppol list (DEC-052)', () => {
     const kvk = scheme('kvk-number');
     expect(kvk.iso6523_icd).toEqual({
       value: '0106',
@@ -410,7 +410,7 @@ describe('kvk-number and the RSIN prerequisite (DAT-01, DEC-036, research Pitfal
     expect(kvk.peppol_eas).toEqual({
       value: '0106',
       source: 'peppol-code-lists-9-7',
-      certainty: 'certain',
+      certainty: 'likely',
     });
   });
 
@@ -623,7 +623,7 @@ describe('peppol-id, gln and GLOBAL (DAT-02, plan 03-10, DEC-033, DEC-036, DEC-0
     ]);
   });
 
-  test('gln has ICD 0088 at likely and EAS 0088 at certain, and its level location is certain from the GS1 Nederland page', () => {
+  test('gln has ICD 0088 and EAS 0088 at likely (DEC-052), and its level location is certain from the GS1 Nederland page', () => {
     const gln = scheme('gln');
     expect(gln.iso6523_icd).toEqual({
       value: '0088',
@@ -633,7 +633,7 @@ describe('peppol-id, gln and GLOBAL (DAT-02, plan 03-10, DEC-033, DEC-036, DEC-0
     expect(gln.peppol_eas).toEqual({
       value: '0088',
       source: 'peppol-code-lists-9-7',
-      certainty: 'certain',
+      certainty: 'likely',
     });
     expect(listOf(gln.level)).toEqual(
       expect.arrayContaining([
@@ -1112,7 +1112,7 @@ describe('lei, the LEI with ISO 7064 mod 97-10 and its registration-authority re
     ]);
   });
 
-  test('is a GLOBAL identifier issued by the local-operating-unit class, with its ICD 0199 at likely and EAS 0199 from the default source', () => {
+  test('is a GLOBAL identifier issued by the local-operating-unit class, with its ICD 0199 and EAS 0199 at likely in the long form (DEC-052)', () => {
     const lei = scheme('lei');
     expect(lei.jurisdiction).toEqual({
       value: 'GLOBAL',
@@ -1125,7 +1125,11 @@ describe('lei, the LEI with ISO 7064 mod 97-10 and its registration-authority re
       source: 'peppol-code-lists-9-7',
       certainty: 'likely',
     });
-    expect(lei.peppol_eas).toBe('0199');
+    expect(lei.peppol_eas).toEqual({
+      value: '0199',
+      source: 'peppol-code-lists-9-7',
+      certainty: 'likely',
+    });
     expect(lei.sources).toEqual({ default: 'peppol-code-lists-9-7' });
   });
 
@@ -1212,7 +1216,7 @@ describe('duns, the D-U-N-S number with its Peppol check statement, and the last
     expect(checkValue(elfproef, '001469630').accepted).toBe(true);
   });
 
-  test('ICD 0060 is likely and EAS 0060 is certain, both from the Peppol list; the default source is the D&B page', () => {
+  test('ICD 0060 and EAS 0060 are likely, both from the Peppol list (DEC-052); the default source is the D&B page', () => {
     const duns = scheme('duns');
     expect(duns.sources).toEqual({ default: 'dnb-duns' });
     expect(duns.iso6523_icd).toEqual({
@@ -1223,7 +1227,7 @@ describe('duns, the D-U-N-S number with its Peppol check statement, and the last
     expect(duns.peppol_eas).toEqual({
       value: '0060',
       source: 'peppol-code-lists-9-7',
-      certainty: 'certain',
+      certainty: 'likely',
     });
   });
 
@@ -1418,7 +1422,7 @@ describe('kbo, the Belgian enterprise number as a light scheme (DAT-03, plan 03-
     expect(checkValue(format, '01234567').accepted).toBe(false);
   });
 
-  test('the ICD 0208 is likely and the EAS 0208 is certain, both long form from the Peppol list (the default source is the KBO page)', () => {
+  test('the ICD 0208 and the EAS 0208 are likely, both long form from the Peppol list (DEC-052; the default source is the KBO page)', () => {
     const kbo = scheme('kbo');
     expect(kbo.iso6523_icd).toEqual({
       value: '0208',
@@ -1428,7 +1432,7 @@ describe('kbo, the Belgian enterprise number as a light scheme (DAT-03, plan 03-
     expect(kbo.peppol_eas).toEqual({
       value: '0208',
       source: 'peppol-code-lists-9-7',
-      certainty: 'certain',
+      certainty: 'likely',
     });
   });
 
@@ -1518,5 +1522,43 @@ describe('docs/gaps.md entries of plan 03-12 (DAT-03, DEC-019, DEC-048)', () => 
   test('the ICD entry names 0208 beside the other Peppol-only codes; the levels entry names kbo', () => {
     expect(gapSection('## ICD codes stated only by the Peppol code list')).toContain('`0208`');
     expect(gapSection('## Levels and roles without a source')).toContain('`kbo` declares');
+  });
+});
+
+describe('Peppol EAS codes held at likely (DEC-052)', () => {
+  /** A header-code field as `<id>:bare:<value>` (bare) or `<id>:<value>:<source>:<certainty>` (long form). */
+  function codeForms(field: 'iso6523_icd' | 'peppol_eas'): string[] {
+    return loadAll('schemes')
+      .filter((s) => s[field] !== undefined && s[field] !== null)
+      .map((s) => {
+        const code = s[field];
+        if (typeof code === 'string') return `${s.id}:bare:${code}`;
+        const long = code as Json;
+        return `${s.id}:${String(long.value)}:${String(long.source)}:${String(long.certainty)}`;
+      });
+  }
+
+  test('every peppol_eas in model/schemes is the long form at likely, sourced only to the Peppol list (DEC-052)', () => {
+    expect(codeForms('peppol_eas')).toEqual([
+      'duns:0060:peppol-code-lists-9-7:likely',
+      'gln:0088:peppol-code-lists-9-7:likely',
+      'kbo:0208:peppol-code-lists-9-7:likely',
+      'kvk-number:0106:peppol-code-lists-9-7:likely',
+      'lei:0199:peppol-code-lists-9-7:likely',
+      'oin:0190:peppol-code-lists-9-7:likely',
+      'vat-nl:9944:peppol-code-lists-9-7:likely',
+    ]);
+  });
+
+  test("the ICD codes are unchanged: the five Peppol-only codes at likely and oin's 0190 bare on oin-stelsel-2-1-0 (DEC-052)", () => {
+    expect(codeForms('iso6523_icd')).toEqual([
+      'duns:0060:peppol-code-lists-9-7:likely',
+      'gln:0088:peppol-code-lists-9-7:likely',
+      'kbo:0208:peppol-code-lists-9-7:likely',
+      'kvk-number:0106:peppol-code-lists-9-7:likely',
+      'lei:0199:peppol-code-lists-9-7:likely',
+      'oin:bare:0190',
+    ]);
+    expect(scheme('oin').sources).toEqual({ default: 'oin-stelsel-2-1-0' });
   });
 });

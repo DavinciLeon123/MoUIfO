@@ -20,7 +20,10 @@ iso6523_icd:
   value: "0199"
   source: peppol-code-lists-9-7
   certainty: likely
-peppol_eas: "0199"
+peppol_eas:
+  value: "0199"
+  source: peppol-code-lists-9-7
+  certainty: likely
 sources:
   default: peppol-code-lists-9-7
 scope:

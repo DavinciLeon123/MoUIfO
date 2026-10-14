@@ -15,7 +15,7 @@ iso6523_icd: "0190"
 peppol_eas:
   value: "0190"
   source: peppol-code-lists-9-7
-  certainty: certain
+  certainty: likely
 sources:
   default: oin-stelsel-2-1-0
 scope:

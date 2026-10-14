@@ -15,7 +15,7 @@ iso6523_icd:
 peppol_eas:
   value: "0208"
   source: peppol-code-lists-9-7
-  certainty: certain
+  certainty: likely
 sources:
   default: kbo-public-search
 scope:
