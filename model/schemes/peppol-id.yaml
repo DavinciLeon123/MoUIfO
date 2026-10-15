@@ -21,49 +21,49 @@ notes:
 components:
   - prefix: "0106"
     scheme: kvk-number
-    certainty: certain
+    certainty: likely
     source: peppol-code-lists-9-7
     note: "NL:KVK, Peppol Code Lists v9.7"
   - prefix: "0190"
     scheme: oin
-    certainty: certain
+    certainty: likely
     source: peppol-code-lists-9-7
     note: "NL:OINO, Peppol Code Lists v9.7"
   - prefix: "9944"
     scheme: vat-nl
-    certainty: certain
+    certainty: likely
     source: peppol-code-lists-9-7
     note: "NL:VAT, Peppol Code Lists v9.7"
   - prefix: "0088"
     scheme: gln
-    certainty: certain
+    certainty: likely
     source: peppol-code-lists-9-7
     note: "GLN, Peppol Code Lists v9.7"
   - prefix: "0208"
     scheme: kbo
-    certainty: certain
+    certainty: likely
     source: peppol-code-lists-9-7
     note: "BE:EN, Peppol Code Lists v9.7"
 relations:
   - kind: contains
     target: kvk-number
-    certainty: certain
+    certainty: likely
     source: peppol-code-lists-9-7
   - kind: contains
     target: oin
-    certainty: certain
+    certainty: likely
     source: peppol-code-lists-9-7
   - kind: contains
     target: vat-nl
-    certainty: certain
+    certainty: likely
     source: peppol-code-lists-9-7
   - kind: contains
     target: gln
-    certainty: certain
+    certainty: likely
     source: peppol-code-lists-9-7
   - kind: contains
     target: kbo
-    certainty: certain
+    certainty: likely
     source: peppol-code-lists-9-7
 format:
   patterns:

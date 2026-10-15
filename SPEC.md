@@ -186,6 +186,8 @@ Monorepo with npm workspaces. Node LTS. No backend, database or telemetry.
 
 > Amended by DECISIONS.md DEC-052: a `peppol_eas` code whose only source is the Peppol code list is held at certainty `likely` in the long form, not at `certain`, and the meaning of the field (DEC-036) is unchanged.
 
+> Amended by DECISIONS.md DEC-053: the `components` of a composite scheme and its `contains` relations whose only source is the Peppol code list are held at certainty `likely`, not at `certain`, as the `peppol_eas` codes are (DEC-052).
+
 Validate with a JSON Schema in `tools/validate`. Fields:
 
 ```yaml
@@ -564,6 +566,8 @@ REST API, a dedicated chat with a language model (for example Jev by TypeSafe AI
 > Amended by DECISIONS.md DEC-051: for now, an item stated by one named source but not confirmed by a primary source may enter the model at the certainty DEC-049 gives it (`likely` or `possible`), and confirming each item against its primary source is deferred and logged in `docs/gaps.md`.
 
 > Amended by DECISIONS.md DEC-052: the Peppol EAS codes, 9944 included, are stated only by the Peppol code list and enter the model at certainty `likely`, as the ICD codes that list alone states do.
+
+> Amended by DECISIONS.md DEC-053: the `peppol-id` components with the prefixes 0106, 0190, 9944, 0088 and 0208, and their `contains` relations, are stated only by the Peppol code list; they enter the model at certainty `likely`, as the EAS codes and the ICD codes that list alone states do.
 
 These are commonly used values. They must first be confirmed with an authoritative source in `model/sources/` before they enter the model.
 
