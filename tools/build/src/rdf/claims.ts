@@ -1,6 +1,6 @@
-import type { Scheme } from '@uio/engine';
+import type { Authority, Jurisdiction, Scheme, Text, VocabularyMember } from '@uio/engine';
 import { DataFactory, type Literal, type NamedNode } from 'n3';
-import { ADMS, DCT, type Iris, RDFS, XSD } from './iris.ts';
+import { ADMS, DCT, type Iris, RDFS, SKOS, XSD } from './iris.ts';
 import { jsonLiteral } from './literals.ts';
 
 const { namedNode, literal } = DataFactory;
@@ -397,4 +397,100 @@ export function schemeClaims(scheme: Scheme, iris: Iris): ClaimInstance[] {
     ...ruleClaims(scheme, iris),
   );
   return claims;
+}
+
+/** A text object as one language-tagged `skos:note` triple per language, outside the hash. */
+function noteExtras(text: Text | undefined): Extra[] {
+  return Object.entries(text ?? {}).flatMap(([language, value]) =>
+    typeof value === 'string'
+      ? [{ predicate: `${SKOS}note`, object: literal(value, language) }]
+      : [],
+  );
+}
+
+/** The instance of an authority class and its jurisdiction, at the instance's source and certainty. */
+export function authorityClaims(authority: Authority, iris: Iris): ClaimInstance[] {
+  if (authority.kind !== 'instance') return [];
+  const { source, certainty } = authority;
+  if (source === undefined || certainty === undefined) return [];
+  const subjectIri = iris.authority(authority.id);
+  const claims: ClaimInstance[] = [];
+  if (authority.instance_of !== undefined) {
+    const object = iris.authority(authority.instance_of);
+    claims.push(
+      claimOf(authority.id, subjectIri, {
+        claim: 'instance-of',
+        predicate: iris.def('instanceOf'),
+        object: namedNode(object),
+        payload: object,
+        certainty,
+        source,
+      }),
+    );
+  }
+  if (authority.jurisdiction !== undefined) {
+    const object = iris.jurisdiction(authority.jurisdiction);
+    claims.push(
+      claimOf(authority.id, subjectIri, {
+        claim: 'jurisdiction',
+        predicate: `${DCT}spatial`,
+        object: namedNode(object),
+        payload: object,
+        certainty,
+        source,
+      }),
+    );
+  }
+  return claims;
+}
+
+/** A jurisdiction's parents and its optional country-table entry (DEC-057). */
+export function jurisdictionClaims(jurisdiction: Jurisdiction, iris: Iris): ClaimInstance[] {
+  const subjectIri = iris.jurisdiction(jurisdiction.id);
+  const claims: ClaimInstance[] = (jurisdiction.part_of ?? []).map((entry) => {
+    const object = iris.jurisdiction(entry.jurisdiction);
+    return claimOf(jurisdiction.id, subjectIri, {
+      claim: 'part-of',
+      predicate: `${DCT}isPartOf`,
+      object: namedNode(object),
+      payload: object,
+      extra: noteExtras(entry.note),
+      certainty: entry.certainty,
+      source: entry.source,
+    });
+  });
+  const table = jurisdiction.authority_table;
+  if (table !== undefined) {
+    claims.push(
+      claimOf(jurisdiction.id, subjectIri, {
+        claim: 'authority-table',
+        predicate: `${SKOS}exactMatch`,
+        object: namedNode(table.iri),
+        payload: table.iri,
+        extra: noteExtras(table.note),
+        certainty: table.certainty,
+        source: table.source,
+      }),
+    );
+  }
+  return claims;
+}
+
+/** The jurisdiction of a country-prefix entry; the subject is the entry itself. */
+export function countryPrefixClaims(member: VocabularyMember, iris: Iris): ClaimInstance[] {
+  const { prefix, jurisdiction, source, certainty } = member;
+  if (prefix === undefined || jurisdiction === undefined) return [];
+  if (source === undefined || certainty === undefined) return [];
+  const object = iris.jurisdiction(jurisdiction);
+  return [
+    claimOf('country-prefix', iris.member('country-prefix', prefix), {
+      claim: 'jurisdiction',
+      predicate: `${DCT}spatial`,
+      object: namedNode(object),
+      payload: object,
+      extra: noteExtras(member.note),
+      certainty,
+      source,
+    }),
+  ];
 }

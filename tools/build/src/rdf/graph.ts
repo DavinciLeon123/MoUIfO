@@ -1,7 +1,13 @@
 import type { Model } from '@uio/engine';
 import { DataFactory, type Literal, type NamedNode, type Quad } from 'n3';
 import type { Problem } from 'uio-config';
-import { type ClaimInstance, schemeClaims } from './claims.ts';
+import {
+  authorityClaims,
+  type ClaimInstance,
+  countryPrefixClaims,
+  jurisdictionClaims,
+  schemeClaims,
+} from './claims.ts';
 import { conditionNode } from './conditions.ts';
 import { createMinter } from './hash.ts';
 import { checkExternalIri, DCT, makeIris, PROV, RDF, SKOS } from './iris.ts';
@@ -78,7 +84,12 @@ function sortedUnique(quads: Quad[]): Quad[] {
  */
 function externalIriProblems(model: Model): Problem[] {
   const problems: Problem[] = [];
-  const check = (kind: 'sources' | 'schemes', id: string, field: string, value?: string): void => {
+  const check = (
+    kind: 'sources' | 'schemes' | 'jurisdictions',
+    id: string,
+    field: string,
+    value?: string,
+  ): void => {
     if (value === undefined) return;
     const reason = checkExternalIri(value);
     if (reason === undefined) return;
@@ -98,6 +109,33 @@ function externalIriProblems(model: Model): Problem[] {
     }
     check('schemes', scheme.id, 'validation_source url', scheme.validation_source?.url);
   }
+  for (const jurisdiction of Object.values(model.jurisdictions)) {
+    check(
+      'jurisdictions',
+      jurisdiction.id,
+      'authority_table iri',
+      jurisdiction.authority_table?.iri,
+    );
+  }
+  return problems;
+}
+
+/**
+ * A vocabulary member that carries a source is a claim; only the country-prefix entries have a
+ * claim kind, so any other sourced member would silently vanish and fails the build (T-04-12).
+ */
+function unmappedMemberProblems(model: Model): Problem[] {
+  const problems: Problem[] = [];
+  for (const vocabulary of Object.values(model.vocab)) {
+    if (vocabulary.id === 'country-prefix') continue;
+    for (const member of vocabulary.values) {
+      if (member.source === undefined) continue;
+      problems.push({
+        file: `model/vocab/${vocabulary.id}.yaml`,
+        message: `vocab/${vocabulary.id}/${member.id ?? member.prefix}: a sourced vocabulary member has no claim kind in tools/build/src/rdf/claims.ts`,
+      });
+    }
+  }
   return problems;
 }
 
@@ -107,7 +145,7 @@ function externalIriProblems(model: Model): Problem[] {
  */
 export function buildGraph(model: Model, namespace: string): Graph {
   const iris = makeIris(namespace);
-  const iriProblems = externalIriProblems(model);
+  const iriProblems = [...externalIriProblems(model), ...unmappedMemberProblems(model)];
   if (iriProblems.length > 0) return { quads: [], problems: iriProblems };
   const minter = createMinter(iris);
   const quads: Quad[] = [];
@@ -136,6 +174,15 @@ export function buildGraph(model: Model, namespace: string): Graph {
 
   for (const scheme of Object.values(model.schemes)) {
     for (const claim of schemeClaims(scheme, iris)) addClaim(claim);
+  }
+  for (const authority of Object.values(model.authorities)) {
+    for (const claim of authorityClaims(authority, iris)) addClaim(claim);
+  }
+  for (const jurisdiction of Object.values(model.jurisdictions)) {
+    for (const claim of jurisdictionClaims(jurisdiction, iris)) addClaim(claim);
+  }
+  for (const member of model.vocab['country-prefix']?.values ?? []) {
+    for (const claim of countryPrefixClaims(member, iris)) addClaim(claim);
   }
 
   quads.push(...structureQuads(model, iris));

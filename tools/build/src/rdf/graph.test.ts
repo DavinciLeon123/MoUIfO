@@ -5,6 +5,7 @@ import { loadValidatedModel } from 'uio-validate';
 import { describe, expect, test } from 'vitest';
 import { normalise } from '../model/normalise.ts';
 import { buildGraph, objectKey } from './graph.ts';
+import { canon } from './hash.ts';
 
 const namespace = loadConfig().namespace;
 
@@ -71,6 +72,10 @@ const subjectsOfType = (iri: string): string[] =>
     .map((q) => q.subject.value);
 
 const statements = subjectsOfType(def('Statement'));
+/** The Statements whose subject is a scheme (the jurisdiction slug also exists for other subjects). */
+const schemeStatements = statements.filter((iri) =>
+  valuesOf(iri, def('subject')).some((subject) => subject.startsWith(`${namespace}scheme/`)),
+);
 const schemes = Object.values(model.schemes);
 
 describe('buildGraph header claims', () => {
@@ -87,7 +92,7 @@ describe('buildGraph header claims', () => {
   test.for(counts)(
     'the Statements of %s equal the count derived from the model',
     ([claim, has]) => {
-      const found = statements.filter((iri) =>
+      const found = schemeStatements.filter((iri) =>
         new RegExp(`/statement/[^/]+/${claim}-[0-9a-f]{8}$`).test(iri),
       );
       expect(found).toHaveLength(schemes.filter(has).length);
@@ -98,7 +103,7 @@ describe('buildGraph header claims', () => {
   test('the header claim slugs account for exactly the header Statements', () => {
     const expected = counts.reduce((sum, [, has]) => sum + schemes.filter(has).length, 0);
     const slugs = counts.map(([claim]) => claim).join('|');
-    const header = statements.filter((iri) =>
+    const header = schemeStatements.filter((iri) =>
       new RegExp(`/statement/[^/]+/(${slugs})-[0-9a-f]{8}$`).test(iri),
     );
     expect(header).toHaveLength(expected);
@@ -251,5 +256,119 @@ describe('buildGraph shape rules', () => {
     for (const q of quads)
       if (!first.has(q.subject.value)) first.set(q.subject.value, q.predicate.value);
     for (const predicate of first.values()) expect(predicate).toBe(RDF_TYPE);
+  });
+});
+
+describe('buildGraph Statement count per claim kind', () => {
+  const entriesOf = (scheme: Scheme): { condition?: unknown }[] => [
+    ...(scheme.format?.patterns ?? []),
+    ...(scheme.format?.checksum ?? []),
+    ...(scheme.level ?? []),
+    ...(scheme.roles ?? []),
+    ...(scheme.applicability ?? []),
+    ...(scheme.persistence ?? []),
+    ...(scheme.relations ?? []),
+    ...(scheme.legal_basis ?? []),
+    ...(scheme.validation_source ? [scheme.validation_source] : []),
+    ...(scheme.mandatory ? [scheme.mandatory] : []),
+    ...(scheme.trust ? [scheme.trust] : []),
+    ...(scheme.components ?? []),
+    ...(scheme.context_from?.issuing_country ? [scheme.context_from.issuing_country] : []),
+    ...(scheme.rules ?? []),
+  ];
+  const trustFields = [
+    ['trust-legal-basis', 'legal_basis'],
+    ['trust-registration-quality', 'registration_quality'],
+    ['trust-verifiability', 'verifiability'],
+    ['trust-crosswalks', 'crosswalks'],
+    ['trust-lifecycle', 'lifecycle'],
+  ] as const;
+  const sum = (values: number[]): number => values.reduce((a, b) => a + b, 0);
+  const ofSchemes = (count: (scheme: Scheme) => number): number => sum(schemes.map(count));
+  const authorities = Object.values(model.authorities).filter((a) => a.kind === 'instance');
+  const jurisdictions = Object.values(model.jurisdictions);
+  const prefixes = model.vocab['country-prefix']?.values ?? [];
+
+  /** The expected Statements per `<subject kind>:<claim slug>`, derived from the model. */
+  const expected: Record<string, number> = {
+    'scheme:issuer': schemes.length,
+    'scheme:jurisdiction': schemes.length,
+    'scheme:kind': schemes.length,
+    'scheme:abbreviation': ofSchemes((s) => (s.abbreviation ? 1 : 0)),
+    'scheme:availability': ofSchemes((s) => (s.availability ? 1 : 0)),
+    'scheme:iso6523-icd': ofSchemes((s) => (s.iso6523_icd?.value != null ? 1 : 0)),
+    'scheme:peppol-eas': ofSchemes((s) => (s.peppol_eas?.value != null ? 1 : 0)),
+    'scheme:pattern': ofSchemes((s) => s.format?.patterns?.length ?? 0),
+    'scheme:checksum': ofSchemes((s) => s.format?.checksum?.length ?? 0),
+    'scheme:level': ofSchemes((s) => s.level?.length ?? 0),
+    'scheme:role': ofSchemes((s) => s.roles?.length ?? 0),
+    'scheme:applicability': ofSchemes((s) =>
+      sum((s.applicability ?? []).map((a) => a.status.length)),
+    ),
+    'scheme:persistence': ofSchemes((s) => s.persistence?.length ?? 0),
+    'scheme:relation': ofSchemes((s) => s.relations?.length ?? 0),
+    'scheme:legal-basis': ofSchemes((s) => s.legal_basis?.length ?? 0),
+    'scheme:validation-source': ofSchemes((s) => (s.validation_source ? 1 : 0)),
+    'scheme:mandatory': ofSchemes((s) => (s.mandatory ? 1 : 0)),
+    'scheme:component': ofSchemes((s) => s.components?.length ?? 0),
+    'scheme:issuing-country-context': ofSchemes((s) => (s.context_from?.issuing_country ? 1 : 0)),
+    'scheme:rule': ofSchemes((s) => s.rules?.length ?? 0),
+    'authority:instance-of': authorities.filter((a) => a.instance_of !== undefined).length,
+    'authority:jurisdiction': authorities.filter((a) => a.jurisdiction !== undefined).length,
+    'jurisdiction:part-of': sum(jurisdictions.map((j) => j.part_of?.length ?? 0)),
+    'jurisdiction:authority-table': jurisdictions.filter((j) => j.authority_table !== undefined)
+      .length,
+    'country-prefix:jurisdiction': prefixes.filter((m) => m.jurisdiction !== undefined).length,
+  };
+  for (const [slug, field] of trustFields) {
+    expected[`scheme:${slug}`] = ofSchemes((s) => (s.trust?.[field] != null ? 1 : 0));
+  }
+
+  const subjectKind = (iri: string): string => {
+    if (iri.startsWith(`${namespace}scheme/`)) return 'scheme';
+    if (iri.startsWith(`${namespace}authority/`)) return 'authority';
+    if (iri.startsWith(`${namespace}jurisdiction/`)) return 'jurisdiction';
+    if (iri.startsWith(`${namespace}vocab/country-prefix/`)) return 'country-prefix';
+    return iri;
+  };
+  const found: Record<string, number> = {};
+  for (const iri of statements) {
+    const [subject] = valuesOf(iri, def('subject'));
+    const slug = /\/statement\/[^/]+\/(.+)-[0-9a-f]{8}$/.exec(iri)?.[1];
+    const key = `${subjectKind(subject ?? '')}:${slug}`;
+    found[key] = (found[key] ?? 0) + 1;
+  }
+
+  test.for(Object.entries(expected))(
+    'count of %s Statements equals the model count',
+    ([key, count]) => {
+      expect(found[key] ?? 0).toBe(count);
+    },
+  );
+
+  test('count: the total is the sum over all claim kinds and nothing else is a Statement', () => {
+    expect(Object.keys(found).filter((key) => !(key in expected))).toEqual([]);
+    expect(statements).toHaveLength(sum(Object.values(expected)));
+    expect(statements.length).toBeGreaterThan(300);
+    expect(buildGraph(model, namespace).problems).toEqual([]);
+  });
+
+  test('count: the Condition nodes equal the distinct authored conditions', () => {
+    const distinct = new Set<string>();
+    for (const scheme of schemes) {
+      for (const entry of entriesOf(scheme)) {
+        if (entry.condition !== undefined) distinct.add(canon(entry.condition));
+      }
+    }
+    expect(distinct.size).toBeGreaterThan(0);
+    expect(subjectsOfType(def('Condition'))).toHaveLength(distinct.size);
+  });
+
+  test('count: every Statement has a source, a certainty and exactly one object', () => {
+    for (const iri of statements) {
+      expect(valuesOf(iri, `${DCT}source`)).toHaveLength(1);
+      expect(valuesOf(iri, def('certainty'))).toHaveLength(1);
+      expect(objectsOf(iri, def('object'))).toHaveLength(1);
+    }
   });
 });

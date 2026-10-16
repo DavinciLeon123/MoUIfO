@@ -278,3 +278,117 @@ describe('jsonLiteral', () => {
     expect(left.datatype.value).toBe(RDF_JSON);
   });
 });
+
+describe('non-scheme subjects', () => {
+  const subjectsOfStatements = (subject: string): string[] =>
+    quads
+      .filter((q) => q.predicate.value === def('subject') && q.object.value === subject)
+      .map((q) => q.subject.value);
+  const statementOf = (subject: string, predicate: string): string => {
+    const found = subjectsOfStatements(subject).filter((iri) =>
+      valuesOf(iri, def('predicate')).includes(predicate),
+    );
+    expect(found).toHaveLength(1);
+    return found[0] ?? '';
+  };
+
+  test('douane-nl has instance-of and jurisdiction Statements with its source; a class has none', () => {
+    const subject = iriOf('authority', 'douane-nl');
+    const instanceOf = statementOf(subject, def('instanceOf'));
+    expect(valuesOf(instanceOf, def('object'))).toEqual([
+      iriOf('authority', 'national-customs-authority'),
+    ]);
+    expect(valuesOf(instanceOf, 'http://purl.org/dc/terms/source')).toEqual([
+      iriOf('source', 'douane-eori-nl'),
+    ]);
+    expect(valuesOf(instanceOf, def('certainty'))).toEqual([vocabIri('certainty', 'certain')]);
+    const spatial = statementOf(subject, 'http://purl.org/dc/terms/spatial');
+    expect(valuesOf(spatial, def('object'))).toEqual([iriOf('jurisdiction', 'NL')]);
+    expect(subjectsOfStatements(iriOf('authority', 'national-customs-authority'))).toEqual([]);
+  });
+
+  test('BE is part of EU and XI is part of GB, with the authored note as a tagged skos:note', () => {
+    const be = statementOf(iriOf('jurisdiction', 'BE'), 'http://purl.org/dc/terms/isPartOf');
+    expect(be).toMatch(/\/statement\/BE\/part-of-[0-9a-f]{8}$/);
+    expect(valuesOf(be, def('object'))).toEqual([iriOf('jurisdiction', 'EU')]);
+    const xi = statementOf(iriOf('jurisdiction', 'XI'), 'http://purl.org/dc/terms/isPartOf');
+    expect(valuesOf(xi, def('object'))).toEqual([iriOf('jurisdiction', 'GB')]);
+    const authored = model.jurisdictions.XI?.part_of?.[0]?.note;
+    const notes = objectsOf(xi, SKOS_NOTE);
+    expect(notes).toHaveLength(authored === undefined ? 0 : Object.keys(authored).length);
+    for (const note of notes) {
+      expect(note.termType === 'Literal' && note.language).toBe('en');
+    }
+  });
+
+  test('the country-prefix entry EL has a jurisdiction Statement from its own subject', () => {
+    const subject = vocabIri('country-prefix', 'EL');
+    const found = statementOf(subject, 'http://purl.org/dc/terms/spatial');
+    expect(found).toMatch(/\/statement\/country-prefix\/jurisdiction-[0-9a-f]{8}$/);
+    expect(valuesOf(found, def('object'))).toEqual([iriOf('jurisdiction', 'GR')]);
+    expect(objectsOf(found, SKOS_NOTE).length).toBeGreaterThan(0);
+  });
+
+  test('a jurisdiction with an authority_table entry gives a skos:exactMatch Statement; the real model none', () => {
+    const exact = 'http://www.w3.org/2004/02/skos/core#exactMatch';
+    expect(
+      quads.filter((q) => q.object.value === exact && q.predicate.value === def('predicate')),
+    ).toEqual([]);
+    const fixture = structuredClone(model);
+    const table = 'https://publications.europa.eu/resource/authority/country/NLD';
+    const nl = fixture.jurisdictions.NL;
+    if (nl === undefined) throw new Error('the real model has NL');
+    fixture.jurisdictions.NL = {
+      ...nl,
+      authority_table: { iri: table, source: 'douane-eori-nl', certainty: 'certain' },
+    };
+    const built = buildGraph(fixture, namespace);
+    expect(built.problems).toEqual([]);
+    const statement = built.quads.filter(
+      (q) => q.predicate.value === def('predicate') && q.object.value === exact,
+    );
+    expect(statement).toHaveLength(1);
+    const objects = built.quads.filter(
+      (q) => q.subject.value === statement[0]?.subject.value && q.predicate.value === def('object'),
+    );
+    expect(objects.map((q) => q.object.value)).toEqual([table]);
+  });
+
+  test('an authority_table iri Turtle cannot carry is a problem, not a quad', () => {
+    const fixture = structuredClone(model);
+    const nl = fixture.jurisdictions.NL;
+    if (nl === undefined) throw new Error('the real model has NL');
+    fixture.jurisdictions.NL = {
+      ...nl,
+      authority_table: {
+        iri: 'https://example.org/a b',
+        source: 'douane-eori-nl',
+        certainty: 'certain',
+      },
+    };
+    const built = buildGraph(fixture, namespace);
+    expect(built.quads).toEqual([]);
+    expect(built.problems.map((problem) => problem.message)).toEqual([
+      'jurisdictions/NL authority_table iri holds a character that Turtle cannot carry in an IRI',
+    ]);
+  });
+
+  test('a sourced member of a vocabulary without a claim kind fails the build', () => {
+    const fixture = structuredClone(model);
+    const level = fixture.vocab.level;
+    const member = level?.values[0];
+    if (level === undefined || member === undefined) throw new Error('the real model has levels');
+    fixture.vocab.level = {
+      ...level,
+      values: [
+        { ...member, source: 'landscape-v1-2', certainty: 'likely' },
+        ...level.values.slice(1),
+      ],
+    };
+    const built = buildGraph(fixture, namespace);
+    expect(built.quads).toEqual([]);
+    expect(built.problems.map((problem) => problem.message)).toEqual([
+      `vocab/level/${member.id}: a sourced vocabulary member has no claim kind in tools/build/src/rdf/claims.ts`,
+    ]);
+  });
+});
