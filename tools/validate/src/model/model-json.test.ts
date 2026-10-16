@@ -107,6 +107,15 @@ describe('checkModelJson', () => {
     ]);
   });
 
+  test('a jurisdiction authority_table is accepted for the country-table IRI and rejected otherwise', () => {
+    const table = (iri: string) => ({ iri, source: 'teu-art-52', certainty: 'certain' });
+    const good = 'http://publications.europa.eu/resource/authority/country/NLD';
+    expect(problemsOf((m) => (m.jurisdictions.NL.authority_table = table(good)))).toEqual([]);
+    expect(
+      problemsOf((m) => (m.jurisdictions.NL.authority_table = table('https://example.org/NLD'))),
+    ).toHaveLength(1);
+  });
+
   test('a missing vocabulary is a problem', () => {
     // The registry is built from the model's own tables, so the references into the missing
     // vocabulary dangle as well; the missing table is reported among them.

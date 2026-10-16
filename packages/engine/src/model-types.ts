@@ -116,6 +116,8 @@ export type Jurisdiction = {
   id: string;
   label: Label;
   part_of?: readonly { jurisdiction: string; source: string; certainty: string; note?: Text }[];
+  /** The entry in the Publications Office country table (DEC-057). */
+  authority_table?: { iri: string; source: string; certainty: string; note?: Text };
   notes?: Text;
 };
 
