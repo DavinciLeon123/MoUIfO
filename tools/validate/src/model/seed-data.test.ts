@@ -29,8 +29,14 @@ function whereValue(text: string, value: string): { line: number; column: number
   return { line: at.line, column: at.column + 'jurisdiction: '.length };
 }
 
+// The fixture keeps the real NL.yaml's authority_table so the seed source it cites stays cited (DEC-057).
+const NL_AUTHORITY_TABLE =
+  'authority_table:\n  iri: "http://publications.europa.eu/resource/authority/country/NLD"\n  source: eu-country-authority-table\n  certainty: certain\n';
 const nlWith = (partOf: string): ModelFile =>
-  fixture(NL, `id: NL\nlabel:\n  en: Netherlands\n  nl: Nederland\npart_of:\n${partOf}`);
+  fixture(
+    NL,
+    `id: NL\nlabel:\n  en: Netherlands\n  nl: Nederland\npart_of:\n${partOf}${NL_AUTHORITY_TABLE}`,
+  );
 const entry = (jurisdiction: string, source = 'teu-art-52'): string =>
   `  - jurisdiction: ${jurisdiction}\n    source: ${source}\n    certainty: certain\n`;
 
@@ -277,7 +283,7 @@ describe('the country-prefix vocabulary contract', () => {
 const list = (directory: string): string[] =>
   readdirSync(join(REPO_ROOT, 'model', directory)).sort();
 
-describe('the complete Phase 2 seed: six jurisdictions, four sources', () => {
+describe('the complete Phase 2 seed: six jurisdictions, five sources', () => {
   test('withSeedModel([]) lists exactly the vocabulary files and the seed jurisdictions and sources', () => {
     expect(
       withSeedModel([])
