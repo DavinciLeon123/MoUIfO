@@ -33,3 +33,24 @@ export function makeIris(namespace: string) {
 }
 
 export type Iris = ReturnType<typeof makeIris>;
+
+/** Characters Turtle cannot carry inside `<...>`, besides whitespace and control characters. */
+const FORBIDDEN = new Set(['<', '>', '"', '{', '}', '|', '\\', '^', '`']);
+
+/**
+ * A reason an external IRI (a source `url` or `eli`) cannot be written as a Turtle IRI, or
+ * undefined when it can. The n3 Writer does not escape IRIs, so this runs before `namedNode`
+ * (T-04-08). The message never repeats the value.
+ */
+export function checkExternalIri(iri: string): string | undefined {
+  if (!iri.startsWith('http://') && !iri.startsWith('https://')) {
+    return 'must start with http:// or https://';
+  }
+  for (const char of iri) {
+    const code = char.codePointAt(0) ?? 0;
+    if (code <= 0x20 || code === 0x7f || /\s/.test(char) || FORBIDDEN.has(char)) {
+      return 'holds a character that Turtle cannot carry in an IRI';
+    }
+  }
+  return undefined;
+}

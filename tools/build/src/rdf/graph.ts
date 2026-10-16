@@ -3,7 +3,7 @@ import { DataFactory, type Literal, type NamedNode, type Quad } from 'n3';
 import type { Problem } from 'uio-config';
 import { type ClaimInstance, schemeClaims } from './claims.ts';
 import { createMinter } from './hash.ts';
-import { DCT, makeIris, PROV, RDF, SKOS } from './iris.ts';
+import { checkExternalIri, DCT, makeIris, PROV, RDF, SKOS } from './iris.ts';
 
 const { namedNode, quad } = DataFactory;
 
@@ -67,11 +67,42 @@ function sortedUnique(quads: Quad[]): Quad[] {
 }
 
 /**
+ * Every external IRI the graph will carry (a source `url` or `eli`, a legal basis or validation
+ * source `url`) must be writable as a Turtle IRI; a failure names the file kind, id and field.
+ */
+function externalIriProblems(model: Model): Problem[] {
+  const problems: Problem[] = [];
+  const check = (kind: 'sources' | 'schemes', id: string, field: string, value?: string): void => {
+    if (value === undefined) return;
+    const reason = checkExternalIri(value);
+    if (reason === undefined) return;
+    problems.push({
+      file: `model/${kind}/${id}.yaml`,
+      message: `${kind}/${id} ${field} ${reason}`,
+    });
+  };
+  for (const source of Object.values(model.sources)) {
+    check('sources', source.id, 'url', source.url);
+    check('sources', source.id, 'eli', source.eli);
+  }
+  for (const scheme of Object.values(model.schemes)) {
+    for (const basis of scheme.legal_basis ?? []) {
+      check('schemes', scheme.id, 'legal_basis url', basis.url);
+      check('schemes', scheme.id, 'legal_basis eli', basis.eli);
+    }
+    check('schemes', scheme.id, 'validation_source url', scheme.validation_source?.url);
+  }
+  return problems;
+}
+
+/**
  * The published graph of a normalised model as sorted, deduplicated quads. Problems (a hash
  * collision, a duplicate claim) end the build; the quads are then not to be written.
  */
 export function buildGraph(model: Model, namespace: string): Graph {
   const iris = makeIris(namespace);
+  const iriProblems = externalIriProblems(model);
+  if (iriProblems.length > 0) return { quads: [], problems: iriProblems };
   const minter = createMinter(iris);
   const quads: Quad[] = [];
 
