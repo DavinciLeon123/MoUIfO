@@ -123,3 +123,69 @@ describe('build CLI', () => {
     expect(existsSync(join(root, 'dist'))).toBe(false);
   });
 });
+
+describe('build CLI targets (D-12)', () => {
+  test('the default dist target writes nothing under docs/', () => {
+    const root = makeBuildRoot();
+    const before = readFileSync(join(root, 'docs', 'gaps.md'), 'utf8');
+    const result = runCli(root);
+    expect(result.status).toBe(0);
+    expect(readdirSync(join(root, 'docs'))).toEqual(['gaps.md']);
+    expect(readFileSync(join(root, 'docs', 'gaps.md'), 'utf8')).toBe(before);
+  });
+
+  test('--target dist behaves like the default and never writes docs/model.md', () => {
+    const root = makeBuildRoot();
+    const result = runCli(root, ['--target', 'dist']);
+    expect(result.status).toBe(0);
+    expect(existsSync(join(root, 'docs', 'model.md'))).toBe(false);
+    expect(existsSync(join(root, 'dist', 'model.json'))).toBe(true);
+  });
+
+  test('--target docs --docs-out writes that file and nothing under --out', () => {
+    const root = makeBuildRoot();
+    const out = join(root, 'custom-out');
+    const docsOut = join(root, 'elsewhere', 'model.md');
+    const result = runCli(root, ['--target', 'docs', '--out', out, '--docs-out', docsOut]);
+    expect(result.status).toBe(0);
+    expect(readFileSync(docsOut, 'utf8').startsWith('# Model documentation\n')).toBe(true);
+    expect(existsSync(out)).toBe(false);
+    expect(existsSync(join(root, 'dist'))).toBe(false);
+  });
+
+  test('--target docs writes docs/model.md under the root by default', () => {
+    const root = makeBuildRoot();
+    const result = runCli(root, ['--target', 'docs']);
+    expect(result.status).toBe(0);
+    expect(result.stdout).toContain('docs/model.md');
+    expect(existsSync(join(root, 'docs', 'model.md'))).toBe(true);
+    expect(existsSync(join(root, 'dist'))).toBe(false);
+  });
+
+  test('--target all writes the dist files, build-info.json and docs/model.md', () => {
+    const root = makeBuildRoot();
+    const result = runCli(root, ['--target', 'all']);
+    expect(result.status).toBe(0);
+    expect(existsSync(join(root, 'dist', 'model.json'))).toBe(true);
+    expect(existsSync(join(root, 'dist', 'build-info.json'))).toBe(true);
+    expect(existsSync(join(root, 'docs', 'model.md'))).toBe(true);
+  });
+
+  test('an unknown --target is a usage problem and exits 1', () => {
+    const root = makeBuildRoot();
+    const result = runCli(root, ['--target', 'everything']);
+    expect(result.status).toBe(1);
+    expect(result.stdout + result.stderr).toContain('--target');
+    expect(existsSync(join(root, 'dist'))).toBe(false);
+    expect(existsSync(join(root, 'docs', 'model.md'))).toBe(false);
+  });
+
+  test('--target docs reports a missing docs/gaps.md as a problem and writes nothing', () => {
+    const root = makeBuildRoot();
+    rmSync(join(root, 'docs', 'gaps.md'));
+    const result = runCli(root, ['--target', 'docs']);
+    expect(result.status).toBe(1);
+    expect(result.stdout).toContain('docs/gaps.md');
+    expect(existsSync(join(root, 'docs', 'model.md'))).toBe(false);
+  });
+});

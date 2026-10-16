@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import type { Quad } from 'n3';
 import type { Problem, UioConfig } from 'uio-config';
 import { checkModelJson, loadValidatedModel } from 'uio-validate';
+import { renderModelMd } from './docs/model-md.ts';
 import { normalise } from './model/normalise.ts';
 import { sameTriples } from './rdf/equivalence.ts';
 import { buildGraph } from './rdf/graph.ts';
@@ -13,7 +14,13 @@ import { parseTurtle, prefixesFor, sameQuads, toTurtle } from './rdf/turtle.ts';
 import { landscapeCsv, landscapeMarkdown, landscapeRows } from './tables/landscape.ts';
 
 /** One generated file: where it goes, its name and its text. */
-export type Output = { target: 'dist'; name: string; text: string };
+export type Output = { target: 'dist' | 'docs'; name: string; text: string };
+
+/** Which artefacts a render produces: `dist` (the default), the committed `docs` or both. */
+export type Target = 'dist' | 'docs' | 'all';
+
+/** The three accepted values of the CLI's `--target` option. */
+export const TARGETS: readonly Target[] = ['dist', 'docs', 'all'];
 
 export type Rendered = { problems: Problem[]; outputs: Output[]; notes: string[] };
 
@@ -56,14 +63,27 @@ export type RenderSeams = {
   serialiseJsonLd?: (quads: readonly Quad[], context: Record<string, string>) => Promise<string>;
 };
 
+/** The text of docs/gaps.md, or a problem on that file (the docs target links into it, D-12). */
+function readGaps(root: string): { text: string } | { problem: Problem } {
+  const file = 'docs/gaps.md';
+  try {
+    return { text: readFileSync(join(root, file), 'utf8') };
+  } catch {
+    return { problem: { file, message: 'cannot be read; docs/model.md links into it' } };
+  }
+}
+
 /**
- * Render every artefact in memory; nothing is written here. A problem at any step ends the render
- * with the problems found, so the caller writes only after every check passed.
+ * Render the artefacts of `target` in memory; nothing is written here. A problem at any step ends
+ * the render with the problems found, so the caller writes only after every check passed. The
+ * docs target renders only docs/model.md, so the dist build never touches docs/ (RESEARCH
+ * Pitfall 1).
  */
 export async function renderArtefacts(
   root: string,
   cfg: UioConfig,
   seams: RenderSeams = {},
+  target: Target = 'dist',
 ): Promise<Rendered> {
   const loaded = loadValidatedModel(root);
   if (!loaded.ok) return { problems: loaded.problems, outputs: [], notes: [] };
@@ -74,6 +94,18 @@ export async function renderArtefacts(
   const model = normalise(loaded.model, read.version);
   const modelProblems = checkModelJson(model);
   if (modelProblems.length > 0) return { problems: modelProblems, outputs: [], notes: [] };
+
+  const size = (table: Record<string, unknown>): number => Object.keys(table).length;
+  const notes = [
+    `build: model loaded (${size(model.schemes)} schemes, ${size(model.authorities)} authorities, ${size(model.jurisdictions)} jurisdictions, ${size(model.sources)} sources, ${size(model.vocab)} vocabularies)`,
+  ];
+  const docs: Output[] = [];
+  if (target !== 'dist') {
+    const gaps = readGaps(root);
+    if ('problem' in gaps) return { problems: [gaps.problem], outputs: [], notes: [] };
+    docs.push({ target: 'docs', name: 'model.md', text: renderModelMd(model, gaps.text) });
+  }
+  if (target === 'docs') return { problems: [], outputs: docs, notes };
 
   const graph = buildGraph(model, cfg.namespace);
   if (graph.problems.length > 0) return { problems: graph.problems, outputs: [], notes: [] };
@@ -111,10 +143,6 @@ export async function renderArtefacts(
   if (termProblems.length > 0) return { problems: termProblems, outputs: [], notes: [] };
 
   const rows = landscapeRows(model);
-  const size = (table: Record<string, unknown>): number => Object.keys(table).length;
-  const notes = [
-    `build: model loaded (${size(model.schemes)} schemes, ${size(model.authorities)} authorities, ${size(model.jurisdictions)} jurisdictions, ${size(model.sources)} sources, ${size(model.vocab)} vocabularies)`,
-  ];
   const outputs: Output[] = [
     { target: 'dist', name: 'model.json', text: `${JSON.stringify(model, null, 2)}\n` },
     { target: 'dist', name: 'uio.ttl', text: turtle },
@@ -122,6 +150,7 @@ export async function renderArtefacts(
     { target: 'dist', name: 'uio-def.ttl', text: ontology.text },
     { target: 'dist', name: 'landscape-table.md', text: landscapeMarkdown(rows, model) },
     { target: 'dist', name: 'landscape-table.csv', text: landscapeCsv(rows) },
+    ...docs,
   ];
   return { problems: [], outputs, notes };
 }
