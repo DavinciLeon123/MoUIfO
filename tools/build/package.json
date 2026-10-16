@@ -8,7 +8,17 @@
     "node": ">=22.18"
   },
   "dependencies": {
+    "@uio/engine": "*",
+    "csv-stringify": "6.9.0",
+    "jsonld": "9.0.0",
+    "n3": "2.13.11",
+    "rdf-validate-shacl": "0.6.5",
     "uio-config": "*",
     "uio-validate": "*"
+  },
+  "devDependencies": {
+    "@types/jsonld": "1.5.15",
+    "@types/n3": "1.26.4",
+    "uio-guards": "*"
   }
 }
