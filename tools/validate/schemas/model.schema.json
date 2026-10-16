@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "model.schema.json",
+  "description": "dist/model.json, the contract the engine, the MCP server and the website read (DEC-054). A closed object of five tables keyed by id.",
+  "type": "object",
+  "properties": {
+    "contract": { "const": 1 },
+    "model_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "schemes": { "type": "object", "additionalProperties": { "type": "object" } },
+    "authorities": { "type": "object", "additionalProperties": { "type": "object" } },
+    "jurisdictions": { "type": "object", "additionalProperties": { "type": "object" } },
+    "sources": { "type": "object", "additionalProperties": { "type": "object" } },
+    "vocab": { "type": "object", "additionalProperties": { "type": "object" } }
+  },
+  "required": [
+    "contract",
+    "model_version",
+    "schemes",
+    "authorities",
+    "jurisdictions",
+    "sources",
+    "vocab"
+  ],
+  "unevaluatedProperties": false
+}

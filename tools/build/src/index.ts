@@ -3,7 +3,7 @@ import { join, relative, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import type { UioConfig } from 'uio-config';
 import { checkPackageNames, formatProblem, loadConfig, REPO_ROOT, toAnnotation } from 'uio-config';
-import { loadValidatedModel } from 'uio-validate';
+import { renderArtefacts } from './build.ts';
 
 /**
  * Phase 1 build step: writes `build-info.json` into `outDir` (default `<root>/dist`) from
@@ -22,7 +22,7 @@ export function buildDist(
   return path;
 }
 
-function main(): void {
+async function main(): Promise<void> {
   const { values } = parseArgs({
     options: { root: { type: 'string' }, out: { type: 'string' } },
     strict: true,
@@ -31,30 +31,32 @@ function main(): void {
   const outDir = values.out === undefined ? join(root, 'dist') : resolve(values.out);
   const cfg = loadConfig(root);
 
-  const problems = checkPackageNames(cfg, root);
+  const names = checkPackageNames(cfg, root);
+  if (names.length > 0) {
+    for (const problem of names) console.log(toAnnotation(problem));
+    process.exitCode = 1;
+    return;
+  }
+
+  // The build renders every artefact in memory first and writes only when no check found a
+  // problem, so a model with an error writes nothing.
+  const { problems, outputs, notes } = await renderArtefacts(root, cfg);
   if (problems.length > 0) {
-    for (const problem of problems) console.log(toAnnotation(problem));
-    process.exitCode = 1;
-    return;
-  }
-
-  // The build reads the model only through the validator's loader: same discovery, parsing and
-  // checks as `npm run validate`. A model with an error writes nothing.
-  const loaded = loadValidatedModel(root);
-  if (!loaded.ok) {
     const github = process.env.GITHUB_ACTIONS === 'true';
-    for (const problem of loaded.problems) console.log(formatProblem(problem, { github }));
-    console.log(`build: the model has ${loaded.problems.length} problems; run npm run validate`);
+    for (const problem of problems) console.log(formatProblem(problem, { github }));
+    console.log(`build: the model has ${problems.length} problems; run npm run validate`);
     process.exitCode = 1;
     return;
   }
-  const { schemes, authorities, jurisdictions, sources, vocab } = loaded.model;
-  const size = (table: Record<string, unknown>): number => Object.keys(table).length;
-  console.log(
-    `build: model loaded (${size(schemes)} schemes, ${size(authorities)} authorities, ${size(jurisdictions)} jurisdictions, ${size(sources)} sources, ${size(vocab)} vocabularies)`,
-  );
+  for (const note of notes) console.log(note);
 
+  for (const output of outputs) {
+    mkdirSync(outDir, { recursive: true });
+    const path = join(outDir, output.name);
+    writeFileSync(path, output.text);
+    console.log(relative(root, path));
+  }
   console.log(relative(root, buildDist(root, cfg, outDir)));
 }
 
-if (import.meta.main) main();
+if (import.meta.main) await main();

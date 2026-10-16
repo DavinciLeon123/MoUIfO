@@ -14,6 +14,7 @@ export {
   type FormatResult,
   type FormatSpec,
 } from './format.ts';
+export { MODEL_CONTRACT, type Model, type ModelRecord } from './model-types.ts';
 export {
   compilePattern,
   compileTransform,
