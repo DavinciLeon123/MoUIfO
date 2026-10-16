@@ -1,8 +1,10 @@
 import type { Scheme } from '@uio/engine';
 import { DataFactory, type Literal, type NamedNode } from 'n3';
-import { ADMS, DCT, type Iris } from './iris.ts';
+import { ADMS, DCT, type Iris, XSD } from './iris.ts';
 
 const { namedNode, literal } = DataFactory;
+
+const integer = (value: number): Literal => literal(String(value), namedNode(`${XSD}integer`));
 
 /** A triple that hangs off the Statement node: a predicate IRI and an object term. */
 export type Extra = { predicate: string; object: NamedNode | Literal };
@@ -76,7 +78,44 @@ const HEADERS: readonly HeaderKind[] = [
   plainLiteral('peppol_eas', 'peppol-eas', 'peppolEas'),
 ];
 
-/** The header claims of one scheme, in table order. */
+/** The fields of a claim that have a default: no qualifier, no extra, no condition. */
+type ClaimFields = Pick<
+  ClaimInstance,
+  'claim' | 'predicate' | 'object' | 'payload' | 'certainty' | 'source'
+> &
+  Partial<ClaimInstance>;
+
+/** A claim of one subject with the empty defaults filled in. */
+function claimOf(subjectId: string, subjectIri: string, fields: ClaimFields): ClaimInstance {
+  return {
+    subjectId,
+    subjectIri,
+    qualifiers: {},
+    qualifierTriples: [],
+    extra: [],
+    condition: null,
+    ...fields,
+  };
+}
+
+/** The pattern claims of a scheme: the regex is the object, the authored index an extra. */
+function patternClaims(scheme: Scheme, iris: Iris): ClaimInstance[] {
+  return (scheme.format?.patterns ?? []).map((entry, index) =>
+    claimOf(scheme.id, iris.scheme(scheme.id), {
+      claim: 'pattern',
+      predicate: iris.def('formatPattern'),
+      object: literal(entry.regex),
+      payload: entry.regex,
+      extra: [{ predicate: iris.def('position'), object: integer(index + 1) }],
+      condition: entry.condition ?? null,
+      certainty: entry.certainty,
+      source: entry.source,
+      note: entry.note,
+    }),
+  );
+}
+
+/** The claims of one scheme, in table order. */
 export function schemeClaims(scheme: Scheme, iris: Iris): ClaimInstance[] {
   const claims: ClaimInstance[] = [];
   for (const kind of HEADERS) {
@@ -98,5 +137,6 @@ export function schemeClaims(scheme: Scheme, iris: Iris): ClaimInstance[] {
       source: header.source,
     });
   }
+  claims.push(...patternClaims(scheme, iris));
   return claims;
 }

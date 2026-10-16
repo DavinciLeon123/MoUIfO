@@ -2,6 +2,7 @@ import type { Model } from '@uio/engine';
 import { DataFactory, type Literal, type NamedNode, type Quad } from 'n3';
 import type { Problem } from 'uio-config';
 import { type ClaimInstance, schemeClaims } from './claims.ts';
+import { conditionNode } from './conditions.ts';
 import { createMinter } from './hash.ts';
 import { checkExternalIri, DCT, makeIris, PROV, RDF, SKOS } from './iris.ts';
 import { structureQuads } from './nodes.ts';
@@ -26,6 +27,7 @@ function statementQuads(
   claim: ClaimInstance,
   iri: string,
   iris: ReturnType<typeof makeIris>,
+  condition?: string,
 ): Quad[] {
   const node = namedNode(iri);
   const source = namedNode(iris.source(claim.source));
@@ -44,6 +46,9 @@ function statementQuads(
   ];
   for (const { predicate, object } of [...claim.qualifierTriples, ...claim.extra]) {
     quads.push(quad(node, namedNode(predicate), object as NamedNode | Literal));
+  }
+  if (condition !== undefined) {
+    quads.push(quad(node, namedNode(iris.def('condition')), namedNode(condition)));
   }
   if (claim.note !== undefined) {
     quads.push(quad(node, namedNode(`${SKOS}note`), DataFactory.literal(claim.note)));
@@ -106,25 +111,38 @@ export function buildGraph(model: Model, namespace: string): Graph {
   if (iriProblems.length > 0) return { quads: [], problems: iriProblems };
   const minter = createMinter(iris);
   const quads: Quad[] = [];
+  const conditionProblems: string[] = [];
+
+  const addClaim = (claim: ClaimInstance): void => {
+    const iri = minter.mint({
+      subjectId: claim.subjectId,
+      claim: claim.claim,
+      subjectIri: claim.subjectIri,
+      predicate: claim.predicate,
+      object: claim.payload,
+      qualifiers: claim.qualifiers,
+      condition: claim.condition,
+      sourceId: claim.source,
+    });
+    let condition: string | undefined;
+    if (claim.condition !== null) {
+      const node = conditionNode(claim.condition, iris);
+      conditionProblems.push(...node.problems);
+      quads.push(...node.quads);
+      condition = node.iri;
+    }
+    quads.push(...statementQuads(claim, iri, iris, condition));
+  };
 
   for (const scheme of Object.values(model.schemes)) {
-    for (const claim of schemeClaims(scheme, iris)) {
-      const iri = minter.mint({
-        subjectId: claim.subjectId,
-        claim: claim.claim,
-        subjectIri: claim.subjectIri,
-        predicate: claim.predicate,
-        object: claim.payload,
-        qualifiers: claim.qualifiers,
-        condition: claim.condition,
-        sourceId: claim.source,
-      });
-      quads.push(...statementQuads(claim, iri, iris));
-    }
+    for (const claim of schemeClaims(scheme, iris)) addClaim(claim);
   }
 
   quads.push(...structureQuads(model, iris));
 
-  const problems: Problem[] = minter.problems().map((message) => ({ file: GRAPH_FILE, message }));
+  const problems: Problem[] = [...minter.problems(), ...conditionProblems].map((message) => ({
+    file: GRAPH_FILE,
+    message,
+  }));
   return { quads: sortedUnique(quads), problems };
 }

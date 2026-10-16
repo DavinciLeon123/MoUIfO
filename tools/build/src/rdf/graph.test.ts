@@ -95,9 +95,13 @@ describe('buildGraph header claims', () => {
     },
   );
 
-  test('the header Statements are all the Statements of this plan', () => {
+  test('the header claim slugs account for exactly the header Statements', () => {
     const expected = counts.reduce((sum, [, has]) => sum + schemes.filter(has).length, 0);
-    expect(statements).toHaveLength(expected);
+    const slugs = counts.map(([claim]) => claim).join('|');
+    const header = statements.filter((iri) =>
+      new RegExp(`/statement/[^/]+/(${slugs})-[0-9a-f]{8}$`).test(iri),
+    );
+    expect(header).toHaveLength(expected);
   });
 
   test('a literal header claim carries a plain literal and a link claim an IRI', () => {
