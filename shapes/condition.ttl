@@ -1,0 +1,51 @@
+# SHACL shapes for condition nodes (D-10, D-07, DEC-060): a def:Condition carries only the
+# properties the build writes (def:issuingCountry, def:excludesIssuingCountry, def:entityForm and
+# def:context), and each points to a known jurisdiction or a member of the matching vocabulary.
+# The fixture is shapes/fixtures/condition.fail.ttl.
+#
+# The absolute IRIs hold the base namespace of config.yaml as literal text (DEC-058).
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix def: <https://w3id.org/uio/def#> .
+@prefix shape: <https://w3id.org/uio/shape/> .
+
+shape:Condition a sh:NodeShape ;
+    sh:targetClass def:Condition ;
+    sh:closed true ;
+    sh:ignoredProperties ( rdf:type ) ;
+    sh:property shape:Condition-issuingCountry ,
+        shape:Condition-excludesIssuingCountry ,
+        shape:Condition-entityForm ,
+        shape:Condition-context .
+
+shape:Condition-issuingCountry a sh:PropertyShape ;
+    sh:path def:issuingCountry ;
+    sh:class def:Jurisdiction .
+
+shape:Condition-excludesIssuingCountry a sh:PropertyShape ;
+    sh:path def:excludesIssuingCountry ;
+    sh:class def:Jurisdiction .
+
+shape:Condition-entityForm a sh:PropertyShape ;
+    sh:path def:entityForm ;
+    sh:class def:VocabularyMember ;
+    sh:node shape:EntityFormMember .
+
+shape:EntityFormMember a sh:NodeShape ;
+    sh:property [
+        sh:path skos:inScheme ;
+        sh:hasValue <https://w3id.org/uio/vocab/entity-form>
+    ] .
+
+shape:Condition-context a sh:PropertyShape ;
+    sh:path def:context ;
+    sh:class def:VocabularyMember ;
+    sh:node shape:ConditionContextMember .
+
+shape:ConditionContextMember a sh:NodeShape ;
+    sh:property [
+        sh:path skos:inScheme ;
+        sh:hasValue <https://w3id.org/uio/vocab/condition-context>
+    ] .

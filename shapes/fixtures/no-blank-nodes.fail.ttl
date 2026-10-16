@@ -1,0 +1,13 @@
+# Failing fixture of shapes/no-blank-nodes.ttl (D-10). Synthetic data only. The absolute IRIs hold
+# the base namespace of config.yaml as literal text (DEC-058).
+
+@prefix def: <https://w3id.org/uio/def#> .
+
+# A typed blank node: breaks shape:NoBlankNodes (subject of rdf:type).
+[] a def:Condition .
+
+# A Statement whose subject is a blank node: breaks shape:NoBlankNodes (object of def:subject).
+<https://w3id.org/uio/statement/fixture/kind-0d0d0d01> a def:Statement ;
+    def:subject [] ;
+    def:predicate <https://w3id.org/uio/def#kind> ;
+    def:object "identifier" .

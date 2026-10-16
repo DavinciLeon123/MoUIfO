@@ -1,0 +1,28 @@
+# Failing fixture of shapes/scheme.ttl (D-10). Synthetic data only. The absolute IRIs hold the base
+# namespace of config.yaml as literal text (DEC-058).
+
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix adms: <http://www.w3.org/ns/adms#> .
+@prefix def: <https://w3id.org/uio/def#> .
+
+# Only a Dutch label and no issuer Statement: breaks shape:Scheme-label (no English label) and
+# shape:Scheme-issuer (no issuer Statement), both as a qualified minimum count.
+<https://w3id.org/uio/scheme/fixture-nl-only> a skos:ConceptScheme , def:Scheme ;
+    skos:prefLabel "Proefschema"@nl .
+
+# Two labels in one language and two issuer Statements: breaks shape:Scheme-label (unique
+# language) and shape:Scheme-issuer (qualified maximum count).
+<https://w3id.org/uio/scheme/fixture-twice> a skos:ConceptScheme , def:Scheme ;
+    skos:prefLabel "Fixture scheme"@en , "Second fixture label"@en .
+
+<https://w3id.org/uio/statement/fixture-twice/issuer-0b0b0b01> a def:Statement ;
+    def:subject <https://w3id.org/uio/scheme/fixture-twice> ;
+    def:predicate adms:schemaAgency ;
+    def:object <https://w3id.org/uio/authority/fixture-authority> .
+
+<https://w3id.org/uio/statement/fixture-twice/issuer-0b0b0b02> a def:Statement ;
+    def:subject <https://w3id.org/uio/scheme/fixture-twice> ;
+    def:predicate adms:schemaAgency ;
+    def:object <https://w3id.org/uio/authority/second-authority> .

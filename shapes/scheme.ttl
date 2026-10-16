@@ -1,0 +1,39 @@
+# SHACL shapes for schemes (D-10, DEC-060): every def:Scheme has an English skos:prefLabel, at most
+# one label per language, and exactly one issuer Statement (a def:Statement whose def:subject is
+# the scheme and whose def:predicate is adms:schemaAgency, DEC-059). The fixture is
+# shapes/fixtures/scheme.fail.ttl.
+#
+# The absolute IRIs hold the base namespace of config.yaml as literal text (DEC-058).
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix adms: <http://www.w3.org/ns/adms#> .
+@prefix def: <https://w3id.org/uio/def#> .
+@prefix shape: <https://w3id.org/uio/shape/> .
+
+shape:Scheme a sh:NodeShape ;
+    sh:targetClass def:Scheme ;
+    sh:property shape:Scheme-label , shape:Scheme-issuer .
+
+shape:Scheme-label a sh:PropertyShape ;
+    sh:path skos:prefLabel ;
+    sh:uniqueLang true ;
+    sh:qualifiedValueShape shape:EnglishLabel ;
+    sh:qualifiedMinCount 1 .
+
+shape:EnglishLabel a sh:NodeShape ;
+    sh:languageIn ( "en" ) .
+
+shape:Scheme-issuer a sh:PropertyShape ;
+    sh:path [ sh:inversePath def:subject ] ;
+    sh:qualifiedValueShape shape:IssuerStatement ;
+    sh:qualifiedMinCount 1 ;
+    sh:qualifiedMaxCount 1 .
+
+shape:IssuerStatement a sh:NodeShape ;
+    sh:property shape:IssuerStatement-predicate .
+
+shape:IssuerStatement-predicate a sh:PropertyShape ;
+    sh:path def:predicate ;
+    sh:hasValue adms:schemaAgency .

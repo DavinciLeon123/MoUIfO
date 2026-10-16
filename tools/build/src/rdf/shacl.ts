@@ -60,6 +60,10 @@ export type ShapeReport = { conforms: boolean; results: ShapeResult[] };
 const show = (term: { termType: string; value: string }): string =>
   term.termType === 'NamedNode' ? `<${term.value}>` : term.value;
 
+/** A property path: an IRI as `<iri>`, a path expression (an inverse path) as a fixed label. */
+const showPath = (term: { termType: string; value: string }): string =>
+  term.termType === 'NamedNode' ? `<${term.value}>` : '(path expression)';
+
 /** The IRI of every named subject in a shape file: the shapes the file declares. */
 export function declaredShapes(text: string): Set<string> {
   return new Set(
@@ -85,7 +89,7 @@ export async function validateShapes(
     (result): ShapeResult => ({
       focusNode: show(result.focusNode),
       // rdf-validate-shacl types `path` as a Term but returns null for a node shape.
-      path: (result.path as unknown) === null ? undefined : show(result.path),
+      path: (result.path as unknown) === null ? undefined : showPath(result.path),
       sourceShape: result.sourceShape.value,
       component: result.sourceConstraintComponent.value,
       message: result.message.map((term) => term.value).join(' '),

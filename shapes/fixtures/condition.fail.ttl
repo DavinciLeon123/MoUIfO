@@ -1,0 +1,25 @@
+# Failing fixture of shapes/condition.ttl (D-10). Synthetic data only. The absolute IRIs hold the
+# base namespace of config.yaml as literal text (DEC-058).
+
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix def: <https://w3id.org/uio/def#> .
+
+<https://w3id.org/uio/jurisdiction/XX> a def:Jurisdiction .
+
+# An entity form that is no vocabulary member at all: breaks shape:Condition-entityForm (class
+# and node), and an issuing country that is no jurisdiction: breaks shape:Condition-issuingCountry.
+<https://w3id.org/uio/condition/0c0c0c01> a def:Condition ;
+    def:entityForm <https://w3id.org/uio/vocab/entity-form/unregistered> ;
+    def:issuingCountry <https://w3id.org/uio/scheme/not-a-jurisdiction> .
+
+# A property the build never writes: breaks shape:Condition (closed).
+<https://w3id.org/uio/condition/0c0c0c02> a def:Condition ;
+    def:issuingCountry <https://w3id.org/uio/jurisdiction/XX> ;
+    def:unknownKey "x" .
+
+# A context that is a member of the entity-form vocabulary: breaks shape:Condition-context (node).
+<https://w3id.org/uio/vocab/entity-form/legal-person> a def:VocabularyMember ;
+    skos:inScheme <https://w3id.org/uio/vocab/entity-form> .
+
+<https://w3id.org/uio/condition/0c0c0c03> a def:Condition ;
+    def:context <https://w3id.org/uio/vocab/entity-form/legal-person> .
