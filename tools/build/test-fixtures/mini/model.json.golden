@@ -1,0 +1,484 @@
+{
+  "authorities": {
+    "mini-authority": {
+      "definition": {
+        "en": "An authority that exists only in the golden files."
+      },
+      "id": "mini-authority",
+      "kind": "class",
+      "label": {
+        "en": "Mini authority"
+      }
+    },
+    "mini-authority-aa": {
+      "certainty": "likely",
+      "id": "mini-authority-aa",
+      "instance_of": "mini-authority",
+      "jurisdiction": "AA",
+      "kind": "instance",
+      "label": {
+        "en": "Mini authority AA"
+      },
+      "source": "mini-analysis"
+    }
+  },
+  "contract": 1,
+  "jurisdictions": {
+    "AA": {
+      "id": "AA",
+      "label": {
+        "en": "Aaland"
+      }
+    },
+    "BB": {
+      "id": "BB",
+      "label": {
+        "en": "Bbland"
+      },
+      "part_of": [
+        {
+          "certainty": "certain",
+          "jurisdiction": "AA",
+          "source": "mini-analysis"
+        }
+      ]
+    }
+  },
+  "model_version": "0.0.0",
+  "schemes": {
+    "alpha": {
+      "abbreviation": {
+        "certainty": "certain",
+        "source": "mini-analysis",
+        "value": "ALP"
+      },
+      "applicability": [
+        {
+          "certainty": "certain",
+          "jurisdiction": "AA",
+          "source": "mini-analysis",
+          "status": [
+            "issued",
+            "recognised"
+          ]
+        }
+      ],
+      "availability": {
+        "certainty": "certain",
+        "source": "mini-analysis",
+        "value": "public"
+      },
+      "context_from": {
+        "issuing_country": {
+          "capture": {
+            "group": 1,
+            "regex": "^([A-Z]{2})"
+          },
+          "certainty": "certain",
+          "map": "country-prefix",
+          "source": "mini-analysis"
+        }
+      },
+      "format": {
+        "checksum": [
+          {
+            "algorithm": "mini-check",
+            "certainty": "possible",
+            "over": [
+              {
+                "capture": {
+                  "group": 1,
+                  "regex": "^[A-Z]{2}([0-9]{4})$"
+                }
+              }
+            ],
+            "source": "mini-analysis"
+          }
+        ],
+        "examples_invalid": [
+          "1234AB"
+        ],
+        "examples_valid": [
+          "AB1234"
+        ],
+        "patterns": [
+          {
+            "certainty": "certain",
+            "regex": "^[A-Z]{2}[0-9]{4}$",
+            "source": "mini-analysis"
+          },
+          {
+            "certainty": "likely",
+            "condition": {
+              "entity_form": "company",
+              "issuing_country": "AA"
+            },
+            "note": "A longer form for companies.",
+            "regex": "^[A-Z]{2}[0-9]{5}$",
+            "source": "mini-analysis"
+          }
+        ]
+      },
+      "id": "alpha",
+      "issuer": {
+        "certainty": "likely",
+        "source": "mini-analysis",
+        "value": "mini-authority"
+      },
+      "jurisdiction": {
+        "certainty": "certain",
+        "source": "mini-analysis",
+        "value": "AA"
+      },
+      "kind": {
+        "certainty": "certain",
+        "source": "mini-analysis",
+        "value": "identifier"
+      },
+      "label": {
+        "en": "Alpha identifier",
+        "nl": "Alfa-nummer"
+      },
+      "legal_basis": [
+        {
+          "certainty": "certain",
+          "source": "mini-analysis",
+          "title": "Mini act, article 1",
+          "url": "https://example.org/mini/act"
+        }
+      ],
+      "level": [
+        {
+          "certainty": "certain",
+          "source": "mini-analysis",
+          "value": "legal-entity"
+        }
+      ],
+      "mandatory": {
+        "certainty": "likely",
+        "source": "mini-analysis",
+        "text": "Only in the golden files."
+      },
+      "notes": {
+        "en": "A synthetic scheme."
+      },
+      "persistence": [
+        {
+          "behaviour": "Unchanged",
+          "certainty": "likely",
+          "event": "merger",
+          "source": "mini-analysis"
+        }
+      ],
+      "relations": [
+        {
+          "certainty": "certain",
+          "kind": "derived-from",
+          "source": "mini-analysis",
+          "target": "beta"
+        }
+      ],
+      "roles": [
+        {
+          "certainty": "certain",
+          "source": "mini-analysis",
+          "value": "taxpayer"
+        }
+      ],
+      "scope": {
+        "en": "Used only in the golden files."
+      },
+      "trust": {
+        "certainty": "likely",
+        "crosswalks": 1,
+        "legal_basis": 1,
+        "lifecycle": 1,
+        "registration_quality": null,
+        "source": "mini-analysis",
+        "verifiability": 0
+      },
+      "validation_source": {
+        "certainty": "certain",
+        "label": "Mini register lookup",
+        "source": "mini-analysis",
+        "url": "https://example.org/mini/lookup"
+      }
+    },
+    "beta": {
+      "abbreviation": {
+        "certainty": "certain",
+        "source": "mini-analysis",
+        "value": "BET"
+      },
+      "availability": {
+        "certainty": "certain",
+        "source": "mini-analysis",
+        "value": "public"
+      },
+      "format": {
+        "examples_valid": [
+          "ZZAB1234"
+        ],
+        "patterns": [
+          {
+            "certainty": "certain",
+            "regex": "^ZZ[A-Z]{2}[0-9]{4}$",
+            "source": "mini-analysis"
+          }
+        ]
+      },
+      "id": "beta",
+      "issuer": {
+        "certainty": "certain",
+        "source": "mini-analysis",
+        "value": "mini-authority"
+      },
+      "jurisdiction": {
+        "certainty": "certain",
+        "source": "mini-analysis",
+        "value": "BB"
+      },
+      "kind": {
+        "certainty": "certain",
+        "source": "mini-analysis",
+        "value": "identifier"
+      },
+      "label": {
+        "en": "Beta identifier"
+      },
+      "rules": [
+        {
+          "certainty": "certain",
+          "condition": {
+            "entity_form": "company"
+          },
+          "examples": [
+            {
+              "in": "AB1234",
+              "out": "ZZAB1234"
+            }
+          ],
+          "id": "beta-from-alpha",
+          "input": "alpha",
+          "output": "beta",
+          "source": "mini-analysis",
+          "transform": [
+            {
+              "add_prefix": "ZZ"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "sources": {
+    "mini-analysis": {
+      "date": "2026-01-01",
+      "id": "mini-analysis",
+      "method": "Written by hand for the golden files; it describes no real identifier.",
+      "title": "Mini analysis for the golden files",
+      "type": "analysis",
+      "url": "https://example.org/mini"
+    }
+  },
+  "vocab": {
+    "applicability-status": {
+      "id": "applicability-status",
+      "label": {
+        "en": "Applicability status"
+      },
+      "values": [
+        {
+          "definition": {
+            "en": "Issued, a synthetic member for the golden files."
+          },
+          "id": "issued",
+          "inherits_down": false,
+          "label": {
+            "en": "Issued"
+          }
+        },
+        {
+          "definition": {
+            "en": "Recognised, a synthetic member for the golden files."
+          },
+          "id": "recognised",
+          "inherits_down": true,
+          "label": {
+            "en": "Recognised"
+          }
+        }
+      ]
+    },
+    "certainty": {
+      "id": "certainty",
+      "label": {
+        "en": "Certainty"
+      },
+      "values": [
+        {
+          "definition": {
+            "en": "Certain, a synthetic member for the golden files."
+          },
+          "id": "certain",
+          "label": {
+            "en": "Certain"
+          },
+          "rank": 3
+        },
+        {
+          "definition": {
+            "en": "Likely, a synthetic member for the golden files."
+          },
+          "id": "likely",
+          "label": {
+            "en": "Likely"
+          },
+          "rank": 2
+        },
+        {
+          "definition": {
+            "en": "Possible, a synthetic member for the golden files."
+          },
+          "id": "possible",
+          "label": {
+            "en": "Possible"
+          },
+          "rank": 1
+        }
+      ]
+    },
+    "checksum": {
+      "id": "checksum",
+      "label": {
+        "en": "Checksum algorithm"
+      },
+      "values": [
+        {
+          "definition": {
+            "en": "Mini check, a synthetic member for the golden files."
+          },
+          "id": "mini-check",
+          "label": {
+            "en": "Mini check"
+          }
+        }
+      ]
+    },
+    "condition-context": {
+      "id": "condition-context",
+      "label": {
+        "en": "Condition context"
+      },
+      "values": []
+    },
+    "country-prefix": {
+      "id": "country-prefix",
+      "label": {
+        "en": "Country prefix"
+      },
+      "values": [
+        {
+          "certainty": "likely",
+          "jurisdiction": "AA",
+          "prefix": "AA",
+          "source": "mini-analysis"
+        }
+      ]
+    },
+    "entity-form": {
+      "id": "entity-form",
+      "label": {
+        "en": "Entity form"
+      },
+      "values": [
+        {
+          "definition": {
+            "en": "Company, a synthetic member for the golden files."
+          },
+          "id": "company",
+          "label": {
+            "en": "Company"
+          }
+        },
+        {
+          "definition": {
+            "en": "Person, a synthetic member for the golden files."
+          },
+          "id": "person",
+          "label": {
+            "en": "Person"
+          }
+        }
+      ]
+    },
+    "level": {
+      "id": "level",
+      "label": {
+        "en": "Level"
+      },
+      "values": [
+        {
+          "definition": {
+            "en": "Legal entity, a synthetic member for the golden files."
+          },
+          "id": "legal-entity",
+          "label": {
+            "en": "Legal entity"
+          }
+        }
+      ]
+    },
+    "persistence-event": {
+      "id": "persistence-event",
+      "label": {
+        "en": "Persistence event"
+      },
+      "values": [
+        {
+          "definition": {
+            "en": "Merger, a synthetic member for the golden files."
+          },
+          "id": "merger",
+          "label": {
+            "en": "Merger"
+          }
+        }
+      ]
+    },
+    "relation-kind": {
+      "id": "relation-kind",
+      "label": {
+        "en": "Relation kind"
+      },
+      "values": [
+        {
+          "definition": {
+            "en": "Derived from, a synthetic member for the golden files."
+          },
+          "id": "derived-from",
+          "label": {
+            "en": "Derived from"
+          }
+        }
+      ]
+    },
+    "role": {
+      "id": "role",
+      "label": {
+        "en": "Role"
+      },
+      "values": [
+        {
+          "definition": {
+            "en": "Taxpayer, a synthetic member for the golden files."
+          },
+          "id": "taxpayer",
+          "label": {
+            "en": "Taxpayer"
+          }
+        }
+      ]
+    }
+  }
+}

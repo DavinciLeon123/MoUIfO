@@ -1,0 +1,1273 @@
+{
+  "@context": {
+    "adms": "http://www.w3.org/ns/adms#",
+    "dct": "http://purl.org/dc/terms/",
+    "def": "https://example.org/ns/def#",
+    "org": "http://www.w3.org/ns/org#",
+    "prov": "http://www.w3.org/ns/prov#",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "skos": "http://www.w3.org/2004/02/skos/core#",
+    "uio": "https://example.org/ns/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "uio:authority/mini-authority",
+      "@type": [
+        "def:AuthorityClass",
+        "org:Organization"
+      ],
+      "skos:definition": {
+        "@language": "en",
+        "@value": "An authority that exists only in the golden files."
+      },
+      "skos:prefLabel": {
+        "@language": "en",
+        "@value": "Mini authority"
+      }
+    },
+    {
+      "@id": "uio:authority/mini-authority-aa",
+      "@type": [
+        "def:Authority",
+        "org:Organization"
+      ],
+      "skos:prefLabel": {
+        "@language": "en",
+        "@value": "Mini authority AA"
+      }
+    },
+    {
+      "@id": "uio:condition/c5618b3a",
+      "@type": "def:Condition",
+      "def:entityForm": {
+        "@id": "uio:vocab/entity-form/company"
+      },
+      "def:issuingCountry": {
+        "@id": "uio:jurisdiction/AA"
+      }
+    },
+    {
+      "@id": "uio:condition/ce86c346",
+      "@type": "def:Condition",
+      "def:entityForm": {
+        "@id": "uio:vocab/entity-form/company"
+      }
+    },
+    {
+      "@id": "uio:jurisdiction/AA",
+      "@type": "def:Jurisdiction",
+      "skos:prefLabel": {
+        "@language": "en",
+        "@value": "Aaland"
+      }
+    },
+    {
+      "@id": "uio:jurisdiction/BB",
+      "@type": "def:Jurisdiction",
+      "skos:prefLabel": {
+        "@language": "en",
+        "@value": "Bbland"
+      }
+    },
+    {
+      "@id": "uio:rule/beta-from-alpha",
+      "@type": "def:Rule",
+      "def:example": {
+        "@type": "@json",
+        "@value": {
+          "in": "AB1234",
+          "out": "ZZAB1234"
+        }
+      },
+      "def:input": {
+        "@id": "uio:scheme/alpha"
+      },
+      "def:output": {
+        "@id": "uio:scheme/beta"
+      },
+      "def:transform": {
+        "@type": "@json",
+        "@value": [
+          {
+            "add_prefix": "ZZ"
+          }
+        ]
+      }
+    },
+    {
+      "@id": "uio:scheme/alpha",
+      "@type": [
+        "def:Scheme",
+        "skos:ConceptScheme"
+      ],
+      "def:exampleInvalid": "1234AB",
+      "def:exampleValid": "AB1234",
+      "skos:note": {
+        "@language": "en",
+        "@value": "A synthetic scheme."
+      },
+      "skos:prefLabel": [
+        {
+          "@language": "en",
+          "@value": "Alpha identifier"
+        },
+        {
+          "@language": "nl",
+          "@value": "Alfa-nummer"
+        }
+      ],
+      "skos:scopeNote": {
+        "@language": "en",
+        "@value": "Used only in the golden files."
+      }
+    },
+    {
+      "@id": "uio:scheme/beta",
+      "@type": [
+        "def:Scheme",
+        "skos:ConceptScheme"
+      ],
+      "def:exampleValid": "ZZAB1234",
+      "skos:prefLabel": {
+        "@language": "en",
+        "@value": "Beta identifier"
+      }
+    },
+    {
+      "@id": "uio:source/mini-analysis",
+      "@type": "def:Source",
+      "dct:date": {
+        "@type": "xsd:date",
+        "@value": "2026-01-01"
+      },
+      "dct:title": "Mini analysis for the golden files",
+      "dct:type": "analysis",
+      "def:method": "Written by hand for the golden files; it describes no real identifier.",
+      "rdfs:seeAlso": {
+        "@id": "https://example.org/mini"
+      }
+    },
+    {
+      "@id": "uio:statement/BB/part-of-09c525ce",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/certain"
+      },
+      "def:object": {
+        "@id": "uio:jurisdiction/AA"
+      },
+      "def:predicate": {
+        "@id": "dct:isPartOf"
+      },
+      "def:subject": {
+        "@id": "uio:jurisdiction/BB"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:statement/alpha/abbreviation-6569d0c2",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/certain"
+      },
+      "def:object": "ALP",
+      "def:predicate": {
+        "@id": "def:abbreviation"
+      },
+      "def:subject": {
+        "@id": "uio:scheme/alpha"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:statement/alpha/applicability-f6f344f5",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/certain"
+      },
+      "def:object": {
+        "@id": "uio:jurisdiction/AA"
+      },
+      "def:predicate": {
+        "@id": "def:applicability"
+      },
+      "def:status": {
+        "@id": "uio:vocab/applicability-status/recognised"
+      },
+      "def:subject": {
+        "@id": "uio:scheme/alpha"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:statement/alpha/applicability-fb549c14",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/certain"
+      },
+      "def:object": {
+        "@id": "uio:jurisdiction/AA"
+      },
+      "def:predicate": {
+        "@id": "def:applicability"
+      },
+      "def:status": {
+        "@id": "uio:vocab/applicability-status/issued"
+      },
+      "def:subject": {
+        "@id": "uio:scheme/alpha"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:statement/alpha/availability-18fe2e62",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/certain"
+      },
+      "def:object": "public",
+      "def:predicate": {
+        "@id": "def:availability"
+      },
+      "def:subject": {
+        "@id": "uio:scheme/alpha"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:statement/alpha/checksum-2ba13a3f",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/possible"
+      },
+      "def:object": {
+        "@id": "uio:vocab/checksum/mini-check"
+      },
+      "def:over": {
+        "@type": "@json",
+        "@value": [
+          {
+            "capture": {
+              "group": 1,
+              "regex": "^[A-Z]{2}([0-9]{4})$"
+            }
+          }
+        ]
+      },
+      "def:position": {
+        "@type": "xsd:integer",
+        "@value": "1"
+      },
+      "def:predicate": {
+        "@id": "def:checksum"
+      },
+      "def:subject": {
+        "@id": "uio:scheme/alpha"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:statement/alpha/issuer-46ccfff7",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/likely"
+      },
+      "def:object": {
+        "@id": "uio:authority/mini-authority"
+      },
+      "def:predicate": {
+        "@id": "adms:schemaAgency"
+      },
+      "def:subject": {
+        "@id": "uio:scheme/alpha"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:statement/alpha/issuing-country-context-e00f011f",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "def:capture": {
+        "@type": "@json",
+        "@value": {
+          "group": 1,
+          "regex": "^([A-Z]{2})"
+        }
+      },
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/certain"
+      },
+      "def:object": {
+        "@id": "uio:vocab/country-prefix"
+      },
+      "def:predicate": {
+        "@id": "def:issuingCountryContext"
+      },
+      "def:subject": {
+        "@id": "uio:scheme/alpha"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:statement/alpha/jurisdiction-300cb0f8",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/certain"
+      },
+      "def:object": {
+        "@id": "uio:jurisdiction/AA"
+      },
+      "def:predicate": {
+        "@id": "dct:spatial"
+      },
+      "def:subject": {
+        "@id": "uio:scheme/alpha"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:statement/alpha/kind-1270fa24",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/certain"
+      },
+      "def:object": "identifier",
+      "def:predicate": {
+        "@id": "def:kind"
+      },
+      "def:subject": {
+        "@id": "uio:scheme/alpha"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:statement/alpha/legal-basis-1657ec15",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "dct:title": "Mini act, article 1",
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/certain"
+      },
+      "def:object": {
+        "@id": "https://example.org/mini/act"
+      },
+      "def:predicate": {
+        "@id": "def:legalBasis"
+      },
+      "def:subject": {
+        "@id": "uio:scheme/alpha"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:statement/alpha/level-badbfa72",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/certain"
+      },
+      "def:object": {
+        "@id": "uio:vocab/level/legal-entity"
+      },
+      "def:predicate": {
+        "@id": "def:level"
+      },
+      "def:subject": {
+        "@id": "uio:scheme/alpha"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:statement/alpha/mandatory-6fced664",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/likely"
+      },
+      "def:object": "Only in the golden files.",
+      "def:predicate": {
+        "@id": "def:mandatory"
+      },
+      "def:subject": {
+        "@id": "uio:scheme/alpha"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:statement/alpha/pattern-76f8f020",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/likely"
+      },
+      "def:condition": {
+        "@id": "uio:condition/c5618b3a"
+      },
+      "def:object": "^[A-Z]{2}[0-9]{5}$",
+      "def:position": {
+        "@type": "xsd:integer",
+        "@value": "2"
+      },
+      "def:predicate": {
+        "@id": "def:formatPattern"
+      },
+      "def:subject": {
+        "@id": "uio:scheme/alpha"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "skos:note": "A longer form for companies."
+    },
+    {
+      "@id": "uio:statement/alpha/pattern-b1da80d4",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/certain"
+      },
+      "def:object": "^[A-Z]{2}[0-9]{4}$",
+      "def:position": {
+        "@type": "xsd:integer",
+        "@value": "1"
+      },
+      "def:predicate": {
+        "@id": "def:formatPattern"
+      },
+      "def:subject": {
+        "@id": "uio:scheme/alpha"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:statement/alpha/persistence-fce63d29",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/likely"
+      },
+      "def:event": {
+        "@id": "uio:vocab/persistence-event/merger"
+      },
+      "def:object": "Unchanged",
+      "def:predicate": {
+        "@id": "def:persistence"
+      },
+      "def:subject": {
+        "@id": "uio:scheme/alpha"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:statement/alpha/relation-f5791720",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/certain"
+      },
+      "def:object": {
+        "@id": "uio:scheme/beta"
+      },
+      "def:predicate": {
+        "@id": "def:relation"
+      },
+      "def:relationKind": {
+        "@id": "uio:vocab/relation-kind/derived-from"
+      },
+      "def:subject": {
+        "@id": "uio:scheme/alpha"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:statement/alpha/role-c67fe61c",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/certain"
+      },
+      "def:object": {
+        "@id": "uio:vocab/role/taxpayer"
+      },
+      "def:predicate": {
+        "@id": "def:role"
+      },
+      "def:subject": {
+        "@id": "uio:scheme/alpha"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:statement/alpha/trust-crosswalks-b5f3e081",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/likely"
+      },
+      "def:object": {
+        "@type": "xsd:integer",
+        "@value": "1"
+      },
+      "def:predicate": {
+        "@id": "def:trustCrosswalks"
+      },
+      "def:subject": {
+        "@id": "uio:scheme/alpha"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:statement/alpha/trust-legal-basis-4bbd9dc3",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/likely"
+      },
+      "def:object": {
+        "@type": "xsd:integer",
+        "@value": "1"
+      },
+      "def:predicate": {
+        "@id": "def:trustLegalBasis"
+      },
+      "def:subject": {
+        "@id": "uio:scheme/alpha"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:statement/alpha/trust-lifecycle-0d8d8f36",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/likely"
+      },
+      "def:object": {
+        "@type": "xsd:integer",
+        "@value": "1"
+      },
+      "def:predicate": {
+        "@id": "def:trustLifecycle"
+      },
+      "def:subject": {
+        "@id": "uio:scheme/alpha"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:statement/alpha/trust-verifiability-76e4dcea",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/likely"
+      },
+      "def:object": {
+        "@type": "xsd:integer",
+        "@value": "0"
+      },
+      "def:predicate": {
+        "@id": "def:trustVerifiability"
+      },
+      "def:subject": {
+        "@id": "uio:scheme/alpha"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:statement/alpha/validation-source-97b1ba8b",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "dct:title": "Mini register lookup",
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/certain"
+      },
+      "def:object": {
+        "@id": "https://example.org/mini/lookup"
+      },
+      "def:predicate": {
+        "@id": "def:validationSource"
+      },
+      "def:subject": {
+        "@id": "uio:scheme/alpha"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:statement/beta/abbreviation-490ad9d5",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/certain"
+      },
+      "def:object": "BET",
+      "def:predicate": {
+        "@id": "def:abbreviation"
+      },
+      "def:subject": {
+        "@id": "uio:scheme/beta"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:statement/beta/availability-0935bb0d",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/certain"
+      },
+      "def:object": "public",
+      "def:predicate": {
+        "@id": "def:availability"
+      },
+      "def:subject": {
+        "@id": "uio:scheme/beta"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:statement/beta/issuer-9d310eef",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/certain"
+      },
+      "def:object": {
+        "@id": "uio:authority/mini-authority"
+      },
+      "def:predicate": {
+        "@id": "adms:schemaAgency"
+      },
+      "def:subject": {
+        "@id": "uio:scheme/beta"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:statement/beta/jurisdiction-198ce4e8",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/certain"
+      },
+      "def:object": {
+        "@id": "uio:jurisdiction/BB"
+      },
+      "def:predicate": {
+        "@id": "dct:spatial"
+      },
+      "def:subject": {
+        "@id": "uio:scheme/beta"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:statement/beta/kind-a63df610",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/certain"
+      },
+      "def:object": "identifier",
+      "def:predicate": {
+        "@id": "def:kind"
+      },
+      "def:subject": {
+        "@id": "uio:scheme/beta"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:statement/beta/pattern-4933d2e3",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/certain"
+      },
+      "def:object": "^ZZ[A-Z]{2}[0-9]{4}$",
+      "def:position": {
+        "@type": "xsd:integer",
+        "@value": "1"
+      },
+      "def:predicate": {
+        "@id": "def:formatPattern"
+      },
+      "def:subject": {
+        "@id": "uio:scheme/beta"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:statement/beta/rule-3e7d06ca",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/certain"
+      },
+      "def:condition": {
+        "@id": "uio:condition/ce86c346"
+      },
+      "def:object": {
+        "@id": "uio:rule/beta-from-alpha"
+      },
+      "def:predicate": {
+        "@id": "def:rule"
+      },
+      "def:subject": {
+        "@id": "uio:scheme/beta"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:statement/country-prefix/jurisdiction-134867b3",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/likely"
+      },
+      "def:object": {
+        "@id": "uio:jurisdiction/AA"
+      },
+      "def:predicate": {
+        "@id": "dct:spatial"
+      },
+      "def:subject": {
+        "@id": "uio:vocab/country-prefix/AA"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:statement/mini-authority-aa/instance-of-37bcca93",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/likely"
+      },
+      "def:object": {
+        "@id": "uio:authority/mini-authority"
+      },
+      "def:predicate": {
+        "@id": "def:instanceOf"
+      },
+      "def:subject": {
+        "@id": "uio:authority/mini-authority-aa"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:statement/mini-authority-aa/jurisdiction-204c4dc0",
+      "@type": "def:Statement",
+      "dct:source": {
+        "@id": "uio:source/mini-analysis"
+      },
+      "def:certainty": {
+        "@id": "uio:vocab/certainty/likely"
+      },
+      "def:object": {
+        "@id": "uio:jurisdiction/AA"
+      },
+      "def:predicate": {
+        "@id": "dct:spatial"
+      },
+      "def:subject": {
+        "@id": "uio:authority/mini-authority-aa"
+      },
+      "prov:wasDerivedFrom": {
+        "@id": "uio:source/mini-analysis"
+      }
+    },
+    {
+      "@id": "uio:vocab/applicability-status",
+      "@type": [
+        "def:Vocabulary",
+        "skos:ConceptScheme"
+      ],
+      "skos:prefLabel": {
+        "@language": "en",
+        "@value": "Applicability status"
+      }
+    },
+    {
+      "@id": "uio:vocab/applicability-status/issued",
+      "@type": [
+        "def:VocabularyMember",
+        "skos:Concept"
+      ],
+      "def:inheritsDown": {
+        "@type": "xsd:boolean",
+        "@value": "false"
+      },
+      "skos:definition": {
+        "@language": "en",
+        "@value": "Issued, a synthetic member for the golden files."
+      },
+      "skos:inScheme": {
+        "@id": "uio:vocab/applicability-status"
+      },
+      "skos:prefLabel": {
+        "@language": "en",
+        "@value": "Issued"
+      }
+    },
+    {
+      "@id": "uio:vocab/applicability-status/recognised",
+      "@type": [
+        "def:VocabularyMember",
+        "skos:Concept"
+      ],
+      "def:inheritsDown": {
+        "@type": "xsd:boolean",
+        "@value": "true"
+      },
+      "skos:definition": {
+        "@language": "en",
+        "@value": "Recognised, a synthetic member for the golden files."
+      },
+      "skos:inScheme": {
+        "@id": "uio:vocab/applicability-status"
+      },
+      "skos:prefLabel": {
+        "@language": "en",
+        "@value": "Recognised"
+      }
+    },
+    {
+      "@id": "uio:vocab/certainty",
+      "@type": [
+        "def:Vocabulary",
+        "skos:ConceptScheme"
+      ],
+      "skos:prefLabel": {
+        "@language": "en",
+        "@value": "Certainty"
+      }
+    },
+    {
+      "@id": "uio:vocab/certainty/certain",
+      "@type": [
+        "def:VocabularyMember",
+        "skos:Concept"
+      ],
+      "def:rank": {
+        "@type": "xsd:integer",
+        "@value": "3"
+      },
+      "skos:definition": {
+        "@language": "en",
+        "@value": "Certain, a synthetic member for the golden files."
+      },
+      "skos:inScheme": {
+        "@id": "uio:vocab/certainty"
+      },
+      "skos:prefLabel": {
+        "@language": "en",
+        "@value": "Certain"
+      }
+    },
+    {
+      "@id": "uio:vocab/certainty/likely",
+      "@type": [
+        "def:VocabularyMember",
+        "skos:Concept"
+      ],
+      "def:rank": {
+        "@type": "xsd:integer",
+        "@value": "2"
+      },
+      "skos:definition": {
+        "@language": "en",
+        "@value": "Likely, a synthetic member for the golden files."
+      },
+      "skos:inScheme": {
+        "@id": "uio:vocab/certainty"
+      },
+      "skos:prefLabel": {
+        "@language": "en",
+        "@value": "Likely"
+      }
+    },
+    {
+      "@id": "uio:vocab/certainty/possible",
+      "@type": [
+        "def:VocabularyMember",
+        "skos:Concept"
+      ],
+      "def:rank": {
+        "@type": "xsd:integer",
+        "@value": "1"
+      },
+      "skos:definition": {
+        "@language": "en",
+        "@value": "Possible, a synthetic member for the golden files."
+      },
+      "skos:inScheme": {
+        "@id": "uio:vocab/certainty"
+      },
+      "skos:prefLabel": {
+        "@language": "en",
+        "@value": "Possible"
+      }
+    },
+    {
+      "@id": "uio:vocab/checksum",
+      "@type": [
+        "def:Vocabulary",
+        "skos:ConceptScheme"
+      ],
+      "skos:prefLabel": {
+        "@language": "en",
+        "@value": "Checksum algorithm"
+      }
+    },
+    {
+      "@id": "uio:vocab/checksum/mini-check",
+      "@type": [
+        "def:VocabularyMember",
+        "skos:Concept"
+      ],
+      "skos:definition": {
+        "@language": "en",
+        "@value": "Mini check, a synthetic member for the golden files."
+      },
+      "skos:inScheme": {
+        "@id": "uio:vocab/checksum"
+      },
+      "skos:prefLabel": {
+        "@language": "en",
+        "@value": "Mini check"
+      }
+    },
+    {
+      "@id": "uio:vocab/condition-context",
+      "@type": [
+        "def:Vocabulary",
+        "skos:ConceptScheme"
+      ],
+      "skos:prefLabel": {
+        "@language": "en",
+        "@value": "Condition context"
+      }
+    },
+    {
+      "@id": "uio:vocab/country-prefix",
+      "@type": [
+        "def:Vocabulary",
+        "skos:ConceptScheme"
+      ],
+      "skos:prefLabel": {
+        "@language": "en",
+        "@value": "Country prefix"
+      }
+    },
+    {
+      "@id": "uio:vocab/country-prefix/AA",
+      "@type": [
+        "def:VocabularyMember",
+        "skos:Concept"
+      ],
+      "skos:inScheme": {
+        "@id": "uio:vocab/country-prefix"
+      },
+      "skos:notation": "AA"
+    },
+    {
+      "@id": "uio:vocab/entity-form",
+      "@type": [
+        "def:Vocabulary",
+        "skos:ConceptScheme"
+      ],
+      "skos:prefLabel": {
+        "@language": "en",
+        "@value": "Entity form"
+      }
+    },
+    {
+      "@id": "uio:vocab/entity-form/company",
+      "@type": [
+        "def:VocabularyMember",
+        "skos:Concept"
+      ],
+      "skos:definition": {
+        "@language": "en",
+        "@value": "Company, a synthetic member for the golden files."
+      },
+      "skos:inScheme": {
+        "@id": "uio:vocab/entity-form"
+      },
+      "skos:prefLabel": {
+        "@language": "en",
+        "@value": "Company"
+      }
+    },
+    {
+      "@id": "uio:vocab/entity-form/person",
+      "@type": [
+        "def:VocabularyMember",
+        "skos:Concept"
+      ],
+      "skos:definition": {
+        "@language": "en",
+        "@value": "Person, a synthetic member for the golden files."
+      },
+      "skos:inScheme": {
+        "@id": "uio:vocab/entity-form"
+      },
+      "skos:prefLabel": {
+        "@language": "en",
+        "@value": "Person"
+      }
+    },
+    {
+      "@id": "uio:vocab/level",
+      "@type": [
+        "def:Vocabulary",
+        "skos:ConceptScheme"
+      ],
+      "skos:prefLabel": {
+        "@language": "en",
+        "@value": "Level"
+      }
+    },
+    {
+      "@id": "uio:vocab/level/legal-entity",
+      "@type": [
+        "def:VocabularyMember",
+        "skos:Concept"
+      ],
+      "skos:definition": {
+        "@language": "en",
+        "@value": "Legal entity, a synthetic member for the golden files."
+      },
+      "skos:inScheme": {
+        "@id": "uio:vocab/level"
+      },
+      "skos:prefLabel": {
+        "@language": "en",
+        "@value": "Legal entity"
+      }
+    },
+    {
+      "@id": "uio:vocab/persistence-event",
+      "@type": [
+        "def:Vocabulary",
+        "skos:ConceptScheme"
+      ],
+      "skos:prefLabel": {
+        "@language": "en",
+        "@value": "Persistence event"
+      }
+    },
+    {
+      "@id": "uio:vocab/persistence-event/merger",
+      "@type": [
+        "def:VocabularyMember",
+        "skos:Concept"
+      ],
+      "skos:definition": {
+        "@language": "en",
+        "@value": "Merger, a synthetic member for the golden files."
+      },
+      "skos:inScheme": {
+        "@id": "uio:vocab/persistence-event"
+      },
+      "skos:prefLabel": {
+        "@language": "en",
+        "@value": "Merger"
+      }
+    },
+    {
+      "@id": "uio:vocab/relation-kind",
+      "@type": [
+        "def:Vocabulary",
+        "skos:ConceptScheme"
+      ],
+      "skos:prefLabel": {
+        "@language": "en",
+        "@value": "Relation kind"
+      }
+    },
+    {
+      "@id": "uio:vocab/relation-kind/derived-from",
+      "@type": [
+        "def:VocabularyMember",
+        "skos:Concept"
+      ],
+      "skos:definition": {
+        "@language": "en",
+        "@value": "Derived from, a synthetic member for the golden files."
+      },
+      "skos:inScheme": {
+        "@id": "uio:vocab/relation-kind"
+      },
+      "skos:prefLabel": {
+        "@language": "en",
+        "@value": "Derived from"
+      }
+    },
+    {
+      "@id": "uio:vocab/role",
+      "@type": [
+        "def:Vocabulary",
+        "skos:ConceptScheme"
+      ],
+      "skos:prefLabel": {
+        "@language": "en",
+        "@value": "Role"
+      }
+    },
+    {
+      "@id": "uio:vocab/role/taxpayer",
+      "@type": [
+        "def:VocabularyMember",
+        "skos:Concept"
+      ],
+      "skos:definition": {
+        "@language": "en",
+        "@value": "Taxpayer, a synthetic member for the golden files."
+      },
+      "skos:inScheme": {
+        "@id": "uio:vocab/role"
+      },
+      "skos:prefLabel": {
+        "@language": "en",
+        "@value": "Taxpayer"
+      }
+    }
+  ]
+}
