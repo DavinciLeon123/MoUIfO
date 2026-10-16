@@ -7,6 +7,7 @@ import { Parser, type Quad } from 'n3';
 import { loadConfig, REPO_ROOT } from 'uio-config';
 import { afterEach, describe, expect, test } from 'vitest';
 import { renderArtefacts } from './build.ts';
+import { LANDSCAPE_COLUMNS } from './tables/landscape.ts';
 import { cleanupBuildRoots, makeBuildRoot } from './testing.ts';
 
 const CLI = fileURLToPath(new URL('./index.ts', import.meta.url));
@@ -113,6 +114,25 @@ describe('renderArtefacts uio.ttl (issuer Statements)', () => {
         ),
       ).toEqual([]);
     }
+  });
+});
+
+describe('renderArtefacts landscape tables', () => {
+  test('writes landscape-table.md and .csv with one row per scheme in id order', async () => {
+    const result = await renderArtefacts(REPO_ROOT, loadConfig());
+    expect(result.problems).toEqual([]);
+    const output = (name: string): string =>
+      result.outputs.find((candidate) => candidate.name === name)?.text ?? '';
+    const csv = output('landscape-table.csv');
+    const markdown = output('landscape-table.md');
+    for (const text of [csv, markdown]) {
+      expect(text.endsWith('\n')).toBe(true);
+      expect(text.endsWith('\n\n')).toBe(false);
+    }
+    const lines = csv.slice(0, -1).split('\n');
+    expect(lines[0]).toBe(LANDSCAPE_COLUMNS.join(','));
+    expect(lines.slice(1).map((line) => line.split(',')[0])).toEqual(stems('schemes'));
+    expect(markdown.startsWith('# Landscape table\n')).toBe(true);
   });
 });
 
