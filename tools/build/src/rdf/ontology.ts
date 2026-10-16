@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import type { Quad } from 'n3';
+import { Parser, type Quad } from 'n3';
 import type { Problem } from 'uio-config';
 import { OWL, RDF } from './iris.ts';
 import { parseTurtle } from './turtle.ts';
@@ -109,4 +109,57 @@ export function ontologyProblems(
     }
   }
   return problems;
+}
+
+/** The prefixes whose IRI is fixed by the namespace (DEC-058): the declared name and its value. */
+const OWN_PREFIXES = (namespace: string): Record<string, string> => ({
+  uio: namespace,
+  def: `${namespace}def#`,
+  shape: `${namespace}shape/`,
+});
+
+/**
+ * Findings for hand-written Turtle (`ontology/` and `shapes/`) whose literal IRIs have drifted from
+ * the `namespace` of config.yaml (DEC-058): a `uio`, `def` or `shape` prefix with another value,
+ * and any IRI on the namespace host that does not start with the namespace. Rejects on text that is
+ * not Turtle. An empty list means no drift.
+ */
+export async function namespaceDrift(text: string, namespace: string): Promise<string[]> {
+  const findings: string[] = [];
+  const origin = `${new URL(namespace).origin}/`;
+  const expected: Record<string, string | undefined> = OWN_PREFIXES(namespace);
+  const iris = new Set<string>();
+  const declared: [string, string][] = [];
+
+  // The n3 Parser reports quads and prefixes through callbacks that fire after parse() returns.
+  await new Promise<void>((resolve, reject) => {
+    new Parser({ format: 'Turtle' }).parse(
+      text,
+      (error, parsed) => {
+        if (error) return reject(error);
+        if (parsed === null) return resolve();
+        for (const term of [parsed.subject, parsed.predicate, parsed.object, parsed.graph]) {
+          if (term.termType === 'NamedNode') iris.add(term.value);
+          if (term.termType === 'Literal') iris.add(term.datatype.value);
+        }
+      },
+      (prefix, iri) => {
+        declared.push([prefix, iri.value]);
+      },
+    );
+  });
+
+  for (const [prefix, iri] of declared) {
+    const want = expected[prefix];
+    if (want !== undefined && iri !== want) {
+      findings.push(`prefix ${prefix}: is <${iri}> and must be <${want}>`);
+    }
+    iris.add(iri);
+  }
+  for (const iri of [...iris].sort()) {
+    if (iri.startsWith(origin) && !iri.startsWith(namespace)) {
+      findings.push(`<${iri}> is on the namespace host but does not start with the namespace`);
+    }
+  }
+  return findings;
 }
