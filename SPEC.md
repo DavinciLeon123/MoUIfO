@@ -65,6 +65,8 @@ The UIO Knowledge Model helps anyone who encounters one or more *Unique Identifi
 
 ## 3. Architecture
 
+> Amended by DECISIONS.md DEC-054: dist/model.json holds normalised tables keyed by id with a contract number and the model version, validated against a closed JSON Schema, and the engine refuses an unknown contract.
+
 ```
  Contributors (PR / issue)
           │
@@ -290,6 +292,8 @@ A rule is either a **transformation** of a value, or an **if-then rule** over pr
 
 > Amended by DECISIONS.md DEC-017: `UIO ontology v0.9.ttl` is input for the `uio:def#` ontology, not a compatibility target.
 
+> Amended by DECISIONS.md DEC-054: dist/model.json is the normalised model with every claim's source and certainty, and the default source of a scheme header is written out on each field.
+
 - Base namespace from `config.yaml`: default `https://w3id.org/uio/`. Schemes: `uio:scheme/<id>`; authorities: `uio:authority/<id>`; rules: `uio:rule/<id>`; ontology: `uio:def#`.
 - Reuse: SKOS (`skos:ConceptScheme`, `skos:prefLabel`, `skos:notation`), ADMS (`adms:Identifier`, `adms:schemaAgency`), W3C ORG (`org:Organization` for authorities), DCTERMS (`dct:source`, `dct:spatial` for jurisdiction), PROV-O (`prov:wasDerivedFrom` to the source), ELI URIs for legislation, EU Authority Tables for countries.
 - Statements with condition, certainty and source are modelled **n-ary**: a node `uio:def#Statement` with `uio:def#subject`, `uio:def#predicate`, `uio:def#object`, `uio:def#condition`, `uio:def#certainty`, `dct:source`. No RDF-star, for maximum compatibility.
@@ -313,6 +317,8 @@ A rule is either a **transformation** of a value, or an **if-then rule** over pr
 TypeScript, ESM, no network access, no dependencies that do I/O. Loads `model.json` (bundled, or supplied via `createEngine(model)`).
 
 ### 6.1 API
+
+> Amended by DECISIONS.md DEC-054: the Model type and the MODEL_CONTRACT constant are part of packages/engine, and createEngine refuses a model with another contract.
 
 ```ts
 createEngine(model: Model): Engine
