@@ -5,12 +5,16 @@ import { fileURLToPath } from 'node:url';
 import { MODEL_CONTRACT } from '@uio/engine';
 import { Parser, type Quad } from 'n3';
 import { loadConfig, REPO_ROOT } from 'uio-config';
-import { afterEach, describe, expect, test } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import { renderArtefacts } from './build.ts';
 import { LANDSCAPE_COLUMNS } from './tables/landscape.ts';
 import { cleanupBuildRoots, makeBuildRoot, parseCsv } from './testing.ts';
 
 const CLI = fileURLToPath(new URL('./index.ts', import.meta.url));
+
+// Each test here renders or spawns the whole build (six outputs plus the BLD-06 proof); under a
+// loaded full-suite run the 5 s default is too tight.
+vi.setConfig({ testTimeout: 30_000 });
 
 afterEach(() => cleanupBuildRoots());
 

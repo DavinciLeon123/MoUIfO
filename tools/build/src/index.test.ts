@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseConfig } from 'uio-config';
-import { afterEach, describe, expect, test } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import { buildDist } from './index.ts';
 import { cleanupBuildRoots, makeBuildRoot } from './testing.ts';
 
@@ -19,6 +19,10 @@ const cfg = parseConfig(
 );
 
 const temps: string[] = [];
+// Each test here renders or spawns the whole build (six outputs plus the BLD-06 proof); under a
+// loaded full-suite run the 5 s default is too tight.
+vi.setConfig({ testTimeout: 30_000 });
+
 afterEach(() => {
   for (const dir of temps.splice(0)) rmSync(dir, { recursive: true, force: true });
   cleanupBuildRoots();
