@@ -1,0 +1,62 @@
+# The uio:def# ontology of the UIO knowledge model.
+#
+# This file is hand-written (D-09, DEC-058). It defines only the classes and properties that the
+# generated graph in dist/uio.ttl emits (D-08), and the build fails when a term is emitted but
+# not defined here, or defined here but not emitted. It is informed by UIO ontology v0.9, which is
+# input and not a compatibility target (DEC-017). It is licensed CC-BY-4.0 (LICENSE-model,
+# DEC-058). The build copies it byte for byte to dist/uio-def.ttl.
+#
+# The absolute IRIs below hold the base namespace of config.yaml as literal text, because
+# standalone Turtle needs absolute IRIs; a test fails when they differ from config.yaml (DEC-058).
+
+@prefix def: <https://w3id.org/uio/def#> .
+@prefix uio: <https://w3id.org/uio/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix adms: <http://www.w3.org/ns/adms#> .
+@prefix org: <http://www.w3.org/ns/org#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+
+uio:def a owl:Ontology ;
+    dct:title "UIO knowledge model ontology"@en ;
+    dct:license <https://creativecommons.org/licenses/by/4.0/> ;
+    rdfs:comment "The classes and properties of the generated UIO knowledge model graph (dist/uio.ttl). Every sourced claim of the model is one def:Statement with exactly one subject, predicate, object, certainty and source."@en ;
+    skos:editorialNote "ADMS caveat (DEC-059): the issuer Statement of a scheme names adms:schemaAgency as its def:predicate and the IRI of an authority as its def:object, although ADMS gives adms:schemaAgency the domain adms:Identifier and the range rdfs:Literal (the name of the agency). The property is the value of def:predicate and never a triple predicate, so no RDFS entailment follows from that domain and range."@en .
+
+#################################
+# Statement
+#################################
+
+def:Statement a owl:Class ;
+    rdfs:subClassOf prov:Entity ;
+    rdfs:label "Statement"@en ;
+    rdfs:comment "An n-ary claim about a subject: one subject, one predicate, one object, one certainty and one source, and optionally a condition. The model does not use RDF-star or reification for this."@en .
+
+def:subject a owl:ObjectProperty ;
+    rdfs:domain def:Statement ;
+    rdfs:label "subject"@en ;
+    rdfs:comment "The resource the statement is about."@en .
+
+def:predicate a owl:ObjectProperty ;
+    rdfs:domain def:Statement ;
+    rdfs:label "predicate"@en ;
+    rdfs:comment "The property the statement asserts of its subject. Its value is an IRI that names a property and is never itself used as a triple predicate."@en .
+
+def:object a owl:ObjectProperty ;
+    rdfs:domain def:Statement ;
+    rdfs:label "object"@en ;
+    rdfs:comment "The value the statement asserts: a resource of the graph, an external IRI or a literal."@en .
+
+def:certainty a owl:ObjectProperty ;
+    rdfs:domain def:Statement ;
+    rdfs:label "certainty"@en ;
+    rdfs:comment "How certain the statement is, a member of the certainty vocabulary."@en .
+
+def:condition a owl:ObjectProperty ;
+    rdfs:domain def:Statement ;
+    rdfs:label "condition"@en ;
+    rdfs:comment "The condition under which the statement holds. A statement without a condition always holds."@en .

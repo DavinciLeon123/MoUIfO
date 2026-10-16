@@ -7,6 +7,7 @@ import { normalise } from './model/normalise.ts';
 import { sameTriples } from './rdf/equivalence.ts';
 import { buildGraph } from './rdf/graph.ts';
 import { toJsonLd } from './rdf/jsonld.ts';
+import { readOntology } from './rdf/ontology.ts';
 import { parseTurtle, prefixesFor, sameQuads, toTurtle } from './rdf/turtle.ts';
 import { landscapeCsv, landscapeMarkdown, landscapeRows } from './tables/landscape.ts';
 
@@ -88,6 +89,9 @@ export async function renderArtefacts(
     return { problems: [{ file: 'dist/uio.jsonld', message }], outputs: [], notes: [] };
   }
 
+  const ontology = readOntology(root);
+  if ('problem' in ontology) return { problems: [ontology.problem], outputs: [], notes: [] };
+
   const rows = landscapeRows(model);
   const size = (table: Record<string, unknown>): number => Object.keys(table).length;
   const notes = [
@@ -97,6 +101,7 @@ export async function renderArtefacts(
     { target: 'dist', name: 'model.json', text: `${JSON.stringify(model, null, 2)}\n` },
     { target: 'dist', name: 'uio.ttl', text: turtle },
     { target: 'dist', name: 'uio.jsonld', text: jsonLd },
+    { target: 'dist', name: 'uio-def.ttl', text: ontology.text },
     { target: 'dist', name: 'landscape-table.md', text: landscapeMarkdown(rows, model) },
     { target: 'dist', name: 'landscape-table.csv', text: landscapeCsv(rows) },
   ];

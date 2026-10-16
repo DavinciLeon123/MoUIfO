@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { MODEL_CONTRACT } from '@uio/engine';
@@ -224,5 +224,48 @@ describe('renderArtefacts BLD-06 gate', () => {
       globalThis.fetch = original;
     }
     expect(calls).toBe(0);
+  });
+});
+
+describe('renderArtefacts uio-def.ttl (D-09)', () => {
+  test('publishes ontology/uio-def.ttl byte for byte as a separate uio-def.ttl output', async () => {
+    const result = await renderArtefacts(REPO_ROOT, loadConfig());
+    expect(result.problems).toEqual([]);
+    const outputs = result.outputs.filter((output) => output.name === 'uio-def.ttl');
+    expect(outputs).toHaveLength(1);
+    const published = Buffer.from(outputs[0]?.text ?? '', 'utf8');
+    const authored = readFileSync(join(REPO_ROOT, 'ontology', 'uio-def.ttl'));
+    expect(published.equals(authored)).toBe(true);
+    expect(authored.at(-1)).toBe(0x0a);
+    expect(authored.at(-2)).not.toBe(0x0a);
+    // D-09: the ontology is a separate file, never merged into uio.ttl.
+    const turtle = result.outputs.find((output) => output.name === 'uio.ttl')?.text ?? '';
+    expect(turtle).not.toContain('owl:Ontology');
+  });
+
+  test('invalid Turtle in ontology/uio-def.ttl is a problem naming that file', async () => {
+    const root = makeBuildRoot();
+    writeFileSync(join(root, 'ontology', 'uio-def.ttl'), 'this is not turtle .\n');
+    const result = await renderArtefacts(root, loadConfig(root));
+    expect(result.outputs).toEqual([]);
+    expect(result.problems.map((problem) => problem.file)).toContain('ontology/uio-def.ttl');
+  });
+
+  test('a missing ontology/uio-def.ttl is a problem naming that file', async () => {
+    const root = makeBuildRoot();
+    rmSync(join(root, 'ontology'), { recursive: true, force: true });
+    const result = await renderArtefacts(root, loadConfig(root));
+    expect(result.outputs).toEqual([]);
+    expect(result.problems.map((problem) => problem.file)).toContain('ontology/uio-def.ttl');
+  });
+
+  test('the CLI writes dist/uio-def.ttl next to dist/uio.ttl', () => {
+    const root = makeBuildRoot();
+    const result = runCli(root);
+    expect(result.status).toBe(0);
+    expect(result.stdout).toContain('dist/uio-def.ttl');
+    const copy = readFileSync(join(root, 'dist', 'uio-def.ttl'));
+    expect(copy.equals(readFileSync(join(root, 'ontology', 'uio-def.ttl')))).toBe(true);
+    expect(existsSync(join(root, 'dist', 'uio.ttl'))).toBe(true);
   });
 });
