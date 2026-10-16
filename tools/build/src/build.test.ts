@@ -168,3 +168,20 @@ describe('build CLI model.json', () => {
     expect(existsSync(join(root, 'dist'))).toBe(false);
   });
 });
+
+describe('renderArtefacts uio.jsonld', () => {
+  test('writes one flat JSON-LD document with an inline context and no blank node', async () => {
+    const result = await renderArtefacts(REPO_ROOT, loadConfig());
+    expect(result.problems).toEqual([]);
+    const outputs = result.outputs.filter((output) => output.name === 'uio.jsonld');
+    expect(outputs).toHaveLength(1);
+    const text = outputs[0]?.text ?? '';
+    expect(text.endsWith('}\n')).toBe(true);
+    expect(text.endsWith('\n\n')).toBe(false);
+    const doc = JSON.parse(text);
+    expect(typeof doc['@context']).toBe('object');
+    expect(Array.isArray(doc['@graph'])).toBe(true);
+    expect(doc['@graph'].length).toBeGreaterThan(100);
+    expect(text).not.toContain('"_:');
+  });
+});

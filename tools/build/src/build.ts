@@ -5,6 +5,7 @@ import type { Problem, UioConfig } from 'uio-config';
 import { checkModelJson, loadValidatedModel } from 'uio-validate';
 import { normalise } from './model/normalise.ts';
 import { buildGraph } from './rdf/graph.ts';
+import { toJsonLd } from './rdf/jsonld.ts';
 import { parseTurtle, prefixesFor, sameQuads, toTurtle } from './rdf/turtle.ts';
 import { landscapeCsv, landscapeMarkdown, landscapeRows } from './tables/landscape.ts';
 
@@ -70,6 +71,8 @@ export async function renderArtefacts(root: string, cfg: UioConfig): Promise<Ren
     return { problems: [{ file: 'dist/uio.ttl', message: turtleProblem }], outputs: [], notes: [] };
   }
 
+  const jsonLd = await toJsonLd(graph.quads, prefixesFor(cfg.namespace));
+
   const rows = landscapeRows(model);
   const size = (table: Record<string, unknown>): number => Object.keys(table).length;
   const notes = [
@@ -78,6 +81,7 @@ export async function renderArtefacts(root: string, cfg: UioConfig): Promise<Ren
   const outputs: Output[] = [
     { target: 'dist', name: 'model.json', text: `${JSON.stringify(model, null, 2)}\n` },
     { target: 'dist', name: 'uio.ttl', text: turtle },
+    { target: 'dist', name: 'uio.jsonld', text: jsonLd },
     { target: 'dist', name: 'landscape-table.md', text: landscapeMarkdown(rows, model) },
     { target: 'dist', name: 'landscape-table.csv', text: landscapeCsv(rows) },
   ];
