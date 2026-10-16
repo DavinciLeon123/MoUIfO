@@ -1,0 +1,84 @@
+# SHACL shapes for the Statement contract of the published graph (D-10, DEC-055, DEC-060).
+#
+# Every def:Statement has exactly one subject, predicate, object, certainty and source, its
+# prov:wasDerivedFrom equals its dct:source, and its certainty is a member of the certainty
+# vocabulary. The build validates the re-parsed dist/uio.ttl against this file and fails on any
+# result. Only SHACL Core is used. Each property shape has an IRI of its own so a test can tell
+# which shape rejected which fixture value; the fixture is shapes/fixtures/statement.fail.ttl.
+#
+# The absolute IRIs hold the base namespace of config.yaml as literal text, because standalone
+# Turtle needs absolute IRIs; a test fails when they differ from config.yaml (DEC-058).
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix def: <https://w3id.org/uio/def#> .
+@prefix uio: <https://w3id.org/uio/> .
+@prefix shape: <https://w3id.org/uio/shape/> .
+
+shape:Statement a sh:NodeShape ;
+    sh:targetClass def:Statement ;
+    sh:nodeKind sh:IRI ;
+    # The subject id may be uppercase (a jurisdiction id), so [A-Za-z]; the pattern is anchored
+    # at the tail only, so the namespace is not repeated here (RESEARCH Pitfall 3).
+    sh:pattern "/statement/[A-Za-z][A-Za-z0-9-]*/[a-z][a-z0-9-]*-[0-9a-f]{8}$" ;
+    sh:property shape:Statement-subject ,
+        shape:Statement-predicate ,
+        shape:Statement-object ,
+        shape:Statement-certainty ,
+        shape:Statement-source ,
+        shape:Statement-derived ,
+        shape:Statement-condition .
+
+shape:Statement-subject a sh:PropertyShape ;
+    sh:path def:subject ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:IRI .
+
+shape:Statement-predicate a sh:PropertyShape ;
+    sh:path def:predicate ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:IRI .
+
+shape:Statement-object a sh:PropertyShape ;
+    sh:path def:object ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:IRIOrLiteral .
+
+shape:Statement-certainty a sh:PropertyShape ;
+    sh:path def:certainty ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:class def:VocabularyMember ;
+    sh:node shape:CertaintyMember .
+
+# A member of the certainty vocabulary and of no other vocabulary.
+shape:CertaintyMember a sh:NodeShape ;
+    sh:property [
+        sh:path skos:inScheme ;
+        sh:hasValue <https://w3id.org/uio/vocab/certainty>
+    ] .
+
+shape:Statement-source a sh:PropertyShape ;
+    sh:path dct:source ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:class def:Source .
+
+# dct:source and prov:wasDerivedFrom name the same resource (DEC-055).
+shape:Statement-derived a sh:PropertyShape ;
+    sh:path prov:wasDerivedFrom ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:equals dct:source .
+
+shape:Statement-condition a sh:PropertyShape ;
+    sh:path def:condition ;
+    sh:maxCount 1 ;
+    sh:class def:Condition .

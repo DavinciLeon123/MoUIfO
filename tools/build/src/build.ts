@@ -8,6 +8,7 @@ import { sameTriples } from './rdf/equivalence.ts';
 import { buildGraph } from './rdf/graph.ts';
 import { toJsonLd } from './rdf/jsonld.ts';
 import { ontologyProblems, readOntology } from './rdf/ontology.ts';
+import { readShapes, resultProblem, validateShapes } from './rdf/shacl.ts';
 import { parseTurtle, prefixesFor, sameQuads, toTurtle } from './rdf/turtle.ts';
 import { landscapeCsv, landscapeMarkdown, landscapeRows } from './tables/landscape.ts';
 
@@ -80,6 +81,21 @@ export async function renderArtefacts(
   const turtleProblem = checkTurtle(turtle, graph.quads);
   if (turtleProblem !== undefined) {
     return { problems: [{ file: 'dist/uio.ttl', message: turtleProblem }], outputs: [], notes: [] };
+  }
+
+  // BLD-04, D-10, DEC-060: the published artefact, as re-parsed, must satisfy every shape.
+  const shapes = readShapes(root);
+  if ('problem' in shapes) return { problems: [shapes.problem], outputs: [], notes: [] };
+  const shaclReport = await validateShapes(
+    shapes.map((shape) => shape.text),
+    parseTurtle(turtle),
+  );
+  if (!shaclReport.conforms) {
+    const problems = shaclReport.results.map(resultProblem);
+    if (problems.length === 0) {
+      problems.push({ file: 'dist/uio.ttl', message: 'SHACL validation did not conform' });
+    }
+    return { problems, outputs: [], notes: [] };
   }
 
   const jsonLd = await (seams.serialiseJsonLd ?? toJsonLd)(graph.quads, prefixesFor(cfg.namespace));

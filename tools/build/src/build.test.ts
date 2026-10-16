@@ -295,3 +295,49 @@ describe('renderArtefacts uio-def.ttl (D-09)', () => {
     expect(existsSync(join(root, 'dist', 'uio.ttl'))).toBe(true);
   });
 });
+
+describe('renderArtefacts SHACL validation (BLD-04, DEC-060)', () => {
+  test('a shape the graph violates fails the render with a dist/uio.ttl problem naming focus node, path and shape', async () => {
+    const root = makeBuildRoot();
+    const def = `${loadConfig(root).namespace}def#`;
+    const shapes = `${loadConfig(root).namespace}shape/`;
+    writeFileSync(
+      join(root, 'shapes', 'statement.ttl'),
+      [
+        '@prefix sh: <http://www.w3.org/ns/shacl#> .',
+        `<${shapes}Impossible> a sh:NodeShape ;`,
+        `  sh:targetClass <${def}Statement> ;`,
+        `  sh:property <${shapes}Impossible-subject> .`,
+        `<${shapes}Impossible-subject> a sh:PropertyShape ;`,
+        `  sh:path <${def}subject> ; sh:minCount 2 .`,
+        '',
+      ].join('\n'),
+    );
+    const result = await renderArtefacts(root, loadConfig(root));
+    expect(result.outputs).toEqual([]);
+    expect(result.problems.length).toBeGreaterThan(0);
+    for (const problem of result.problems) {
+      expect(problem.file).toBe('dist/uio.ttl');
+      expect(problem.message).toContain('violates');
+      expect(problem.message).toContain(`<${shapes}Impossible-subject>`);
+      expect(problem.message).toContain(`<${def}subject>`);
+      expect(problem.message).toContain('/statement/');
+    }
+  });
+
+  test('a root without any shapes/*.ttl is a problem naming shapes/', async () => {
+    const root = makeBuildRoot();
+    rmSync(join(root, 'shapes'), { recursive: true, force: true });
+    const result = await renderArtefacts(root, loadConfig(root));
+    expect(result.outputs).toEqual([]);
+    expect(result.problems.map((problem) => problem.file)).toEqual(['shapes']);
+  });
+
+  test('a shape file that is not Turtle is a problem naming that file', async () => {
+    const root = makeBuildRoot();
+    writeFileSync(join(root, 'shapes', 'statement.ttl'), 'this is not turtle .\n');
+    const result = await renderArtefacts(root, loadConfig(root));
+    expect(result.outputs).toEqual([]);
+    expect(result.problems.map((problem) => problem.file)).toEqual(['shapes/statement.ttl']);
+  });
+});
