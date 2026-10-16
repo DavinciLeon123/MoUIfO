@@ -1,8 +1,8 @@
 import type { Scheme } from '@uio/engine';
 import { DataFactory, type Literal, type NamedNode } from 'n3';
-import { ADMS, type Iris } from './iris.ts';
+import { ADMS, DCT, type Iris } from './iris.ts';
 
-const { namedNode } = DataFactory;
+const { namedNode, literal } = DataFactory;
 
 /** A triple that hangs off the Statement node: a predicate IRI and an object term. */
 export type Extra = { predicate: string; object: NamedNode | Literal };
@@ -43,6 +43,17 @@ type HeaderKind = {
   payload: (value: string, iris: Iris) => string;
 };
 
+/** A header field whose object is a plain literal and whose predicate is a `def:` term. */
+function plainLiteral(field: keyof Scheme, claim: string, term: string): HeaderKind {
+  return {
+    field,
+    claim,
+    predicate: (iris) => iris.def(term),
+    object: (value) => literal(value),
+    payload: (value) => value,
+  };
+}
+
 const HEADERS: readonly HeaderKind[] = [
   {
     field: 'issuer',
@@ -51,6 +62,18 @@ const HEADERS: readonly HeaderKind[] = [
     object: (value, iris) => namedNode(iris.authority(value)),
     payload: (value, iris) => iris.authority(value),
   },
+  {
+    field: 'jurisdiction',
+    claim: 'jurisdiction',
+    predicate: () => `${DCT}spatial`,
+    object: (value, iris) => namedNode(iris.jurisdiction(value)),
+    payload: (value, iris) => iris.jurisdiction(value),
+  },
+  plainLiteral('kind', 'kind', 'kind'),
+  plainLiteral('abbreviation', 'abbreviation', 'abbreviation'),
+  plainLiteral('availability', 'availability', 'availability'),
+  plainLiteral('iso6523_icd', 'iso6523-icd', 'iso6523Icd'),
+  plainLiteral('peppol_eas', 'peppol-eas', 'peppolEas'),
 ];
 
 /** The header claims of one scheme, in table order. */

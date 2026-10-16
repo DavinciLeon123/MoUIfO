@@ -4,6 +4,7 @@ import type { Problem } from 'uio-config';
 import { type ClaimInstance, schemeClaims } from './claims.ts';
 import { createMinter } from './hash.ts';
 import { checkExternalIri, DCT, makeIris, PROV, RDF, SKOS } from './iris.ts';
+import { structureQuads } from './nodes.ts';
 
 const { namedNode, quad } = DataFactory;
 
@@ -121,6 +122,8 @@ export function buildGraph(model: Model, namespace: string): Graph {
       quads.push(...statementQuads(claim, iri, iris));
     }
   }
+
+  quads.push(...structureQuads(model, iris));
 
   const problems: Problem[] = minter.problems().map((message) => ({ file: GRAPH_FILE, message }));
   return { quads: sortedUnique(quads), problems };
