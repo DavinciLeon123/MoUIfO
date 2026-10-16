@@ -8,6 +8,7 @@
     "node": ">=22.18"
   },
   "dependencies": {
-    "uio-config": "*"
+    "uio-config": "*",
+    "uio-validate": "*"
   }
 }
