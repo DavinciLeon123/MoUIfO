@@ -4,6 +4,7 @@ import type { Quad } from 'n3';
 import type { Problem, UioConfig } from 'uio-config';
 import { checkModelJson, loadValidatedModel } from 'uio-validate';
 import { normalise } from './model/normalise.ts';
+import { sameTriples } from './rdf/equivalence.ts';
 import { buildGraph } from './rdf/graph.ts';
 import { toJsonLd } from './rdf/jsonld.ts';
 import { parseTurtle, prefixesFor, sameQuads, toTurtle } from './rdf/turtle.ts';
@@ -48,11 +49,20 @@ function checkTurtle(text: string, quads: readonly Quad[]): string | undefined {
   return difference === undefined ? undefined : `the re-parsed Turtle differs: ${difference}`;
 }
 
+/** Test seam: replaces the JSON-LD serialiser so a test can prove the BLD-06 gate fails the render. */
+export type RenderSeams = {
+  serialiseJsonLd?: (quads: readonly Quad[], context: Record<string, string>) => Promise<string>;
+};
+
 /**
  * Render every artefact in memory; nothing is written here. A problem at any step ends the render
  * with the problems found, so the caller writes only after every check passed.
  */
-export async function renderArtefacts(root: string, cfg: UioConfig): Promise<Rendered> {
+export async function renderArtefacts(
+  root: string,
+  cfg: UioConfig,
+  seams: RenderSeams = {},
+): Promise<Rendered> {
   const loaded = loadValidatedModel(root);
   if (!loaded.ok) return { problems: loaded.problems, outputs: [], notes: [] };
 
@@ -71,7 +81,12 @@ export async function renderArtefacts(root: string, cfg: UioConfig): Promise<Ren
     return { problems: [{ file: 'dist/uio.ttl', message: turtleProblem }], outputs: [], notes: [] };
   }
 
-  const jsonLd = await toJsonLd(graph.quads, prefixesFor(cfg.namespace));
+  const jsonLd = await (seams.serialiseJsonLd ?? toJsonLd)(graph.quads, prefixesFor(cfg.namespace));
+  const equivalence = await sameTriples(turtle, jsonLd);
+  if (!equivalence.equal) {
+    const message = `dist/uio.ttl and dist/uio.jsonld must hold the same triples (Turtle ${equivalence.sizes.ttl}, JSON-LD ${equivalence.sizes.jsonld}); first difference: ${equivalence.firstDifference ?? 'unknown'}`;
+    return { problems: [{ file: 'dist/uio.jsonld', message }], outputs: [], notes: [] };
+  }
 
   const rows = landscapeRows(model);
   const size = (table: Record<string, unknown>): number => Object.keys(table).length;

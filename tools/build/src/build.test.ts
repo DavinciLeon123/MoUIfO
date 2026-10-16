@@ -185,3 +185,40 @@ describe('renderArtefacts uio.jsonld', () => {
     expect(text).not.toContain('"_:');
   });
 });
+
+describe('renderArtefacts BLD-06 gate', () => {
+  test('fails with a dist/uio.jsonld problem when the JSON-LD would differ', async () => {
+    const broken = async (): Promise<string> =>
+      `${JSON.stringify({ '@context': {}, '@graph': [] }, null, 2)}\n`;
+    const result = await renderArtefacts(REPO_ROOT, loadConfig(), { serialiseJsonLd: broken });
+    expect(result.outputs).toEqual([]);
+    expect(result.problems).toHaveLength(1);
+    expect(result.problems[0]?.file).toBe('dist/uio.jsonld');
+    expect(result.problems[0]?.message).toMatch(/triples/);
+    expect(result.problems[0]?.message).toMatch(/only in the Turtle/);
+  });
+
+  test('fails with a dist/uio.jsonld problem when the JSON-LD cannot be parsed', async () => {
+    const result = await renderArtefacts(REPO_ROOT, loadConfig(), {
+      serialiseJsonLd: async () => 'not json',
+    });
+    expect(result.problems[0]?.file).toBe('dist/uio.jsonld');
+  });
+
+  test('a full render succeeds while fetch is a throwing stub that is never called', async () => {
+    const original = globalThis.fetch;
+    let calls = 0;
+    globalThis.fetch = (() => {
+      calls += 1;
+      throw new Error('fetch must not be called');
+    }) as typeof fetch;
+    try {
+      const result = await renderArtefacts(REPO_ROOT, loadConfig());
+      expect(result.problems).toEqual([]);
+      expect(result.outputs.map((output) => output.name)).toContain('uio.jsonld');
+    } finally {
+      globalThis.fetch = original;
+    }
+    expect(calls).toBe(0);
+  });
+});
