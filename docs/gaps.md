@@ -353,3 +353,17 @@ These checks need a browser or a human reading, because the build environment ca
 - **Why it is not in the model:** it is a tooling follow-up, not model knowledge, and no model statement depends on it. Plan 03-01 met the false positive on the serialized snapshot and worked around it (owner-approved option A: the snapshot test applies the pattern to the decoded string values). The pattern itself was left unchanged, and this entry does not change it either. The Phase 3 verification lists it as a follow-up.
 - **Open question:** how should the drive-letter alternative be narrowed (for example an uppercase-only letter class, or a drive letter at the start of a path) so that the other markers keep their case-insensitive match?
 - **Owner or next step:** a separate tooling change narrows the pattern, adds a test case for the escaped line break, and removes this entry.
+
+## ADMS domain and range of the issuer predicate (DEC-059)
+
+- **Item:** the issuer Statement of a scheme names `adms:schemaAgency` as its `uio:def#predicate` and the IRI of the authority as its object (SPEC §5.5, DEC-059).
+- **Why it is not in the model:** it is in the model, with a caveat. ADMS gives the property the domain `adms:Identifier` and the range `rdfs:Literal` (the name of the agency), whereas the model uses it for a scheme and an authority IRI. Because the property is the value of `uio:def#predicate` and not a triple predicate, no RDFS entailment follows, and the mismatch is noted in the ontology.
+- **Open question:** should a later version publish its own issuer property (the v0.9 ontology had `:issuedBy`) as a sub-property of `dct:publisher` instead?
+- **Owner or next step:** the owner, at the w3id registration in Phase 8 or when a consumer reports a reasoning problem.
+
+## adms:Identifier of SPEC §5.5 not used (DEC-061)
+
+- **Item:** the SPEC §5.5 reuse item `adms:Identifier`.
+- **Why it is not in the model:** the model holds no identifier values, only examples, which stay literals of the scheme, and the owner decided on 2026-10-15 to mint no identifier nodes for examples (DEC-061).
+- **Open question:** should a later phase publish identifier instances, for example when a consumer needs ADMS identifiers?
+- **Owner or next step:** the owner.
