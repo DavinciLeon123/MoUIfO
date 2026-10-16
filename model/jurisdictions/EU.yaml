@@ -3,3 +3,7 @@ id: EU
 label:
   en: European Union
   nl: Europese Unie
+authority_table:
+  iri: "http://publications.europa.eu/resource/authority/country/EUR"
+  source: eu-country-authority-table
+  certainty: certain

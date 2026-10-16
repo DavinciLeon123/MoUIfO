@@ -7,3 +7,7 @@ part_of:
   - jurisdiction: EU
     source: teu-art-52
     certainty: certain
+authority_table:
+  iri: "http://publications.europa.eu/resource/authority/country/BEL"
+  source: eu-country-authority-table
+  certainty: certain

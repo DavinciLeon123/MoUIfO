@@ -6,7 +6,7 @@ import { loadValidatedModel } from 'uio-validate';
 import { beforeAll, describe, expect, test } from 'vitest';
 import { renderArtefacts } from './build.ts';
 
-// Real-data assertions for the EU country authority table mappings (DEC-057, plan 04-12). Task 1 maps NL; task 2 extends the set.
+// Real-data assertions for the EU country authority table mappings (DEC-057, plan 04-12).
 // The slow build runs once in beforeAll, so a test timeout of 30 s keeps a failure readable.
 
 const SKOS_EXACT_MATCH = 'http://www.w3.org/2004/02/skos/core#exactMatch';
@@ -15,6 +15,10 @@ const SOURCE_ID = 'eu-country-authority-table';
 
 /** DEC-057: the mapped jurisdictions and the entry each one maps to. */
 const MAPPED: Record<string, string> = {
+  BE: 'BEL',
+  EU: 'EUR',
+  GB: 'GBR',
+  GR: 'GRC',
   NL: 'NLD',
 };
 /** DEC-057: jurisdictions left out and logged in docs/gaps.md. */
@@ -99,5 +103,25 @@ describe('the published Statements', () => {
         }))
         .sort((a, b) => (a.subject < b.subject ? -1 : a.subject > b.subject ? 1 : 0)),
     );
+  });
+});
+
+describe('docs/gaps.md', () => {
+  test('lists the jurisdictions left out, in a four-part entry', () => {
+    const gaps = readFileSync(join(REPO_ROOT, 'docs', 'gaps.md'), 'utf8');
+    const heading = '## Country authority table entries not mapped (DEC-057)';
+    const start = gaps.indexOf(`\n${heading}\n`);
+    expect(start).toBeGreaterThan(-1);
+    const end = gaps.indexOf('\n## ', start + 1);
+    const section = gaps.slice(start, end < 0 ? undefined : end);
+    for (const part of [
+      '**Item:**',
+      '**Why it is not in the model:**',
+      '**Open question:**',
+      '**Owner or next step:**',
+    ]) {
+      expect(section).toContain(part);
+    }
+    for (const id of UNMAPPED) expect(section).toContain(id);
   });
 });

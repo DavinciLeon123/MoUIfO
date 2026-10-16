@@ -329,12 +329,20 @@ describe('non-scheme subjects', () => {
     expect(objectsOf(found, SKOS_NOTE).length).toBeGreaterThan(0);
   });
 
-  test('a jurisdiction with an authority_table entry gives a skos:exactMatch Statement; the real model none', () => {
+  test('a jurisdiction with an authority_table entry gives a skos:exactMatch Statement; the real model one per mapped jurisdiction', () => {
     const exact = 'http://www.w3.org/2004/02/skos/core#exactMatch';
+    // The real model maps its jurisdictions to the country table (DEC-057, plan 04-12).
+    const mapped = Object.values(model.jurisdictions).filter(
+      (jurisdiction) => jurisdiction.authority_table !== undefined,
+    );
     expect(
       quads.filter((q) => q.object.value === exact && q.predicate.value === def('predicate')),
-    ).toEqual([]);
+    ).toHaveLength(mapped.length);
     const fixture = structuredClone(model);
+    // Start from no mapping, so the single Statement below is the fixture's own.
+    for (const jurisdiction of Object.values(fixture.jurisdictions)) {
+      delete jurisdiction.authority_table;
+    }
     const table = 'https://publications.europa.eu/resource/authority/country/NLD';
     const nl = fixture.jurisdictions.NL;
     if (nl === undefined) throw new Error('the real model has NL');

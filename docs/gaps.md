@@ -367,3 +367,10 @@ These checks need a browser or a human reading, because the build environment ca
 - **Why it is not in the model:** the model holds no identifier values, only examples, which stay literals of the scheme, and the owner decided on 2026-10-15 to mint no identifier nodes for examples (DEC-061).
 - **Open question:** should a later phase publish identifier instances, for example when a consumer needs ADMS identifiers?
 - **Owner or next step:** the owner.
+
+## Country authority table entries not mapped (DEC-057)
+
+- **Item:** the jurisdictions `GLOBAL` and `XI` carry no `authority_table`. The other five (NL, BE, GB, GR, and EU to the entry EUR) are mapped, each after its entry was read on 2026-10-16.
+- **Why it is not in the model:** `GLOBAL` ("Worldwide") is not a country or territory and has no entry in the Publications Office list "Countries and territories". `XI` (Northern Ireland) is left out by the owner's answer of 2026-10-15 (DEC-057). The table, as read through the Publications Office SPARQL endpoint on 2026-10-16, holds no entry with the ISO 3166-1 alpha-2 notation XI, and the IRI `http://publications.europa.eu/resource/authority/country/XI` returns an empty RDF document, so no mapping could be stated for it. Every mapped entry (NLD, BEL, GBR, GRC, EUR) states the alpha-2 notation NL, BE, GB, GR and EU respectively.
+- **Open question:** should `XI` map to an entry once the table has one for Northern Ireland, and should `GLOBAL` map to a world entry if the table ever offers one?
+- **Owner or next step:** the owner.
