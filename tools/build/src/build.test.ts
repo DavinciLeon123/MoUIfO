@@ -3,6 +3,7 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { MODEL_CONTRACT } from '@uio/engine';
+import { Parser, type Quad } from 'n3';
 import { loadConfig, REPO_ROOT } from 'uio-config';
 import { afterEach, describe, expect, test } from 'vitest';
 import { renderArtefacts } from './build.ts';
@@ -52,6 +53,66 @@ describe('renderArtefacts', () => {
       'vocab',
     ]);
     expect(result.notes.join('\n')).toContain('build: model loaded (');
+  });
+});
+
+const RDF_TYPE = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
+const DCT_SOURCE = 'http://purl.org/dc/terms/source';
+const PROV_DERIVED = 'http://www.w3.org/ns/prov#wasDerivedFrom';
+const SCHEMA_AGENCY = 'http://www.w3.org/ns/adms#schemaAgency';
+
+describe('renderArtefacts uio.ttl (issuer Statements)', () => {
+  test('writes one issuer Statement per scheme, each tied to its scheme, authority and source', async () => {
+    const cfg = loadConfig();
+    const namespace = cfg.namespace;
+    const def = (term: string): string => `${namespace}def#${term}`;
+    const result = await renderArtefacts(REPO_ROOT, cfg);
+    expect(result.problems).toEqual([]);
+    const outputs = result.outputs.filter((output) => output.name === 'uio.ttl');
+    expect(outputs).toHaveLength(1);
+    const text = outputs[0]?.text ?? '';
+    expect(text.endsWith('\n')).toBe(true);
+    expect(text.endsWith('\n\n')).toBe(false);
+    expect(text).not.toContain('_:');
+    expect(text).not.toContain('<<');
+
+    const quads: Quad[] = new Parser().parse(text);
+    const objectsOf = (subject: string, predicate: string): string[] =>
+      quads
+        .filter((q) => q.subject.value === subject && q.predicate.value === predicate)
+        .map((q) => q.object.value);
+
+    const model = JSON.parse(
+      (result.outputs.find((output) => output.name === 'model.json') ?? { text: '{}' }).text,
+    );
+    const schemes = Object.values(model.schemes) as {
+      id: string;
+      issuer: { value: string; source: string };
+    }[];
+    const issuers = quads
+      .filter((q) => q.predicate.value === def('predicate') && q.object.value === SCHEMA_AGENCY)
+      .map((q) => q.subject.value);
+    expect(issuers).toHaveLength(schemes.length);
+    for (const scheme of schemes) {
+      const found = issuers.filter((iri) =>
+        new RegExp(`/statement/${scheme.id}/issuer-[0-9a-f]{8}$`).test(iri),
+      );
+      expect(found).toHaveLength(1);
+      const iri = found[0] ?? '';
+      expect(objectsOf(iri, RDF_TYPE)).toEqual([def('Statement')]);
+      expect(objectsOf(iri, def('subject'))).toEqual([`${namespace}scheme/${scheme.id}`]);
+      expect(objectsOf(iri, def('object'))).toEqual([
+        `${namespace}authority/${scheme.issuer.value}`,
+      ]);
+      expect(objectsOf(iri, DCT_SOURCE)).toEqual([`${namespace}source/${scheme.issuer.source}`]);
+      expect(objectsOf(iri, PROV_DERIVED)).toEqual(objectsOf(iri, DCT_SOURCE));
+      // D-05: no plain triple repeats the claim.
+      expect(
+        quads.filter(
+          (q) => q.predicate.value === SCHEMA_AGENCY && q.subject.value.includes('/scheme/'),
+        ),
+      ).toEqual([]);
+    }
   });
 });
 
