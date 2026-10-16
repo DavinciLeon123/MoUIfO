@@ -1,6 +1,7 @@
 import type { Label, Model, Text } from '@uio/engine';
 import { DataFactory, type Literal, type NamedNode, type Quad } from 'n3';
 import { DCT, type Iris, ORG, RDF, RDFS, SKOS, XSD } from './iris.ts';
+import { jsonLiteral } from './literals.ts';
 
 const { namedNode, literal, quad } = DataFactory;
 
@@ -55,6 +56,18 @@ export function structureQuads(model: Model, iris: Iris): Quad[] {
     }
     for (const value of scheme.format?.examples_invalid ?? []) {
       node.plain(iris.def('exampleInvalid'), value);
+    }
+
+    // A rule is a node of its own: the Statement of the scheme points to it (D-05).
+    for (const rule of scheme.rules ?? []) {
+      const ruleNode = nodeWriter(quads, iris.rule(rule.id));
+      ruleNode.types(iris.def('Rule'));
+      ruleNode.add(iris.def('input'), namedNode(iris.scheme(rule.input)));
+      ruleNode.add(iris.def('output'), namedNode(iris.scheme(rule.output)));
+      ruleNode.add(iris.def('transform'), jsonLiteral(rule.transform));
+      for (const example of rule.examples ?? []) {
+        ruleNode.add(iris.def('example'), jsonLiteral(example));
+      }
     }
   }
 
