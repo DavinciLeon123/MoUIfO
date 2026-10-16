@@ -7,7 +7,7 @@ import { normalise } from './model/normalise.ts';
 import { sameTriples } from './rdf/equivalence.ts';
 import { buildGraph } from './rdf/graph.ts';
 import { toJsonLd } from './rdf/jsonld.ts';
-import { readOntology } from './rdf/ontology.ts';
+import { ontologyProblems, readOntology } from './rdf/ontology.ts';
 import { parseTurtle, prefixesFor, sameQuads, toTurtle } from './rdf/turtle.ts';
 import { landscapeCsv, landscapeMarkdown, landscapeRows } from './tables/landscape.ts';
 
@@ -91,6 +91,8 @@ export async function renderArtefacts(
 
   const ontology = readOntology(root);
   if ('problem' in ontology) return { problems: [ontology.problem], outputs: [], notes: [] };
+  const termProblems = ontologyProblems(ontology.quads, graph.quads, cfg.namespace);
+  if (termProblems.length > 0) return { problems: termProblems, outputs: [], notes: [] };
 
   const rows = landscapeRows(model);
   const size = (table: Record<string, unknown>): number => Object.keys(table).length;

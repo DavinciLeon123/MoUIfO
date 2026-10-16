@@ -259,6 +259,32 @@ describe('renderArtefacts uio-def.ttl (D-09)', () => {
     expect(result.problems.map((problem) => problem.file)).toContain('ontology/uio-def.ttl');
   });
 
+  test('an emitted def: term with no definition fails the render naming the term', async () => {
+    const root = makeBuildRoot();
+    const path = join(root, 'ontology', 'uio-def.ttl');
+    const text = readFileSync(path, 'utf8');
+    const start = text.indexOf('def:Rule a owl:Class');
+    const end = text.indexOf('def:Condition a owl:Class');
+    expect(start).toBeGreaterThan(0);
+    writeFileSync(path, text.slice(0, start) + text.slice(end));
+    const result = await renderArtefacts(root, loadConfig(root));
+    expect(result.outputs).toEqual([]);
+    expect(result.problems).toEqual([
+      { file: 'ontology/uio-def.ttl', message: 'def:Rule is emitted but not defined' },
+    ]);
+  });
+
+  test('a defined def: term the graph never emits fails the render naming the term', async () => {
+    const root = makeBuildRoot();
+    const path = join(root, 'ontology', 'uio-def.ttl');
+    writeFileSync(path, `${readFileSync(path, 'utf8')}\ndef:Unused a owl:Class .\n`);
+    const result = await renderArtefacts(root, loadConfig(root));
+    expect(result.outputs).toEqual([]);
+    expect(result.problems).toEqual([
+      { file: 'ontology/uio-def.ttl', message: 'def:Unused is defined but not emitted (D-08)' },
+    ]);
+  });
+
   test('the CLI writes dist/uio-def.ttl next to dist/uio.ttl', () => {
     const root = makeBuildRoot();
     const result = runCli(root);
