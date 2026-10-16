@@ -8,7 +8,7 @@ import { loadConfig, REPO_ROOT } from 'uio-config';
 import { afterEach, describe, expect, test } from 'vitest';
 import { renderArtefacts } from './build.ts';
 import { LANDSCAPE_COLUMNS } from './tables/landscape.ts';
-import { cleanupBuildRoots, makeBuildRoot } from './testing.ts';
+import { cleanupBuildRoots, makeBuildRoot, parseCsv } from './testing.ts';
 
 const CLI = fileURLToPath(new URL('./index.ts', import.meta.url));
 
@@ -129,9 +129,10 @@ describe('renderArtefacts landscape tables', () => {
       expect(text.endsWith('\n')).toBe(true);
       expect(text.endsWith('\n\n')).toBe(false);
     }
-    const lines = csv.slice(0, -1).split('\n');
-    expect(lines[0]).toBe(LANDSCAPE_COLUMNS.join(','));
-    expect(lines.slice(1).map((line) => line.split(',')[0])).toEqual(stems('schemes'));
+    const records = parseCsv(csv);
+    expect(records[0]).toEqual([...LANDSCAPE_COLUMNS]);
+    expect(csv.startsWith(`${LANDSCAPE_COLUMNS.join(',')}\n`)).toBe(true);
+    expect(records.slice(1).map((record) => record[0])).toEqual(stems('schemes'));
     expect(markdown.startsWith('# Landscape table\n')).toBe(true);
   });
 });

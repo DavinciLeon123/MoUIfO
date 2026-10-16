@@ -86,3 +86,31 @@ export function makeBuildRoot(options: BuildRootOptions = {}): string {
 export function cleanupBuildRoots(): void {
   for (const root of roots.splice(0)) rmSync(root, { recursive: true, force: true });
 }
+
+/** A small RFC 4180 reader: quoted cells with doubled quotes, LF or CRLF records. */
+export function parseCsv(text: string): string[][] {
+  const records: string[][] = [];
+  let record: string[] = [];
+  let cell = '';
+  let quoted = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (quoted) {
+      if (c === '"' && text[i + 1] === '"') {
+        cell += '"';
+        i++;
+      } else if (c === '"') quoted = false;
+      else cell += c;
+    } else if (c === '"') quoted = true;
+    else if (c === ',') {
+      record.push(cell);
+      cell = '';
+    } else if (c === '\n') {
+      record.push(cell);
+      records.push(record);
+      record = [];
+      cell = '';
+    } else cell += c;
+  }
+  return records;
+}
