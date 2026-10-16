@@ -20,7 +20,20 @@ export function mdCell(text: string): string {
 }
 
 /**
- * A code span for a table cell or a paragraph. The fence is one backtick longer than the longest
+ * A code span for a paragraph or a list item: the fence is one backtick longer than the longest
+ * backtick run, and a value that starts or ends with a backtick is padded with a space. A `|` is
+ * left as it is, because a backslash inside a code span outside a table would be shown literally.
+ */
+export function mdSpan(value: string): string {
+  const flat = value.replace(BREAKS, ' ');
+  const longest = Math.max(0, ...(flat.match(/`+/g) ?? []).map((run) => run.length));
+  const fence = '`'.repeat(longest + 1);
+  const pad = flat.startsWith('`') || flat.endsWith('`') ? ' ' : '';
+  return `${fence}${pad}${flat}${pad}${fence}`;
+}
+
+/**
+ * A code span for a table cell. The fence is one backtick longer than the longest
  * backtick run in the value; a value that starts or ends with a backtick is padded with a space.
  * A `|` is escaped as `\|`, which GFM requires even inside code in a table.
  */
