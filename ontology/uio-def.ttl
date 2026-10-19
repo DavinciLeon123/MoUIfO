@@ -1,0 +1,402 @@
+# The uio:def# ontology of the UIO knowledge model.
+#
+# This file is hand-written (D-09, DEC-058). It defines only the classes and properties that the
+# generated graph in dist/uio.ttl emits (D-08), and the build fails when a term is emitted but
+# not defined here, or defined here but not emitted. It is informed by UIO ontology v0.9, which is
+# input and not a compatibility target (DEC-017). It is licensed CC-BY-4.0 (LICENSE-model,
+# DEC-058). The build copies it byte for byte to dist/uio-def.ttl.
+#
+# The v0.9 concepts Actor, NaturalPerson, LegalEntity, Enterprise, Branch, Role (with its
+# sub-classes) and IdentifierInstance are not ported: the generated graph does not use them.
+# Where a term comes from a v0.9 concept, a skos:historyNote names it in plain text, because the
+# v0.9 IRIs live under a placeholder namespace.
+#
+# The absolute IRIs below hold the base namespace of config.yaml as literal text, because
+# standalone Turtle needs absolute IRIs; a test fails when they differ from config.yaml (DEC-058).
+
+@prefix def: <https://w3id.org/uio/def#> .
+@prefix uio: <https://w3id.org/uio/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix adms: <http://www.w3.org/ns/adms#> .
+@prefix org: <http://www.w3.org/ns/org#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+
+uio:def a owl:Ontology ;
+    dct:title "UIO knowledge model ontology"@en ;
+    dct:license <https://creativecommons.org/licenses/by/4.0/> ;
+    rdfs:comment "The classes and properties of the generated UIO knowledge model graph (dist/uio.ttl). Every sourced claim of the model is one def:Statement with exactly one subject, predicate, object, certainty and source."@en ;
+    skos:historyNote "Informed by UIO ontology v0.9 (DEC-017). The issuer claim of a scheme, which uses adms:schemaAgency as the value of def:predicate, descends from :issuedBy of v0.9."@en ;
+    skos:editorialNote "ADMS caveat (DEC-059): the issuer Statement of a scheme names adms:schemaAgency as its def:predicate and the IRI of an authority as its def:object, although ADMS gives adms:schemaAgency the domain adms:Identifier and the range rdfs:Literal (the name of the agency). The property is the value of def:predicate and never a triple predicate, so no RDFS entailment follows from that domain and range."@en .
+
+# W3C PROV-DC maps dct:source to prov:wasDerivedFrom as a sub-property.
+dct:source rdfs:subPropertyOf prov:wasDerivedFrom .
+
+#################################
+# Classes
+#################################
+
+def:Statement a owl:Class ;
+    rdfs:subClassOf prov:Entity ;
+    rdfs:label "Statement"@en ;
+    rdfs:comment "An n-ary claim about a subject: one subject, one predicate, one object, one certainty and one source, and optionally a condition. The model does not use RDF-star or reification for this."@en .
+
+def:Scheme a owl:Class ;
+    rdfs:subClassOf skos:ConceptScheme ;
+    rdfs:label "Scheme"@en ;
+    rdfs:comment "An identifier scheme such as the KVK number, the RSIN or the EORI number. Its sourced facts are Statements about it."@en ;
+    skos:historyNote "Informed by :IdentifierType of UIO ontology v0.9."@en .
+
+def:Rule a owl:Class ;
+    rdfs:label "Rule"@en ;
+    rdfs:comment "A deterministic derivation of one identifier scheme from another, expressed as a list of transform operations with a worked example."@en .
+
+def:Condition a owl:Class ;
+    rdfs:label "Condition"@en ;
+    rdfs:comment "A set of context requirements, such as the issuing country or the form of the entity, under which a Statement holds."@en ;
+    skos:historyNote "Informed by :Context, :Country and :dependsOnContext of UIO ontology v0.9."@en .
+
+def:Source a owl:Class ;
+    rdfs:subClassOf prov:Entity ;
+    rdfs:label "Source"@en ;
+    rdfs:comment "A document, register, standard or analysis that a Statement is derived from."@en .
+
+def:Jurisdiction a owl:Class ;
+    rdfs:subClassOf dct:Jurisdiction ;
+    rdfs:label "Jurisdiction"@en ;
+    rdfs:comment "A country or a larger or smaller area of authority, such as the European Union, in which an identifier scheme is issued or applies."@en .
+
+def:Authority a owl:Class ;
+    rdfs:subClassOf org:Organization ;
+    rdfs:label "Authority"@en ;
+    rdfs:comment "An organisation that issues identifiers of a scheme, in one jurisdiction."@en ;
+    skos:historyNote "Informed by :IssuingBody of UIO ontology v0.9."@en .
+
+def:AuthorityClass a owl:Class ;
+    rdfs:subClassOf org:Organization ;
+    rdfs:label "Authority class"@en ;
+    rdfs:comment "An organisation that stands for a class of issuers, for example the body that accredits the organisations issuing identifiers in many jurisdictions."@en ;
+    skos:historyNote "Informed by :IssuingBody of UIO ontology v0.9."@en .
+
+def:Vocabulary a owl:Class ;
+    rdfs:subClassOf skos:ConceptScheme ;
+    rdfs:label "Vocabulary"@en ;
+    rdfs:comment "A controlled list of values used by the model, such as the certainty levels or the checksum algorithms."@en .
+
+def:VocabularyMember a owl:Class ;
+    rdfs:subClassOf skos:Concept ;
+    rdfs:label "Vocabulary member"@en ;
+    rdfs:comment "One value of a Vocabulary."@en .
+
+#################################
+# Properties of a Statement
+#################################
+
+def:subject a owl:ObjectProperty ;
+    rdfs:domain def:Statement ;
+    rdfs:label "subject"@en ;
+    rdfs:comment "The resource the statement is about."@en .
+
+def:predicate a owl:ObjectProperty ;
+    rdfs:domain def:Statement ;
+    rdfs:label "predicate"@en ;
+    rdfs:comment "The property the statement asserts of its subject. Its value is an IRI that names a property and is never itself used as a triple predicate."@en .
+
+def:object a owl:ObjectProperty ;
+    rdfs:domain def:Statement ;
+    rdfs:label "object"@en ;
+    rdfs:comment "The value the statement asserts: a resource of the graph, an external IRI or a literal."@en .
+
+def:certainty a owl:ObjectProperty ;
+    rdfs:domain def:Statement ;
+    rdfs:range def:VocabularyMember ;
+    rdfs:label "certainty"@en ;
+    rdfs:comment "How certain the statement is, a member of the certainty vocabulary."@en .
+
+def:condition a owl:ObjectProperty ;
+    rdfs:domain def:Statement ;
+    rdfs:range def:Condition ;
+    rdfs:label "condition"@en ;
+    rdfs:comment "The condition under which the statement holds. A statement without a condition always holds."@en .
+
+def:event a owl:ObjectProperty ;
+    rdfs:domain def:Statement ;
+    rdfs:range def:VocabularyMember ;
+    rdfs:label "event"@en ;
+    rdfs:comment "The life-cycle event, a member of the persistence-event vocabulary, that a persistence statement describes."@en .
+
+def:status a owl:ObjectProperty ;
+    rdfs:domain def:Statement ;
+    rdfs:range def:VocabularyMember ;
+    rdfs:label "status"@en ;
+    rdfs:comment "The applicability status, a member of the applicability-status vocabulary, that an applicability statement asserts for a jurisdiction."@en .
+
+def:relationKind a owl:ObjectProperty ;
+    rdfs:domain def:Statement ;
+    rdfs:range def:VocabularyMember ;
+    rdfs:label "relation kind"@en ;
+    rdfs:comment "The kind of relation, a member of the relation-kind vocabulary, that a relation statement asserts between two schemes."@en ;
+    skos:historyNote "The kinds derived-from and may-identify-same-party descend from :derivedFrom, :mayBeLinkedTo and :likelyLinkedTo of UIO ontology v0.9."@en .
+
+def:prefix a owl:DatatypeProperty ;
+    rdfs:domain def:Statement ;
+    rdfs:range xsd:string ;
+    rdfs:label "prefix"@en ;
+    rdfs:comment "The literal prefix that a component statement says a part of a composite scheme value starts with."@en .
+
+def:over a owl:DatatypeProperty ;
+    rdfs:domain def:Statement ;
+    rdfs:range rdf:JSON ;
+    rdfs:label "over"@en ;
+    rdfs:comment "The ordered list of transforms or captures, as a canonical JSON literal, that a checksum statement applies to the value before the algorithm runs."@en .
+
+def:capture a owl:DatatypeProperty ;
+    rdfs:domain def:Statement ;
+    rdfs:range rdf:JSON ;
+    rdfs:label "capture"@en ;
+    rdfs:comment "The regular expression and group, as a canonical JSON literal, that reads the issuing-country context out of a value."@en .
+
+def:position a owl:DatatypeProperty ;
+    rdfs:domain def:Statement ;
+    rdfs:range xsd:integer ;
+    rdfs:label "position"@en ;
+    rdfs:comment "The one-based place of the statement in the authored order of its subject, so a consumer can recover the order of patterns and checksum algorithms."@en .
+
+#################################
+# Properties of a Condition
+#################################
+
+def:entityForm a owl:ObjectProperty ;
+    rdfs:domain def:Condition ;
+    rdfs:range def:VocabularyMember ;
+    rdfs:label "entity form"@en ;
+    rdfs:comment "The form of the entity, a member of the entity-form vocabulary, that a condition requires."@en .
+
+def:issuingCountry a owl:ObjectProperty ;
+    rdfs:domain def:Condition ;
+    rdfs:range def:Jurisdiction ;
+    rdfs:label "issuing country"@en ;
+    rdfs:comment "The jurisdiction of the issuing country that a condition requires."@en ;
+    skos:historyNote "Informed by :Country and :dependsOnContext of UIO ontology v0.9."@en .
+
+#################################
+# Properties of a Rule
+#################################
+
+def:input a owl:ObjectProperty ;
+    rdfs:domain def:Rule ;
+    rdfs:range def:Scheme ;
+    rdfs:label "input"@en ;
+    rdfs:comment "The scheme whose value the rule starts from."@en .
+
+def:output a owl:ObjectProperty ;
+    rdfs:domain def:Rule ;
+    rdfs:range def:Scheme ;
+    rdfs:label "output"@en ;
+    rdfs:comment "The scheme whose value the rule produces."@en .
+
+def:transform a owl:DatatypeProperty ;
+    rdfs:domain def:Rule ;
+    rdfs:range rdf:JSON ;
+    rdfs:label "transform"@en ;
+    rdfs:comment "The ordered list of transform operations of the rule, as a canonical JSON literal."@en .
+
+def:example a owl:DatatypeProperty ;
+    rdfs:domain def:Rule ;
+    rdfs:range rdf:JSON ;
+    rdfs:label "example"@en ;
+    rdfs:comment "A worked example of the rule, an input value and the value it produces, as a canonical JSON literal."@en .
+
+#################################
+# Properties of a Scheme, a Source and a VocabularyMember
+#################################
+
+def:exampleValid a owl:DatatypeProperty ;
+    rdfs:domain def:Scheme ;
+    rdfs:range xsd:string ;
+    rdfs:label "valid example"@en ;
+    rdfs:comment "A value that the scheme accepts. It is kept as a string so leading zeros survive."@en .
+
+def:exampleInvalid a owl:DatatypeProperty ;
+    rdfs:domain def:Scheme ;
+    rdfs:range xsd:string ;
+    rdfs:label "invalid example"@en ;
+    rdfs:comment "A value that the scheme rejects. It is kept as a string so leading zeros survive."@en .
+
+def:eli a owl:ObjectProperty ;
+    rdfs:domain def:Source ;
+    rdfs:label "ELI"@en ;
+    rdfs:comment "The European Legislation Identifier of a source that is an act of European Union or national law."@en .
+
+def:method a owl:DatatypeProperty ;
+    rdfs:domain def:Source ;
+    rdfs:range xsd:string ;
+    rdfs:label "method"@en ;
+    rdfs:comment "How the source was produced, for a source that is an analysis or a computation and not a published text."@en .
+
+def:rank a owl:DatatypeProperty ;
+    rdfs:domain def:VocabularyMember ;
+    rdfs:range xsd:integer ;
+    rdfs:label "rank"@en ;
+    rdfs:comment "The place of a member in an ordered vocabulary; a higher rank is more certain."@en .
+
+def:inheritsDown a owl:DatatypeProperty ;
+    rdfs:domain def:VocabularyMember ;
+    rdfs:range xsd:boolean ;
+    rdfs:label "inherits down"@en ;
+    rdfs:comment "Whether a status holds for the parts of a jurisdiction as well as for the jurisdiction itself."@en .
+
+#################################
+# Properties used only as the value of def:predicate
+#################################
+
+def:abbreviation a owl:DatatypeProperty ;
+    rdfs:domain def:Scheme ;
+    rdfs:range xsd:string ;
+    rdfs:label "abbreviation"@en ;
+    rdfs:comment "The abbreviation of a scheme. It is used as the value of def:predicate on a def:Statement and not asserted as a direct triple (D-05)."@en .
+
+def:applicability a owl:ObjectProperty ;
+    rdfs:domain def:Scheme ;
+    rdfs:range def:Jurisdiction ;
+    rdfs:label "applicability"@en ;
+    rdfs:comment "A jurisdiction in which the scheme has a status, given by def:status. It is used as the value of def:predicate on a def:Statement and not asserted as a direct triple (D-05)."@en .
+
+def:availability a owl:DatatypeProperty ;
+    rdfs:domain def:Scheme ;
+    rdfs:range xsd:string ;
+    rdfs:label "availability"@en ;
+    rdfs:comment "How freely the identifiers of a scheme can be looked up. It is used as the value of def:predicate on a def:Statement and not asserted as a direct triple (D-05)."@en .
+
+def:checksum a owl:ObjectProperty ;
+    rdfs:domain def:Scheme ;
+    rdfs:range def:VocabularyMember ;
+    rdfs:label "checksum"@en ;
+    rdfs:comment "A checksum algorithm, a member of the checksum vocabulary, that a value of the scheme passes. It is used as the value of def:predicate on a def:Statement and not asserted as a direct triple (D-05)."@en .
+
+def:component a owl:ObjectProperty ;
+    rdfs:domain def:Scheme ;
+    rdfs:range def:Scheme ;
+    rdfs:label "component"@en ;
+    rdfs:comment "A scheme that a composite scheme is made of, with its prefix given by def:prefix. It is used as the value of def:predicate on a def:Statement and not asserted as a direct triple (D-05)."@en .
+
+def:formatPattern a owl:DatatypeProperty ;
+    rdfs:domain def:Scheme ;
+    rdfs:range xsd:string ;
+    rdfs:label "format pattern"@en ;
+    rdfs:comment "A regular expression that a value of the scheme matches. It is used as the value of def:predicate on a def:Statement and not asserted as a direct triple (D-05)."@en .
+
+def:instanceOf a owl:ObjectProperty ;
+    rdfs:domain def:Authority ;
+    rdfs:range def:AuthorityClass ;
+    rdfs:label "instance of"@en ;
+    rdfs:comment "The class of issuers that an authority is an instance of. It is used as the value of def:predicate on a def:Statement and not asserted as a direct triple (D-05)."@en ;
+    skos:historyNote "Informed by :IssuingBody of UIO ontology v0.9."@en .
+
+def:iso6523Icd a owl:DatatypeProperty ;
+    rdfs:domain def:Scheme ;
+    rdfs:range xsd:string ;
+    rdfs:label "ISO 6523 ICD"@en ;
+    rdfs:comment "The International Code Designator of ISO/IEC 6523 for the scheme. It is used as the value of def:predicate on a def:Statement and not asserted as a direct triple (D-05)."@en .
+
+def:issuingCountryContext a owl:ObjectProperty ;
+    rdfs:domain def:Scheme ;
+    rdfs:range def:VocabularyMember ;
+    rdfs:label "issuing country context"@en ;
+    rdfs:comment "A context, a member of the condition-context vocabulary, that can be read out of a value of the scheme by def:capture. It is used as the value of def:predicate on a def:Statement and not asserted as a direct triple (D-05)."@en ;
+    skos:historyNote "Informed by :dependsOnContext of UIO ontology v0.9."@en .
+
+def:kind a owl:DatatypeProperty ;
+    rdfs:domain def:Scheme ;
+    rdfs:range xsd:string ;
+    rdfs:label "kind"@en ;
+    rdfs:comment "Whether the scheme is an identifier, a register or a composite (SPEC section 9). It is used as the value of def:predicate on a def:Statement and not asserted as a direct triple (D-05)."@en .
+
+def:legalBasis a owl:ObjectProperty ;
+    rdfs:domain def:Scheme ;
+    rdfs:label "legal basis"@en ;
+    rdfs:comment "The IRI of the act of law, an ELI where one exists, that the scheme rests on. It is used as the value of def:predicate on a def:Statement and not asserted as a direct triple (D-05)."@en .
+
+def:level a owl:ObjectProperty ;
+    rdfs:domain def:Scheme ;
+    rdfs:range def:VocabularyMember ;
+    rdfs:label "level"@en ;
+    rdfs:comment "The level of organisation, a member of the level vocabulary, that the scheme typically identifies. It is used as the value of def:predicate on a def:Statement and not asserted as a direct triple (D-05)."@en ;
+    skos:historyNote "Informed by :identifiesActor and :hasTypicalLevel of UIO ontology v0.9."@en .
+
+def:mandatory a owl:DatatypeProperty ;
+    rdfs:domain def:Scheme ;
+    rdfs:range xsd:string ;
+    rdfs:label "mandatory"@en ;
+    rdfs:comment "A text stating when having an identifier of the scheme is mandatory. It is used as the value of def:predicate on a def:Statement and not asserted as a direct triple (D-05)."@en .
+
+def:peppolEas a owl:DatatypeProperty ;
+    rdfs:domain def:Scheme ;
+    rdfs:range xsd:string ;
+    rdfs:label "Peppol EAS code"@en ;
+    rdfs:comment "The code of the scheme in the Peppol Electronic Address Scheme list. It is used as the value of def:predicate on a def:Statement and not asserted as a direct triple (D-05)."@en .
+
+def:persistence a owl:DatatypeProperty ;
+    rdfs:domain def:Scheme ;
+    rdfs:range xsd:string ;
+    rdfs:label "persistence"@en ;
+    rdfs:comment "What happens to an identifier at the life-cycle event given by def:event. It is used as the value of def:predicate on a def:Statement and not asserted as a direct triple (D-05)."@en .
+
+def:relation a owl:ObjectProperty ;
+    rdfs:domain def:Scheme ;
+    rdfs:range def:Scheme ;
+    rdfs:label "relation"@en ;
+    rdfs:comment "A scheme that the scheme is related to, with the kind of relation given by def:relationKind. It is used as the value of def:predicate on a def:Statement and not asserted as a direct triple (D-05)."@en ;
+    skos:historyNote "Informed by :derivedFrom, :mayBeLinkedTo and :likelyLinkedTo of UIO ontology v0.9."@en .
+
+def:role a owl:ObjectProperty ;
+    rdfs:domain def:Scheme ;
+    rdfs:range def:VocabularyMember ;
+    rdfs:label "role"@en ;
+    rdfs:comment "A role, a member of the role vocabulary, that the scheme identifies. It is used as the value of def:predicate on a def:Statement and not asserted as a direct triple (D-05)."@en ;
+    skos:historyNote "Informed by :identifiesRole of UIO ontology v0.9."@en .
+
+def:rule a owl:ObjectProperty ;
+    rdfs:domain def:Scheme ;
+    rdfs:range def:Rule ;
+    rdfs:label "rule"@en ;
+    rdfs:comment "A derivation rule that involves the scheme. It is used as the value of def:predicate on a def:Statement and not asserted as a direct triple (D-05)."@en .
+
+def:trustCrosswalks a owl:DatatypeProperty ;
+    rdfs:domain def:Scheme ;
+    rdfs:range xsd:integer ;
+    rdfs:label "trust: crosswalks"@en ;
+    rdfs:comment "The crosswalks sub-score of the trust score of the scheme, an integer from the landscape workbook. It is used as the value of def:predicate on a def:Statement and not asserted as a direct triple (D-05)."@en .
+
+def:trustLegalBasis a owl:DatatypeProperty ;
+    rdfs:domain def:Scheme ;
+    rdfs:range xsd:integer ;
+    rdfs:label "trust: legal basis"@en ;
+    rdfs:comment "The legal-basis sub-score of the trust score of the scheme, an integer from the landscape workbook. It is used as the value of def:predicate on a def:Statement and not asserted as a direct triple (D-05)."@en .
+
+def:trustLifecycle a owl:DatatypeProperty ;
+    rdfs:domain def:Scheme ;
+    rdfs:range xsd:integer ;
+    rdfs:label "trust: life cycle"@en ;
+    rdfs:comment "The lifecycle sub-score of the trust score of the scheme, an integer from the landscape workbook. It is used as the value of def:predicate on a def:Statement and not asserted as a direct triple (D-05)."@en .
+
+def:trustRegistrationQuality a owl:DatatypeProperty ;
+    rdfs:domain def:Scheme ;
+    rdfs:range xsd:integer ;
+    rdfs:label "trust: registration quality"@en ;
+    rdfs:comment "The registration-quality sub-score of the trust score of the scheme, an integer from the landscape workbook. It is used as the value of def:predicate on a def:Statement and not asserted as a direct triple (D-05)."@en .
+
+def:trustVerifiability a owl:DatatypeProperty ;
+    rdfs:domain def:Scheme ;
+    rdfs:range xsd:integer ;
+    rdfs:label "trust: verifiability"@en ;
+    rdfs:comment "The verifiability sub-score of the trust score of the scheme, an integer from the landscape workbook. It is used as the value of def:predicate on a def:Statement and not asserted as a direct triple (D-05)."@en .
+
+def:validationSource a owl:ObjectProperty ;
+    rdfs:domain def:Scheme ;
+    rdfs:label "validation source"@en ;
+    rdfs:comment "The IRI of a public service where a value of the scheme can be checked. It is used as the value of def:predicate on a def:Statement and not asserted as a direct triple (D-05)."@en .

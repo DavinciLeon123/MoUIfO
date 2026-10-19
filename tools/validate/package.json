@@ -7,6 +7,9 @@
   "engines": {
     "node": ">=22.18"
   },
+  "exports": {
+    ".": "./src/api.ts"
+  },
   "dependencies": {
     "@uio/engine": "*",
     "ajv": "8.20.0",

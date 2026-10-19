@@ -1,0 +1,191 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "model.schema.json",
+  "description": "dist/model.json, the contract the engine, the MCP server and the website read (DEC-054): a closed object of five tables keyed by id. Every record is closed. The record shapes are reached by $ref from the authored schemas, so the two cannot drift; the scheme header fields are the long form { value, source, certainty } only (the build applied the default-source rule, DEC-029) and a scheme has no sources key. References are checked against the model's own tables.",
+  "type": "object",
+  "properties": {
+    "contract": {
+      "const": 1
+    },
+    "model_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "schemes": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "common.schema.json#/$defs/kebab-id"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/scheme"
+      }
+    },
+    "authorities": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "common.schema.json#/$defs/kebab-id"
+      },
+      "additionalProperties": {
+        "$ref": "authority.schema.json"
+      }
+    },
+    "jurisdictions": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "common.schema.json#/$defs/jurisdiction-id"
+      },
+      "additionalProperties": {
+        "$ref": "jurisdiction.schema.json"
+      }
+    },
+    "sources": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "common.schema.json#/$defs/kebab-id"
+      },
+      "additionalProperties": {
+        "$ref": "source.schema.json"
+      }
+    },
+    "vocab": {
+      "type": "object",
+      "properties": {
+        "applicability-status": {
+          "$ref": "vocab-applicability-status.schema.json"
+        },
+        "certainty": {
+          "$ref": "vocab-certainty.schema.json"
+        },
+        "checksum": {
+          "$ref": "vocab-simple.schema.json"
+        },
+        "condition-context": {
+          "$ref": "vocab-simple.schema.json"
+        },
+        "country-prefix": {
+          "$ref": "vocab-country-prefix.schema.json"
+        },
+        "entity-form": {
+          "$ref": "vocab-simple.schema.json"
+        },
+        "level": {
+          "$ref": "vocab-simple.schema.json"
+        },
+        "persistence-event": {
+          "$ref": "vocab-simple.schema.json"
+        },
+        "relation-kind": {
+          "$ref": "vocab-simple.schema.json"
+        },
+        "role": {
+          "$ref": "vocab-simple.schema.json"
+        }
+      },
+      "required": [
+        "applicability-status",
+        "certainty",
+        "checksum",
+        "condition-context",
+        "country-prefix",
+        "entity-form",
+        "level",
+        "persistence-event",
+        "relation-kind",
+        "role"
+      ],
+      "unevaluatedProperties": false
+    }
+  },
+  "required": [
+    "contract",
+    "model_version",
+    "schemes",
+    "authorities",
+    "jurisdictions",
+    "sources",
+    "vocab"
+  ],
+  "unevaluatedProperties": false,
+  "$defs": {
+    "scheme": {
+      "description": "A scheme record of model.json: the authored scheme without its sources key and with every header field in the long form.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "common.schema.json#/$defs/kebab-id"
+        },
+        "label": {
+          "$ref": "common.schema.json#/$defs/label"
+        },
+        "abbreviation": {
+          "$ref": "common.schema.json#/$defs/header-text/then"
+        },
+        "iso6523_icd": {
+          "$ref": "common.schema.json#/$defs/header-code/then"
+        },
+        "peppol_eas": {
+          "$ref": "common.schema.json#/$defs/header-code/then"
+        },
+        "kind": {
+          "$ref": "common.schema.json#/$defs/header-kind/then"
+        },
+        "issuer": {
+          "$ref": "common.schema.json#/$defs/header-authority/then"
+        },
+        "jurisdiction": {
+          "$ref": "common.schema.json#/$defs/header-jurisdiction/then"
+        },
+        "availability": {
+          "$ref": "common.schema.json#/$defs/header-kebab/then"
+        },
+        "scope": {
+          "$ref": "common.schema.json#/$defs/text"
+        },
+        "notes": {
+          "$ref": "common.schema.json#/$defs/text"
+        },
+        "level": {
+          "$ref": "scheme.schema.json#/properties/level"
+        },
+        "roles": {
+          "$ref": "scheme.schema.json#/properties/roles"
+        },
+        "applicability": {
+          "$ref": "scheme.schema.json#/properties/applicability"
+        },
+        "persistence": {
+          "$ref": "scheme.schema.json#/properties/persistence"
+        },
+        "trust": {
+          "$ref": "scheme.schema.json#/properties/trust"
+        },
+        "relations": {
+          "$ref": "scheme.schema.json#/properties/relations"
+        },
+        "legal_basis": {
+          "$ref": "scheme.schema.json#/properties/legal_basis"
+        },
+        "validation_source": {
+          "$ref": "scheme.schema.json#/properties/validation_source"
+        },
+        "mandatory": {
+          "$ref": "scheme.schema.json#/properties/mandatory"
+        },
+        "format": {
+          "$ref": "scheme.schema.json#/properties/format"
+        },
+        "context_from": {
+          "$ref": "scheme.schema.json#/properties/context_from"
+        },
+        "components": {
+          "$ref": "scheme.schema.json#/properties/components"
+        },
+        "rules": {
+          "$ref": "scheme.schema.json#/properties/rules"
+        }
+      },
+      "required": ["id", "label", "kind", "issuer", "jurisdiction"],
+      "unevaluatedProperties": false
+    }
+  }
+}

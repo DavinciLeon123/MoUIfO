@@ -18,8 +18,8 @@ Phase 1: repository foundations. There is no model data yet.
 ## Licences
 
 - Code, configuration and tooling are licensed under EUPL-1.2, see `LICENSE`.
-- Everything under `model/`, `dist/`, `sources/` and `docs/` is licensed under CC-BY-4.0, see `LICENSE-model`. Credit line for the CC-BY content: Davinci Conclusion, as produced for the CoE-DSC.
-- The licence scope is recorded in `DECISIONS.md` as DEC-013.
+- Everything under `model/`, `dist/`, `sources/`, `docs/`, `ontology/` and `shapes/` is licensed under CC-BY-4.0, see `LICENSE-model`. Credit line for the CC-BY content: Davinci Conclusion, as produced for the CoE-DSC.
+- The licence scope is recorded in `DECISIONS.md` as DEC-013, extended to `ontology/` and `shapes/` by DEC-058.
 
 ## Development
 

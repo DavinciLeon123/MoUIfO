@@ -1,0 +1,101 @@
+# Failing fixture of shapes/statement.ttl (D-10). Every Statement below breaks one property shape
+# or the IRI pattern; the shape file must report a result from each of its named shapes.
+# Synthetic data only: no real identifier value appears here. The absolute IRIs hold the base
+# namespace of config.yaml as literal text (DEC-058).
+
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix def: <https://w3id.org/uio/def#> .
+
+# Supporting nodes that are valid.
+<https://w3id.org/uio/scheme/fixture> a def:Scheme .
+<https://w3id.org/uio/source/fixture-source> a def:Source .
+<https://w3id.org/uio/source/other-source> a def:Source .
+<https://w3id.org/uio/vocab/certainty/certain> a def:VocabularyMember ;
+    skos:inScheme <https://w3id.org/uio/vocab/certainty> .
+<https://w3id.org/uio/vocab/entity-form/legal-person> a def:VocabularyMember ;
+    skos:inScheme <https://w3id.org/uio/vocab/entity-form> .
+<https://w3id.org/uio/condition/aaaaaaaa> a def:Condition .
+<https://w3id.org/uio/condition/bbbbbbbb> a def:Condition .
+
+# The IRI has no claim slug and no hash tail: it breaks shape:Statement (the pattern).
+<https://w3id.org/uio/statement/fixture/claim> a def:Statement ;
+    def:subject <https://w3id.org/uio/scheme/fixture> ;
+    def:predicate <https://w3id.org/uio/def#kind> ;
+    def:object "identifier" ;
+    def:certainty <https://w3id.org/uio/vocab/certainty/certain> ;
+    dct:source <https://w3id.org/uio/source/fixture-source> ;
+    prov:wasDerivedFrom <https://w3id.org/uio/source/fixture-source> .
+
+# Two subjects: breaks shape:Statement-subject.
+<https://w3id.org/uio/statement/fixture/kind-0a0a0a01> a def:Statement ;
+    def:subject <https://w3id.org/uio/scheme/fixture> , <https://w3id.org/uio/scheme/second> ;
+    def:predicate <https://w3id.org/uio/def#kind> ;
+    def:object "identifier" ;
+    def:certainty <https://w3id.org/uio/vocab/certainty/certain> ;
+    dct:source <https://w3id.org/uio/source/fixture-source> ;
+    prov:wasDerivedFrom <https://w3id.org/uio/source/fixture-source> .
+
+# No predicate: breaks shape:Statement-predicate.
+<https://w3id.org/uio/statement/fixture/kind-0a0a0a02> a def:Statement ;
+    def:subject <https://w3id.org/uio/scheme/fixture> ;
+    def:object "identifier" ;
+    def:certainty <https://w3id.org/uio/vocab/certainty/certain> ;
+    dct:source <https://w3id.org/uio/source/fixture-source> ;
+    prov:wasDerivedFrom <https://w3id.org/uio/source/fixture-source> .
+
+# No object: breaks shape:Statement-object.
+<https://w3id.org/uio/statement/fixture/kind-0a0a0a03> a def:Statement ;
+    def:subject <https://w3id.org/uio/scheme/fixture> ;
+    def:predicate <https://w3id.org/uio/def#kind> ;
+    def:certainty <https://w3id.org/uio/vocab/certainty/certain> ;
+    dct:source <https://w3id.org/uio/source/fixture-source> ;
+    prov:wasDerivedFrom <https://w3id.org/uio/source/fixture-source> .
+
+# A certainty that is a member of another vocabulary: breaks shape:Statement-certainty (node).
+<https://w3id.org/uio/statement/fixture/kind-0a0a0a04> a def:Statement ;
+    def:subject <https://w3id.org/uio/scheme/fixture> ;
+    def:predicate <https://w3id.org/uio/def#kind> ;
+    def:object "identifier" ;
+    def:certainty <https://w3id.org/uio/vocab/entity-form/legal-person> ;
+    dct:source <https://w3id.org/uio/source/fixture-source> ;
+    prov:wasDerivedFrom <https://w3id.org/uio/source/fixture-source> .
+
+# A certainty that is not a vocabulary member at all: breaks shape:Statement-certainty (class).
+<https://w3id.org/uio/statement/fixture/kind-0a0a0a05> a def:Statement ;
+    def:subject <https://w3id.org/uio/scheme/fixture> ;
+    def:predicate <https://w3id.org/uio/def#kind> ;
+    def:object "identifier" ;
+    def:certainty "certain" ;
+    dct:source <https://w3id.org/uio/source/fixture-source> ;
+    prov:wasDerivedFrom <https://w3id.org/uio/source/fixture-source> .
+
+# A source that is not a def:Source: breaks shape:Statement-source.
+<https://w3id.org/uio/statement/fixture/kind-0a0a0a06> a def:Statement ;
+    def:subject <https://w3id.org/uio/scheme/fixture> ;
+    def:predicate <https://w3id.org/uio/def#kind> ;
+    def:object "identifier" ;
+    def:certainty <https://w3id.org/uio/vocab/certainty/certain> ;
+    dct:source <https://w3id.org/uio/source/unregistered> ;
+    prov:wasDerivedFrom <https://w3id.org/uio/source/unregistered> .
+
+# prov:wasDerivedFrom differs from dct:source: breaks shape:Statement-derived.
+<https://w3id.org/uio/statement/fixture/kind-0a0a0a07> a def:Statement ;
+    def:subject <https://w3id.org/uio/scheme/fixture> ;
+    def:predicate <https://w3id.org/uio/def#kind> ;
+    def:object "identifier" ;
+    def:certainty <https://w3id.org/uio/vocab/certainty/certain> ;
+    dct:source <https://w3id.org/uio/source/fixture-source> ;
+    prov:wasDerivedFrom <https://w3id.org/uio/source/other-source> .
+
+# Two conditions: breaks shape:Statement-condition (the count).
+<https://w3id.org/uio/statement/fixture/kind-0a0a0a08> a def:Statement ;
+    def:subject <https://w3id.org/uio/scheme/fixture> ;
+    def:predicate <https://w3id.org/uio/def#kind> ;
+    def:object "identifier" ;
+    def:certainty <https://w3id.org/uio/vocab/certainty/certain> ;
+    dct:source <https://w3id.org/uio/source/fixture-source> ;
+    prov:wasDerivedFrom <https://w3id.org/uio/source/fixture-source> ;
+    def:condition <https://w3id.org/uio/condition/aaaaaaaa> , <https://w3id.org/uio/condition/bbbbbbbb> .

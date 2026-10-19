@@ -35,7 +35,7 @@ const escapePointer = (key: string): string => key.replaceAll('~', '~0').replace
  * Drop `if` errors and, for each `oneOf` or `anyOf` failure, the branch errors at the same
  * instance path (their schema path lies below the group's); the group error itself stays.
  */
-function shapeErrors(errors: readonly ErrorObject[]): ErrorObject[] {
+export function shapeErrors(errors: readonly ErrorObject[]): ErrorObject[] {
   const kept = errors.filter((error) => error.keyword !== 'if');
   const groups = kept.filter((error) => error.keyword === 'oneOf' || error.keyword === 'anyOf');
   return kept.filter(
@@ -50,7 +50,7 @@ function shapeErrors(errors: readonly ErrorObject[]): ErrorObject[] {
 }
 
 /** One readable message per failing rule; it names the rule, never the failing instance value. */
-function messageOf(error: ErrorObject): string {
+export function messageOf(error: ErrorObject): string {
   const params = error.params as Record<string, unknown>;
   switch (error.keyword) {
     case 'required':

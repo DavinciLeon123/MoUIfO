@@ -23,8 +23,10 @@ export function realModelFiles(root: string = REPO_ROOT): ModelFile[] {
 /** The six jurisdictions of the frozen Phase 2 seed, read as `model/jurisdictions/<id>.yaml`. */
 export const SEED_JURISDICTIONS = ['BE', 'EU', 'GB', 'GR', 'NL', 'XI'] as const;
 
-/** The four sources of the frozen Phase 2 seed, read as `model/sources/<id>.yaml`. */
+/** The five seed sources (four from Phase 2, the country table of DEC-057), read as `model/sources/<id>.yaml`. */
 export const SEED_SOURCES = [
+  // Joins the seed because the seed jurisdictions cite it through authority_table (DEC-057).
+  'eu-country-authority-table',
   'hmrc-eori-introduction',
   'nia-1998-s1',
   'teu-art-52',

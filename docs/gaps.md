@@ -76,7 +76,7 @@ These checks need a browser or a human reading, because the build environment ca
 
 ## Source dates not stated on the page (DEC-042)
 
-- **Item:** the date of these registry sources is a DEC-042 fallback, with the kind of date used: `kvk-home` (JSON-LD dateModified), `kvk-zoeken` (JSON-LD dateModified, 2026-01-20 read on 2026-10-12), `koop-roo` (DCTERMS.modified), `gs1-nl-gln` (read date), `dnb-duns` (HTTP Last-Modified), `oin-register` (HTTP Last-Modified), `vies` (read date), `organisaties-overheid` (read date), `e-justice-business-registers` (HTTP Last-Modified), `eori-validation` (read date), `peppol-test-tool` (HTTP Last-Modified), `gs1-verified` (read date), `dnb-duns-lookup` (HTTP Last-Modified), `commission-eori` (JSON-LD dateModified, 2026-06-03; the page shows no visible date), `ondernemersplein-nummers-voor-de-btw` (JSON-LD dateModified, 2026-08-04; no visible date found on the page), and `gs1-gln-allocation-rules` (month stated, day not stated: the cover reads "Aug 2022"; the date used is 2022-08-01).
+- **Item:** the date of these registry sources is a DEC-042 fallback, with the kind of date used: `kvk-home` (JSON-LD dateModified), `kvk-zoeken` (JSON-LD dateModified, 2026-01-20 read on 2026-10-12), `koop-roo` (DCTERMS.modified), `gs1-nl-gln` (read date), `dnb-duns` (HTTP Last-Modified), `oin-register` (HTTP Last-Modified), `vies` (read date), `organisaties-overheid` (read date), `e-justice-business-registers` (HTTP Last-Modified), `eori-validation` (read date), `peppol-test-tool` (HTTP Last-Modified), `gs1-verified` (read date), `dnb-duns-lookup` (HTTP Last-Modified), `commission-eori` (JSON-LD dateModified, 2026-06-03; the page shows no visible date), `ondernemersplein-nummers-voor-de-btw` (JSON-LD dateModified, 2026-08-04; no visible date found on the page), and `gs1-gln-allocation-rules` (month stated, day not stated: the cover reads "Aug 2022"; the date used is 2022-08-01), and `eu-country-authority-table` (read date, 2026-10-16: the dataset page states the version number 20260923-0 and a version list but no date, and it has no JSON-LD, no DCTERMS.modified meta element and no Last-Modified header; the version string was not turned into a date).
 - **Why it is not in the model:** the source schema dates a register-doc by the page's last-updated date, and the schema needs a date for every source. DEC-042 takes the machine-readable modification date, then the date the page was read, when the page states no date. Whether each page also shows a visible version date was not checked for every page.
 - **Open question:** does each page show a version date a person can read (for example "Bijgewerkt" or "Last update")? If it does, that date replaces the fallback.
 - **Owner or next step:** the end-of-phase human check opens each page and confirms or corrects its `date`; the affected files are adjusted if it differs. Later plans append the ids of their own fallback-dated sources to this entry.
@@ -353,3 +353,24 @@ These checks need a browser or a human reading, because the build environment ca
 - **Why it is not in the model:** it is a tooling follow-up, not model knowledge, and no model statement depends on it. Plan 03-01 met the false positive on the serialized snapshot and worked around it (owner-approved option A: the snapshot test applies the pattern to the decoded string values). The pattern itself was left unchanged, and this entry does not change it either. The Phase 3 verification lists it as a follow-up.
 - **Open question:** how should the drive-letter alternative be narrowed (for example an uppercase-only letter class, or a drive letter at the start of a path) so that the other markers keep their case-insensitive match?
 - **Owner or next step:** a separate tooling change narrows the pattern, adds a test case for the escaped line break, and removes this entry.
+
+## ADMS domain and range of the issuer predicate (DEC-059)
+
+- **Item:** the issuer Statement of a scheme names `adms:schemaAgency` as its `uio:def#predicate` and the IRI of the authority as its object (SPEC §5.5, DEC-059).
+- **Why it is not in the model:** it is in the model, with a caveat. ADMS gives the property the domain `adms:Identifier` and the range `rdfs:Literal` (the name of the agency), whereas the model uses it for a scheme and an authority IRI. Because the property is the value of `uio:def#predicate` and not a triple predicate, no RDFS entailment follows, and the mismatch is noted in the ontology.
+- **Open question:** should a later version publish its own issuer property (the v0.9 ontology had `:issuedBy`) as a sub-property of `dct:publisher` instead?
+- **Owner or next step:** the owner, at the w3id registration in Phase 8 or when a consumer reports a reasoning problem.
+
+## adms:Identifier of SPEC §5.5 not used (DEC-061)
+
+- **Item:** the SPEC §5.5 reuse item `adms:Identifier`.
+- **Why it is not in the model:** the model holds no identifier values, only examples, which stay literals of the scheme, and the owner decided on 2026-10-15 to mint no identifier nodes for examples (DEC-061).
+- **Open question:** should a later phase publish identifier instances, for example when a consumer needs ADMS identifiers?
+- **Owner or next step:** the owner.
+
+## Country authority table entries not mapped (DEC-057)
+
+- **Item:** the jurisdictions `GLOBAL` and `XI` carry no `authority_table`. The other five (NL, BE, GB, GR, and EU to the entry EUR) are mapped, each after its entry was read on 2026-10-16.
+- **Why it is not in the model:** `GLOBAL` ("Worldwide") is not a country or territory and has no entry in the Publications Office list "Countries and territories". `XI` (Northern Ireland) is left out by the owner's answer of 2026-10-15 (DEC-057). The table, as read through the Publications Office SPARQL endpoint on 2026-10-16, holds no entry with the ISO 3166-1 alpha-2 notation XI, and the IRI `http://publications.europa.eu/resource/authority/country/XI` returns an empty RDF document, so no mapping could be stated for it. Every mapped entry (NLD, BEL, GBR, GRC, EUR) states the alpha-2 notation NL, BE, GB, GR and EU respectively.
+- **Open question:** should `XI` map to an entry once the table has one for Northern Ireland, and should `GLOBAL` map to a world entry if the table ever offers one?
+- **Owner or next step:** the owner.

@@ -65,6 +65,8 @@ The UIO Knowledge Model helps anyone who encounters one or more *Unique Identifi
 
 ## 3. Architecture
 
+> Amended by DECISIONS.md DEC-054: dist/model.json holds normalised tables keyed by id with a contract number and the model version, validated against a closed JSON Schema, and the engine refuses an unknown contract.
+
 ```
  Contributors (PR / issue)
           │
@@ -105,6 +107,10 @@ The engine reads **only** the generated `dist/model.json`, a compact, normalised
 > Amended by DECISIONS.md DEC-040: supersedes DEC-032 in part; GR (Greece, `part_of` EU) is seeded now as a sixth jurisdiction so that the prefix entry EL to GR resolves.
 
 > Amended by DECISIONS.md DEC-045: an authority file exists only for an issuer that a scheme names; a single-organisation issuer is an authority class only, and class plus per-country instance is used only where one authority per country exists.
+
+> Amended by DECISIONS.md DEC-058: a top-level directory `ontology/` holds the hand-written `uio-def.ttl`, next to `shapes/`, and `LICENSE-model` (CC-BY-4.0) also covers `ontology/` and `shapes/`.
+
+> Amended by DECISIONS.md DEC-060: the SHACL validation of the generated TTL runs inside `npm run build:dist` (`tools/build`), and `tools/validate` checks only the model YAML and the repository rules.
 
 ```
 /
@@ -290,6 +296,20 @@ A rule is either a **transformation** of a value, or an **if-then rule** over pr
 
 > Amended by DECISIONS.md DEC-017: `UIO ontology v0.9.ttl` is input for the `uio:def#` ontology, not a compatibility target.
 
+> Amended by DECISIONS.md DEC-054: dist/model.json is the normalised model with every claim's source and certainty, and the default source of a scheme header is written out on each field.
+
+> Amended by DECISIONS.md DEC-055: every sourced claim is one `uio:def#Statement` whose IRI is `uio:statement/<subject-id>/<claim>-<hash>`, the hash covering the subject IRI, predicate, object, qualifiers, condition and source, and a condition is a minted `uio:condition/<hash>` node, with no blank nodes.
+
+> Amended by DECISIONS.md DEC-056: the build also publishes the IRI patterns `uio:jurisdiction/<id>`, `uio:source/<id>`, `uio:vocab/<vocabulary-id>`, `uio:vocab/<vocabulary-id>/<member>`, `uio:condition/<hash>`, `uio:shape/<name>` and `uio:statement/<subject-id>/<claim>-<hash>`.
+
+> Amended by DECISIONS.md DEC-057: the EU Authority Tables for countries are added now under strict sourcing, through `authority_table` on the jurisdictions NL, BE, GB, GR and EU (to the entry EUR), with GLOBAL and XI omitted and logged.
+
+> Amended by DECISIONS.md DEC-058: `ontology/uio-def.ttl` is hand-written, checked by the build and copied to `dist/uio-def.ttl`, and it and the Turtle under `shapes/` hold the namespace as literals guarded by a drift test against `config.yaml`.
+
+> Amended by DECISIONS.md DEC-059: the issuer Statement names `adms:schemaAgency` as its predicate with the authority IRI as object, and the ADMS domain and range mismatch is noted in the ontology and logged in `docs/gaps.md`.
+
+> Amended by DECISIONS.md DEC-061: no `adms:Identifier` node is emitted and no identifier node is minted for an example, so the unused reuse item is logged in `docs/gaps.md`.
+
 - Base namespace from `config.yaml`: default `https://w3id.org/uio/`. Schemes: `uio:scheme/<id>`; authorities: `uio:authority/<id>`; rules: `uio:rule/<id>`; ontology: `uio:def#`.
 - Reuse: SKOS (`skos:ConceptScheme`, `skos:prefLabel`, `skos:notation`), ADMS (`adms:Identifier`, `adms:schemaAgency`), W3C ORG (`org:Organization` for authorities), DCTERMS (`dct:source`, `dct:spatial` for jurisdiction), PROV-O (`prov:wasDerivedFrom` to the source), ELI URIs for legislation, EU Authority Tables for countries.
 - Statements with condition, certainty and source are modelled **n-ary**: a node `uio:def#Statement` with `uio:def#subject`, `uio:def#predicate`, `uio:def#object`, `uio:def#condition`, `uio:def#certainty`, `dct:source`. No RDF-star, for maximum compatibility.
@@ -300,6 +320,8 @@ A rule is either a **transformation** of a value, or an **if-then rule** over pr
 > Amended by DECISIONS.md DEC-028: the validator reports every error of every model file with file, line and column, rejects unquoted numbers with a leading zero or more than 15 digits and duplicate keys, and treats an uncited source as a warning.
 
 > Amended by DECISIONS.md DEC-039: an `examples_valid` value must be accepted by the scheme, and an `examples_invalid` value is valid when the scheme does not accept it, so a pattern match with every checksum entry failing is a valid invalid example.
+
+> Amended by DECISIONS.md DEC-060: item 6 (the generated TTL against the SHACL shapes) is checked by `npm run build:dist`, which fails the build on any violation.
 
 1. YAML conforms to the JSON Schema.
 2. Every reference (issuer, jurisdiction, source, target, input/output of rules) exists.
@@ -313,6 +335,8 @@ A rule is either a **transformation** of a value, or an **if-then rule** over pr
 TypeScript, ESM, no network access, no dependencies that do I/O. Loads `model.json` (bundled, or supplied via `createEngine(model)`).
 
 ### 6.1 API
+
+> Amended by DECISIONS.md DEC-054: the Model type and the MODEL_CONTRACT constant are part of packages/engine, and createEngine refuses a model with another contract.
 
 ```ts
 createEngine(model: Model): Engine
@@ -417,6 +441,8 @@ REST API, a dedicated chat with a language model (for example Jev by TypeSafe AI
 
 > Amended by DECISIONS.md DEC-022: a personal-number guard (`tools/guards`) also runs in CI over the tree and over every commit of a pull request.
 
+> Amended by DECISIONS.md DEC-062: the byte-identical double build runs as a Vitest test inside the CI Test step, building twice in two processes with another locale and time zone, so ci.yml gets no separate double-build step.
+
 - **Unit:** checksums, transformations, certainty combination, the five behaviour rules of §6.2.
 - **Model-driven:** generate the tests from all `examples_valid`, `examples_invalid` and rule `examples`.
 - **Acceptance:** the EORI case (§10) as an end-to-end test at engine level, and as a smoke test on MCP and web (Playwright, headless).
@@ -508,6 +534,8 @@ REST API, a dedicated chat with a language model (for example Jev by TypeSafe AI
 > Amended by DECISIONS.md DEC-012: the repository stays `DavinciLeon123/MoUIfO` for v0.1, and the GitHub Pages base path is configurable as `pages_base_path` in `config.yaml`.
 
 > Amended by DECISIONS.md DEC-013: `LICENSE-model` (CC-BY-4.0) also covers `sources/` and `docs/`.
+
+> Amended by DECISIONS.md DEC-058: `LICENSE-model` (CC-BY-4.0) also covers `ontology/` and `shapes/`.
 
 | Choice | Default until decided |
 |---|---|

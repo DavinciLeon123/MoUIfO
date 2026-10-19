@@ -1,0 +1,30 @@
+# SHACL shape for the absence of blank nodes (D-10, DEC-056, DEC-060): every typed node and every
+# object of a Statement or structure link is an IRI, so the output is deterministic and the Turtle
+# and JSON-LD publications hold the same ground triples. The fixture is
+# shapes/fixtures/no-blank-nodes.fail.ttl.
+#
+# The absolute IRIs hold the base namespace of config.yaml as literal text (DEC-058).
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix def: <https://w3id.org/uio/def#> .
+@prefix shape: <https://w3id.org/uio/shape/> .
+
+shape:NoBlankNodes a sh:NodeShape ;
+    sh:targetSubjectsOf rdf:type ;
+    sh:targetObjectsOf def:subject ,
+        def:predicate ,
+        def:condition ,
+        def:certainty ,
+        dct:source ,
+        prov:wasDerivedFrom ,
+        skos:inScheme ,
+        def:status ,
+        def:event ,
+        def:relationKind ,
+        def:input ,
+        def:output ;
+    sh:nodeKind sh:IRI .

@@ -1,0 +1,367 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix skos: <http://www.w3.org/2004/02/skos/core#>.
+@prefix dct: <http://purl.org/dc/terms/>.
+@prefix adms: <http://www.w3.org/ns/adms#>.
+@prefix org: <http://www.w3.org/ns/org#>.
+@prefix prov: <http://www.w3.org/ns/prov#>.
+@prefix def: <https://example.org/ns/def#>.
+@prefix uio: <https://example.org/ns/>.
+
+<https://example.org/ns/authority/mini-authority> a org:Organization, def:AuthorityClass;
+    skos:definition "An authority that exists only in the golden files."@en;
+    skos:prefLabel "Mini authority"@en.
+<https://example.org/ns/authority/mini-authority-aa> a org:Organization, def:Authority;
+    skos:prefLabel "Mini authority AA"@en.
+<https://example.org/ns/condition/c5618b3a> a def:Condition;
+    def:entityForm <https://example.org/ns/vocab/entity-form/company>;
+    def:issuingCountry <https://example.org/ns/jurisdiction/AA>.
+<https://example.org/ns/condition/ce86c346> a def:Condition;
+    def:entityForm <https://example.org/ns/vocab/entity-form/company>.
+<https://example.org/ns/jurisdiction/AA> a def:Jurisdiction;
+    skos:prefLabel "Aaland"@en.
+<https://example.org/ns/jurisdiction/BB> a def:Jurisdiction;
+    skos:prefLabel "Bbland"@en.
+<https://example.org/ns/rule/beta-from-alpha> a def:Rule;
+    def:example "{\"in\":\"AB1234\",\"out\":\"ZZAB1234\"}"^^rdf:JSON;
+    def:input <https://example.org/ns/scheme/alpha>;
+    def:output <https://example.org/ns/scheme/beta>;
+    def:transform "[{\"add_prefix\":\"ZZ\"}]"^^rdf:JSON.
+<https://example.org/ns/scheme/alpha> a skos:ConceptScheme, def:Scheme;
+    skos:note "A synthetic scheme."@en;
+    skos:prefLabel "Alfa-nummer"@nl, "Alpha identifier"@en;
+    skos:scopeNote "Used only in the golden files."@en;
+    def:exampleInvalid "1234AB";
+    def:exampleValid "AB1234".
+<https://example.org/ns/scheme/beta> a skos:ConceptScheme, def:Scheme;
+    skos:prefLabel "Beta identifier"@en;
+    def:exampleValid "ZZAB1234".
+<https://example.org/ns/source/mini-analysis> a def:Source;
+    dct:date "2026-01-01"^^xsd:date;
+    dct:title "Mini analysis for the golden files";
+    dct:type "analysis";
+    rdfs:seeAlso <https://example.org/mini>;
+    def:method "Written by hand for the golden files; it describes no real identifier.".
+<https://example.org/ns/statement/BB/part-of-09c525ce> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/certain>;
+    def:object <https://example.org/ns/jurisdiction/AA>;
+    def:predicate dct:isPartOf;
+    def:subject <https://example.org/ns/jurisdiction/BB>.
+<https://example.org/ns/statement/alpha/abbreviation-6569d0c2> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/certain>;
+    def:object "ALP";
+    def:predicate def:abbreviation;
+    def:subject <https://example.org/ns/scheme/alpha>.
+<https://example.org/ns/statement/alpha/applicability-f6f344f5> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/certain>;
+    def:object <https://example.org/ns/jurisdiction/AA>;
+    def:predicate def:applicability;
+    def:status <https://example.org/ns/vocab/applicability-status/recognised>;
+    def:subject <https://example.org/ns/scheme/alpha>.
+<https://example.org/ns/statement/alpha/applicability-fb549c14> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/certain>;
+    def:object <https://example.org/ns/jurisdiction/AA>;
+    def:predicate def:applicability;
+    def:status <https://example.org/ns/vocab/applicability-status/issued>;
+    def:subject <https://example.org/ns/scheme/alpha>.
+<https://example.org/ns/statement/alpha/availability-18fe2e62> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/certain>;
+    def:object "public";
+    def:predicate def:availability;
+    def:subject <https://example.org/ns/scheme/alpha>.
+<https://example.org/ns/statement/alpha/checksum-2ba13a3f> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/possible>;
+    def:object <https://example.org/ns/vocab/checksum/mini-check>;
+    def:over "[{\"capture\":{\"group\":1,\"regex\":\"^[A-Z]{2}([0-9]{4})$\"}}]"^^rdf:JSON;
+    def:position 1;
+    def:predicate def:checksum;
+    def:subject <https://example.org/ns/scheme/alpha>.
+<https://example.org/ns/statement/alpha/issuer-46ccfff7> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/likely>;
+    def:object <https://example.org/ns/authority/mini-authority>;
+    def:predicate adms:schemaAgency;
+    def:subject <https://example.org/ns/scheme/alpha>.
+<https://example.org/ns/statement/alpha/issuing-country-context-e00f011f> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:capture "{\"group\":1,\"regex\":\"^([A-Z]{2})\"}"^^rdf:JSON;
+    def:certainty <https://example.org/ns/vocab/certainty/certain>;
+    def:object <https://example.org/ns/vocab/country-prefix>;
+    def:predicate def:issuingCountryContext;
+    def:subject <https://example.org/ns/scheme/alpha>.
+<https://example.org/ns/statement/alpha/jurisdiction-300cb0f8> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/certain>;
+    def:object <https://example.org/ns/jurisdiction/AA>;
+    def:predicate dct:spatial;
+    def:subject <https://example.org/ns/scheme/alpha>.
+<https://example.org/ns/statement/alpha/kind-1270fa24> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/certain>;
+    def:object "identifier";
+    def:predicate def:kind;
+    def:subject <https://example.org/ns/scheme/alpha>.
+<https://example.org/ns/statement/alpha/legal-basis-1657ec15> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    dct:title "Mini act, article 1";
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/certain>;
+    def:object <https://example.org/mini/act>;
+    def:predicate def:legalBasis;
+    def:subject <https://example.org/ns/scheme/alpha>.
+<https://example.org/ns/statement/alpha/level-badbfa72> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/certain>;
+    def:object <https://example.org/ns/vocab/level/legal-entity>;
+    def:predicate def:level;
+    def:subject <https://example.org/ns/scheme/alpha>.
+<https://example.org/ns/statement/alpha/mandatory-6fced664> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/likely>;
+    def:object "Only in the golden files.";
+    def:predicate def:mandatory;
+    def:subject <https://example.org/ns/scheme/alpha>.
+<https://example.org/ns/statement/alpha/pattern-76f8f020> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    skos:note "A longer form for companies.";
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/likely>;
+    def:condition <https://example.org/ns/condition/c5618b3a>;
+    def:object "^[A-Z]{2}[0-9]{5}$";
+    def:position 2;
+    def:predicate def:formatPattern;
+    def:subject <https://example.org/ns/scheme/alpha>.
+<https://example.org/ns/statement/alpha/pattern-b1da80d4> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/certain>;
+    def:object "^[A-Z]{2}[0-9]{4}$";
+    def:position 1;
+    def:predicate def:formatPattern;
+    def:subject <https://example.org/ns/scheme/alpha>.
+<https://example.org/ns/statement/alpha/persistence-fce63d29> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/likely>;
+    def:event <https://example.org/ns/vocab/persistence-event/merger>;
+    def:object "Unchanged";
+    def:predicate def:persistence;
+    def:subject <https://example.org/ns/scheme/alpha>.
+<https://example.org/ns/statement/alpha/relation-f5791720> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/certain>;
+    def:object <https://example.org/ns/scheme/beta>;
+    def:predicate def:relation;
+    def:relationKind <https://example.org/ns/vocab/relation-kind/derived-from>;
+    def:subject <https://example.org/ns/scheme/alpha>.
+<https://example.org/ns/statement/alpha/role-c67fe61c> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/certain>;
+    def:object <https://example.org/ns/vocab/role/taxpayer>;
+    def:predicate def:role;
+    def:subject <https://example.org/ns/scheme/alpha>.
+<https://example.org/ns/statement/alpha/trust-crosswalks-b5f3e081> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/likely>;
+    def:object 1;
+    def:predicate def:trustCrosswalks;
+    def:subject <https://example.org/ns/scheme/alpha>.
+<https://example.org/ns/statement/alpha/trust-legal-basis-4bbd9dc3> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/likely>;
+    def:object 1;
+    def:predicate def:trustLegalBasis;
+    def:subject <https://example.org/ns/scheme/alpha>.
+<https://example.org/ns/statement/alpha/trust-lifecycle-0d8d8f36> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/likely>;
+    def:object 1;
+    def:predicate def:trustLifecycle;
+    def:subject <https://example.org/ns/scheme/alpha>.
+<https://example.org/ns/statement/alpha/trust-verifiability-76e4dcea> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/likely>;
+    def:object 0;
+    def:predicate def:trustVerifiability;
+    def:subject <https://example.org/ns/scheme/alpha>.
+<https://example.org/ns/statement/alpha/validation-source-97b1ba8b> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    dct:title "Mini register lookup";
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/certain>;
+    def:object <https://example.org/mini/lookup>;
+    def:predicate def:validationSource;
+    def:subject <https://example.org/ns/scheme/alpha>.
+<https://example.org/ns/statement/beta/abbreviation-490ad9d5> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/certain>;
+    def:object "BET";
+    def:predicate def:abbreviation;
+    def:subject <https://example.org/ns/scheme/beta>.
+<https://example.org/ns/statement/beta/availability-0935bb0d> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/certain>;
+    def:object "public";
+    def:predicate def:availability;
+    def:subject <https://example.org/ns/scheme/beta>.
+<https://example.org/ns/statement/beta/issuer-9d310eef> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/certain>;
+    def:object <https://example.org/ns/authority/mini-authority>;
+    def:predicate adms:schemaAgency;
+    def:subject <https://example.org/ns/scheme/beta>.
+<https://example.org/ns/statement/beta/jurisdiction-198ce4e8> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/certain>;
+    def:object <https://example.org/ns/jurisdiction/BB>;
+    def:predicate dct:spatial;
+    def:subject <https://example.org/ns/scheme/beta>.
+<https://example.org/ns/statement/beta/kind-a63df610> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/certain>;
+    def:object "identifier";
+    def:predicate def:kind;
+    def:subject <https://example.org/ns/scheme/beta>.
+<https://example.org/ns/statement/beta/pattern-4933d2e3> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/certain>;
+    def:object "^ZZ[A-Z]{2}[0-9]{4}$";
+    def:position 1;
+    def:predicate def:formatPattern;
+    def:subject <https://example.org/ns/scheme/beta>.
+<https://example.org/ns/statement/beta/rule-3e7d06ca> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/certain>;
+    def:condition <https://example.org/ns/condition/ce86c346>;
+    def:object <https://example.org/ns/rule/beta-from-alpha>;
+    def:predicate def:rule;
+    def:subject <https://example.org/ns/scheme/beta>.
+<https://example.org/ns/statement/country-prefix/jurisdiction-134867b3> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/likely>;
+    def:object <https://example.org/ns/jurisdiction/AA>;
+    def:predicate dct:spatial;
+    def:subject <https://example.org/ns/vocab/country-prefix/AA>.
+<https://example.org/ns/statement/mini-authority-aa/instance-of-37bcca93> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/likely>;
+    def:object <https://example.org/ns/authority/mini-authority>;
+    def:predicate def:instanceOf;
+    def:subject <https://example.org/ns/authority/mini-authority-aa>.
+<https://example.org/ns/statement/mini-authority-aa/jurisdiction-204c4dc0> a def:Statement;
+    dct:source <https://example.org/ns/source/mini-analysis>;
+    prov:wasDerivedFrom <https://example.org/ns/source/mini-analysis>;
+    def:certainty <https://example.org/ns/vocab/certainty/likely>;
+    def:object <https://example.org/ns/jurisdiction/AA>;
+    def:predicate dct:spatial;
+    def:subject <https://example.org/ns/authority/mini-authority-aa>.
+<https://example.org/ns/vocab/applicability-status> a skos:ConceptScheme, def:Vocabulary;
+    skos:prefLabel "Applicability status"@en.
+<https://example.org/ns/vocab/applicability-status/issued> a skos:Concept, def:VocabularyMember;
+    skos:definition "Issued, a synthetic member for the golden files."@en;
+    skos:inScheme <https://example.org/ns/vocab/applicability-status>;
+    skos:prefLabel "Issued"@en;
+    def:inheritsDown false.
+<https://example.org/ns/vocab/applicability-status/recognised> a skos:Concept, def:VocabularyMember;
+    skos:definition "Recognised, a synthetic member for the golden files."@en;
+    skos:inScheme <https://example.org/ns/vocab/applicability-status>;
+    skos:prefLabel "Recognised"@en;
+    def:inheritsDown true.
+<https://example.org/ns/vocab/certainty> a skos:ConceptScheme, def:Vocabulary;
+    skos:prefLabel "Certainty"@en.
+<https://example.org/ns/vocab/certainty/certain> a skos:Concept, def:VocabularyMember;
+    skos:definition "Certain, a synthetic member for the golden files."@en;
+    skos:inScheme <https://example.org/ns/vocab/certainty>;
+    skos:prefLabel "Certain"@en;
+    def:rank 3.
+<https://example.org/ns/vocab/certainty/likely> a skos:Concept, def:VocabularyMember;
+    skos:definition "Likely, a synthetic member for the golden files."@en;
+    skos:inScheme <https://example.org/ns/vocab/certainty>;
+    skos:prefLabel "Likely"@en;
+    def:rank 2.
+<https://example.org/ns/vocab/certainty/possible> a skos:Concept, def:VocabularyMember;
+    skos:definition "Possible, a synthetic member for the golden files."@en;
+    skos:inScheme <https://example.org/ns/vocab/certainty>;
+    skos:prefLabel "Possible"@en;
+    def:rank 1.
+<https://example.org/ns/vocab/checksum> a skos:ConceptScheme, def:Vocabulary;
+    skos:prefLabel "Checksum algorithm"@en.
+<https://example.org/ns/vocab/checksum/mini-check> a skos:Concept, def:VocabularyMember;
+    skos:definition "Mini check, a synthetic member for the golden files."@en;
+    skos:inScheme <https://example.org/ns/vocab/checksum>;
+    skos:prefLabel "Mini check"@en.
+<https://example.org/ns/vocab/condition-context> a skos:ConceptScheme, def:Vocabulary;
+    skos:prefLabel "Condition context"@en.
+<https://example.org/ns/vocab/country-prefix> a skos:ConceptScheme, def:Vocabulary;
+    skos:prefLabel "Country prefix"@en.
+<https://example.org/ns/vocab/country-prefix/AA> a skos:Concept, def:VocabularyMember;
+    skos:inScheme <https://example.org/ns/vocab/country-prefix>;
+    skos:notation "AA".
+<https://example.org/ns/vocab/entity-form> a skos:ConceptScheme, def:Vocabulary;
+    skos:prefLabel "Entity form"@en.
+<https://example.org/ns/vocab/entity-form/company> a skos:Concept, def:VocabularyMember;
+    skos:definition "Company, a synthetic member for the golden files."@en;
+    skos:inScheme <https://example.org/ns/vocab/entity-form>;
+    skos:prefLabel "Company"@en.
+<https://example.org/ns/vocab/entity-form/person> a skos:Concept, def:VocabularyMember;
+    skos:definition "Person, a synthetic member for the golden files."@en;
+    skos:inScheme <https://example.org/ns/vocab/entity-form>;
+    skos:prefLabel "Person"@en.
+<https://example.org/ns/vocab/level> a skos:ConceptScheme, def:Vocabulary;
+    skos:prefLabel "Level"@en.
+<https://example.org/ns/vocab/level/legal-entity> a skos:Concept, def:VocabularyMember;
+    skos:definition "Legal entity, a synthetic member for the golden files."@en;
+    skos:inScheme <https://example.org/ns/vocab/level>;
+    skos:prefLabel "Legal entity"@en.
+<https://example.org/ns/vocab/persistence-event> a skos:ConceptScheme, def:Vocabulary;
+    skos:prefLabel "Persistence event"@en.
+<https://example.org/ns/vocab/persistence-event/merger> a skos:Concept, def:VocabularyMember;
+    skos:definition "Merger, a synthetic member for the golden files."@en;
+    skos:inScheme <https://example.org/ns/vocab/persistence-event>;
+    skos:prefLabel "Merger"@en.
+<https://example.org/ns/vocab/relation-kind> a skos:ConceptScheme, def:Vocabulary;
+    skos:prefLabel "Relation kind"@en.
+<https://example.org/ns/vocab/relation-kind/derived-from> a skos:Concept, def:VocabularyMember;
+    skos:definition "Derived from, a synthetic member for the golden files."@en;
+    skos:inScheme <https://example.org/ns/vocab/relation-kind>;
+    skos:prefLabel "Derived from"@en.
+<https://example.org/ns/vocab/role> a skos:ConceptScheme, def:Vocabulary;
+    skos:prefLabel "Role"@en.
+<https://example.org/ns/vocab/role/taxpayer> a skos:Concept, def:VocabularyMember;
+    skos:definition "Taxpayer, a synthetic member for the golden files."@en;
+    skos:inScheme <https://example.org/ns/vocab/role>;
+    skos:prefLabel "Taxpayer"@en.
