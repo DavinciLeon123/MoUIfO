@@ -262,6 +262,8 @@ The values above are illustrative. Take the real values from `sources/` (§9). T
 
 > Amended by DECISIONS.md DEC-035: the `capture` operation is also used by `context_from` to read the issuing country from a value, and a prefix that the `country-prefix` map does not know gives no context, not an error.
 
+> Amended by DECISIONS.md DEC-069: the context keys are the closed condition keys issuing_country, entity_form and context, a key the context does not give becomes an assumption at likely, and a contradicting key drops the statement or rule.
+
 A rule is either a **transformation** of a value, or an **if-then rule** over properties.
 
 **Transformations** are a list of steps from a fixed, small set of operations. Do not add free code or expressions.
@@ -338,6 +340,12 @@ TypeScript, ESM, no network access, no dependencies that do I/O. Loads `model.js
 
 > Amended by DECISIONS.md DEC-054: the Model type and the MODEL_CONTRACT constant are part of packages/engine, and createEngine refuses a model with another contract.
 
+> Amended by DECISIONS.md DEC-067: the second argument of derive declares the scheme of the input value, and there is no target-scheme parameter in v0.1.
+
+> Amended by DECISIONS.md DEC-069: relate takes the same optional ctx as derive and check, and ctx keys or values outside the closed condition keys and vocabularies are ignored with a warning.
+
+> Amended by DECISIONS.md DEC-070: Step gains the kind component and the fields edge and inverse, its source is null only for assumption and caller-context steps, and Conclusion carries an i18n key and its parameters.
+
 ```ts
 createEngine(model: Model): Engine
 
@@ -377,6 +385,16 @@ interface Step {
 
 > Amended by DECISIONS.md DEC-063: recognise returns every candidate whose pattern matches with separate format and checksum results, lists candidates that fail their checksum last at certainty possible, orders by certainty, hint grade, specificity and scheme id, and lets a hint or a value prefix only re-rank.
 
+> Amended by DECISIONS.md DEC-064: specificity is the number of literal characters in the deciding pattern, with anchors, groups, alternation, quantifiers, character classes, the wildcard and class escapes counted as zero.
+
+> Amended by DECISIONS.md DEC-065: a composite Peppol-ID is split after its last double colon into a component prefix and a value, which is recognised against the declared component scheme only.
+
+> Amended by DECISIONS.md DEC-066: relate follows relations, rules and components in both directions, marks inverted hops, and returns every shortest chain of at most four hops as one path per scheme sequence with the parallel edges kept alongside.
+
+> Amended by DECISIONS.md DEC-067: derive lists every scheme reachable within four rule steps without returning to a scheme, drops an output its scheme does not accept with a warning, and sorts by certainty, steps and rule ids.
+
+> Amended by DECISIONS.md DEC-068: check tries every accepted candidate of each value and calls a pair consistent when a rule chain turns one value into the other, inconsistent when a chain reaches the other's scheme with another value, and no-rule otherwise.
+
 - **Weakest link:** the certainty of a conclusion is the minimum over all steps in `explanation`. A condition that is not established counts as an `assumption` step with certainty `likely`.
 - **`recognise`:** try all patterns of all schemes and check the checksum. Return all candidates, sorted by certainty and then by specificity (length of the regex match without wildcards). Multiple candidates are normal; 9 digits can be RSIN, BSN or DUNS.
 - **`relate`:** a direct relation, otherwise the shortest chain (BFS) over `relations` and `rules`, with at most 4 steps. All chains of equal length are returned.
@@ -391,6 +409,8 @@ interface Step {
 > Amended by DECISIONS.md DEC-022: a personal-number guard in `tools/guards` scans tracked files and the added lines of every pull-request commit; output masks the value, and a value-level allow-list holds public or synthetic values only.
 
 > Amended by DECISIONS.md DEC-063: a bare nine-digit value that passes the elfproef returns the full ambiguity set with the warning possible-personal-identifier, whose message never contains the value.
+
+> Amended by DECISIONS.md DEC-068: in check a bare nine-digit value joins only as the schemes that another supplied value's derivations output, and findings refer to values by position.
 
 - No storage, logging, telemetry or network traffic with values. A unit test checks that the engine bundle contains no `fetch`, `XMLHttpRequest` or `WebSocket`.
 - **BSN:** if a bare 9-digit value passes the elfproef, it can be a BSN or an RSIN. The result then gets a warning `possible-personal-identifier`. The value is only used further in `derive` and `check` if the user or the context indicates that it is an RSIN (for example `derive(value, "rsin")`, or derived from a VAT number).
@@ -478,6 +498,8 @@ REST API, a dedicated chat with a language model (for example Jev by TypeSafe AI
 
 > Amended by DECISIONS.md DEC-051: for now, DEC-043 with its two primary-row exceptions (the Digital Single Market communication PDF of cell O13 and the Logius landing page of cell H15) is accepted as registering every primary hyperlink URL, and registering or replacing both is deferred and logged in `docs/gaps.md`.
 
+> Amended by DECISIONS.md DEC-065: the engine delegates a Peppol-ID to the component scheme whose declared prefix it carries, and an unknown prefix gives a warning instead of a guess.
+
 **Source:** `sources/Analysis of Unique IDs for companies.xlsx` (tab *Overzicht UID* = landscape table, *Persistence*, *KvK in NL en buitenland*). Also deliver a conversion script `tools/import/excel.ts`, or transfer the values by hand. In both cases record `source: landscape-v1.2` per field.
 
 **Starter set of 14 schemes:** `kvk-number`, `kvk-establishment-number` (establishment number), `oin`, `rsin`, `vat` (generic) plus `vat-nl`, `roo`, `peppol-id`, `lei`, `gln`, `euid`, `eori`, `duns`, `bsn`, `fi-number`.
@@ -497,6 +519,10 @@ REST API, a dedicated chat with a language model (for example Jev by TypeSafe AI
 > Amended by DECISIONS.md DEC-005: a bare 9-digit value (possibly a BSN) joins `check` only when another supplied value derives it.
 
 > Amended by DECISIONS.md DEC-050: the EORI levels and the associated VAT number of a Dutch EORI are not asserted by the acceptance test, because no source supports them, and are logged in `docs/gaps.md`.
+
+> Amended by DECISIONS.md DEC-067: in derive("NL001469630", "eori") the second argument names the input as an EORI, so the derivations run from the EORI through the RSIN.
+
+> Amended by DECISIONS.md DEC-068: the three check pairs of the acceptance case are consistent through the rules from the VAT number and from the EORI to the RSIN and from the RSIN to the EORI.
 
 **Input:** `derive("NL001469630", "eori")` and `check(["NL001469630", "NL001469630B01", "001469630"])`.
 
