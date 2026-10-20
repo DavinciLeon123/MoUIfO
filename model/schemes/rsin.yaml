@@ -105,6 +105,7 @@ rules:
     transform:
       - strip_prefix: 2
     condition:
+      issuing_country: NL
       entity_form: legal-person
     certainty: certain
     source: douane-eori-nl

@@ -65,7 +65,7 @@ describe('rsin (DAT-01, SPEC §10)', () => {
     const rule = ruleOf(scheme('rsin'), 'rsin-from-eori-nl');
     expect(rule.input).toBe('eori');
     expect(rule.output).toBe('rsin');
-    expect(rule.condition).toEqual({ entity_form: 'legal-person' });
+    expect(rule.condition).toEqual({ entity_form: 'legal-person', issuing_country: 'NL' });
     expect(rule.certainty).toBe('certain');
     expect(rule.source).toBe('douane-eori-nl');
     expect(run(rule.transform, 'NL001469630')).toBe('001469630');

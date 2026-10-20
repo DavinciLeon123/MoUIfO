@@ -497,7 +497,7 @@ Open questions in docs/gaps.md: [Levels and roles without a source](gaps.md#leve
   - `prerequisite`: `kvk-number`; note: The RSIN is issued with the KvK number; only sole proprietorships receive none (KVK RSIN page). (certainty: likely, source: [kvk-rsin](https://www.kvk.nl/en/about-the-business-register/rsin-number/))
   - `may-identify-same-party`: `fi-number`; note: The workbook remark '(predecessed by fi-number)' and the fi-number scope: parties with an RSIN were assigned a fi-nummer in the past. No rule derives one from the other. (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
 - Rules:
-  - `rsin-from-eori-nl`: `eori` to `rsin`, transform `[{"strip_prefix":2}]`; condition: `entity_form legal-person` (certainty: certain, source: [douane-eori-nl](https://www.douane.nl/onderwerpen/invoer-en-uitvoer/nodig-bij-aangifte/eori-nummer/eori-nummer-aanvragen/))
+  - `rsin-from-eori-nl`: `eori` to `rsin`, transform `[{"strip_prefix":2}]`; condition: `entity_form legal-person`, `issuing_country NL` (certainty: certain, source: [douane-eori-nl](https://www.douane.nl/onderwerpen/invoer-en-uitvoer/nodig-bij-aangifte/eori-nummer/eori-nummer-aanvragen/))
     - Example: `NL001469630` → `001469630`
   - `rsin-from-vat-nl`: `vat-nl` to `rsin`, transform `[{"capture":{"group":1,"regex":"^NL([0-9]{9})B[0-9]{2}$"}}]`; condition: `entity_form legal-person` (certainty: certain, source: [ondernemersplein-btw-vermelden](https://ondernemersplein.overheid.nl/btw-nummer-vermelden-en-controleren/))
     - Example: `NL001469630B01` → `001469630`
