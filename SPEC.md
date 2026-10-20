@@ -375,6 +375,8 @@ interface Step {
 
 > Amended by DECISIONS.md DEC-041: when applicability is resolved through `part_of`, a stated applicability beats an inherited one and an inherited result is capped below `certain`.
 
+> Amended by DECISIONS.md DEC-063: recognise returns every candidate whose pattern matches with separate format and checksum results, lists candidates that fail their checksum last at certainty possible, orders by certainty, hint grade, specificity and scheme id, and lets a hint or a value prefix only re-rank.
+
 - **Weakest link:** the certainty of a conclusion is the minimum over all steps in `explanation`. A condition that is not established counts as an `assumption` step with certainty `likely`.
 - **`recognise`:** try all patterns of all schemes and check the checksum. Return all candidates, sorted by certainty and then by specificity (length of the regex match without wildcards). Multiple candidates are normal; 9 digits can be RSIN, BSN or DUNS.
 - **`relate`:** a direct relation, otherwise the shortest chain (BFS) over `relations` and `rules`, with at most 4 steps. All chains of equal length are returned.
@@ -387,6 +389,8 @@ interface Step {
 > Amended by DECISIONS.md DEC-005: a bare 9-digit value (possibly a BSN) joins `check` only when another supplied value derives it; otherwise it only gets the `possible-personal-identifier` warning.
 
 > Amended by DECISIONS.md DEC-022: a personal-number guard in `tools/guards` scans tracked files and the added lines of every pull-request commit; output masks the value, and a value-level allow-list holds public or synthetic values only.
+
+> Amended by DECISIONS.md DEC-063: a bare nine-digit value that passes the elfproef returns the full ambiguity set with the warning possible-personal-identifier, whose message never contains the value.
 
 - No storage, logging, telemetry or network traffic with values. A unit test checks that the engine bundle contains no `fetch`, `XMLHttpRequest` or `WebSocket`.
 - **BSN:** if a bare 9-digit value passes the elfproef, it can be a BSN or an RSIN. The result then gets a warning `possible-personal-identifier`. The value is only used further in `derive` and `check` if the user or the context indicates that it is an RSIN (for example `derive(value, "rsin")`, or derived from a VAT number).
