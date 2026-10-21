@@ -1,5 +1,10 @@
 export const ENGINE_VERSION = '0.0.0';
 
+export type {
+  Applicability,
+  ApplicabilityBasis,
+  ApplicabilityStatus,
+} from './applicability.ts';
 export { elfproef } from './checksum/elfproef.ts';
 export { gs1Mod10 } from './checksum/gs1-mod10.ts';
 export { CHECKSUM_IDS, CHECKSUMS, type ChecksumId } from './checksum/index.ts';
