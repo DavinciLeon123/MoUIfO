@@ -12,6 +12,7 @@ import {
 } from './explain.ts';
 import type { ChecksumOutcome } from './format.ts';
 import type { Component } from './model-types.ts';
+import { specificity } from './specificity.ts';
 import type { Certainty, Conclusion, Result, Step, Warning } from './types.ts';
 
 /** The longest value recognise reads; a longer one gives no candidate (T-05-07). */
@@ -30,6 +31,12 @@ export type Candidate = {
     entry: number | null;
   };
   explanation: Step[];
+  /** Literal characters of the deciding pattern (DEC-064). */
+  specificity: number;
+  /** 2 for the hinted or value-prefix jurisdiction, 1 for one of its `part_of` ancestors, else 0. */
+  hint_grade: 0 | 1 | 2;
+  /** 1-based; candidates tied on accepted, certainty, hint grade and specificity share one. */
+  rank_group: number;
   components?: ComponentMatch[];
 };
 
@@ -230,6 +237,9 @@ function evaluate(
       entry: decidingChecksum === null ? null : decidingChecksum.index,
     },
     explanation,
+    specificity: specificity((format.patterns ?? [])[decidingPattern.index]?.regex ?? ''),
+    hint_grade: 0,
+    rank_group: 1,
   };
   if (components !== undefined) candidate.components = components;
   return candidate;
@@ -245,16 +255,63 @@ function emptyResult(code: string, message: string): Result<Candidate[]> {
   return { data: [], conclusions: [], warnings: [{ code, message }] };
 }
 
+/** The jurisdiction a hint names: the country-prefix vocabulary first (EL gives GR), then an id. */
+function hintJurisdiction(
+  compiled: CompiledModel,
+  hint: unknown,
+  warnings: Warning[],
+): string | null {
+  if (hint === undefined) return null;
+  if (typeof hint !== 'object' || hint === null || Array.isArray(hint)) {
+    warnings.push({ code: 'unknown-country-hint', message: 'the country hint is not understood' });
+    return null;
+  }
+  const country = Object.hasOwn(hint, 'country')
+    ? (hint as { country?: unknown }).country
+    : undefined;
+  if (country === undefined) return null;
+  if (typeof country === 'string') {
+    const prefixed = compiled.prefixes.get(country)?.jurisdiction;
+    if (prefixed !== undefined) return prefixed;
+    if (compiled.jurisdictions.has(country)) return country;
+  }
+  warnings.push({ code: 'unknown-country-hint', message: 'the country hint is not understood' });
+  return null;
+}
+
+/** The jurisdiction the value itself carries: the first scheme whose capture maps (DEC-063). */
+function valueJurisdiction(compiled: CompiledModel, value: string): string | null {
+  for (const id of compiled.schemeIds) {
+    const capture = compiled.schemes.get(id)?.capture;
+    if (capture === undefined || capture === null) continue;
+    const prefix = capture.run(value);
+    if (prefix === null) continue;
+    const entry = compiled.prefixes.get(prefix);
+    if (entry !== undefined) return entry.jurisdiction;
+  }
+  return null;
+}
+
+function hintGrade(compiled: CompiledModel, schemeId: string, target: string | null): 0 | 1 | 2 {
+  if (target === null) return 0;
+  const jurisdiction = compiled.schemes.get(schemeId)?.scheme.jurisdiction.value;
+  if (jurisdiction === undefined) return 0;
+  if (jurisdiction === target) return 2;
+  const ancestors = compiled.ancestors.get(target) ?? [];
+  return ancestors.some((each) => each.jurisdiction === jurisdiction) ? 1 : 0;
+}
+
 /**
- * Recognise a value (SPEC §6.2, DEC-063): every scheme whose pattern matches the whole trimmed
- * value, each with its format and checksum result apart, accepted candidates first, then certainty
- * (highest first), then scheme id. Only surrounding whitespace is trimmed; no case is folded.
- * `hint` is accepted for the ranking of plan 05-04 and is not read yet.
+ * Recognise a value (SPEC §6.2, DEC-063, DEC-064): every scheme whose pattern matches the whole
+ * trimmed value, each with its format and checksum result apart. Order: accepted first, then
+ * certainty (highest first), then the hint grade, then specificity, then scheme id; candidates tied
+ * on all but the id share one rank group. Only surrounding whitespace is trimmed; no case is folded.
+ * The hint (or else the country prefix the value carries) only re-ranks; it never removes a candidate.
  */
 export function recognise(
   compiled: CompiledModel,
   value: unknown,
-  _hint?: { country?: string },
+  hint?: { country?: string },
 ): Result<Candidate[]> {
   if (typeof value !== 'string') {
     return emptyResult('invalid-input', 'the value must be a string');
@@ -272,10 +329,29 @@ export function recognise(
     const candidate = evaluateCandidate(compiled, id, trimmed, empty, warnings);
     if (candidate !== null) candidates.push(candidate);
   }
+  const target = hintJurisdiction(compiled, hint, warnings) ?? valueJurisdiction(compiled, trimmed);
+  for (const candidate of candidates) {
+    candidate.hint_grade = hintGrade(compiled, candidate.scheme, target);
+  }
   candidates.sort((a, b) => {
     if (a.accepted !== b.accepted) return a.accepted ? -1 : 1;
     const byRank = (compiled.rank.get(b.certainty) ?? 0) - (compiled.rank.get(a.certainty) ?? 0);
-    return byRank !== 0 ? byRank : byCodeUnit(a.scheme, b.scheme);
+    if (byRank !== 0) return byRank;
+    if (a.hint_grade !== b.hint_grade) return b.hint_grade - a.hint_grade;
+    if (a.specificity !== b.specificity) return b.specificity - a.specificity;
+    return byCodeUnit(a.scheme, b.scheme);
+  });
+  let group = 0;
+  candidates.forEach((candidate, index) => {
+    const before = candidates[index - 1];
+    const tied =
+      before !== undefined &&
+      before.accepted === candidate.accepted &&
+      before.certainty === candidate.certainty &&
+      before.hint_grade === candidate.hint_grade &&
+      before.specificity === candidate.specificity;
+    if (!tied) group += 1;
+    candidate.rank_group = group;
   });
 
   const conclusions: Conclusion[] = candidates.map((candidate) => {

@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { createEngine } from './engine.ts';
 import { checkValue } from './format.ts';
+import { specificity } from './specificity.ts';
 import { fixtureModel, fixtureScheme } from './testing/fixture-model.ts';
 import { loadDistModel } from './testing/load-model.ts';
 
@@ -246,5 +247,112 @@ describe('recognise conditions on a synthetic model (D-12, DEC-063)', () => {
     const candidate = createEngine(fixtureModel({ schemes: [scheme] })).recognise('AB1234').data[0];
     expect(candidate?.format.pattern).toBe(2);
     expect(candidate?.certainty).toBe('certain');
+  });
+});
+
+describe('specificity of a regex source (DEC-064)', () => {
+  test.for([
+    ['^NL[0-9]{9}B[0-9]{2}$', 3],
+    ['^[A-Z]{2}[A-Z0-9]{1,15}$', 0],
+    ['^NL\\.KVK\\.[0-9]{8}$', 7],
+    ['^iso6523-actorid-upis::[0-9]{4}:[A-Za-z0-9]+$', 23],
+    ['^NL[0-9]{9}$', 2],
+    ['^(?:ab|cd)$', 4],
+    ['^a\\d+$', 1],
+    ['^a{2,}b?.$', 2],
+    ['^[\\]a]x$', 1],
+  ] as const)('specificity of %s is %i', ([source, expected]) => {
+    expect(specificity(source)).toBe(expected);
+  });
+
+  test('a brace that is not a quantifier counts one, and a trailing backslash counts zero', () => {
+    expect(specificity('a{b')).toBe(3);
+    expect(specificity('a\\')).toBe(1);
+  });
+});
+
+describe('recognise ordering, hint grade and rank groups (D-05, D-06, DEC-063)', () => {
+  // The one public allow-listed value; the ambiguity set is the four nine-digit schemes.
+  const AMBIGUOUS = '001469630';
+
+  test('without a hint the four nine-digit candidates share one rank group', () => {
+    const { data } = engine.recognise(AMBIGUOUS);
+    expect(schemesOf(data)).toEqual(['bsn', 'duns', 'fi-number', 'rsin']);
+    expect(data.map((c) => c.rank_group)).toEqual([1, 1, 1, 1]);
+    expect(data.every((c) => c.accepted && c.specificity === 0 && c.hint_grade === 0)).toBe(true);
+  });
+
+  test('hint country NL ranks the Dutch schemes first and duns apart', () => {
+    const { data, warnings } = engine.recognise(AMBIGUOUS, { country: 'NL' });
+    expect(schemesOf(data)).toEqual(['bsn', 'fi-number', 'rsin', 'duns']);
+    expect(data.map((c) => c.hint_grade)).toEqual([2, 2, 2, 0]);
+    expect(data.map((c) => c.rank_group)).toEqual([1, 1, 1, 2]);
+    expect(warnings).toEqual([]);
+  });
+
+  test('the value prefix NL ranks eori, vat-nl and vat in three rank groups', () => {
+    const { data } = engine.recognise(EORI_B01);
+    expect(schemesOf(data)).toEqual(['eori', 'vat-nl', 'vat']);
+    expect(data.map((c) => c.certainty)).toEqual(['certain', 'likely', 'likely']);
+    expect(data.map((c) => c.hint_grade)).toEqual([1, 2, 1]);
+    expect(data.map((c) => c.rank_group)).toEqual([1, 2, 3]);
+  });
+
+  test('every candidate carries the specificity of its deciding pattern', () => {
+    const vatNl = engine.recognise(EORI_B01).data.find((c) => c.scheme === 'vat-nl');
+    expect(vatNl?.specificity).toBe(3);
+  });
+
+  test('the hint EL resolves to GR through the country-prefix vocabulary and gives no warning', () => {
+    const { warnings } = engine.recognise(EORI_B01, { country: 'EL' });
+    expect(warnings).toEqual([]);
+  });
+
+  test.for([[{ country: 'ZZ' }], [{ country: 7 }], ['x'], [null], [[]]] as const)(
+    'the hint %j gives unknown-country-hint and the unhinted order',
+    ([hint]) => {
+      const unhinted = engine.recognise(AMBIGUOUS);
+      const result = engine.recognise(AMBIGUOUS, hint as never);
+      expect(result.warnings.map((w) => w.code)).toEqual(['unknown-country-hint']);
+      expect(result.warnings[0]?.message).not.toContain('ZZ');
+      expect(result.data).toEqual(unhinted.data);
+    },
+  );
+
+  test('a hint never removes a candidate', () => {
+    const plain = schemesOf(engine.recognise(AMBIGUOUS).data).sort();
+    const hinted = schemesOf(engine.recognise(AMBIGUOUS, { country: 'BE' }).data).sort();
+    expect(hinted).toEqual(plain);
+  });
+
+  test('rejected candidates stay after every accepted one whatever the hint', () => {
+    const example = model.schemes.duns?.format?.examples_valid?.[0] ?? '';
+    for (const hint of [undefined, { country: 'NL' }, { country: 'GLOBAL' }]) {
+      const { data } = engine.recognise(example, hint);
+      expect(data.map((c) => c.accepted)).toEqual([true, false, false, false]);
+      expect(data[0]?.scheme).toBe('duns');
+    }
+  });
+
+  test('the comparator is total: every model example gives identical data twice', () => {
+    const everyValue = Object.values(model.schemes).flatMap((scheme) => [
+      ...(scheme.format?.examples_valid ?? []),
+      ...(scheme.format?.examples_invalid ?? []),
+    ]);
+    expect(everyValue.length).toBeGreaterThan(20);
+    for (const value of everyValue) {
+      expect(engine.recognise(value)).toEqual(engine.recognise(value));
+    }
+  });
+
+  test('rank groups are consecutive from 1', () => {
+    for (const value of [AMBIGUOUS, EORI_B01, EORI_VALUE]) {
+      const groups = engine.recognise(value).data.map((c) => c.rank_group);
+      expect(groups[0]).toBe(1);
+      for (let i = 1; i < groups.length; i++) {
+        const step = (groups[i] ?? 0) - (groups[i - 1] ?? 0);
+        expect(step === 0 || step === 1).toBe(true);
+      }
+    }
   });
 });
