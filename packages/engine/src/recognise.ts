@@ -4,12 +4,14 @@ import { evaluateCondition, type Known, mergeKnown, valueContext } from './condi
 import {
   chainCertainty,
   checksumStep,
+  componentStep,
   conclusion,
   dedupeSteps,
   patternStep,
   type StatementLike,
 } from './explain.ts';
 import type { ChecksumOutcome } from './format.ts';
+import type { Component } from './model-types.ts';
 import type { Certainty, Conclusion, Result, Step, Warning } from './types.ts';
 
 /** The longest value recognise reads; a longer one gives no candidate (T-05-07). */
@@ -80,6 +82,72 @@ export function evaluateCandidate(
   known: Known,
   warnings: Warning[] = [],
 ): Candidate | null {
+  return evaluate(compiled, schemeId, value, known, warnings, true);
+}
+
+/** The prefix of a composite's rest is named in a warning only when it has the ICD shape (T-05-08). */
+const ICD_PREFIX = /^[0-9]{4}$/;
+
+/**
+ * Peppol delegation (DEC-065): the part after the last `::` is read as `<prefix>:<rest>`; a declared
+ * component prefix sends `<rest>` to that component scheme only. The rest is never case-folded.
+ */
+function delegate(
+  compiled: CompiledModel,
+  schemeId: string,
+  components: readonly Component[],
+  value: string,
+  known: Known,
+  warnings: Warning[],
+  explanation: Step[],
+): { components: ComponentMatch[]; accepted: boolean } {
+  const tail = value.slice(value.lastIndexOf('::') + 2);
+  const colon = tail.indexOf(':');
+  const prefix = colon < 0 ? tail : tail.slice(0, colon);
+  const rest = colon < 0 ? '' : tail.slice(colon + 1);
+  const component = components.find((each) => each.prefix === prefix);
+  if (component === undefined) {
+    warnings.push({
+      code: 'unknown-component-prefix',
+      message: ICD_PREFIX.test(prefix)
+        ? `the value has the component prefix ${prefix}, which ${schemeId} does not declare, so it is not delegated`
+        : `the value has a component prefix that ${schemeId} does not declare, so it is not delegated`,
+      ref: schemeId,
+    });
+    return { components: [], accepted: false };
+  }
+  const nested = evaluate(compiled, component.scheme, rest, known, warnings, false);
+  const ref = `${schemeId}/components/${component.prefix}`;
+  explanation.push(componentStep(compiled, schemeId, component));
+  const accepted = nested?.accepted === true;
+  if (nested !== null && accepted) explanation.push(...nested.explanation);
+  if (!accepted) {
+    warnings.push({
+      code: 'component-not-accepted',
+      message: `the component value is not accepted by ${component.scheme}`,
+      ref,
+    });
+  }
+  return {
+    components: [
+      {
+        prefix: component.prefix,
+        scheme: component.scheme,
+        candidates: nested === null ? [] : [nested],
+      },
+    ],
+    accepted,
+  };
+}
+
+function evaluate(
+  compiled: CompiledModel,
+  schemeId: string,
+  value: string,
+  known: Known,
+  warnings: Warning[],
+  split: boolean,
+): Candidate | null {
   const entry = compiled.schemes.get(schemeId);
   if (entry === undefined || entry.check === null) return null;
   const format = entry.scheme.format;
@@ -130,9 +198,28 @@ export function evaluateCandidate(
   explanation = dedupeSteps(explanation);
 
   const accepted = checksumResult !== 'fail';
-  const certainty: Certainty = accepted ? chainCertainty(compiled, explanation) : 'possible';
 
-  return {
+  let components: ComponentMatch[] | undefined;
+  let delegated = true;
+  const declaredComponents = entry.scheme.components ?? [];
+  if (split && entry.scheme.kind.value === 'composite' && declaredComponents.length > 0) {
+    const outcome = delegate(
+      compiled,
+      schemeId,
+      declaredComponents,
+      value,
+      known,
+      warnings,
+      explanation,
+    );
+    components = outcome.components;
+    delegated = outcome.accepted || components.length === 0;
+    explanation = dedupeSteps(explanation);
+  }
+  const certainty: Certainty =
+    accepted && delegated ? chainCertainty(compiled, explanation) : 'possible';
+
+  const candidate: Candidate = {
     scheme: schemeId,
     accepted,
     certainty,
@@ -144,6 +231,14 @@ export function evaluateCandidate(
     },
     explanation,
   };
+  if (components !== undefined) candidate.components = components;
+  return candidate;
+}
+
+/** True when the composite found its declared component but the component rejected the rest. */
+function componentRejected(candidate: Candidate): boolean {
+  const components = candidate.components ?? [];
+  return components.some((each) => !each.candidates.some((nested) => nested.accepted));
 }
 
 function emptyResult(code: string, message: string): Result<Candidate[]> {
@@ -186,6 +281,21 @@ export function recognise(
   const conclusions: Conclusion[] = candidates.map((candidate) => {
     const label = compiled.schemes.get(candidate.scheme)?.scheme.label.en ?? candidate.scheme;
     const params = { scheme: candidate.scheme };
+    const rejected = componentRejected(candidate);
+    if (candidate.accepted && rejected) {
+      const nestedScheme = candidate.components?.[0]?.scheme ?? '';
+      const nestedLabel = compiled.schemes.get(nestedScheme)?.scheme.label.en ?? nestedScheme;
+      return {
+        ...conclusion(
+          compiled,
+          'recognise.component-not-accepted',
+          { scheme: candidate.scheme, component: nestedScheme },
+          `The value has the format of ${label} (${candidate.scheme}), but its component value is not accepted by ${nestedLabel} (${nestedScheme}).`,
+          candidate.explanation,
+        ),
+        certainty: 'possible',
+      };
+    }
     if (candidate.accepted) {
       return conclusion(
         compiled,
