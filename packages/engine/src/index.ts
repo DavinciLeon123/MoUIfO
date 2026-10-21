@@ -5,6 +5,13 @@ export { gs1Mod10 } from './checksum/gs1-mod10.ts';
 export { CHECKSUM_IDS, CHECKSUMS, type ChecksumId } from './checksum/index.ts';
 export { iso7064Mod9710 } from './checksum/iso7064-mod97-10.ts';
 export { none } from './checksum/none.ts';
+export type {
+  IssuerDescription,
+  IssuerInstance,
+  RuleLink,
+  SchemeDescription,
+  SourcedClaim,
+} from './describe.ts';
 export { createEngine, type Engine } from './engine.ts';
 export {
   type ChecksumOutcome,
