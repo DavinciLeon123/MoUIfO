@@ -280,3 +280,153 @@ describe('check on fixtures: direction and scheme choice', () => {
     expect(finding?.rules).toEqual(['m1-t']);
   });
 });
+
+function codesOf(result: { warnings: { code: string }[] }): string[] {
+  return result.warnings.map((warning) => warning.code);
+}
+
+describe('check: the gate joins a bare value only through a deriving partner', () => {
+  test('a possible BSN beside an unrelated EORI stays out: no-rule, no tried scheme, one warning', () => {
+    const bare = syntheticValid();
+    const result = engine.check(['NL001469630', bare]);
+    expect(result.data).toHaveLength(1);
+    expect(result.data[0]?.outcome).toBe('no-rule');
+    expect(result.data[0]?.tried.b).toEqual([]);
+    expect(result.warnings.filter((each) => each.code === 'possible-personal-identifier')).toEqual([
+      expect.objectContaining({ ref: 'values/1' }),
+    ]);
+    expect(JSON.stringify(result).includes(bare)).toBe(false);
+  });
+
+  test('a possible BSN beside the EORI that derives it joins, as the RSIN only', () => {
+    const result = engine.check(['NL001469630', '001469630']);
+    expect(result.data[0]?.outcome).toBe('consistent');
+    expect(result.data[0]?.tried.b).toEqual(['rsin']);
+  });
+});
+
+describe('check: input handling', () => {
+  test('an exact duplicate is compared once, with a warning at its own position', () => {
+    const result = engine.check(['NL001469630', 'NL001469630']);
+    expect(result.data).toEqual([]);
+    expect(result.warnings).toEqual([
+      {
+        code: 'duplicate-value',
+        message: 'Value 2 repeats value 1; it is compared once.',
+        ref: 'values/1',
+      },
+    ]);
+  });
+
+  test('a trimmed duplicate counts and positions stay the original input positions', () => {
+    const result = engine.check(['NL001469630', 'x', ' NL001469630 ']);
+    expect(result.data.map((each) => [each.a, each.b])).toEqual([[0, 1]]);
+    expect(
+      result.warnings.filter((each) => each.code === 'duplicate-value').map((each) => each.ref),
+    ).toEqual(['values/2']);
+  });
+
+  test('one value or no value gives no finding and no warning', () => {
+    for (const values of [['NL001469630'], []]) {
+      const result = engine.check(values);
+      expect(result).toEqual({ data: [], conclusions: [], warnings: [] });
+    }
+  });
+
+  test('something that is not an array gives invalid-input and no finding', () => {
+    const result = engine.check('NL001469630' as never);
+    expect(result.data).toEqual([]);
+    expect(result.conclusions).toEqual([]);
+    expect(codesOf(result)).toEqual(['invalid-input']);
+    expect(JSON.stringify(result).includes('NL001469630')).toBe(false);
+  });
+
+  test('an entry that is not a string gives invalid-input at its position and is left out', () => {
+    const result = engine.check(['NL001469630', 7 as never, 'NL001469630B01']);
+    expect(result.warnings.filter((each) => each.code === 'invalid-input')).toEqual([
+      expect.objectContaining({ ref: 'values/1' }),
+    ]);
+    expect(result.data.map((each) => [each.a, each.b])).toEqual([[0, 2]]);
+  });
+
+  test('an empty or over-long entry is left out with its own warning', () => {
+    const result = engine.check(['NL001469630', '   ', 'N'.repeat(300), 'NL001469630B01']);
+    expect(result.warnings.map((each) => [each.code, each.ref])).toEqual([
+      ['empty-input', 'values/1'],
+      ['input-too-long', 'values/2'],
+    ]);
+    expect(result.data.map((each) => [each.a, each.b])).toEqual([[0, 3]]);
+  });
+
+  test('51 values give empty data and too-many-values; 50 are compared', () => {
+    const many = Array.from({ length: 51 }, (_, i) => `NL${i}`);
+    const refused = engine.check(many);
+    expect(refused.data).toEqual([]);
+    expect(refused.conclusions).toEqual([]);
+    expect(refused.warnings).toEqual([
+      { code: 'too-many-values', message: 'check compares at most 50 values.', ref: 'values' },
+    ]);
+    const allowed = engine.check(many.slice(0, 50));
+    expect(allowed.data).toHaveLength((50 * 49) / 2);
+    expect(codesOf(allowed)).not.toContain('too-many-values');
+  });
+});
+
+describe('check: context', () => {
+  test('entity_form legal-person keeps the triple consistent and replaces every assumption', () => {
+    const result = engine.check(TRIPLE, { entity_form: 'legal-person' });
+    expect(result.data.map((each) => each.outcome)).toEqual([
+      'consistent',
+      'consistent',
+      'consistent',
+    ]);
+    for (const finding of result.data) {
+      const refs = finding.explanation.map((step) => step.ref);
+      expect(refs).toContain('ctx/entity_form');
+      expect(
+        finding.explanation.some(
+          (step) => step.kind === 'assumption' && step.condition?.entity_form !== undefined,
+        ),
+      ).toBe(false);
+    }
+  });
+
+  test('entity_form sole-proprietorship makes every pair no-rule', () => {
+    const result = engine.check(TRIPLE, { entity_form: 'sole-proprietorship' });
+    expect(result.data.map((each) => each.outcome)).toEqual(['no-rule', 'no-rule', 'no-rule']);
+    expect(result.data[0]?.tried.b).toEqual(['eori', 'vat']);
+    expect(result.data[2]?.tried.b).toEqual([]);
+    expect(result.conclusions).toEqual([]);
+  });
+
+  test('an unknown context key is ignored with a warning that names no input', () => {
+    const result = engine.check(TRIPLE, { colour: 'red' } as never);
+    expect(codesOf(result)).toContain('unknown-context-key');
+    expect(result.data.map((each) => each.outcome)).toEqual([
+      'consistent',
+      'consistent',
+      'consistent',
+    ]);
+  });
+});
+
+describe('check: privacy and determinism', () => {
+  const bare = syntheticValid();
+  const cases: [string, string[], Record<string, string> | undefined][] = [
+    ['the triple', TRIPLE, undefined],
+    ['the triple with context', TRIPLE, { entity_form: 'legal-person' }],
+    ['a possible BSN with no partner', ['NL001469630', bare], undefined],
+    ['a duplicate', ['NL001469630', ' NL001469630', 'NL001469630B01'], undefined],
+    ['a VAT number of another RSIN', ['NL001469630', `NL${bare}B01`], undefined],
+  ];
+
+  for (const [name, values, ctx] of cases) {
+    test(`${name}: no input value is repeated and a second call gives the same result`, () => {
+      const result = engine.check(values, ctx);
+      const text = JSON.stringify(result);
+      for (const value of values) expect(text.includes(value.trim())).toBe(false);
+      for (const warning of result.warnings) expect(/[0-9]{4,}/.test(warning.message)).toBe(false);
+      expect(engine.check(values, ctx)).toEqual(result);
+    });
+  }
+});
