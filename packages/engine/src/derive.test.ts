@@ -61,15 +61,18 @@ describe('derive: the SPEC section 10 tracer on the real model', () => {
     expect(result.data.some((each) => each.scheme === 'vat')).toBe(false);
   });
 
-  test('one conclusion per derivation, built from labels and ids, never from a value', () => {
-    expect(result.conclusions.map((each) => each.key)).toEqual([
-      'derive.derivation',
-      'derive.derivation',
-    ]);
-    expect(result.conclusions[0]?.params).toEqual({
+  test('the derivation conclusions, built from labels and ids, never from a value', () => {
+    const derivations = result.conclusions.filter((each) => each.key === 'derive.derivation');
+    expect(derivations).toHaveLength(2);
+    expect(derivations[0]?.params).toEqual({
       from: 'eori',
       scheme: 'rsin',
       rules: 'rsin-from-eori-nl',
+    });
+    expect(derivations[1]?.params).toEqual({
+      from: 'eori',
+      scheme: 'oin',
+      rules: 'rsin-from-eori-nl,oin-from-rsin',
     });
     for (const each of result.conclusions) {
       expect(each.statement.includes('001469630')).toBe(false);
@@ -420,7 +423,7 @@ describe('derive on fixtures: limits and ordering', () => {
     ]);
     const result = wide.derive('A1', 'hub');
     expect(result.data).toHaveLength(100);
-    expect(result.conclusions).toHaveLength(100);
+    expect(result.conclusions.filter((each) => each.key === 'derive.derivation')).toHaveLength(100);
     expect(codes(result)).toEqual(['too-many-results']);
     expect(wide.derive('A1', 'hub').data).toEqual(result.data);
   });
@@ -438,5 +441,107 @@ describe('derive on fixtures: limits and ordering', () => {
     const known = conditional.derive('A1', 'k1', { entity_form: 'legal-person' }).data[0];
     expect(known?.certainty).toBe('certain');
     expect(conditional.derive('A1', 'k1', { entity_form: 'fiscal-unit' }).data).toEqual([]);
+  });
+});
+
+const rank = new Map<string, number>([
+  ['certain', 3],
+  ['likely', 2],
+  ['possible', 1],
+]);
+
+describe('derive: reference conclusions (SPEC section 10, DEC-031, DEC-045, DEC-050)', () => {
+  const result = engine.derive('NL001469630', 'eori');
+  const keys = result.conclusions.map((each) => each.key);
+
+  test('reference: issued by the class instance of the issuing country, before the derivations', () => {
+    expect(keys).toEqual([
+      'derive.issued-by',
+      'derive.verify-through',
+      'derive.derivation',
+      'derive.derivation',
+      'derive.look-up-through',
+      'derive.look-up-through',
+    ]);
+    const issued = result.conclusions[0];
+    expect(issued?.params).toEqual({ scheme: 'eori', authority: 'douane-nl' });
+    expect(issued?.certainty).toBe('certain');
+    expect(issued?.explanation.map((step) => step.ref)).toEqual([
+      'eori/issuer',
+      'eori/context_from/issuing_country',
+      'vocab/country-prefix/NL',
+      'authorities/douane-nl',
+    ]);
+    expect(issued?.statement).toContain('(douane-nl)');
+  });
+
+  test('reference: verifiable through the start scheme validation source', () => {
+    const verify = result.conclusions[1];
+    expect(verify?.params).toEqual({ scheme: 'eori', source: 'eori-validation' });
+    expect(verify?.certainty).toBe('certain');
+    expect(verify?.explanation.map((step) => step.ref)).toEqual(['eori/validation_source']);
+  });
+
+  test('reference: each derived scheme is a look-up reference, not a lookup', () => {
+    const [rsin, oin] = result.conclusions.slice(4);
+    expect(rsin?.params).toEqual({ scheme: 'rsin', source: 'kvk-zoeken' });
+    expect(oin?.params).toEqual({ scheme: 'oin', source: 'oin-register' });
+    for (const each of [rsin, oin]) {
+      expect(each?.certainty).toBe('certain');
+      expect(each?.explanation.map((step) => step.ref)).toEqual([
+        `${each?.params.scheme}/validation_source`,
+      ]);
+    }
+    expect(rsin?.statement).toContain('this is a reference, not a lookup');
+  });
+
+  test('reference: a DE EORI names the authority class, with one issuer step, and verify-through', () => {
+    const de = engine.derive('DE123456789012345', 'eori');
+    expect(de.conclusions.map((each) => each.key)).toEqual([
+      'derive.issued-by',
+      'derive.verify-through',
+    ]);
+    expect(de.conclusions[0]?.params).toEqual({
+      scheme: 'eori',
+      authority: 'national-customs-authority',
+    });
+    expect(de.conclusions[0]?.explanation.map((step) => step.ref)).toEqual(['eori/issuer']);
+  });
+
+  test('reference: a declared rsin is issued by the instance issuer kvk and verified through kvk-zoeken', () => {
+    const rsin = engine.derive(syntheticValid(), 'rsin');
+    const issued = rsin.conclusions.find((each) => each.key === 'derive.issued-by');
+    const verify = rsin.conclusions.find((each) => each.key === 'derive.verify-through');
+    expect(issued?.params).toEqual({ scheme: 'rsin', authority: 'kvk' });
+    expect(verify?.params).toEqual({ scheme: 'rsin', source: 'kvk-zoeken' });
+    const derived = rsin.conclusions
+      .filter((each) => each.key === 'derive.look-up-through')
+      .map((each) => each.params.scheme);
+    expect(derived).toEqual(['eori', 'oin']);
+  });
+
+  test('reference: a context country that agrees with the value still gives the instance', () => {
+    const viaCtx = engine.derive('NL001469630', 'eori', { issuing_country: 'NL' });
+    expect(viaCtx.conclusions[0]?.params.authority).toBe('douane-nl');
+  });
+
+  test('reference: no key or statement names a level or a VAT number from the EORI or RSIN', () => {
+    for (const call of [result, engine.derive(syntheticValid(), 'rsin')]) {
+      for (const each of call.conclusions) {
+        expect(each.key).toMatch(/^derive\.(issued-by|verify-through|derivation|look-up-through)$/);
+        expect(each.statement).not.toMatch(/level|VAT/i);
+        expect(each.params.scheme === 'vat-nl' || each.params.scheme === 'vat').toBe(false);
+      }
+    }
+  });
+
+  test('reference: every conclusion has a step and the certainty of its weakest step', () => {
+    for (const call of [result, engine.derive('NL001469630B01', 'vat-nl')]) {
+      for (const each of call.conclusions) {
+        expect(each.explanation.length).toBeGreaterThan(0);
+        const weakest = Math.min(...each.explanation.map((step) => rank.get(step.certainty) ?? 0));
+        expect(rank.get(each.certainty)).toBe(weakest);
+      }
+    }
   });
 });

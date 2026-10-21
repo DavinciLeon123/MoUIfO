@@ -7,7 +7,7 @@ import {
   resolveContext,
   valueContext,
 } from './conditions.ts';
-import { chainCertainty, conclusion, dedupeSteps, ruleStep } from './explain.ts';
+import { chainCertainty, conclusion, dedupeSteps, factStep, ruleStep } from './explain.ts';
 import { isPossiblePersonalIdentifier, personalIdentifierWarning } from './gate.ts';
 import type { Candidate } from './recognise.ts';
 import { evaluateCandidate, MAX_INPUT_LENGTH } from './recognise.ts';
@@ -160,6 +160,106 @@ function derivationConclusion(compiled: CompiledModel, each: Derivation): Conclu
 }
 
 /**
+ * The sourced reference conclusions about the start value (SPEC §10): who issues the scheme and
+ * where the value can be verified. A class issuer resolves to the instance of the value's issuing
+ * country when the model has one (DEC-031); otherwise the issuer is named as the model states it.
+ */
+function startConclusions(
+  compiled: CompiledModel,
+  start: DeriveStart,
+  ctxKnown: Known,
+): Conclusion[] {
+  const scheme = compiled.schemes.get(start.scheme)?.scheme;
+  if (scheme === undefined) return [];
+  const conclusions: Conclusion[] = [];
+
+  const steps: Step[] = [factStep(compiled, `${start.scheme}/issuer`, scheme.issuer)];
+  let named = scheme.issuer.value;
+  const issuer = compiled.authorities.get(named);
+  if (issuer?.kind === 'class') {
+    const country = mergeKnown(
+      ctxKnown,
+      valueContext(compiled, start.scheme, start.value),
+      `${start.scheme}/context_from/issuing_country`,
+    ).known.get('issuing_country');
+    if (country !== undefined) {
+      for (const id of compiled.instancesByClass.get(issuer.id) ?? []) {
+        const instance = compiled.authorities.get(id);
+        if (
+          instance?.jurisdiction !== country.value ||
+          instance.certainty === undefined ||
+          instance.source === undefined
+        ) {
+          continue;
+        }
+        steps.push(
+          ...country.steps,
+          factStep(compiled, `authorities/${id}`, {
+            certainty: instance.certainty,
+            source: instance.source,
+          }),
+        );
+        named = id;
+        break;
+      }
+    }
+  }
+  const authorityLabel = compiled.authorities.get(named)?.label.en;
+  conclusions.push(
+    conclusion(
+      compiled,
+      'derive.issued-by',
+      { scheme: start.scheme, authority: named },
+      `The ${labelOf(compiled, start.scheme)} is issued by ${authorityLabel === undefined ? named : `${authorityLabel} (${named})`}.`,
+      dedupeSteps(steps),
+    ),
+  );
+
+  const validation = scheme.validation_source;
+  if (validation !== undefined) {
+    conclusions.push(
+      conclusion(
+        compiled,
+        'derive.verify-through',
+        { scheme: start.scheme, source: validation.source },
+        `The ${labelOf(compiled, start.scheme)} can be verified through ${validation.label}.`,
+        [factStep(compiled, `${start.scheme}/validation_source`, validation)],
+      ),
+    );
+  }
+  return conclusions;
+}
+
+/**
+ * One reference per derived scheme that has a validation source and is not itself a start, in order
+ * of first appearance. It names where to look the value up; it never looks anything up.
+ */
+function lookUpConclusions(
+  compiled: CompiledModel,
+  starts: readonly DeriveStart[],
+  data: readonly Derivation[],
+): Conclusion[] {
+  const skip = new Set(starts.map((each) => each.scheme));
+  const conclusions: Conclusion[] = [];
+  for (const each of data) {
+    if (skip.has(each.scheme)) continue;
+    skip.add(each.scheme);
+    const validation = compiled.schemes.get(each.scheme)?.scheme.validation_source;
+    if (validation === undefined) continue;
+    conclusions.push(
+      conclusion(
+        compiled,
+        'derive.look-up-through',
+        { scheme: each.scheme, source: validation.source },
+        `The derived ${labelOf(compiled, each.scheme)} can be looked up through ${validation.label}; this is a reference, not a lookup.`,
+        [factStep(compiled, `${each.scheme}/validation_source`, validation)],
+      ),
+    );
+  }
+  return conclusions;
+}
+
+/**
  * Derive from a value (SPEC §6.2, ENG-06, DEC-067): `schemeId` declares the scheme of the input
  * value, there is no target scheme. With a declared scheme the value must be accepted by it; without
  * one, every accepted candidate is a start, except that a bare elfproef-valid nine-digit value starts
@@ -249,6 +349,11 @@ export function derive(
     });
   }
 
-  const conclusions: Conclusion[] = data.map((each) => derivationConclusion(compiled, each));
+  const conclusions: Conclusion[] = [];
+  for (const start of starts) {
+    conclusions.push(...startConclusions(compiled, start, resolved.known));
+  }
+  conclusions.push(...data.map((each) => derivationConclusion(compiled, each)));
+  conclusions.push(...lookUpConclusions(compiled, starts, data));
   return { data, conclusions, warnings: dedupeWarnings(warnings) };
 }
