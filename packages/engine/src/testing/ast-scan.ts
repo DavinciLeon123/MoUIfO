@@ -121,6 +121,17 @@ function compareFindings(a: Finding, b: Finding): number {
   return left < right ? -1 : left > right ? 1 : 0;
 }
 
+/** The module specifiers of every import and re-export declaration, in source order, duplicates kept. */
+export function importSpecifiers(text: string, lang: 'ts' | 'js'): string[] {
+  const specifiers: string[] = [];
+  walk(parse(text, lang), (n) => {
+    if (!isImportOrExport(n)) return;
+    const specifier = sourceValue(n);
+    if (specifier !== null) specifiers.push(specifier);
+  });
+  return specifiers;
+}
+
 /** Scan one file's text; findings are sorted by file, rule and name, duplicates collapsed. */
 export function scanSource(text: string, lang: 'ts' | 'js', file: string): Finding[] {
   const seen = new Map<string, Finding>();
