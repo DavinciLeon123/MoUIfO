@@ -1,6 +1,9 @@
 import { describe, expect, test } from 'vitest';
 import { createEngine } from './engine.ts';
+import type { Rule, Scheme } from './model-types.ts';
+import { fixtureModel, fixtureScheme } from './testing/fixture-model.ts';
 import { loadDistModel } from './testing/load-model.ts';
+import { syntheticValid } from './testing/synthetic-values.ts';
 
 const model = loadDistModel();
 const engine = createEngine(model);
@@ -70,5 +73,210 @@ describe('check: the SPEC section 10 tracer on the real model', () => {
     });
     const text = JSON.stringify(result);
     for (const value of TRIPLE) expect(text.includes(value)).toBe(false);
+  });
+});
+
+/** The first and second valid example of a scheme, read from the model, never typed here. */
+function example(schemeId: string, index: number): string {
+  const value = model.schemes[schemeId]?.format?.examples_valid?.[index];
+  if (value === undefined) throw new Error(`the model has no example ${index} for ${schemeId}`);
+  return value;
+}
+
+const RANK: Record<string, number> = { certain: 3, likely: 2, possible: 1 };
+
+function weakestOf(steps: readonly { certainty: string }[]): string {
+  return steps.reduce(
+    (low, step) => ((RANK[step.certainty] ?? 0) < (RANK[low] ?? 0) ? step.certainty : low),
+    'certain',
+  );
+}
+
+describe('check: outcomes on the real model', () => {
+  const kvk = example('kvk-number', 1);
+  const oinOfOther = `00000003${example('kvk-number', 0)}0000`;
+
+  test('a KvK number against an OIN of another KvK number is inconsistent, a-to-b, through the OIN rule', () => {
+    const result = engine.check([kvk, oinOfOther]);
+    expect(result.data).toHaveLength(1);
+    const finding = result.data[0];
+    expect(finding?.outcome).toBe('inconsistent');
+    expect(finding?.direction).toBe('a-to-b');
+    expect(finding?.from_scheme).toBe('kvk-number');
+    expect(finding?.to_scheme).toBe('oin');
+    expect(finding?.rules).toEqual(['oin-from-kvk-number']);
+    expect(finding?.tried).toEqual({ a: ['kvk-number'], b: ['oin'] });
+    expect(finding?.explanation.length).toBeGreaterThan(0);
+    expect(finding?.certainty).not.toBeNull();
+    expect(result.conclusions.map((each) => each.key)).toEqual(['check.inconsistent']);
+    expect(result.conclusions[0]?.statement.startsWith('Values 1 and 2 are inconsistent:')).toBe(
+      true,
+    );
+  });
+
+  test('an EORI against a VAT number of another RSIN is inconsistent, b-to-a, through the RSIN', () => {
+    const result = engine.check(['NL001469630', `NL${syntheticValid()}B01`]);
+    const finding = result.data[0];
+    expect(finding?.outcome).toBe('inconsistent');
+    expect(finding?.direction).toBe('b-to-a');
+    expect(finding?.from_scheme).toBe('vat-nl');
+    expect(finding?.to_scheme).toBe('eori');
+    expect(finding?.rules).toEqual(['rsin-from-vat-nl', 'eori-nl-from-rsin']);
+  });
+
+  test('a relation without a rule is no-rule: an EUID and a KvK number', () => {
+    const result = engine.check([example('euid', 0), example('kvk-number', 0)]);
+    expect(result.data).toHaveLength(1);
+    const finding = result.data[0];
+    expect(finding?.outcome).toBe('no-rule');
+    expect(finding?.direction).toBeNull();
+    expect(finding?.from_scheme).toBeNull();
+    expect(finding?.to_scheme).toBeNull();
+    expect(finding?.certainty).toBeNull();
+    expect(finding?.rules).toEqual([]);
+    expect(finding?.explanation).toEqual([]);
+    expect(finding?.tried.a).toEqual(['euid']);
+    expect(finding?.tried.b).toEqual(['kvk-number']);
+    expect(result.conclusions).toEqual([]);
+  });
+
+  test('every consistent or inconsistent conclusion has the certainty of its weakest step', () => {
+    const results = [
+      engine.check(TRIPLE),
+      engine.check([kvk, oinOfOther]),
+      engine.check([example('euid', 0), example('kvk-number', 0)]),
+    ];
+    let seen = 0;
+    for (const result of results) {
+      for (const each of result.conclusions) {
+        seen += 1;
+        expect(each.certainty).toBe(weakestOf(each.explanation));
+      }
+      for (const finding of result.data) {
+        if (finding.outcome === 'no-rule') continue;
+        expect(finding.certainty).toBe(weakestOf(finding.explanation));
+      }
+    }
+    expect(seen).toBe(4);
+  });
+
+  test('every finding has exactly the ConsistencyFinding keys', () => {
+    const keys = [
+      'a',
+      'b',
+      'certainty',
+      'direction',
+      'explanation',
+      'from_scheme',
+      'outcome',
+      'rules',
+      'to_scheme',
+      'tried',
+    ];
+    const results = [
+      engine.check(TRIPLE),
+      engine.check([kvk, oinOfOther]),
+      engine.check([example('euid', 0), example('kvk-number', 0)]),
+    ];
+    let seen = 0;
+    for (const result of results) {
+      for (const finding of result.data) {
+        seen += 1;
+        expect(Object.keys(finding).sort()).toEqual(keys);
+        expect(Object.keys(finding.tried).sort()).toEqual(['a', 'b']);
+      }
+    }
+    expect(seen).toBe(5);
+  });
+});
+
+/** A fixture scheme that accepts a letter followed by digits. */
+function lettered(id: string, letter: string, rules: Rule[] = []): Scheme {
+  return fixtureScheme(id, {
+    format: { patterns: [{ regex: `^${letter}[0-9]+$`, certainty: 'certain', source: 'fx-law' }] },
+    rules,
+  });
+}
+
+/** A rule that swaps the leading letter of the value for another. */
+function swap(
+  id: string,
+  input: string,
+  output: string,
+  letter: string,
+  more: Partial<Rule> = {},
+): Rule {
+  return {
+    id,
+    input,
+    output,
+    transform: [{ strip_prefix: 1 }, { add_prefix: letter }],
+    certainty: 'certain',
+    source: 'fx-law',
+    ...more,
+  };
+}
+
+describe('check on fixtures: direction and scheme choice', () => {
+  test('a pair connected both ways at the same length chooses a-to-b, in either order', () => {
+    const both = createEngine(
+      fixtureModel({
+        schemes: [
+          lettered('p', 'P', [swap('p-q', 'p', 'q', 'Q')]),
+          lettered('q', 'Q', [swap('q-p', 'q', 'p', 'P')]),
+        ],
+      }),
+    );
+    const forward = both.check(['P1', 'Q1']).data[0];
+    expect([forward?.outcome, forward?.direction, forward?.rules]).toEqual([
+      'consistent',
+      'a-to-b',
+      ['p-q'],
+    ]);
+    const backward = both.check(['Q1', 'P1']).data[0];
+    expect([backward?.outcome, backward?.direction, backward?.rules]).toEqual([
+      'consistent',
+      'a-to-b',
+      ['q-p'],
+    ]);
+  });
+
+  test('a shorter b-to-a chain wins over a longer a-to-b chain', () => {
+    const uneven = createEngine(
+      fixtureModel({
+        schemes: [
+          lettered('x', 'X', [swap('x-y', 'x', 'y', 'Y')]),
+          lettered('y', 'Y', [swap('y-z', 'y', 'z', 'Z')]),
+          lettered('z', 'Z', [swap('z-x', 'z', 'x', 'X')]),
+        ],
+      }),
+    );
+    const finding = uneven.check(['X1', 'Z1']).data[0];
+    expect(finding?.outcome).toBe('consistent');
+    expect(finding?.direction).toBe('b-to-a');
+    expect(finding?.from_scheme).toBe('z');
+    expect(finding?.to_scheme).toBe('x');
+    expect(finding?.rules).toEqual(['z-x']);
+  });
+
+  test('a consistent chain from one tried scheme wins over an inconsistent one from another', () => {
+    const mixed = createEngine(
+      fixtureModel({
+        schemes: [
+          lettered('m1', 'M', [swap('m1-t', 'm1', 't', 'T')]),
+          lettered('m2', 'M', [
+            swap('m2-t', 'm2', 't', 'T', {
+              transform: [{ strip_prefix: 1 }, { add_prefix: 'T' }, { add_suffix: '9' }],
+            }),
+          ]),
+          lettered('t', 'T'),
+        ],
+      }),
+    );
+    const finding = mixed.check(['M1', 'T1']).data[0];
+    expect(finding?.tried).toEqual({ a: ['m1', 'm2'], b: ['t'] });
+    expect(finding?.outcome).toBe('consistent');
+    expect(finding?.from_scheme).toBe('m1');
+    expect(finding?.rules).toEqual(['m1-t']);
   });
 });
