@@ -287,7 +287,8 @@ describe('recognise ordering, hint grade and rank groups (D-05, D-06, DEC-063)',
     expect(schemesOf(data)).toEqual(['bsn', 'fi-number', 'rsin', 'duns']);
     expect(data.map((c) => c.hint_grade)).toEqual([2, 2, 2, 0]);
     expect(data.map((c) => c.rank_group)).toEqual([1, 1, 1, 2]);
-    expect(warnings).toEqual([]);
+    // the gate warning of plan 05-04 is the only warning: the hint itself is understood
+    expect(warnings.map((w) => w.code)).toEqual(['possible-personal-identifier']);
   });
 
   test('the value prefix NL ranks eori, vat-nl and vat in three rank groups', () => {
@@ -313,7 +314,10 @@ describe('recognise ordering, hint grade and rank groups (D-05, D-06, DEC-063)',
     ([hint]) => {
       const unhinted = engine.recognise(AMBIGUOUS);
       const result = engine.recognise(AMBIGUOUS, hint as never);
-      expect(result.warnings.map((w) => w.code)).toEqual(['unknown-country-hint']);
+      expect(result.warnings.map((w) => w.code)).toEqual([
+        'unknown-country-hint',
+        'possible-personal-identifier',
+      ]);
       expect(result.warnings[0]?.message).not.toContain('ZZ');
       expect(result.data).toEqual(unhinted.data);
     },

@@ -11,6 +11,7 @@ import {
   type StatementLike,
 } from './explain.ts';
 import type { ChecksumOutcome } from './format.ts';
+import { isPossiblePersonalIdentifier, personalIdentifierWarning } from './gate.ts';
 import type { Component } from './model-types.ts';
 import { specificity } from './specificity.ts';
 import type { Certainty, Conclusion, Result, Step, Warning } from './types.ts';
@@ -353,6 +354,11 @@ export function recognise(
     if (!tied) group += 1;
     candidate.rank_group = group;
   });
+
+  if (isPossiblePersonalIdentifier(trimmed)) {
+    const accepted = candidates.filter((each) => each.accepted).map((each) => each.scheme);
+    if (accepted.length > 0) warnings.push(personalIdentifierWarning(accepted));
+  }
 
   const conclusions: Conclusion[] = candidates.map((candidate) => {
     const label = compiled.schemes.get(candidate.scheme)?.scheme.label.en ?? candidate.scheme;
