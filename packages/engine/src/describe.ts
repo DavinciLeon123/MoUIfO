@@ -146,7 +146,7 @@ export function describe(
     const label = compiled.schemes.get(other)?.scheme.label.en;
     return label === undefined ? other : `${label} (${other})`;
   };
-  const self = nameOf(id);
+  const schemeName = nameOf(id);
 
   /** One claim: build its conclusion (fact step plus condition steps) and return the claim. */
   function take<T>(
@@ -180,7 +180,7 @@ export function describe(
     'kind',
     'kind',
     scheme.kind,
-    (value) => `The kind of ${self} is ${value}.`,
+    (value) => `The kind of ${schemeName} is ${value}.`,
     (value) => ({ kind: value }),
   );
 
@@ -189,7 +189,7 @@ export function describe(
   const issuerLabel = authority?.label.en ?? scheme.issuer.value;
   const authorityKind = authority?.kind ?? 'class';
   const issuerStep = factStep(compiled, `${id}/issuer`, scheme.issuer);
-  const issuerText = `The issuer of ${self} is ${issuerLabel} (${
+  const issuerText = `The issuer of ${schemeName} is ${issuerLabel} (${
     authorityKind === 'class' ? 'a class' : 'an instance'
   }).`;
   const issuerClaim = take(
@@ -259,7 +259,7 @@ export function describe(
     'jurisdiction',
     'jurisdiction',
     scheme.jurisdiction,
-    (value) => `The jurisdiction of ${self} is ${value}.`,
+    (value) => `The jurisdiction of ${schemeName} is ${value}.`,
     (value) => ({ jurisdiction: value }),
   );
 
@@ -270,7 +270,7 @@ export function describe(
           'abbreviation',
           'abbreviation',
           scheme.abbreviation,
-          (value) => `${self} is abbreviated ${value}.`,
+          (value) => `${schemeName} is abbreviated ${value}.`,
           (value) => ({ abbreviation: value }),
         );
   const availability =
@@ -280,7 +280,7 @@ export function describe(
           'availability',
           'availability',
           scheme.availability,
-          (value) => `The availability of ${self} is ${value}.`,
+          (value) => `The availability of ${schemeName} is ${value}.`,
           (value) => ({ availability: value }),
         );
   const iso6523Icd =
@@ -292,8 +292,8 @@ export function describe(
           scheme.iso6523_icd,
           (value) =>
             value === null
-              ? `${self} has no ISO 6523 ICD code.`
-              : `The ISO 6523 ICD code of ${self} is ${value}.`,
+              ? `${schemeName} has no ISO 6523 ICD code.`
+              : `The ISO 6523 ICD code of ${schemeName} is ${value}.`,
           (value) => ({ icd: value ?? '' }),
         );
   const peppolEas =
@@ -305,8 +305,8 @@ export function describe(
           scheme.peppol_eas,
           (value) =>
             value === null
-              ? `${self} has no Peppol EAS code.`
-              : `The Peppol EAS code of ${self} is ${value}.`,
+              ? `${schemeName} has no Peppol EAS code.`
+              : `The Peppol EAS code of ${schemeName} is ${value}.`,
           (value) => ({ eas: value ?? '' }),
         );
 
@@ -320,7 +320,7 @@ export function describe(
       value,
       'legal-basis',
       { index: String(index) },
-      `The legal basis of ${self} includes ${entry.title}.`,
+      `The legal basis of ${schemeName} includes ${entry.title}.`,
     );
   });
 
@@ -333,7 +333,7 @@ export function describe(
           { label: scheme.validation_source.label, url: scheme.validation_source.url },
           'validation-source',
           {},
-          `${self} can be validated through ${scheme.validation_source.label}.`,
+          `${schemeName} can be validated through ${scheme.validation_source.label}.`,
         );
 
   const mandatory =
@@ -345,7 +345,7 @@ export function describe(
           scheme.mandatory.text,
           'mandatory',
           {},
-          `Mandatory use of ${self}: ${scheme.mandatory.text}.`,
+          `Mandatory use of ${schemeName}: ${scheme.mandatory.text}.`,
         );
 
   const level = (scheme.level ?? []).map((entry, index) =>
@@ -355,7 +355,7 @@ export function describe(
       entry.value,
       'level',
       { index: String(index), level: entry.value },
-      `The level of ${self} is ${entry.value}.`,
+      `The level of ${schemeName} is ${entry.value}.`,
     ),
   );
   const roles = (scheme.roles ?? []).map((entry, index) =>
@@ -365,7 +365,7 @@ export function describe(
       entry.value,
       'role',
       { index: String(index), role: entry.value },
-      `The role of ${self} is ${entry.value}.`,
+      `The role of ${schemeName} is ${entry.value}.`,
     ),
   );
   const applicability = (scheme.applicability ?? []).map((entry, index) =>
@@ -375,7 +375,7 @@ export function describe(
       { jurisdiction: entry.jurisdiction, status: [...entry.status] },
       'applicability',
       { index: String(index), jurisdiction: entry.jurisdiction },
-      `${self} is ${entry.status.join(', ')} in ${entry.jurisdiction}.`,
+      `${schemeName} is ${entry.status.join(', ')} in ${entry.jurisdiction}.`,
     ),
   );
   const persistence = (scheme.persistence ?? []).map((entry, index) =>
@@ -385,7 +385,7 @@ export function describe(
       { behaviour: entry.behaviour, event: entry.event },
       'persistence',
       { index: String(index), event: entry.event },
-      `On the event ${entry.event}, ${self}: ${entry.behaviour}.`,
+      `On the event ${entry.event}, ${schemeName}: ${entry.behaviour}.`,
     ),
   );
 
@@ -405,7 +405,7 @@ export function describe(
       },
       'trust',
       {},
-      `The trust scores of ${self} are legal basis ${score(t.legal_basis)}, registration quality ${score(
+      `The trust scores of ${schemeName} are legal basis ${score(t.legal_basis)}, registration quality ${score(
         t.registration_quality,
       )}, verifiability ${score(t.verifiability)}, crosswalks ${score(t.crosswalks)} and lifecycle ${score(
         t.lifecycle,
@@ -420,7 +420,7 @@ export function describe(
       { target: entry.target, kind: entry.kind },
       'relation',
       { index: String(index), target: entry.target, kind: entry.kind },
-      `${self} has the relation ${entry.kind} with ${nameOf(entry.target)}.`,
+      `${schemeName} has the relation ${entry.kind} with ${nameOf(entry.target)}.`,
     ),
   );
 
@@ -431,7 +431,7 @@ export function describe(
       entry.regex,
       'pattern',
       { index: String(index) },
-      `${self} accepts values that match the pattern ${entry.regex} (pattern ${index}).`,
+      `${schemeName} accepts values that match the pattern ${entry.regex} (pattern ${index}).`,
     ),
   );
   const checksum = (scheme.format?.checksum ?? []).map((entry, index) => {
@@ -443,7 +443,7 @@ export function describe(
       value,
       'checksum',
       { index: String(index), algorithm: entry.algorithm },
-      `${self} is checked with the ${entry.algorithm} checksum (entry ${index}).`,
+      `${schemeName} is checked with the ${entry.algorithm} checksum (entry ${index}).`,
     );
   });
 
@@ -454,7 +454,7 @@ export function describe(
       { scheme: entry.scheme, prefix: entry.prefix },
       'component',
       { component: entry.scheme, prefix: entry.prefix },
-      `${self} has the component ${nameOf(entry.scheme)} under the prefix ${entry.prefix}.`,
+      `${schemeName} has the component ${nameOf(entry.scheme)} under the prefix ${entry.prefix}.`,
     ),
   );
 
@@ -473,7 +473,7 @@ export function describe(
       },
       'context-from',
       { map: contextStatement.map },
-      `The issuing country of ${self} is read from its value through the ${contextStatement.map} vocabulary.`,
+      `The issuing country of ${schemeName} is read from its value through the ${contextStatement.map} vocabulary.`,
     );
   }
 
@@ -492,8 +492,8 @@ export function describe(
       'rule',
       { rule: rule.id, input: rule.input, output: rule.output, direction },
       direction === 'in'
-        ? `${nameOf(rule.input)} becomes ${self} through the rule ${rule.id}.`
-        : `${self} becomes ${nameOf(rule.output)} through the rule ${rule.id}.`,
+        ? `${nameOf(rule.input)} becomes ${schemeName} through the rule ${rule.id}.`
+        : `${schemeName} becomes ${nameOf(rule.output)} through the rule ${rule.id}.`,
     );
   };
   const rulesIn: SourcedClaim<RuleLink>[] = [];
