@@ -58,6 +58,7 @@ export type {
 } from './model-types.ts';
 export { assertModelContract, MODEL_CONTRACT } from './model-types.ts';
 export type { Candidate, ComponentMatch } from './recognise.ts';
+export type { RelationHop, RelationPath } from './relate.ts';
 export {
   compilePattern,
   compileTransform,
