@@ -1,0 +1,1943 @@
+{
+  "recognise": [
+    {
+      "data": [
+        {
+          "scheme": "eori",
+          "accepted": true,
+          "certainty": "certain",
+          "format": {
+            "patterns": [
+              true,
+              true,
+              false
+            ],
+            "pattern": 0
+          },
+          "checksum": {
+            "outcomes": [],
+            "result": "none",
+            "entry": null
+          },
+          "explanation": [
+            {
+              "kind": "pattern",
+              "ref": "eori/patterns/0",
+              "certainty": "certain",
+              "source": "commission-eori"
+            }
+          ],
+          "specificity": 0,
+          "hint_grade": 1,
+          "rank_group": 1
+        },
+        {
+          "scheme": "vat",
+          "accepted": true,
+          "certainty": "likely",
+          "format": {
+            "patterns": [
+              true
+            ],
+            "pattern": 0
+          },
+          "checksum": {
+            "outcomes": [],
+            "result": "none",
+            "entry": null
+          },
+          "explanation": [
+            {
+              "kind": "pattern",
+              "ref": "vat/patterns/0",
+              "certainty": "likely",
+              "source": "vat-directive-art-215"
+            }
+          ],
+          "specificity": 0,
+          "hint_grade": 1,
+          "rank_group": 2
+        }
+      ],
+      "conclusions": [
+        {
+          "key": "recognise.candidate",
+          "params": {
+            "scheme": "eori"
+          },
+          "statement": "The value has the format of Economic Operators Registration and Identification number (eori).",
+          "certainty": "certain",
+          "explanation": [
+            {
+              "kind": "pattern",
+              "ref": "eori/patterns/0",
+              "certainty": "certain",
+              "source": "commission-eori"
+            }
+          ]
+        },
+        {
+          "key": "recognise.candidate",
+          "params": {
+            "scheme": "vat"
+          },
+          "statement": "The value has the format of VAT identification number (vat).",
+          "certainty": "likely",
+          "explanation": [
+            {
+              "kind": "pattern",
+              "ref": "vat/patterns/0",
+              "certainty": "likely",
+              "source": "vat-directive-art-215"
+            }
+          ]
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "data": [
+        {
+          "scheme": "eori",
+          "accepted": true,
+          "certainty": "certain",
+          "format": {
+            "patterns": [
+              true,
+              false,
+              false
+            ],
+            "pattern": 0
+          },
+          "checksum": {
+            "outcomes": [],
+            "result": "none",
+            "entry": null
+          },
+          "explanation": [
+            {
+              "kind": "pattern",
+              "ref": "eori/patterns/0",
+              "certainty": "certain",
+              "source": "commission-eori"
+            }
+          ],
+          "specificity": 0,
+          "hint_grade": 1,
+          "rank_group": 1
+        },
+        {
+          "scheme": "vat-nl",
+          "accepted": true,
+          "certainty": "likely",
+          "format": {
+            "patterns": [
+              true
+            ],
+            "pattern": 0
+          },
+          "checksum": {
+            "outcomes": [
+              "pass",
+              "fail"
+            ],
+            "result": "pass",
+            "entry": 0
+          },
+          "explanation": [
+            {
+              "kind": "pattern",
+              "ref": "vat-nl/patterns/0",
+              "certainty": "certain",
+              "source": "ondernemersplein-nummers-voor-de-btw"
+            },
+            {
+              "kind": "checksum",
+              "ref": "vat-nl/checksum/0",
+              "certainty": "likely",
+              "source": "landscape-v1-2",
+              "condition": {
+                "entity_form": "legal-person"
+              }
+            },
+            {
+              "kind": "assumption",
+              "ref": "vat-nl/checksum/0/condition/entity_form",
+              "certainty": "likely",
+              "condition": {
+                "entity_form": "legal-person"
+              },
+              "source": null
+            }
+          ],
+          "specificity": 3,
+          "hint_grade": 2,
+          "rank_group": 2
+        },
+        {
+          "scheme": "vat",
+          "accepted": true,
+          "certainty": "likely",
+          "format": {
+            "patterns": [
+              true
+            ],
+            "pattern": 0
+          },
+          "checksum": {
+            "outcomes": [],
+            "result": "none",
+            "entry": null
+          },
+          "explanation": [
+            {
+              "kind": "pattern",
+              "ref": "vat/patterns/0",
+              "certainty": "likely",
+              "source": "vat-directive-art-215"
+            }
+          ],
+          "specificity": 0,
+          "hint_grade": 1,
+          "rank_group": 3
+        }
+      ],
+      "conclusions": [
+        {
+          "key": "recognise.candidate",
+          "params": {
+            "scheme": "eori"
+          },
+          "statement": "The value has the format of Economic Operators Registration and Identification number (eori).",
+          "certainty": "certain",
+          "explanation": [
+            {
+              "kind": "pattern",
+              "ref": "eori/patterns/0",
+              "certainty": "certain",
+              "source": "commission-eori"
+            }
+          ]
+        },
+        {
+          "key": "recognise.candidate",
+          "params": {
+            "scheme": "vat-nl"
+          },
+          "statement": "The value has the format of Dutch VAT identification number (vat-nl).",
+          "certainty": "likely",
+          "explanation": [
+            {
+              "kind": "pattern",
+              "ref": "vat-nl/patterns/0",
+              "certainty": "certain",
+              "source": "ondernemersplein-nummers-voor-de-btw"
+            },
+            {
+              "kind": "checksum",
+              "ref": "vat-nl/checksum/0",
+              "certainty": "likely",
+              "source": "landscape-v1-2",
+              "condition": {
+                "entity_form": "legal-person"
+              }
+            },
+            {
+              "kind": "assumption",
+              "ref": "vat-nl/checksum/0/condition/entity_form",
+              "certainty": "likely",
+              "condition": {
+                "entity_form": "legal-person"
+              },
+              "source": null
+            }
+          ]
+        },
+        {
+          "key": "recognise.candidate",
+          "params": {
+            "scheme": "vat"
+          },
+          "statement": "The value has the format of VAT identification number (vat).",
+          "certainty": "likely",
+          "explanation": [
+            {
+              "kind": "pattern",
+              "ref": "vat/patterns/0",
+              "certainty": "likely",
+              "source": "vat-directive-art-215"
+            }
+          ]
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "data": [
+        {
+          "scheme": "bsn",
+          "accepted": true,
+          "certainty": "likely",
+          "format": {
+            "patterns": [
+              true
+            ],
+            "pattern": 0
+          },
+          "checksum": {
+            "outcomes": [
+              "pass"
+            ],
+            "result": "pass",
+            "entry": 0
+          },
+          "explanation": [
+            {
+              "kind": "pattern",
+              "ref": "bsn/patterns/0",
+              "certainty": "likely",
+              "source": "landscape-v1-2"
+            },
+            {
+              "kind": "checksum",
+              "ref": "bsn/checksum/0",
+              "certainty": "likely",
+              "source": "landscape-v1-2"
+            }
+          ],
+          "specificity": 0,
+          "hint_grade": 0,
+          "rank_group": 1
+        },
+        {
+          "scheme": "duns",
+          "accepted": true,
+          "certainty": "likely",
+          "format": {
+            "patterns": [
+              true
+            ],
+            "pattern": 0
+          },
+          "checksum": {
+            "outcomes": [
+              "pass"
+            ],
+            "result": "pass",
+            "entry": 0
+          },
+          "explanation": [
+            {
+              "kind": "pattern",
+              "ref": "duns/patterns/0",
+              "certainty": "certain",
+              "source": "dnb-duns"
+            },
+            {
+              "kind": "checksum",
+              "ref": "duns/checksum/0",
+              "certainty": "likely",
+              "source": "peppol-code-lists-9-7"
+            }
+          ],
+          "specificity": 0,
+          "hint_grade": 0,
+          "rank_group": 1
+        },
+        {
+          "scheme": "fi-number",
+          "accepted": true,
+          "certainty": "likely",
+          "format": {
+            "patterns": [
+              true
+            ],
+            "pattern": 0
+          },
+          "checksum": {
+            "outcomes": [
+              "pass"
+            ],
+            "result": "pass",
+            "entry": 0
+          },
+          "explanation": [
+            {
+              "kind": "pattern",
+              "ref": "fi-number/patterns/0",
+              "certainty": "likely",
+              "source": "landscape-v1-2"
+            },
+            {
+              "kind": "checksum",
+              "ref": "fi-number/checksum/0",
+              "certainty": "likely",
+              "source": "landscape-v1-2"
+            }
+          ],
+          "specificity": 0,
+          "hint_grade": 0,
+          "rank_group": 1
+        },
+        {
+          "scheme": "rsin",
+          "accepted": true,
+          "certainty": "likely",
+          "format": {
+            "patterns": [
+              true
+            ],
+            "pattern": 0
+          },
+          "checksum": {
+            "outcomes": [
+              "pass"
+            ],
+            "result": "pass",
+            "entry": 0
+          },
+          "explanation": [
+            {
+              "kind": "pattern",
+              "ref": "rsin/patterns/0",
+              "certainty": "likely",
+              "source": "landscape-v1-2"
+            },
+            {
+              "kind": "checksum",
+              "ref": "rsin/checksum/0",
+              "certainty": "likely",
+              "source": "landscape-v1-2"
+            }
+          ],
+          "specificity": 0,
+          "hint_grade": 0,
+          "rank_group": 1
+        }
+      ],
+      "conclusions": [
+        {
+          "key": "recognise.candidate",
+          "params": {
+            "scheme": "bsn"
+          },
+          "statement": "The value has the format of Citizen service number (bsn).",
+          "certainty": "likely",
+          "explanation": [
+            {
+              "kind": "pattern",
+              "ref": "bsn/patterns/0",
+              "certainty": "likely",
+              "source": "landscape-v1-2"
+            },
+            {
+              "kind": "checksum",
+              "ref": "bsn/checksum/0",
+              "certainty": "likely",
+              "source": "landscape-v1-2"
+            }
+          ]
+        },
+        {
+          "key": "recognise.candidate",
+          "params": {
+            "scheme": "duns"
+          },
+          "statement": "The value has the format of D-U-N-S Number (duns).",
+          "certainty": "likely",
+          "explanation": [
+            {
+              "kind": "pattern",
+              "ref": "duns/patterns/0",
+              "certainty": "certain",
+              "source": "dnb-duns"
+            },
+            {
+              "kind": "checksum",
+              "ref": "duns/checksum/0",
+              "certainty": "likely",
+              "source": "peppol-code-lists-9-7"
+            }
+          ]
+        },
+        {
+          "key": "recognise.candidate",
+          "params": {
+            "scheme": "fi-number"
+          },
+          "statement": "The value has the format of Fiscal number (fi-nummer) (fi-number).",
+          "certainty": "likely",
+          "explanation": [
+            {
+              "kind": "pattern",
+              "ref": "fi-number/patterns/0",
+              "certainty": "likely",
+              "source": "landscape-v1-2"
+            },
+            {
+              "kind": "checksum",
+              "ref": "fi-number/checksum/0",
+              "certainty": "likely",
+              "source": "landscape-v1-2"
+            }
+          ]
+        },
+        {
+          "key": "recognise.candidate",
+          "params": {
+            "scheme": "rsin"
+          },
+          "statement": "The value has the format of Legal Entities and Partnerships Information Number (rsin).",
+          "certainty": "likely",
+          "explanation": [
+            {
+              "kind": "pattern",
+              "ref": "rsin/patterns/0",
+              "certainty": "likely",
+              "source": "landscape-v1-2"
+            },
+            {
+              "kind": "checksum",
+              "ref": "rsin/checksum/0",
+              "certainty": "likely",
+              "source": "landscape-v1-2"
+            }
+          ]
+        }
+      ],
+      "warnings": [
+        {
+          "code": "possible-personal-identifier",
+          "message": "The value may be a personal identifier (candidate schemes: bsn, duns, fi-number, rsin); it is used further only when its scheme is named or another supplied value derives it."
+        }
+      ]
+    }
+  ],
+  "derive": [
+    {
+      "data": [
+        {
+          "from": "eori",
+          "scheme": "rsin",
+          "value": "001469630",
+          "rules": [
+            "rsin-from-eori-nl"
+          ],
+          "hops": 1,
+          "certainty": "likely",
+          "explanation": [
+            {
+              "kind": "pattern",
+              "ref": "eori/patterns/0",
+              "certainty": "certain",
+              "source": "commission-eori"
+            },
+            {
+              "kind": "rule",
+              "ref": "rsin-from-eori-nl",
+              "certainty": "certain",
+              "source": "douane-eori-nl",
+              "condition": {
+                "entity_form": "legal-person",
+                "issuing_country": "NL"
+              }
+            },
+            {
+              "kind": "fact",
+              "ref": "eori/context_from/issuing_country",
+              "certainty": "certain",
+              "source": "commission-eori"
+            },
+            {
+              "kind": "fact",
+              "ref": "vocab/country-prefix/NL",
+              "certainty": "certain",
+              "source": "vat-directive-art-215"
+            },
+            {
+              "kind": "assumption",
+              "ref": "rsin-from-eori-nl/condition/entity_form",
+              "certainty": "likely",
+              "condition": {
+                "entity_form": "legal-person"
+              },
+              "source": null
+            },
+            {
+              "kind": "pattern",
+              "ref": "rsin/patterns/0",
+              "certainty": "likely",
+              "source": "landscape-v1-2"
+            },
+            {
+              "kind": "checksum",
+              "ref": "rsin/checksum/0",
+              "certainty": "likely",
+              "source": "landscape-v1-2"
+            }
+          ]
+        },
+        {
+          "from": "eori",
+          "scheme": "oin",
+          "value": "00000001001469630000",
+          "rules": [
+            "rsin-from-eori-nl",
+            "oin-from-rsin"
+          ],
+          "hops": 2,
+          "certainty": "likely",
+          "explanation": [
+            {
+              "kind": "pattern",
+              "ref": "eori/patterns/0",
+              "certainty": "certain",
+              "source": "commission-eori"
+            },
+            {
+              "kind": "rule",
+              "ref": "rsin-from-eori-nl",
+              "certainty": "certain",
+              "source": "douane-eori-nl",
+              "condition": {
+                "entity_form": "legal-person",
+                "issuing_country": "NL"
+              }
+            },
+            {
+              "kind": "fact",
+              "ref": "eori/context_from/issuing_country",
+              "certainty": "certain",
+              "source": "commission-eori"
+            },
+            {
+              "kind": "fact",
+              "ref": "vocab/country-prefix/NL",
+              "certainty": "certain",
+              "source": "vat-directive-art-215"
+            },
+            {
+              "kind": "assumption",
+              "ref": "rsin-from-eori-nl/condition/entity_form",
+              "certainty": "likely",
+              "condition": {
+                "entity_form": "legal-person"
+              },
+              "source": null
+            },
+            {
+              "kind": "pattern",
+              "ref": "rsin/patterns/0",
+              "certainty": "likely",
+              "source": "landscape-v1-2"
+            },
+            {
+              "kind": "checksum",
+              "ref": "rsin/checksum/0",
+              "certainty": "likely",
+              "source": "landscape-v1-2"
+            },
+            {
+              "kind": "rule",
+              "ref": "oin-from-rsin",
+              "certainty": "likely",
+              "source": "oin-stelsel-2-1-0"
+            },
+            {
+              "kind": "pattern",
+              "ref": "oin/patterns/0",
+              "certainty": "certain",
+              "source": "oin-stelsel-2-1-0"
+            },
+            {
+              "kind": "checksum",
+              "ref": "oin/checksum/0",
+              "certainty": "likely",
+              "source": "peppol-code-lists-9-7"
+            }
+          ]
+        }
+      ],
+      "conclusions": [
+        {
+          "key": "derive.issued-by",
+          "params": {
+            "scheme": "eori",
+            "authority": "douane-nl"
+          },
+          "statement": "The Economic Operators Registration and Identification number (eori) is issued by Netherlands Customs (douane-nl).",
+          "certainty": "certain",
+          "explanation": [
+            {
+              "kind": "fact",
+              "ref": "eori/issuer",
+              "certainty": "certain",
+              "source": "commission-eori"
+            },
+            {
+              "kind": "fact",
+              "ref": "eori/context_from/issuing_country",
+              "certainty": "certain",
+              "source": "commission-eori"
+            },
+            {
+              "kind": "fact",
+              "ref": "vocab/country-prefix/NL",
+              "certainty": "certain",
+              "source": "vat-directive-art-215"
+            },
+            {
+              "kind": "fact",
+              "ref": "authorities/douane-nl",
+              "certainty": "certain",
+              "source": "douane-eori-nl"
+            }
+          ]
+        },
+        {
+          "key": "derive.verify-through",
+          "params": {
+            "scheme": "eori",
+            "source": "eori-validation"
+          },
+          "statement": "The Economic Operators Registration and Identification number (eori) can be verified through EU EORI number validation.",
+          "certainty": "certain",
+          "explanation": [
+            {
+              "kind": "fact",
+              "ref": "eori/validation_source",
+              "certainty": "certain",
+              "source": "eori-validation"
+            }
+          ]
+        },
+        {
+          "key": "derive.derivation",
+          "params": {
+            "from": "eori",
+            "scheme": "rsin",
+            "rules": "rsin-from-eori-nl"
+          },
+          "statement": "As Economic Operators Registration and Identification number (eori), the value derives a Legal Entities and Partnerships Information Number (rsin) through rsin-from-eori-nl.",
+          "certainty": "likely",
+          "explanation": [
+            {
+              "kind": "pattern",
+              "ref": "eori/patterns/0",
+              "certainty": "certain",
+              "source": "commission-eori"
+            },
+            {
+              "kind": "rule",
+              "ref": "rsin-from-eori-nl",
+              "certainty": "certain",
+              "source": "douane-eori-nl",
+              "condition": {
+                "entity_form": "legal-person",
+                "issuing_country": "NL"
+              }
+            },
+            {
+              "kind": "fact",
+              "ref": "eori/context_from/issuing_country",
+              "certainty": "certain",
+              "source": "commission-eori"
+            },
+            {
+              "kind": "fact",
+              "ref": "vocab/country-prefix/NL",
+              "certainty": "certain",
+              "source": "vat-directive-art-215"
+            },
+            {
+              "kind": "assumption",
+              "ref": "rsin-from-eori-nl/condition/entity_form",
+              "certainty": "likely",
+              "condition": {
+                "entity_form": "legal-person"
+              },
+              "source": null
+            },
+            {
+              "kind": "pattern",
+              "ref": "rsin/patterns/0",
+              "certainty": "likely",
+              "source": "landscape-v1-2"
+            },
+            {
+              "kind": "checksum",
+              "ref": "rsin/checksum/0",
+              "certainty": "likely",
+              "source": "landscape-v1-2"
+            }
+          ]
+        },
+        {
+          "key": "derive.derivation",
+          "params": {
+            "from": "eori",
+            "scheme": "oin",
+            "rules": "rsin-from-eori-nl,oin-from-rsin"
+          },
+          "statement": "As Economic Operators Registration and Identification number (eori), the value derives a Organisation Identification Number (oin) through rsin-from-eori-nl, then oin-from-rsin.",
+          "certainty": "likely",
+          "explanation": [
+            {
+              "kind": "pattern",
+              "ref": "eori/patterns/0",
+              "certainty": "certain",
+              "source": "commission-eori"
+            },
+            {
+              "kind": "rule",
+              "ref": "rsin-from-eori-nl",
+              "certainty": "certain",
+              "source": "douane-eori-nl",
+              "condition": {
+                "entity_form": "legal-person",
+                "issuing_country": "NL"
+              }
+            },
+            {
+              "kind": "fact",
+              "ref": "eori/context_from/issuing_country",
+              "certainty": "certain",
+              "source": "commission-eori"
+            },
+            {
+              "kind": "fact",
+              "ref": "vocab/country-prefix/NL",
+              "certainty": "certain",
+              "source": "vat-directive-art-215"
+            },
+            {
+              "kind": "assumption",
+              "ref": "rsin-from-eori-nl/condition/entity_form",
+              "certainty": "likely",
+              "condition": {
+                "entity_form": "legal-person"
+              },
+              "source": null
+            },
+            {
+              "kind": "pattern",
+              "ref": "rsin/patterns/0",
+              "certainty": "likely",
+              "source": "landscape-v1-2"
+            },
+            {
+              "kind": "checksum",
+              "ref": "rsin/checksum/0",
+              "certainty": "likely",
+              "source": "landscape-v1-2"
+            },
+            {
+              "kind": "rule",
+              "ref": "oin-from-rsin",
+              "certainty": "likely",
+              "source": "oin-stelsel-2-1-0"
+            },
+            {
+              "kind": "pattern",
+              "ref": "oin/patterns/0",
+              "certainty": "certain",
+              "source": "oin-stelsel-2-1-0"
+            },
+            {
+              "kind": "checksum",
+              "ref": "oin/checksum/0",
+              "certainty": "likely",
+              "source": "peppol-code-lists-9-7"
+            }
+          ]
+        },
+        {
+          "key": "derive.look-up-through",
+          "params": {
+            "scheme": "rsin",
+            "source": "kvk-zoeken"
+          },
+          "statement": "The derived Legal Entities and Partnerships Information Number (rsin) can be looked up through Business Register search (KVK); this is a reference, not a lookup.",
+          "certainty": "certain",
+          "explanation": [
+            {
+              "kind": "fact",
+              "ref": "rsin/validation_source",
+              "certainty": "certain",
+              "source": "kvk-zoeken"
+            }
+          ]
+        },
+        {
+          "key": "derive.look-up-through",
+          "params": {
+            "scheme": "oin",
+            "source": "oin-register"
+          },
+          "statement": "The derived Organisation Identification Number (oin) can be looked up through OIN register (Logius); this is a reference, not a lookup.",
+          "certainty": "certain",
+          "explanation": [
+            {
+              "kind": "fact",
+              "ref": "oin/validation_source",
+              "certainty": "certain",
+              "source": "oin-register"
+            }
+          ]
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "data": [],
+      "conclusions": [
+        {
+          "key": "derive.issued-by",
+          "params": {
+            "scheme": "eori",
+            "authority": "national-customs-authority"
+          },
+          "statement": "The Economic Operators Registration and Identification number (eori) is issued by National customs authority (national-customs-authority).",
+          "certainty": "certain",
+          "explanation": [
+            {
+              "kind": "fact",
+              "ref": "eori/issuer",
+              "certainty": "certain",
+              "source": "commission-eori"
+            }
+          ]
+        },
+        {
+          "key": "derive.verify-through",
+          "params": {
+            "scheme": "eori",
+            "source": "eori-validation"
+          },
+          "statement": "The Economic Operators Registration and Identification number (eori) can be verified through EU EORI number validation.",
+          "certainty": "certain",
+          "explanation": [
+            {
+              "kind": "fact",
+              "ref": "eori/validation_source",
+              "certainty": "certain",
+              "source": "eori-validation"
+            }
+          ]
+        }
+      ],
+      "warnings": []
+    }
+  ],
+  "check": {
+    "data": [
+      {
+        "a": 0,
+        "b": 1,
+        "outcome": "consistent",
+        "direction": "b-to-a",
+        "from_scheme": "vat-nl",
+        "to_scheme": "eori",
+        "rules": [
+          "rsin-from-vat-nl",
+          "eori-nl-from-rsin"
+        ],
+        "tried": {
+          "a": [
+            "eori",
+            "vat"
+          ],
+          "b": [
+            "eori",
+            "vat",
+            "vat-nl"
+          ]
+        },
+        "certainty": "likely",
+        "explanation": [
+          {
+            "kind": "pattern",
+            "ref": "vat-nl/patterns/0",
+            "certainty": "certain",
+            "source": "ondernemersplein-nummers-voor-de-btw"
+          },
+          {
+            "kind": "checksum",
+            "ref": "vat-nl/checksum/0",
+            "certainty": "likely",
+            "source": "landscape-v1-2",
+            "condition": {
+              "entity_form": "legal-person"
+            }
+          },
+          {
+            "kind": "assumption",
+            "ref": "vat-nl/checksum/0/condition/entity_form",
+            "certainty": "likely",
+            "condition": {
+              "entity_form": "legal-person"
+            },
+            "source": null
+          },
+          {
+            "kind": "rule",
+            "ref": "rsin-from-vat-nl",
+            "certainty": "certain",
+            "source": "ondernemersplein-btw-vermelden",
+            "condition": {
+              "entity_form": "legal-person"
+            }
+          },
+          {
+            "kind": "assumption",
+            "ref": "rsin-from-vat-nl/condition/entity_form",
+            "certainty": "likely",
+            "condition": {
+              "entity_form": "legal-person"
+            },
+            "source": null
+          },
+          {
+            "kind": "pattern",
+            "ref": "rsin/patterns/0",
+            "certainty": "likely",
+            "source": "landscape-v1-2"
+          },
+          {
+            "kind": "checksum",
+            "ref": "rsin/checksum/0",
+            "certainty": "likely",
+            "source": "landscape-v1-2"
+          },
+          {
+            "kind": "rule",
+            "ref": "eori-nl-from-rsin",
+            "certainty": "certain",
+            "source": "douane-eori-nl",
+            "condition": {
+              "entity_form": "legal-person"
+            }
+          },
+          {
+            "kind": "assumption",
+            "ref": "eori-nl-from-rsin/condition/entity_form",
+            "certainty": "likely",
+            "condition": {
+              "entity_form": "legal-person"
+            },
+            "source": null
+          },
+          {
+            "kind": "pattern",
+            "ref": "eori/patterns/0",
+            "certainty": "certain",
+            "source": "commission-eori"
+          }
+        ]
+      },
+      {
+        "a": 0,
+        "b": 2,
+        "outcome": "consistent",
+        "direction": "a-to-b",
+        "from_scheme": "eori",
+        "to_scheme": "rsin",
+        "rules": [
+          "rsin-from-eori-nl"
+        ],
+        "tried": {
+          "a": [
+            "eori",
+            "vat"
+          ],
+          "b": [
+            "rsin"
+          ]
+        },
+        "certainty": "likely",
+        "explanation": [
+          {
+            "kind": "pattern",
+            "ref": "eori/patterns/0",
+            "certainty": "certain",
+            "source": "commission-eori"
+          },
+          {
+            "kind": "rule",
+            "ref": "rsin-from-eori-nl",
+            "certainty": "certain",
+            "source": "douane-eori-nl",
+            "condition": {
+              "entity_form": "legal-person",
+              "issuing_country": "NL"
+            }
+          },
+          {
+            "kind": "fact",
+            "ref": "eori/context_from/issuing_country",
+            "certainty": "certain",
+            "source": "commission-eori"
+          },
+          {
+            "kind": "fact",
+            "ref": "vocab/country-prefix/NL",
+            "certainty": "certain",
+            "source": "vat-directive-art-215"
+          },
+          {
+            "kind": "assumption",
+            "ref": "rsin-from-eori-nl/condition/entity_form",
+            "certainty": "likely",
+            "condition": {
+              "entity_form": "legal-person"
+            },
+            "source": null
+          },
+          {
+            "kind": "pattern",
+            "ref": "rsin/patterns/0",
+            "certainty": "likely",
+            "source": "landscape-v1-2"
+          },
+          {
+            "kind": "checksum",
+            "ref": "rsin/checksum/0",
+            "certainty": "likely",
+            "source": "landscape-v1-2"
+          }
+        ]
+      },
+      {
+        "a": 1,
+        "b": 2,
+        "outcome": "consistent",
+        "direction": "a-to-b",
+        "from_scheme": "vat-nl",
+        "to_scheme": "rsin",
+        "rules": [
+          "rsin-from-vat-nl"
+        ],
+        "tried": {
+          "a": [
+            "eori",
+            "vat",
+            "vat-nl"
+          ],
+          "b": [
+            "rsin"
+          ]
+        },
+        "certainty": "likely",
+        "explanation": [
+          {
+            "kind": "pattern",
+            "ref": "vat-nl/patterns/0",
+            "certainty": "certain",
+            "source": "ondernemersplein-nummers-voor-de-btw"
+          },
+          {
+            "kind": "checksum",
+            "ref": "vat-nl/checksum/0",
+            "certainty": "likely",
+            "source": "landscape-v1-2",
+            "condition": {
+              "entity_form": "legal-person"
+            }
+          },
+          {
+            "kind": "assumption",
+            "ref": "vat-nl/checksum/0/condition/entity_form",
+            "certainty": "likely",
+            "condition": {
+              "entity_form": "legal-person"
+            },
+            "source": null
+          },
+          {
+            "kind": "rule",
+            "ref": "rsin-from-vat-nl",
+            "certainty": "certain",
+            "source": "ondernemersplein-btw-vermelden",
+            "condition": {
+              "entity_form": "legal-person"
+            }
+          },
+          {
+            "kind": "assumption",
+            "ref": "rsin-from-vat-nl/condition/entity_form",
+            "certainty": "likely",
+            "condition": {
+              "entity_form": "legal-person"
+            },
+            "source": null
+          },
+          {
+            "kind": "pattern",
+            "ref": "rsin/patterns/0",
+            "certainty": "likely",
+            "source": "landscape-v1-2"
+          },
+          {
+            "kind": "checksum",
+            "ref": "rsin/checksum/0",
+            "certainty": "likely",
+            "source": "landscape-v1-2"
+          }
+        ]
+      }
+    ],
+    "conclusions": [
+      {
+        "key": "check.consistent",
+        "params": {
+          "a": "0",
+          "b": "1",
+          "from": "vat-nl",
+          "to": "eori",
+          "rules": "rsin-from-vat-nl,eori-nl-from-rsin"
+        },
+        "statement": "Values 1 and 2 are consistent: value 2 as Dutch VAT identification number (vat-nl) gives value 1 as Economic Operators Registration and Identification number (eori) through rsin-from-vat-nl, then eori-nl-from-rsin.",
+        "certainty": "likely",
+        "explanation": [
+          {
+            "kind": "pattern",
+            "ref": "vat-nl/patterns/0",
+            "certainty": "certain",
+            "source": "ondernemersplein-nummers-voor-de-btw"
+          },
+          {
+            "kind": "checksum",
+            "ref": "vat-nl/checksum/0",
+            "certainty": "likely",
+            "source": "landscape-v1-2",
+            "condition": {
+              "entity_form": "legal-person"
+            }
+          },
+          {
+            "kind": "assumption",
+            "ref": "vat-nl/checksum/0/condition/entity_form",
+            "certainty": "likely",
+            "condition": {
+              "entity_form": "legal-person"
+            },
+            "source": null
+          },
+          {
+            "kind": "rule",
+            "ref": "rsin-from-vat-nl",
+            "certainty": "certain",
+            "source": "ondernemersplein-btw-vermelden",
+            "condition": {
+              "entity_form": "legal-person"
+            }
+          },
+          {
+            "kind": "assumption",
+            "ref": "rsin-from-vat-nl/condition/entity_form",
+            "certainty": "likely",
+            "condition": {
+              "entity_form": "legal-person"
+            },
+            "source": null
+          },
+          {
+            "kind": "pattern",
+            "ref": "rsin/patterns/0",
+            "certainty": "likely",
+            "source": "landscape-v1-2"
+          },
+          {
+            "kind": "checksum",
+            "ref": "rsin/checksum/0",
+            "certainty": "likely",
+            "source": "landscape-v1-2"
+          },
+          {
+            "kind": "rule",
+            "ref": "eori-nl-from-rsin",
+            "certainty": "certain",
+            "source": "douane-eori-nl",
+            "condition": {
+              "entity_form": "legal-person"
+            }
+          },
+          {
+            "kind": "assumption",
+            "ref": "eori-nl-from-rsin/condition/entity_form",
+            "certainty": "likely",
+            "condition": {
+              "entity_form": "legal-person"
+            },
+            "source": null
+          },
+          {
+            "kind": "pattern",
+            "ref": "eori/patterns/0",
+            "certainty": "certain",
+            "source": "commission-eori"
+          }
+        ]
+      },
+      {
+        "key": "check.consistent",
+        "params": {
+          "a": "0",
+          "b": "2",
+          "from": "eori",
+          "to": "rsin",
+          "rules": "rsin-from-eori-nl"
+        },
+        "statement": "Values 1 and 3 are consistent: value 1 as Economic Operators Registration and Identification number (eori) gives value 3 as Legal Entities and Partnerships Information Number (rsin) through rsin-from-eori-nl.",
+        "certainty": "likely",
+        "explanation": [
+          {
+            "kind": "pattern",
+            "ref": "eori/patterns/0",
+            "certainty": "certain",
+            "source": "commission-eori"
+          },
+          {
+            "kind": "rule",
+            "ref": "rsin-from-eori-nl",
+            "certainty": "certain",
+            "source": "douane-eori-nl",
+            "condition": {
+              "entity_form": "legal-person",
+              "issuing_country": "NL"
+            }
+          },
+          {
+            "kind": "fact",
+            "ref": "eori/context_from/issuing_country",
+            "certainty": "certain",
+            "source": "commission-eori"
+          },
+          {
+            "kind": "fact",
+            "ref": "vocab/country-prefix/NL",
+            "certainty": "certain",
+            "source": "vat-directive-art-215"
+          },
+          {
+            "kind": "assumption",
+            "ref": "rsin-from-eori-nl/condition/entity_form",
+            "certainty": "likely",
+            "condition": {
+              "entity_form": "legal-person"
+            },
+            "source": null
+          },
+          {
+            "kind": "pattern",
+            "ref": "rsin/patterns/0",
+            "certainty": "likely",
+            "source": "landscape-v1-2"
+          },
+          {
+            "kind": "checksum",
+            "ref": "rsin/checksum/0",
+            "certainty": "likely",
+            "source": "landscape-v1-2"
+          }
+        ]
+      },
+      {
+        "key": "check.consistent",
+        "params": {
+          "a": "1",
+          "b": "2",
+          "from": "vat-nl",
+          "to": "rsin",
+          "rules": "rsin-from-vat-nl"
+        },
+        "statement": "Values 2 and 3 are consistent: value 2 as Dutch VAT identification number (vat-nl) gives value 3 as Legal Entities and Partnerships Information Number (rsin) through rsin-from-vat-nl.",
+        "certainty": "likely",
+        "explanation": [
+          {
+            "kind": "pattern",
+            "ref": "vat-nl/patterns/0",
+            "certainty": "certain",
+            "source": "ondernemersplein-nummers-voor-de-btw"
+          },
+          {
+            "kind": "checksum",
+            "ref": "vat-nl/checksum/0",
+            "certainty": "likely",
+            "source": "landscape-v1-2",
+            "condition": {
+              "entity_form": "legal-person"
+            }
+          },
+          {
+            "kind": "assumption",
+            "ref": "vat-nl/checksum/0/condition/entity_form",
+            "certainty": "likely",
+            "condition": {
+              "entity_form": "legal-person"
+            },
+            "source": null
+          },
+          {
+            "kind": "rule",
+            "ref": "rsin-from-vat-nl",
+            "certainty": "certain",
+            "source": "ondernemersplein-btw-vermelden",
+            "condition": {
+              "entity_form": "legal-person"
+            }
+          },
+          {
+            "kind": "assumption",
+            "ref": "rsin-from-vat-nl/condition/entity_form",
+            "certainty": "likely",
+            "condition": {
+              "entity_form": "legal-person"
+            },
+            "source": null
+          },
+          {
+            "kind": "pattern",
+            "ref": "rsin/patterns/0",
+            "certainty": "likely",
+            "source": "landscape-v1-2"
+          },
+          {
+            "kind": "checksum",
+            "ref": "rsin/checksum/0",
+            "certainty": "likely",
+            "source": "landscape-v1-2"
+          }
+        ]
+      }
+    ],
+    "warnings": [
+      {
+        "code": "possible-personal-identifier",
+        "message": "The value may be a personal identifier (candidate schemes: bsn, duns, fi-number, rsin); it is used further only when its scheme is named or another supplied value derives it.",
+        "ref": "values/2"
+      }
+    ]
+  },
+  "relate": [
+    {
+      "data": [
+        {
+          "schemes": [
+            "rsin",
+            "eori"
+          ],
+          "hops": [
+            {
+              "from": "rsin",
+              "to": "eori",
+              "step": {
+                "kind": "fact",
+                "ref": "eori/relations/0",
+                "certainty": "certain",
+                "source": "douane-eori-nl",
+                "condition": {
+                  "entity_form": "legal-person"
+                },
+                "edge": "relation",
+                "inverse": true
+              },
+              "also_via": [
+                {
+                  "kind": "rule",
+                  "ref": "eori-nl-from-rsin",
+                  "certainty": "certain",
+                  "source": "douane-eori-nl",
+                  "condition": {
+                    "entity_form": "legal-person"
+                  },
+                  "edge": "rule",
+                  "inverse": false
+                },
+                {
+                  "kind": "rule",
+                  "ref": "rsin-from-eori-nl",
+                  "certainty": "certain",
+                  "source": "douane-eori-nl",
+                  "condition": {
+                    "entity_form": "legal-person",
+                    "issuing_country": "NL"
+                  },
+                  "edge": "rule",
+                  "inverse": true
+                }
+              ]
+            }
+          ],
+          "certainty": "likely",
+          "explanation": [
+            {
+              "kind": "fact",
+              "ref": "eori/relations/0",
+              "certainty": "certain",
+              "source": "douane-eori-nl",
+              "condition": {
+                "entity_form": "legal-person"
+              },
+              "edge": "relation",
+              "inverse": true
+            },
+            {
+              "kind": "assumption",
+              "ref": "eori/relations/0/condition/entity_form",
+              "certainty": "likely",
+              "condition": {
+                "entity_form": "legal-person"
+              },
+              "source": null
+            }
+          ]
+        }
+      ],
+      "conclusions": [
+        {
+          "key": "relate.path",
+          "params": {
+            "a": "rsin",
+            "b": "eori",
+            "steps": "1"
+          },
+          "statement": "Legal Entities and Partnerships Information Number (rsin) and Economic Operators Registration and Identification number (eori) are connected in 1 step: eori derived-from rsin (inverse).",
+          "certainty": "likely",
+          "explanation": [
+            {
+              "kind": "fact",
+              "ref": "eori/relations/0",
+              "certainty": "certain",
+              "source": "douane-eori-nl",
+              "condition": {
+                "entity_form": "legal-person"
+              },
+              "edge": "relation",
+              "inverse": true
+            },
+            {
+              "kind": "assumption",
+              "ref": "eori/relations/0/condition/entity_form",
+              "certainty": "likely",
+              "condition": {
+                "entity_form": "legal-person"
+              },
+              "source": null
+            }
+          ]
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "data": [
+        {
+          "schemes": [
+            "vat-nl",
+            "rsin",
+            "eori"
+          ],
+          "hops": [
+            {
+              "from": "vat-nl",
+              "to": "rsin",
+              "step": {
+                "kind": "fact",
+                "ref": "vat-nl/relations/0",
+                "certainty": "certain",
+                "source": "ondernemersplein-btw-vermelden",
+                "condition": {
+                  "entity_form": "legal-person"
+                },
+                "edge": "relation",
+                "inverse": false
+              },
+              "also_via": [
+                {
+                  "kind": "rule",
+                  "ref": "rsin-from-vat-nl",
+                  "certainty": "certain",
+                  "source": "ondernemersplein-btw-vermelden",
+                  "condition": {
+                    "entity_form": "legal-person"
+                  },
+                  "edge": "rule",
+                  "inverse": false
+                }
+              ]
+            },
+            {
+              "from": "rsin",
+              "to": "eori",
+              "step": {
+                "kind": "fact",
+                "ref": "eori/relations/0",
+                "certainty": "certain",
+                "source": "douane-eori-nl",
+                "condition": {
+                  "entity_form": "legal-person"
+                },
+                "edge": "relation",
+                "inverse": true
+              },
+              "also_via": [
+                {
+                  "kind": "rule",
+                  "ref": "eori-nl-from-rsin",
+                  "certainty": "certain",
+                  "source": "douane-eori-nl",
+                  "condition": {
+                    "entity_form": "legal-person"
+                  },
+                  "edge": "rule",
+                  "inverse": false
+                },
+                {
+                  "kind": "rule",
+                  "ref": "rsin-from-eori-nl",
+                  "certainty": "certain",
+                  "source": "douane-eori-nl",
+                  "condition": {
+                    "entity_form": "legal-person",
+                    "issuing_country": "NL"
+                  },
+                  "edge": "rule",
+                  "inverse": true
+                }
+              ]
+            }
+          ],
+          "certainty": "likely",
+          "explanation": [
+            {
+              "kind": "fact",
+              "ref": "vat-nl/relations/0",
+              "certainty": "certain",
+              "source": "ondernemersplein-btw-vermelden",
+              "condition": {
+                "entity_form": "legal-person"
+              },
+              "edge": "relation",
+              "inverse": false
+            },
+            {
+              "kind": "assumption",
+              "ref": "vat-nl/relations/0/condition/entity_form",
+              "certainty": "likely",
+              "condition": {
+                "entity_form": "legal-person"
+              },
+              "source": null
+            },
+            {
+              "kind": "fact",
+              "ref": "eori/relations/0",
+              "certainty": "certain",
+              "source": "douane-eori-nl",
+              "condition": {
+                "entity_form": "legal-person"
+              },
+              "edge": "relation",
+              "inverse": true
+            },
+            {
+              "kind": "assumption",
+              "ref": "eori/relations/0/condition/entity_form",
+              "certainty": "likely",
+              "condition": {
+                "entity_form": "legal-person"
+              },
+              "source": null
+            }
+          ]
+        }
+      ],
+      "conclusions": [
+        {
+          "key": "relate.path",
+          "params": {
+            "a": "vat-nl",
+            "b": "eori",
+            "steps": "2"
+          },
+          "statement": "Dutch VAT identification number (vat-nl) and Economic Operators Registration and Identification number (eori) are connected in 2 steps: vat-nl contains rsin; eori derived-from rsin (inverse).",
+          "certainty": "likely",
+          "explanation": [
+            {
+              "kind": "fact",
+              "ref": "vat-nl/relations/0",
+              "certainty": "certain",
+              "source": "ondernemersplein-btw-vermelden",
+              "condition": {
+                "entity_form": "legal-person"
+              },
+              "edge": "relation",
+              "inverse": false
+            },
+            {
+              "kind": "assumption",
+              "ref": "vat-nl/relations/0/condition/entity_form",
+              "certainty": "likely",
+              "condition": {
+                "entity_form": "legal-person"
+              },
+              "source": null
+            },
+            {
+              "kind": "fact",
+              "ref": "eori/relations/0",
+              "certainty": "certain",
+              "source": "douane-eori-nl",
+              "condition": {
+                "entity_form": "legal-person"
+              },
+              "edge": "relation",
+              "inverse": true
+            },
+            {
+              "kind": "assumption",
+              "ref": "eori/relations/0/condition/entity_form",
+              "certainty": "likely",
+              "condition": {
+                "entity_form": "legal-person"
+              },
+              "source": null
+            }
+          ]
+        }
+      ],
+      "warnings": []
+    }
+  ],
+  "applicability": [
+    {
+      "data": {
+        "scheme": "eori",
+        "jurisdiction": "NL",
+        "statuses": [
+          {
+            "status": "issued",
+            "basis": "no-data",
+            "from": null,
+            "certainty": null,
+            "explanation": []
+          },
+          {
+            "status": "recognised",
+            "basis": "inherited",
+            "from": "EU",
+            "certainty": "likely",
+            "explanation": [
+              {
+                "kind": "fact",
+                "ref": "eori/applicability/0",
+                "certainty": "certain",
+                "source": "commission-eori"
+              },
+              {
+                "kind": "fact",
+                "ref": "jurisdictions/NL/part_of/0",
+                "certainty": "certain",
+                "source": "teu-art-52"
+              },
+              {
+                "kind": "assumption",
+                "ref": "vocab/applicability-status/recognised/inherits_down",
+                "certainty": "likely",
+                "source": null
+              }
+            ]
+          },
+          {
+            "status": "verifiable",
+            "basis": "inherited",
+            "from": "EU",
+            "certainty": "likely",
+            "explanation": [
+              {
+                "kind": "fact",
+                "ref": "eori/applicability/1",
+                "certainty": "certain",
+                "source": "eori-validation"
+              },
+              {
+                "kind": "fact",
+                "ref": "jurisdictions/NL/part_of/0",
+                "certainty": "certain",
+                "source": "teu-art-52"
+              },
+              {
+                "kind": "assumption",
+                "ref": "vocab/applicability-status/verifiable/inherits_down",
+                "certainty": "likely",
+                "source": null
+              }
+            ]
+          },
+          {
+            "status": "not-applicable",
+            "basis": "no-data",
+            "from": null,
+            "certainty": null,
+            "explanation": []
+          }
+        ]
+      },
+      "conclusions": [
+        {
+          "key": "applicability.inherited",
+          "params": {
+            "scheme": "eori",
+            "jurisdiction": "NL",
+            "status": "recognised",
+            "from": "EU"
+          },
+          "statement": "Economic Operators Registration and Identification number (eori) is recognised in Netherlands, inherited from European Union (EU).",
+          "certainty": "likely",
+          "explanation": [
+            {
+              "kind": "fact",
+              "ref": "eori/applicability/0",
+              "certainty": "certain",
+              "source": "commission-eori"
+            },
+            {
+              "kind": "fact",
+              "ref": "jurisdictions/NL/part_of/0",
+              "certainty": "certain",
+              "source": "teu-art-52"
+            },
+            {
+              "kind": "assumption",
+              "ref": "vocab/applicability-status/recognised/inherits_down",
+              "certainty": "likely",
+              "source": null
+            }
+          ]
+        },
+        {
+          "key": "applicability.inherited",
+          "params": {
+            "scheme": "eori",
+            "jurisdiction": "NL",
+            "status": "verifiable",
+            "from": "EU"
+          },
+          "statement": "Economic Operators Registration and Identification number (eori) is verifiable in Netherlands, inherited from European Union (EU).",
+          "certainty": "likely",
+          "explanation": [
+            {
+              "kind": "fact",
+              "ref": "eori/applicability/1",
+              "certainty": "certain",
+              "source": "eori-validation"
+            },
+            {
+              "kind": "fact",
+              "ref": "jurisdictions/NL/part_of/0",
+              "certainty": "certain",
+              "source": "teu-art-52"
+            },
+            {
+              "kind": "assumption",
+              "ref": "vocab/applicability-status/verifiable/inherits_down",
+              "certainty": "likely",
+              "source": null
+            }
+          ]
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "data": {
+        "scheme": "eori",
+        "jurisdiction": "XI",
+        "statuses": [
+          {
+            "status": "issued",
+            "basis": "stated",
+            "from": null,
+            "certainty": "certain",
+            "explanation": [
+              {
+                "kind": "fact",
+                "ref": "eori/applicability/2",
+                "certainty": "certain",
+                "source": "hmrc-eori-introduction"
+              }
+            ]
+          },
+          {
+            "status": "recognised",
+            "basis": "stated",
+            "from": null,
+            "certainty": "certain",
+            "explanation": [
+              {
+                "kind": "fact",
+                "ref": "eori/applicability/2",
+                "certainty": "certain",
+                "source": "hmrc-eori-introduction"
+              }
+            ]
+          },
+          {
+            "status": "verifiable",
+            "basis": "no-data",
+            "from": null,
+            "certainty": null,
+            "explanation": []
+          },
+          {
+            "status": "not-applicable",
+            "basis": "no-data",
+            "from": null,
+            "certainty": null,
+            "explanation": []
+          }
+        ]
+      },
+      "conclusions": [
+        {
+          "key": "applicability.stated",
+          "params": {
+            "scheme": "eori",
+            "jurisdiction": "XI",
+            "status": "issued"
+          },
+          "statement": "Economic Operators Registration and Identification number (eori) is issued in Northern Ireland (stated).",
+          "certainty": "certain",
+          "explanation": [
+            {
+              "kind": "fact",
+              "ref": "eori/applicability/2",
+              "certainty": "certain",
+              "source": "hmrc-eori-introduction"
+            }
+          ]
+        },
+        {
+          "key": "applicability.stated",
+          "params": {
+            "scheme": "eori",
+            "jurisdiction": "XI",
+            "status": "recognised"
+          },
+          "statement": "Economic Operators Registration and Identification number (eori) is recognised in Northern Ireland (stated).",
+          "certainty": "certain",
+          "explanation": [
+            {
+              "kind": "fact",
+              "ref": "eori/applicability/2",
+              "certainty": "certain",
+              "source": "hmrc-eori-introduction"
+            }
+          ]
+        }
+      ],
+      "warnings": []
+    }
+  ]
+}
