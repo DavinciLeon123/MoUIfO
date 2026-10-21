@@ -1,17 +1,19 @@
 import { type Applicability, applicability } from './applicability.ts';
 import { compileModel } from './compile.ts';
+import { type Derivation, derive } from './derive.ts';
 import { describe, type SchemeDescription } from './describe.ts';
 import type { Model } from './model-types.ts';
 import { type Candidate, recognise } from './recognise.ts';
 import { buildEdges, type RelationPath, relate } from './relate.ts';
 import type { Context, Result } from './types.ts';
 
-/** The six engine functions of SPEC §6.2 as they exist so far. */
+/** The engine functions of SPEC §6.2 as they exist so far (`check` comes later). */
 export type Engine = {
   recognise(value: string, hint?: { country?: string }): Result<Candidate[]>;
   describe(schemeId: string): Result<SchemeDescription | null>;
   applicability(schemeId: string, jurisdiction: string): Result<Applicability | null>;
   relate(a: string, b: string, ctx?: Context): Result<RelationPath[]>;
+  derive(value: string, schemeId?: string, ctx?: Context): Result<Derivation[]>;
 };
 
 /**
@@ -27,5 +29,7 @@ export function createEngine(model: Model): Engine {
     applicability: (schemeId: string, jurisdiction: string) =>
       applicability(compiled, schemeId, jurisdiction),
     relate: (a: string, b: string, ctx?: Context) => relate(compiled, edges, a, b, ctx),
+    derive: (value: string, schemeId?: string, ctx?: Context) =>
+      derive(compiled, value, schemeId, ctx),
   });
 }
