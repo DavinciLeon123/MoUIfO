@@ -524,6 +524,8 @@ REST API, a dedicated chat with a language model (for example Jev by TypeSafe AI
 
 > Amended by DECISIONS.md DEC-068: the three check pairs of the acceptance case are consistent through the rules from the VAT number and from the EORI to the RSIN and from the RSIN to the EORI.
 
+> Amended by DECISIONS.md DEC-071: the reverse rule from the EORI to the RSIN applies only to an EORI of the form NL plus nine digits issued in the Netherlands, so a value with another prefix, such as the DE contrast value, yields no RSIN and no Dutch VAT number.
+
 **Input:** `derive("NL001469630", "eori")` and `check(["NL001469630", "NL001469630B01", "001469630"])`.
 
 **Expected** (certainty in brackets; the sources follow from the model):
