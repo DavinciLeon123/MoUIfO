@@ -103,7 +103,9 @@ rules:
     input: eori
     output: rsin
     transform:
-      - strip_prefix: 2
+      - capture:
+          regex: "^NL([0-9]{9})$"
+          group: 1
     condition:
       issuing_country: NL
       entity_form: legal-person

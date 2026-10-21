@@ -69,6 +69,8 @@ describe('rsin (DAT-01, SPEC §10)', () => {
     expect(rule.certainty).toBe('certain');
     expect(rule.source).toBe('douane-eori-nl');
     expect(run(rule.transform, 'NL001469630')).toBe('001469630');
+    // D-17 and DEC-071: a prefix other than NL gives no output, even when the country-prefix map lacks it.
+    expect(run(rule.transform, ['DE', '001469630'].join(''))).toBeNull();
   });
 
   test('the level legal-entity is likely and sourced to the KvK RSIN page', () => {
