@@ -242,6 +242,55 @@ describe('recognise conditions on a synthetic model (D-12, DEC-063)', () => {
     ]);
   });
 
+  test('a mixed list with one entry conditioned out and one passing entry passes without a warning', () => {
+    const scheme = fixtureScheme('mixpass', {
+      context_from: { issuing_country: capture },
+      format: {
+        patterns: [{ regex: '^[A-Z]{2}[0-9]{4}$', ...claim }],
+        checksum: [
+          { algorithm: 'elfproef', condition: { issuing_country: 'BB' }, ...claim },
+          { algorithm: 'none', ...claim },
+        ],
+      },
+    });
+    const result = createEngine(fixtureModel({ schemes: [scheme] })).recognise('AA1234');
+    const candidate = result.data[0];
+    expect(candidate?.accepted).toBe(true);
+    expect(candidate?.checksum).toEqual({ outcomes: ['fail', 'pass'], result: 'pass', entry: 1 });
+    expect(result.warnings).toEqual([]);
+  });
+
+  test('a mixed list with one entry conditioned out and one failing entry fails without a warning', () => {
+    const scheme = fixtureScheme('mixfail', {
+      context_from: { issuing_country: capture },
+      format: {
+        patterns: [{ regex: '^[A-Z]{2}[0-9]{4}$', ...claim }],
+        checksum: [
+          { algorithm: 'none', condition: { issuing_country: 'BB' }, ...claim },
+          { algorithm: 'elfproef', ...claim },
+        ],
+      },
+    });
+    const result = createEngine(fixtureModel({ schemes: [scheme] })).recognise('AA1234');
+    const candidate = result.data[0];
+    expect(candidate?.accepted).toBe(false);
+    expect(candidate?.checksum.result).toBe('fail');
+    expect(candidate?.checksum.entry).toBeNull();
+    expect(candidate?.certainty).toBe('possible');
+    expect(result.conclusions[0]?.key).toBe('recognise.checksum-failed');
+    expect(result.warnings).toEqual([]);
+  });
+
+  test('a scheme that declares no checksum keeps result none and gets no warning', () => {
+    const scheme = fixtureScheme('plain', {
+      format: { patterns: [{ regex: '^[A-Z]{2}[0-9]{4}$', ...claim }] },
+    });
+    const result = createEngine(fixtureModel({ schemes: [scheme] })).recognise('AA1234');
+    expect(result.data[0]?.checksum).toEqual({ outcomes: [], result: 'none', entry: null });
+    expect(result.data[0]?.accepted).toBe(true);
+    expect(result.warnings).toEqual([]);
+  });
+
   test('the deciding pattern prefers the higher certainty, then no condition, then the lower index', () => {
     const scheme = fixtureScheme('pick', {
       format: {

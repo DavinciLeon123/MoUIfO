@@ -457,6 +457,39 @@ describe('derive on fixtures: limits and ordering', () => {
     expect(wide.derive('A1', 'hub').data).toEqual(result.data);
   });
 
+  test('an output scheme whose checksum entries the context conditions out is validated on its format (D-01, DEC-072)', () => {
+    const guarded = fixtureEngine([
+      accepting('g1', [ruleOf('g1-g2', 'g1', 'g2')]),
+      fixtureScheme('g2', {
+        format: {
+          patterns: [{ regex: '^[A-Z0-9]+$', certainty: 'certain', source: 'fx-law' }],
+          checksum: [
+            {
+              algorithm: 'elfproef',
+              condition: { entity_form: 'legal-person' },
+              certainty: 'certain',
+              source: 'fx-law',
+            },
+          ],
+        },
+      }),
+    ]);
+    const conditionedOut = guarded.derive('A1', 'g1', { entity_form: 'fiscal-unit' });
+    expect(conditionedOut.data.map((each) => [each.scheme, each.value])).toEqual([['g2', 'XA1']]);
+    expect(codes(conditionedOut)).not.toContain('output-failed-validation');
+    expect(conditionedOut.warnings).toEqual([
+      {
+        code: 'no-applicable-checksum',
+        message:
+          'no checksum entry of g2 applies in the given context, so the value is accepted on its format alone',
+        ref: 'g2',
+      },
+    ]);
+    const applicable = guarded.derive('A1', 'g1', { entity_form: 'legal-person' });
+    expect(applicable.data).toEqual([]);
+    expect(codes(applicable)).toEqual(['output-failed-validation']);
+  });
+
   test('a condition the context does not establish is an assumption at likely', () => {
     const conditional = fixtureEngine([
       accepting('k1', [
