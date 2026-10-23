@@ -1,14 +1,20 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { Client } from '@modelcontextprotocol/client';
+import { StdioClientTransport } from '@modelcontextprotocol/client/stdio';
+import { createEngine } from '@uio/engine';
 import { loadConfig, REPO_ROOT } from 'uio-config';
 import { describe, expect, test } from 'vitest';
 import { SUMMARY_URI } from './summary.ts';
+import { loadDistModel } from './testing/load-model.ts';
 import { TOOL_NAMES } from './tools.ts';
 
 /**
  * The README's `## MCP server` section (MCP-06) and DEC-075: the two npx blocks hold the package
  * name as a literal copy of the name derived from `npm_scope` in config.yaml, and this file fails
- * when they differ. The scope is read through `loadConfig`, never written here.
+ * when they differ. The scope is read through `loadConfig`, never written here. The local-build
+ * configuration is run exactly as written (MCP-01); the npx blocks are checked as data only, because
+ * the package is unpublished and the scope is unproven (DEC-010), so no test contacts the registry.
  */
 
 const PLACEHOLDER = '/absolute/path/to/MoUIfO';
@@ -117,4 +123,42 @@ describe('DEC-075: the README package name follows config.yaml', () => {
     expect(drifted).not.toBe(readme);
     expect(nameDrift(drifted).length).toBeGreaterThanOrEqual(2);
   });
+});
+
+describe('MCP-01: the README local-build configuration runs as written', () => {
+  test('the Claude Desktop and VS Code local-build blocks start a server with the six tools and the engine answer', async () => {
+    const local = blocks
+      .filter((b) => b.entry.command === 'node')
+      .map((b) => ({ command: b.entry.command, args: b.entry.args }));
+    expect(local).toHaveLength(2);
+    expect(local[1]).toEqual(local[0]);
+
+    const root = REPO_ROOT.replace(/\/+$/, '');
+    const { command, args } = local[0] as { command: string; args: string[] };
+    const resolved = args.map((arg) => arg.replace(PLACEHOLDER, root));
+    expect(resolved).toEqual([`${root}/packages/mcp/dist/cli.js`]);
+
+    const transport = new StdioClientTransport({ command, args: resolved, stderr: 'pipe' });
+    const client = new Client({ name: 'uio-readme-test', version: '0.0.0' });
+    try {
+      await client.connect(transport);
+
+      const { tools } = await client.listTools();
+      expect(tools.map((tool) => tool.name).sort()).toEqual([...TOOL_NAMES].sort());
+
+      const reply = await client.callTool({
+        name: 'uio_derive',
+        arguments: { value: 'NL001469630', scheme: 'eori' },
+      });
+      expect(reply.isError).toBeFalsy();
+      expect(reply.structuredContent).toEqual(
+        createEngine(loadDistModel()).derive('NL001469630', 'eori'),
+      );
+
+      const summary = await client.readResource({ uri: SUMMARY_URI });
+      expect(summary.contents.length).toBeGreaterThan(0);
+    } finally {
+      await client.close();
+    }
+  }, 60_000);
 });

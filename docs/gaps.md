@@ -381,3 +381,10 @@ These checks need a browser or a human reading, because the build environment ca
 - **Why it is not in the model:** the owner kept decision D-02 to the `derived-from` relation from `eori` to `rsin`, which carries `issuing_country: NL` (DEC-074). The owner's answer of 2026-10-23 at the plan 06-02 checkpoint was "option-a: keep D-02 as written", so the rule `eori-nl-from-rsin` has only the condition `entity_form: legal-person`.
 - **Open question:** should `eori-nl-from-rsin` carry `issuing_country: NL` as well, so that `relate` finds no chain and `derive` from an RSIN yields no EORI for a non-Dutch context?
 - **Owner or next step:** the owner.
+
+## Scheme without a scope text in the model summary (bsn)
+
+- **Item:** the `bsn` scheme has no `scope` text, so its item in `uio://model/summary` has no `description`; every other scheme has one.
+- **Why it is not in the model:** no scope text was written for `bsn`, and the Phase 6 decision D-10 forbids the server from inventing a description, so the item shows only what the model holds.
+- **Open question:** should the model gain a scope text for `bsn`? DEC-029 states that `label`, `notes` and `scope` are descriptive text that no rule reasons on and need no source, so such a text needs no new source.
+- **Owner or next step:** the owner.
