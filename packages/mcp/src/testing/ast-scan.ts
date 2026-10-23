@@ -8,7 +8,10 @@ import { parseAst } from 'vitest/node';
  *  - `console` may only be `console.error` called with string-literal arguments;
  *  - `process` may only be `process.exit`;
  *  - network, dynamic-code and file-write names are banned in every position;
- *  - an import must be relative or on the allow-list the caller passes.
+ *  - an import must be relative or on the allow-list the caller passes;
+ *  - from `node:fs` only the names of FS_ALLOWED may be bound (an allow-list, not a deny-list: a
+ *    name the list does not know, such as `writeSync` to file descriptor 1, can never slip through);
+ *    a default or namespace import, or a re-export of the whole module, is a finding.
  * `parseAst` is the Rolldown parser that `vitest/node` forwards, so no package is added.
  */
 
@@ -19,7 +22,8 @@ export type FindingRule =
   | 'banned-identifier'
   | 'banned-string'
   | 'dynamic-import'
-  | 'import-not-allowed';
+  | 'import-not-allowed'
+  | 'fs-binding';
 
 export type Finding = { file: string; rule: FindingRule; name: string };
 
@@ -51,6 +55,12 @@ export const BANNED_NAMES: ReadonlySet<string> = new Set([
   'unlink',
   'unlinkSync',
 ]);
+
+/** The only names the server code may bind from `node:fs`: it reads its model file and nothing else. */
+export const FS_ALLOWED: ReadonlySet<string> = new Set(['readFileSync']);
+
+/** The module specifiers that name the file system module, with or without the `node:` prefix. */
+const FS_MODULES: ReadonlySet<string> = new Set(['node:fs', 'fs']);
 
 type AstNode = { type: string } & Record<string, unknown>;
 
@@ -127,6 +137,34 @@ function sourceValue(node: AstNode): string | null {
   return null;
 }
 
+/** The name an import or export specifier binds from the module, or null for a default or namespace. */
+function boundName(specifier: AstNode): string | null {
+  const name = specifier.type === 'ExportSpecifier' ? specifier.local : specifier.imported;
+  if (isIdentifier(name)) return name.name;
+  if (isNode(name) && name.type === 'Literal' && typeof name.value === 'string') return name.value;
+  return null;
+}
+
+/** Report every binding of a `node:fs` import or re-export that FS_ALLOWED does not list. */
+function checkFsBindings(node: AstNode, report: (rule: FindingRule, name: string) => void): void {
+  if (node.type === 'ExportAllDeclaration') {
+    report('fs-binding', 'node:fs *');
+    return;
+  }
+  const specifiers = Array.isArray(node.specifiers) ? (node.specifiers as AstNode[]) : [];
+  for (const specifier of specifiers) {
+    if (!isNode(specifier)) continue;
+    if (specifier.type === 'ImportDefaultSpecifier') {
+      report('fs-binding', 'node:fs default');
+    } else if (specifier.type === 'ImportNamespaceSpecifier') {
+      report('fs-binding', 'node:fs *');
+    } else {
+      const name = boundName(specifier);
+      if (name === null || !FS_ALLOWED.has(name)) report('fs-binding', `node:fs ${name ?? '?'}`);
+    }
+  }
+}
+
 function isRelative(specifier: string): boolean {
   return specifier.startsWith('./') || specifier.startsWith('../');
 }
@@ -175,6 +213,7 @@ export function scanServerSource(
         if (specifier !== null && !isRelative(specifier) && !allowed.has(specifier)) {
           report('import-not-allowed', specifier);
         }
+        if (specifier !== null && FS_MODULES.has(specifier)) checkFsBindings(n, report);
         break;
       }
       case 'Literal':
