@@ -6,6 +6,9 @@
   "engines": {
     "node": ">=22.12"
   },
+  "bin": {
+    "mcp-server": "dist/cli.js"
+  },
   "exports": {
     ".": {
       "uio-source": "./src/index.ts",
@@ -21,6 +24,12 @@
     "build": "tsc -p tsconfig.build.json"
   },
   "dependencies": {
-    "@uio/engine": "*"
+    "@modelcontextprotocol/server": "2.3.1",
+    "@uio/engine": "*",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/client": "2.3.1",
+    "uio-config": "*"
   }
 }
