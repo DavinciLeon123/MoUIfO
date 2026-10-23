@@ -1,6 +1,6 @@
-import type { Derivation, Engine, Result } from '@uio/engine';
+import type { ConsistencyFinding, Derivation, Engine, Result } from '@uio/engine';
 import * as z from 'zod/v4';
-import { ContextSchema, DerivationSchema, ResultOf } from './schemas.ts';
+import { ConsistencyFindingSchema, ContextSchema, DerivationSchema, ResultOf } from './schemas.ts';
 
 /** The sentence every tool description ends with (SPEC section 7.2, MCP-03). */
 export const CLOSING_SENTENCE =
@@ -45,5 +45,20 @@ const deriveTool = defineTool({
   run: (engine, args) => engine.derive(args.value, args.scheme, args.ctx),
 });
 
+const checkTool = defineTool({
+  name: 'uio_check',
+  title: 'Check identifiers together',
+  text: 'Check whether several values can belong to the same organisation: every pair is consistent, inconsistent or no-rule, with the rule chain, its certainty and its explanation; values are referred to by position and never repeated. `ctx` may state issuing_country, entity_form or context.',
+  input: z.object({
+    values: z.array(z.string()),
+    ctx: ContextSchema.optional(),
+  }),
+  output: ResultOf(z.array(ConsistencyFindingSchema)) as z.ZodType<Result<ConsistencyFinding[]>>,
+  run: (engine, args) => engine.check(args.values, args.ctx),
+});
+
 /** The tool table; a new entry needs no change in server.ts. */
-export const TOOLS: readonly ToolDef<z.ZodType, unknown>[] = [deriveTool as ToolDef];
+export const TOOLS: readonly ToolDef<z.ZodType, unknown>[] = [
+  deriveTool as ToolDef,
+  checkTool as ToolDef,
+];

@@ -78,3 +78,17 @@ export const DerivationSchema = z.looseObject({
   certainty: CertaintySchema,
   explanation: z.array(StepSchema),
 });
+
+/** One verdict on a pair of supplied values (DEC-068), field for field as the engine's `ConsistencyFinding`. */
+export const ConsistencyFindingSchema = z.looseObject({
+  a: z.number(),
+  b: z.number(),
+  outcome: z.enum(['consistent', 'inconsistent', 'no-rule']),
+  direction: z.enum(['a-to-b', 'b-to-a']).nullable(),
+  from_scheme: z.string().nullable(),
+  to_scheme: z.string().nullable(),
+  rules: z.array(z.string()),
+  tried: z.looseObject({ a: z.array(z.string()), b: z.array(z.string()) }),
+  certainty: CertaintySchema.nullable(),
+  explanation: z.array(StepSchema),
+});
