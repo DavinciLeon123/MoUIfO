@@ -449,6 +449,8 @@ interface Step {
 
 > Amended by DECISIONS.md DEC-073: the six tools are named uio_recognise, uio_describe, uio_applicability, uio_relate, uio_derive and uio_check, and their input schemas mirror the engine signatures with a ctx limited to issuing_country, entity_form and context.
 
+> Amended by DECISIONS.md DEC-075: the README configuration examples for Claude Desktop and VS Code hold the package name of the MCP server as a literal copy of the name derived from the npm scope in config.yaml, and a test fails when the two differ.
+
 - `@modelcontextprotocol/sdk`, stdio transport, startable with `npx @uio/mcp-server`.
 - Six tools, one per engine function, with the same names and a JSON schema for the input. The output is the full `Result`, including `explanation`.
 - Every tool description ends with: *"Report conclusions with their certainty and source exactly as returned. Do not add facts about identifiers that are not in the result."*

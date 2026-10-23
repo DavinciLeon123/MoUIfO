@@ -25,8 +25,80 @@ Phase 1: repository foundations. There is no model data yet.
 
 - Node 24 per `.nvmrc`; Node 22.18 or newer is supported.
 - Commands: `npm install`, `npm test`, `npm run check`, `npm run guard`, `npm run validate`, `npm run build`.
-- `config.yaml` is the single place for the namespace and the npm scope. After changing `npm_scope`, run `npm run config:sync` and then `npm install`.
+- `config.yaml` is the single place for the namespace and the npm scope. After changing `npm_scope`, run `npm run config:sync` and then `npm install`, and update the MCP configuration examples in this README (DEC-075); a test checks them against config.yaml.
 - npm builds workspaces in glob order (engine, mcp, web). A new workspace that others depend on and that sorts earlier must be listed explicitly in dependency order.
+
+## MCP server
+
+`packages/mcp` is a stdio MCP server built on `@modelcontextprotocol/server`. It exposes the six engine functions as the tools `uio_recognise`, `uio_describe`, `uio_applicability`, `uio_relate`, `uio_derive` and `uio_check`, and the resource `uio://model/summary`. Every answer is the engine's full Result (conclusions with certainty, source and explanation), and the tool descriptions ask the model to report them exactly as returned.
+
+The MCP client sees every value you enter, and so does the language model it uses. The server itself stores, logs and sends nothing, and reads only the model shipped inside the package.
+
+The npx form works once the package is published to npm; until then, use the local build. Once it is published, pin a version in the configuration, because the model version equals the package version.
+
+Answers can be tens of kilobytes (the description of one scheme is about 30 KB of JSON). They are never shortened.
+
+### Local build
+
+Run `npm install` and `npm run build` in your checkout. The server is then `packages/mcp/dist/cli.js`. In the examples below, replace `/absolute/path/to/MoUIfO` with the absolute path of your checkout.
+
+### Claude Desktop
+
+Edit `claude_desktop_config.json` (macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`; Windows: `%APPDATA%\Claude\claude_desktop_config.json`), then restart Claude Desktop. Local build:
+
+```json
+{
+  "mcpServers": {
+    "uio": {
+      "command": "node",
+      "args": ["/absolute/path/to/MoUIfO/packages/mcp/dist/cli.js"]
+    }
+  }
+}
+```
+
+From npm, after publication:
+
+```json
+{
+  "mcpServers": {
+    "uio": {
+      "command": "npx",
+      "args": ["-y", "@uio/mcp-server"]
+    }
+  }
+}
+```
+
+### VS Code
+
+Edit `.vscode/mcp.json` in your workspace, then start the server from the MCP view. Local build:
+
+```json
+{
+  "servers": {
+    "uio": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["/absolute/path/to/MoUIfO/packages/mcp/dist/cli.js"]
+    }
+  }
+}
+```
+
+From npm, after publication:
+
+```json
+{
+  "servers": {
+    "uio": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@uio/mcp-server"]
+    }
+  }
+}
+```
 
 ## Personal numbers
 
