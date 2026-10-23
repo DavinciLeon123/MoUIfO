@@ -21,7 +21,7 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "tsc -p tsconfig.build.json"
+    "build": "tsc -p tsconfig.build.json && node copy-model.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/server": "2.3.1",
