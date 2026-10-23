@@ -131,6 +131,7 @@ relations:
   - kind: derived-from
     target: rsin
     condition:
+      issuing_country: NL
       entity_form: legal-person
     certainty: certain
     source: douane-eori-nl

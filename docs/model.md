@@ -103,7 +103,7 @@ Open questions in docs/gaps.md: [ICD codes stated only by the Peppol code list](
   - `XI`: `issued`, `recognised`; note: Northern Ireland, under EU customs legislation. Stated here, not inherited from GB (DEC-041). (certainty: certain, source: [hmrc-eori-introduction](https://www.gov.uk/guidance/economic-operators-registration-and-identification-eori/introduction))
   - `GB`: `issued`, `recognised`; note: England, Scotland and Wales, under UK legislation (see the gap entry on the GB prefix). (certainty: certain, source: [hmrc-eori-introduction](https://www.gov.uk/guidance/economic-operators-registration-and-identification-eori/introduction))
 - Relations:
-  - `derived-from`: `rsin`; condition: `entity_form legal-person` (certainty: certain, source: [douane-eori-nl](https://www.douane.nl/onderwerpen/invoer-en-uitvoer/nodig-bij-aangifte/eori-nummer/eori-nummer-aanvragen/))
+  - `derived-from`: `rsin`; condition: `entity_form legal-person`, `issuing_country NL` (certainty: certain, source: [douane-eori-nl](https://www.douane.nl/onderwerpen/invoer-en-uitvoer/nodig-bij-aangifte/eori-nummer/eori-nummer-aanvragen/))
 - Issuing-country context:
   - capture `^([A-Z]{2})` group 1, map `country-prefix` (certainty: certain, source: [commission-eori](https://taxation-customs.ec.europa.eu/customs-4/customs-procedures-import-and-export/customs-procedures/economic-operators-registration-and-identification-number-eori_en))
 - Rules:

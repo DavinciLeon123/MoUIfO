@@ -137,7 +137,10 @@ suite('describe: conditions, absent parts and components', () => {
     expect(found?.params.kind).toBe('derived-from');
     expect(found?.certainty).toBe('likely');
     const assumptions = found?.explanation.filter((step) => step.kind === 'assumption') ?? [];
-    expect(assumptions.map((step) => step.condition)).toEqual([{ entity_form: 'legal-person' }]);
+    expect(assumptions.map((step) => step.condition)).toEqual([
+      { issuing_country: 'NL' },
+      { entity_form: 'legal-person' },
+    ]);
     expect(assumptions.every((step) => step.source === null)).toBe(true);
   });
 

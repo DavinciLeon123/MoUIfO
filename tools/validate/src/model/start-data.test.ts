@@ -92,6 +92,18 @@ describe('eori (DAT-01, SPEC §10)', () => {
     expect(run(rule.transform, '001469630')).toBe('NL001469630');
   });
 
+  test('the derived-from relation to rsin holds for a Dutch legal person only, certain, sourced to Douane (D-02)', () => {
+    const relations = listOf(scheme('eori').relations);
+    expect(relations).toHaveLength(1);
+    expect(relations[0]).toMatchObject({
+      kind: 'derived-from',
+      target: 'rsin',
+      condition: { issuing_country: 'NL', entity_form: 'legal-person' },
+      certainty: 'certain',
+      source: 'douane-eori-nl',
+    });
+  });
+
   test('three patterns: EU certain, Dutch legal person certain, Dutch sole proprietor likely; no checksum', () => {
     const patterns = listOf((scheme('eori').format as Json).patterns);
     expect(patterns.map((pattern) => pattern.certainty)).toEqual(['certain', 'certain', 'likely']);
