@@ -5,6 +5,25 @@ import { StdioClientTransport } from '@modelcontextprotocol/client/stdio';
 /** Absolute path of the built bin entry, `packages/mcp/dist/cli.js`. */
 export const CLI_PATH: string = fileURLToPath(new URL('../../dist/cli.js', import.meta.url));
 
+/**
+ * The one stderr capture the privacy tests rely on: everything the stream emits, as text, readable
+ * at any time. It accepts the Buffer chunks of a child process and the strings of a stream with an
+ * encoding alike. A positive control in privacy.test.ts runs a child that writes a value to stderr
+ * through this same function, so an empty capture can never be mistaken for a clean one.
+ */
+export function captureStderr(
+  stream:
+    | { on(event: 'data', listener: (chunk: Buffer | string) => void): unknown }
+    | null
+    | undefined,
+): () => string {
+  let captured = '';
+  stream?.on('data', (chunk) => {
+    captured += chunk.toString();
+  });
+  return () => captured;
+}
+
 export type Spawned = {
   client: Client;
   stderr: () => string;
@@ -21,14 +40,11 @@ export async function connectSpawned(mode: 'legacy' | 'auto' = 'legacy'): Promis
     args: [CLI_PATH],
     stderr: 'pipe',
   });
-  let stderr = '';
-  transport.stderr?.on('data', (chunk: Buffer) => {
-    stderr += chunk.toString();
-  });
+  const stderr = captureStderr(transport.stderr);
   const client = new Client(
     { name: 'uio-mcp-test', version: '0.0.0' },
     { versionNegotiation: { mode } },
   );
   await client.connect(transport);
-  return { client, stderr: () => stderr, close: () => client.close() };
+  return { client, stderr, close: () => client.close() };
 }

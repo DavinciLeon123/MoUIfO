@@ -2,10 +2,11 @@ import { type ChildProcess, spawn } from 'node:child_process';
 import { mkdtempSync, readdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { StdioClientTransport } from '@modelcontextprotocol/client/stdio';
 import { createEngine } from '@uio/engine';
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 import { loadDistModel } from './testing/load-model.ts';
-import { CLI_PATH, connectSpawned } from './testing/spawn-client.ts';
+import { CLI_PATH, captureStderr, connectSpawned } from './testing/spawn-client.ts';
 import { syntheticInvalid, syntheticValid } from './testing/synthetic-values.ts';
 
 /**
@@ -37,6 +38,8 @@ type Reply = { isError?: boolean; structuredContent?: unknown };
 type EraRun = {
   derive: Reply;
   check: Reply;
+  /** The three calls on synthetic valid-looking values: they must succeed, or the run proves nothing. */
+  synthetic: { recognise: Reply; derive: Reply; check: Reply };
   stderr: string;
 };
 
@@ -48,7 +51,12 @@ afterAll(() => {
   for (const dir of scratch) rmSync(dir, { recursive: true, force: true });
 });
 
-/** A call the server may refuse (rejected argument, unknown tool): only its absence of a leak matters. */
+/**
+ * Only for the calls below that the server is meant to refuse (a rejected argument, an unknown ctx
+ * key, an unknown tool): for those the refusal is the expected outcome and only the absence of a
+ * leak matters. Every call with a valid value is made directly, so a dead or failing server fails
+ * the test instead of leaving stderr empty.
+ */
 async function tolerate(call: Promise<unknown>): Promise<void> {
   try {
     await call;
@@ -73,21 +81,18 @@ describe.each(['legacy', 'auto'] as const)('a spawned client session in the %s e
       })) as Reply;
       const valid = syntheticValid(0);
       const other = syntheticValid(1);
-      await tolerate(
-        session.client.callTool({ name: 'uio_recognise', arguments: { value: valid } }),
-      );
-      await tolerate(
-        session.client.callTool({
-          name: 'uio_derive',
-          arguments: { value: valid, scheme: 'rsin' },
-        }),
-      );
-      await tolerate(
-        session.client.callTool({
-          name: 'uio_check',
-          arguments: { values: [valid, other, syntheticInvalid(0)] },
-        }),
-      );
+      const recognise = (await session.client.callTool({
+        name: 'uio_recognise',
+        arguments: { value: valid },
+      })) as Reply;
+      const deriveSynthetic = (await session.client.callTool({
+        name: 'uio_derive',
+        arguments: { value: valid, scheme: 'rsin' },
+      })) as Reply;
+      const checkSynthetic = (await session.client.callTool({
+        name: 'uio_check',
+        arguments: { values: [valid, other, syntheticInvalid(0)] },
+      })) as Reply;
       // A rejected argument, an unknown ctx key and an unknown tool name.
       await tolerate(session.client.callTool({ name: 'uio_derive', arguments: { value: 7 } }));
       await tolerate(
@@ -100,7 +105,12 @@ describe.each(['legacy', 'auto'] as const)('a spawned client session in the %s e
       await session.close();
       // Let the piped stderr drain after the child has gone.
       await new Promise((resolve) => setTimeout(resolve, 200));
-      run = { derive, check, stderr: session.stderr() };
+      run = {
+        derive,
+        check,
+        synthetic: { recognise, derive: deriveSynthetic, check: checkSynthetic },
+        stderr: session.stderr(),
+      };
     } finally {
       await session.close().catch(() => undefined);
     }
@@ -123,6 +133,13 @@ describe.each(['legacy', 'auto'] as const)('a spawned client session in the %s e
     for (const finding of direct.data) expect(finding.outcome).toBe('consistent');
   });
 
+  test('the calls on synthetic values succeed and return structured content', () => {
+    for (const [name, reply] of Object.entries(run.synthetic)) {
+      expect(reply.isError, `${name} was refused`).toBeFalsy();
+      expect(reply.structuredContent, `${name} has no structured content`).toBeDefined();
+    }
+  });
+
   test.for(ENTERED.map((value, index) => [index, value] as const))(
     'stderr does not contain entered value %#',
     ([, value]) => {
@@ -132,7 +149,19 @@ describe.each(['legacy', 'auto'] as const)('a spawned client session in the %s e
 });
 
 describe('a raw spawned session', () => {
-  type Raw = { lines: string[]; stderr: string; code: number | null; cwdAfter: string[] };
+  type Message = {
+    jsonrpc?: unknown;
+    id?: unknown;
+    result?: Record<string, unknown>;
+    error?: unknown;
+  };
+  type Raw = {
+    lines: string[];
+    responses: Map<number, Message>;
+    stderr: string;
+    code: number | null;
+    cwdAfter: string[];
+  };
   let raw: Raw;
 
   beforeAll(async () => {
@@ -143,14 +172,10 @@ describe('a raw spawned session', () => {
 
     let buffer = '';
     const lines: string[] = [];
-    const answered = new Set<number>();
-    let stderr = '';
+    const responses = new Map<number, Message>();
+    const stderr = captureStderr(child.stderr);
     const waiting: (() => void)[] = [];
     child.stdout.setEncoding('utf8');
-    child.stderr.setEncoding('utf8');
-    child.stderr.on('data', (chunk: string) => {
-      stderr += chunk;
-    });
     child.stdout.on('data', (chunk: string) => {
       buffer += chunk;
       let newline = buffer.indexOf('\n');
@@ -160,8 +185,8 @@ describe('a raw spawned session', () => {
         if (line.trim() !== '') {
           lines.push(line);
           try {
-            const message = JSON.parse(line) as { id?: unknown };
-            if (typeof message.id === 'number') answered.add(message.id);
+            const message = JSON.parse(line) as Message;
+            if (typeof message.id === 'number') responses.set(message.id, message);
           } catch {
             // reported by the test that parses every line
           }
@@ -177,7 +202,7 @@ describe('a raw spawned session', () => {
           15_000,
         );
         const check = (): void => {
-          if (ids.every((id) => answered.has(id))) {
+          if (ids.every((id) => responses.has(id))) {
             clearTimeout(timer);
             resolve();
           } else {
@@ -231,11 +256,29 @@ describe('a raw spawned session', () => {
       new Promise<'timeout'>((resolve) => setTimeout(() => resolve('timeout'), 10_000)),
     ]);
     if (code === 'timeout') throw new Error('the server did not exit after stdin ended');
-    raw = { lines, stderr, code, cwdAfter: readdirSync(cwd) };
+    raw = { lines, responses, stderr: stderr(), code, cwdAfter: readdirSync(cwd) };
   }, 60_000);
 
   test('the process exits with code 0 after stdin closes', () => {
     expect(raw.code).toBe(0);
+  });
+
+  test('the calls with valid values (ids 2 and 3) are successes, so the server was alive', () => {
+    for (const id of [2, 3]) {
+      const message = raw.responses.get(id);
+      expect(message?.error, `id ${id} is a protocol error`).toBeUndefined();
+      expect(message?.result, `id ${id} has no result`).toBeDefined();
+      expect(message?.result?.isError, `id ${id} is a refused call`).toBeFalsy();
+      expect(
+        message?.result?.structuredContent,
+        `id ${id} has no structured content`,
+      ).toBeDefined();
+    }
+  });
+
+  test('the call with a wrong argument type (id 4) is refused', () => {
+    const message = raw.responses.get(4);
+    expect(message?.error !== undefined || message?.result?.isError === true).toBe(true);
   });
 
   test('every non-empty stdout line is a JSON-RPC 2.0 message', () => {
@@ -256,5 +299,38 @@ describe('a raw spawned session', () => {
 
   test('the working directory the server ran in is still empty', () => {
     expect(raw.cwdAfter).toEqual([]);
+  });
+});
+
+describe('positive control: the stderr capture would see a leak', () => {
+  /** A child that writes `process.argv[1]` to stderr and exits, standing in for a leaking server. */
+  const LEAK = ['-e', 'process.stderr.write(process.argv[1])'];
+
+  test('the capture used by the client sessions contains a value written to stderr', async () => {
+    const leaked = syntheticValid(2);
+    const transport = new StdioClientTransport({
+      command: process.execPath,
+      args: [...LEAK, leaked],
+      stderr: 'pipe',
+    });
+    const stderr = captureStderr(transport.stderr);
+    await transport.start();
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      expect(stderr()).toContain(leaked);
+      expect(ENTERED).not.toContain(leaked);
+    } finally {
+      await transport.close();
+    }
+  });
+
+  test('the capture used by the raw session contains a value written to stderr', async () => {
+    const leaked = syntheticValid(3);
+    const child = spawn(process.execPath, [...LEAK, leaked], { stdio: ['pipe', 'pipe', 'pipe'] });
+    children.push(child);
+    const stderr = captureStderr(child.stderr);
+    await new Promise<void>((resolve) => child.on('exit', () => resolve()));
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(stderr()).toContain(leaked);
   });
 });
