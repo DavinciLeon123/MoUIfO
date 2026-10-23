@@ -248,3 +248,41 @@ describe('the SDK rejects a wrong input shape before the engine runs (D-07)', ()
     expect(reply.content[0]?.text.startsWith('Input validation error')).toBe(true);
   });
 });
+
+describe('closed top-level inputs (review CR-01)', () => {
+  test.for(SORTED_NAMES)(
+    '%s advertises additionalProperties false at the top level',
+    async (name) => {
+      const { tools } = await session.client.listTools();
+      const schema = tools.find((t) => t.name === name)?.inputSchema as {
+        additionalProperties?: unknown;
+      };
+      expect(schema.additionalProperties).toBe(false);
+    },
+  );
+
+  // One valid call per tool and the key a client plausibly mistypes: the key is refused, the same
+  // call without it is answered, so the refusal comes from the extra key and from nothing else.
+  test.for([
+    ['uio_recognise', { value: 'NL001469630' }, { hints: { country: 'NL' } }],
+    ['uio_describe', { scheme: 'eori' }, { schem: 'eori' }],
+    ['uio_applicability', { scheme: 'eori', jurisdiction: 'NL' }, { jurisdictions: 'NL' }],
+    ['uio_relate', { a: 'eori', b: 'rsin' }, { context: { issuing_country: 'NL' } }],
+    [
+      'uio_derive',
+      { value: 'NL001469630', scheme: 'eori' },
+      { context: { issuing_country: 'BE' } },
+    ],
+    ['uio_check', { values: TRIPLE }, { value: 'NL001469630' }],
+  ] as const)(
+    '%s refuses an extra top-level key and answers without it',
+    async ([name, args, extra]) => {
+      const refused = await call(name, { ...args, ...extra });
+      expect(refused.isError).toBe(true);
+      expect(refused.content[0]?.text.startsWith('Input validation error')).toBe(true);
+      const answered = await call(name, { ...args });
+      expect(answered.isError).toBeFalsy();
+      expect(answered.structuredContent).toBeDefined();
+    },
+  );
+});

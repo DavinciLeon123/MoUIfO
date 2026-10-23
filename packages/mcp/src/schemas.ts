@@ -2,7 +2,9 @@ import * as z from 'zod/v4';
 
 // Input schemas (D-07): type and shape only, no length, count or pattern refinement, so a value the
 // engine answers with a warning never becomes an SDK error instead (D-09, RESEARCH Pitfall 5). The
-// objects are closed: only the keys the engine reads are accepted.
+// input objects are closed at every level: the six tool inputs in tools.ts and the ctx and hint
+// objects below are strict objects, so a misnamed key is an input validation error and is never
+// dropped silently. The output schemas further down are deliberately loose.
 
 /** The optional context of derive, check and relate (DEC-069): the closed condition keys. */
 export const ContextSchema = z.strictObject({

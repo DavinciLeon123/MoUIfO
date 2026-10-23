@@ -55,7 +55,7 @@ const recogniseTool = defineTool({
   name: 'uio_recognise',
   title: 'Recognise an identifier',
   text: 'Recognise which identifier schemes one value can belong to: every scheme whose pattern matches the whole value, with its format and checksum results apart, its certainty and its explanation. Several candidates are normal; `hint.country` only re-ranks them.',
-  input: z.object({
+  input: z.strictObject({
     value: z.string().describe('one identifier value as entered'),
     hint: HintSchema.optional(),
   }),
@@ -67,7 +67,7 @@ const describeTool = defineTool({
   name: 'uio_describe',
   title: 'Describe a scheme',
   text: 'Describe one identifier scheme by its id: every sourced claim the model holds about it, such as issuer, jurisdiction, format, checksum, relations, rules, applicability and persistence, each with its source and certainty.',
-  input: z.object({
+  input: z.strictObject({
     scheme: z.string().describe('scheme id, for example the id of the EORI scheme'),
   }),
   output: ResultOf(SchemeDescriptionSchema.nullable()) as unknown as z.ZodType<
@@ -80,7 +80,7 @@ const applicabilityTool = defineTool({
   name: 'uio_applicability',
   title: 'Applicability in a jurisdiction',
   text: 'Tell for one scheme and one jurisdiction id whether the scheme is issued, recognised or verifiable there, stated by the model or inherited from a parent jurisdiction, with source and certainty.',
-  input: z.object({
+  input: z.strictObject({
     scheme: z.string().describe('scheme id'),
     jurisdiction: z.string().describe('jurisdiction id, for example an ISO 3166 alpha-2 code'),
   }),
@@ -94,7 +94,7 @@ const relateTool = defineTool({
   name: 'uio_relate',
   title: 'Relate two schemes',
   text: "Find how two schemes are connected: every shortest chain of at most four hops over the model's relations, rules and components, each hop with its source and certainty. `ctx` may state issuing_country, entity_form or context.",
-  input: z.object({
+  input: z.strictObject({
     a: z.string().describe('scheme id of the start of the chain'),
     b: z.string().describe('scheme id of the end of the chain'),
     ctx: ContextSchema.optional(),
@@ -107,7 +107,7 @@ const deriveTool = defineTool({
   name: 'uio_derive',
   title: 'Derive identifiers',
   text: "Derive the identifiers that the model's rules produce from one value, at most four rule steps, each with the rules applied, its certainty and its explanation. `scheme` names the scheme of the input value; `ctx` may state issuing_country, entity_form or context.",
-  input: z.object({
+  input: z.strictObject({
     value: z.string().describe('one identifier value as entered'),
     scheme: z.string().optional().describe('scheme id of the input value, when known'),
     ctx: ContextSchema.optional(),
@@ -120,7 +120,7 @@ const checkTool = defineTool({
   name: 'uio_check',
   title: 'Check identifiers together',
   text: 'Check whether several values can belong to the same organisation: every pair is consistent, inconsistent or no-rule, with the rule chain, its certainty and its explanation; values are referred to by position and never repeated. `ctx` may state issuing_country, entity_form or context.',
-  input: z.object({
+  input: z.strictObject({
     values: z.array(z.string()).describe('the identifier values as entered, compared pairwise'),
     ctx: ContextSchema.optional(),
   }),
