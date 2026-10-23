@@ -76,7 +76,7 @@ describe('relate: the rsin-eori tracer on the real model', () => {
   });
 });
 
-describe('relate: eori and rsin by issuing country (D-02)', () => {
+describe('relate: eori and rsin by issuing country (D-02, DEC-074)', () => {
   test('a Dutch legal-person context gives one certain path through the relation with the ctx facts', () => {
     const result = engine.relate('eori', 'rsin', {
       issuing_country: 'NL',

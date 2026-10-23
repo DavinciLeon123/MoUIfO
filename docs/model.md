@@ -125,7 +125,7 @@ Open questions in docs/gaps.md: [ICD codes stated only by the Peppol code list](
 - Scope (en): required for international trade with EU and UK involving customs; for legal persons as well as single person enterprises
 - Notes (en): not a general business ID, often derived from one.
 
-Open questions in docs/gaps.md: [GB means the United Kingdom, but the GB EORI prefix covers Great Britain only](gaps.md#gb-means-the-united-kingdom-but-the-gb-eori-prefix-covers-great-britain-only); [EORI level claims of SPEC §10 (DEC-050)](gaps.md#eori-level-claims-of-spec-10-dec-050); [Dutch sole-proprietor EORI and the non-Dutch NL plus fi-number form](gaps.md#dutch-sole-proprietor-eori-and-the-non-dutch-nl-plus-fi-number-form); [Union Customs Code succession (Regulation (EU) 2026/2108)](gaps.md#union-customs-code-succession-regulation-eu-20262108)
+Open questions in docs/gaps.md: [GB means the United Kingdom, but the GB EORI prefix covers Great Britain only](gaps.md#gb-means-the-united-kingdom-but-the-gb-eori-prefix-covers-great-britain-only); [EORI level claims of SPEC §10 (DEC-050)](gaps.md#eori-level-claims-of-spec-10-dec-050); [Dutch sole-proprietor EORI and the non-Dutch NL plus fi-number form](gaps.md#dutch-sole-proprietor-eori-and-the-non-dutch-nl-plus-fi-number-form); [Union Customs Code succession (Regulation (EU) 2026/2108)](gaps.md#union-customs-code-succession-regulation-eu-20262108); [Foreign EORI context and the inverse of eori-nl-from-rsin in relate (DEC-074)](gaps.md#foreign-eori-context-and-the-inverse-of-eori-nl-from-rsin-in-relate-dec-074)
 
 ## euid
 
@@ -515,7 +515,7 @@ Open questions in docs/gaps.md: [Levels and roles without a source](gaps.md#leve
   - `move-to-other-country`: New RSIN (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
 - Scope (en): legal person equivalent of BSN; used for digital communication with Dutch government
 
-Open questions in docs/gaps.md: [Elfproef of RSIN, BSN and fi-number rests on the workbook](gaps.md#elfproef-of-rsin-bsn-and-fi-number-rests-on-the-workbook); [No rule from the fi-number to the RSIN or the OIN](gaps.md#no-rule-from-the-fi-number-to-the-rsin-or-the-oin)
+Open questions in docs/gaps.md: [Elfproef of RSIN, BSN and fi-number rests on the workbook](gaps.md#elfproef-of-rsin-bsn-and-fi-number-rests-on-the-workbook); [No rule from the fi-number to the RSIN or the OIN](gaps.md#no-rule-from-the-fi-number-to-the-rsin-or-the-oin); [Foreign EORI context and the inverse of eori-nl-from-rsin in relate (DEC-074)](gaps.md#foreign-eori-context-and-the-inverse-of-eori-nl-from-rsin-in-relate-dec-074)
 
 ## vat
 

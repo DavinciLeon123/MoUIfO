@@ -530,6 +530,8 @@ REST API, a dedicated chat with a language model (for example Jev by TypeSafe AI
 
 > Amended by DECISIONS.md DEC-071: the reverse rule from the EORI to the RSIN applies only to an EORI of the form NL plus nine digits issued in the Netherlands, so a value with another prefix, such as the DE contrast value, yields no RSIN and no Dutch VAT number.
 
+> Amended by DECISIONS.md DEC-074: the relation from the EORI to the RSIN holds only for a Dutch legal person, and relate can still link a foreign EORI context to the RSIN through the inverse of the rule from the RSIN to the EORI.
+
 **Input:** `derive("NL001469630", "eori")` and `check(["NL001469630", "NL001469630B01", "001469630"])`.
 
 **Expected** (certainty in brackets; the sources follow from the model):

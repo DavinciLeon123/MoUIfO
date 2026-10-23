@@ -374,3 +374,10 @@ These checks need a browser or a human reading, because the build environment ca
 - **Why it is not in the model:** `GLOBAL` ("Worldwide") is not a country or territory and has no entry in the Publications Office list "Countries and territories". `XI` (Northern Ireland) is left out by the owner's answer of 2026-10-15 (DEC-057). The table, as read through the Publications Office SPARQL endpoint on 2026-10-16, holds no entry with the ISO 3166-1 alpha-2 notation XI, and the IRI `http://publications.europa.eu/resource/authority/country/XI` returns an empty RDF document, so no mapping could be stated for it. Every mapped entry (NLD, BEL, GBR, GRC, EUR) states the alpha-2 notation NL, BE, GB, GR and EU respectively.
 - **Open question:** should `XI` map to an entry once the table has one for Northern Ireland, and should `GLOBAL` map to a world entry if the table ever offers one?
 - **Owner or next step:** the owner.
+
+## Foreign EORI context and the inverse of eori-nl-from-rsin in relate (DEC-074)
+
+- **Item:** `relate` between `eori` and `rsin` for a BE or GB context, for example issuing country BE and entity form legal person, still returns one path, through the inverse of the rule `eori-nl-from-rsin`, which has no country condition. `derive` from an RSIN with such a context still outputs the Dutch EORI, with a `context-conflict` warning, while `derive` of a non-Dutch EORI yields no RSIN (DEC-071).
+- **Why it is not in the model:** the owner kept decision D-02 to the `derived-from` relation from `eori` to `rsin`, which carries `issuing_country: NL` (DEC-074). The owner's answer of 2026-10-23 at the plan 06-02 checkpoint was "option-a: keep D-02 as written", so the rule `eori-nl-from-rsin` has only the condition `entity_form: legal-person`.
+- **Open question:** should `eori-nl-from-rsin` carry `issuing_country: NL` as well, so that `relate` finds no chain and `derive` from an RSIN yields no EORI for a non-Dutch context?
+- **Owner or next step:** the owner.
