@@ -217,7 +217,7 @@ describe('recognise conditions on a synthetic model (D-12, DEC-063)', () => {
     ]);
   });
 
-  test('a checksum list whose every entry has a false condition fails', () => {
+  test('a checksum list whose every entry has a false condition does not apply (D-01, DEC-072)', () => {
     const scheme = fixtureScheme('allout', {
       context_from: { issuing_country: capture },
       format: {
@@ -227,10 +227,19 @@ describe('recognise conditions on a synthetic model (D-12, DEC-063)', () => {
     });
     const result = createEngine(fixtureModel({ schemes: [scheme] })).recognise('AA1234');
     const candidate = result.data[0];
-    expect(candidate?.accepted).toBe(false);
-    expect(candidate?.checksum.result).toBe('fail');
-    expect(candidate?.certainty).toBe('possible');
-    expect(result.conclusions[0]?.key).toBe('recognise.checksum-failed');
+    expect(candidate?.accepted).toBe(true);
+    expect(candidate?.checksum).toEqual({ outcomes: ['fail'], result: 'none', entry: null });
+    expect(candidate?.certainty).toBe('certain');
+    expect(candidate?.explanation.some((step) => step.kind === 'checksum')).toBe(false);
+    expect(result.conclusions[0]?.key).toBe('recognise.candidate');
+    expect(result.warnings).toEqual([
+      {
+        code: 'no-applicable-checksum',
+        message:
+          'no checksum entry of allout applies in the given context, so the value is accepted on its format alone',
+        ref: 'allout',
+      },
+    ]);
   });
 
   test('the deciding pattern prefers the higher certainty, then no condition, then the lower index', () => {

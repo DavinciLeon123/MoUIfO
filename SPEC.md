@@ -395,6 +395,8 @@ interface Step {
 
 > Amended by DECISIONS.md DEC-068: check tries every accepted candidate of each value and calls a pair consistent when a rule chain turns one value into the other, inconsistent when a chain reaches the other's scheme with another value, and no-rule otherwise.
 
+> Amended by DECISIONS.md DEC-072: a checksum entry whose condition the context makes false does not apply, so a candidate whose every checksum entry is conditioned out has checksum result none, is accepted on its format alone and carries the warning no-applicable-checksum.
+
 - **Weakest link:** the certainty of a conclusion is the minimum over all steps in `explanation`. A condition that is not established counts as an `assumption` step with certainty `likely`.
 - **`recognise`:** try all patterns of all schemes and check the checksum. Return all candidates, sorted by certainty and then by specificity (length of the regex match without wildcards). Multiple candidates are normal; 9 digits can be RSIN, BSN or DUNS.
 - **`relate`:** a direct relation, otherwise the shortest chain (BFS) over `relations` and `rules`, with at most 4 steps. All chains of equal length are returned.
@@ -444,6 +446,8 @@ interface Step {
 > Amended by DECISIONS.md DEC-006: the MCP server uses `@modelcontextprotocol/server` (MCP TypeScript SDK major version 2) instead of `@modelcontextprotocol/sdk`.
 
 > Amended by DECISIONS.md DEC-010: the package name derives from the npm scope set once in `config.yaml` (`npm_scope`), so `npx @uio/mcp-server` holds only while the scope is `@uio`.
+
+> Amended by DECISIONS.md DEC-073: the six tools are named uio_recognise, uio_describe, uio_applicability, uio_relate, uio_derive and uio_check, and their input schemas mirror the engine signatures with a ctx limited to issuing_country, entity_form and context.
 
 - `@modelcontextprotocol/sdk`, stdio transport, startable with `npx @uio/mcp-server`.
 - Six tools, one per engine function, with the same names and a JSON schema for the input. The output is the full `Result`, including `explanation`.
