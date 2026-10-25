@@ -40,6 +40,64 @@ test('the privacy sentence is the description of the input and follows it direct
   );
 });
 
+const EORI_VALUE = 'NL001469630';
+const RSIN_VALUE = '001469630';
+const INPUT = 'Identifiers, one per line';
+
+test('the EORI triple gives the four sections in order, the derived value and every pair', async ({
+  page,
+}) => {
+  await page.goto('./');
+  await page
+    .getByRole('textbox', { name: INPUT })
+    .fill(`  ${EORI_VALUE}  \n\n${VALUE}\n${RSIN_VALUE}  `);
+  await page.getByRole('button', { name: 'Explain' }).click();
+
+  await expect(page.getByRole('heading', { level: 2 })).toHaveText([
+    'Normalised input',
+    'Recognition',
+    'Derivations',
+    'Consistency',
+  ]);
+
+  const normalised = page.getByRole('region', { name: 'Normalised input' });
+  const items = normalised.getByRole('listitem');
+  await expect(items).toHaveText([EORI_VALUE, VALUE, RSIN_VALUE]);
+  expect(await normalised.locator('ol').count()).toBe(1);
+
+  const pairs = page.getByRole('region', { name: 'Consistency' }).locator('[data-pair]');
+  await expect(pairs).toHaveCount(3);
+  for (const pair of await pairs.all()) await expect(pair).toContainText('consistent');
+
+  const derivations = page.getByRole('region', { name: 'Derivations' });
+  const firstValue = derivations.locator('div').first();
+  await expect(
+    firstValue.locator('[data-key="derive.derivation"][data-scheme="rsin"]'),
+  ).toContainText(RSIN_VALUE);
+});
+
+test('one value gives the reason that consistency needs two', async ({ page }) => {
+  await page.goto('./');
+  await page.getByRole('textbox', { name: INPUT }).fill(VALUE);
+  await page.getByRole('button', { name: 'Explain' }).click();
+  await expect(page.getByRole('region', { name: 'Consistency' })).toContainText(
+    'Needs at least two values.',
+  );
+});
+
+test('a lower-case value is shown and sent as typed, so no scheme matches it', async ({ page }) => {
+  const lower = VALUE.toLowerCase();
+  await page.goto('./');
+  await page.getByRole('textbox', { name: INPUT }).fill(lower);
+  await page.getByRole('button', { name: 'Explain' }).click();
+  await expect(
+    page.getByRole('region', { name: 'Normalised input' }).getByRole('listitem'),
+  ).toHaveText([lower]);
+  await expect(page.getByRole('region', { name: 'Recognition' })).toContainText(
+    'No scheme in the model has this format.',
+  );
+});
+
 test('the CSP meta comes first, requests stay same-origin and the URL never holds the value', async ({
   page,
   baseURL,
