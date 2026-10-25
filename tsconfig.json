@@ -3,5 +3,6 @@
   "compilerOptions": {
     "noEmit": true
   },
-  "include": ["packages/*/src", "packages/*/*.ts", "tools/*/src", "tools/*/*.ts", "*.ts"]
+  "include": ["packages/*/src", "packages/*/*.ts", "tools/*/src", "tools/*/*.ts", "*.ts"],
+  "exclude": ["packages/web"]
 }

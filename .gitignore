@@ -4,3 +4,6 @@ dist/
 .tsbuild/
 *.tsbuildinfo
 *.xlsx
+test-results/
+playwright-report/
+blob-report/
