@@ -473,6 +473,10 @@ REST API, a dedicated chat with a language model (for example Jev by TypeSafe AI
 
 > Amended by DECISIONS.md DEC-062: the byte-identical double build runs as a Vitest test inside the CI Test step, building twice in two processes with another locale and time zone, so ci.yml gets no separate double-build step.
 
+> Amended by DECISIONS.md DEC-076: npm run check also type-checks the website with tsc -p packages/web, and the website's base path is read from pages_base_path in config.yaml.
+
+> Amended by DECISIONS.md DEC-077: pages.yml deploys the website to GitHub Pages on every push to main and tests it before and after the deploy, web-e2e.yml runs the browser tests on every pull request, and ci.yml is unchanged.
+
 - **Unit:** checksums, transformations, certainty combination, the five behaviour rules of §6.2.
 - **Model-driven:** generate the tests from all `examples_valid`, `examples_invalid` and rule `examples`.
 - **Acceptance:** the EORI case (§10) as an end-to-end test at engine level, and as a smoke test on MCP and web (Playwright, headless).
