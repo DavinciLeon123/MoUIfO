@@ -18,14 +18,17 @@ type Props = {
 /** One conclusion as a list item holding the expandable ConclusionView. */
 function ConclusionLine({
   conclusion,
+  data,
   extra,
 }: {
   conclusion: Conclusion;
+  /** The data of the call that made the conclusion, which the Dutch renderers may need. */
+  data?: unknown;
   extra?: ComponentChildren;
 }) {
   return (
     <li>
-      <ConclusionView conclusion={conclusion} extra={extra} />
+      <ConclusionView conclusion={conclusion} data={data} extra={extra} />
     </li>
   );
 }
@@ -191,7 +194,7 @@ export function PasteView({ text, run, onText, onExplain, onTreatAs }: Props) {
                     </p>
                     {pair.conclusion === null ? null : (
                       <ul>
-                        <ConclusionLine conclusion={pair.conclusion} />
+                        <ConclusionLine conclusion={pair.conclusion} data={pair.finding} />
                       </ul>
                     )}
                   </li>

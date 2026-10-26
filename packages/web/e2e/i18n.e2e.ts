@@ -97,15 +97,15 @@ test('the toggle switches language in place and keeps the text and the results, 
   ]);
 });
 
-test('a Dutch engine line without a dictionary entry shows the English text and says so', async ({
-  page,
-}) => {
+test('a Dutch engine line is Dutch and carries no not-translated marker', async ({ page }) => {
   await page.goto('./?lang=nl');
   await page.getByRole('textbox', { name: NL_INPUT }).fill(EORI_FULL);
   await page.getByRole('button', { name: 'Uitleggen' }).click();
   const line = page
     .getByRole('region', { name: 'Herkenning' })
     .locator('[data-key="recognise.candidate"][data-scheme="eori"]');
-  await expect(line.locator('.statement')).toContainText('niet vertaald');
-  await expect(line.locator('.statement [lang="en"]')).toContainText('The value has the format of');
+  await expect(line.locator('.statement')).toHaveText(
+    'De waarde heeft het formaat van EORI-nummer (eori).',
+  );
+  await expect(line).not.toContainText('niet vertaald');
 });

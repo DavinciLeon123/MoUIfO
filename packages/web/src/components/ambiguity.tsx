@@ -37,7 +37,9 @@ export function AmbiguityPanel({ value, onTreatAs }: Props) {
       <div class="banner">
         <h4>{ui.ambiguityHeading}</h4>
         <p>
-          <MarkedText rendered={warningText(ambiguity.warning, { host, lang })} />
+          <MarkedText
+            rendered={warningText(ambiguity.warning, { host, lang, data: ambiguity.candidates })}
+          />
         </p>
       </div>
       <ul class="candidates">

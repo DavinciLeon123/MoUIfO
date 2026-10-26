@@ -10,7 +10,13 @@ import { type Conclusion, createHost, type Warning } from '../engine-host.ts';
 import { loadDistJson } from '../testing/load-model.ts';
 import { ENGINE_EN } from './engine.en.ts';
 import { ENGINE_NL } from './engine.nl.ts';
-import { CONCLUSION_KEYS, WARNING_CODES } from './engine-keys.ts';
+import {
+  CONCLUSION_KEYS,
+  type ConclusionKey,
+  type EngineDictionary,
+  WARNING_CODES,
+  type WarningCode,
+} from './engine-keys.ts';
 import { conclusionText, warningText } from './text.ts';
 
 const ENGINE_SRC = new URL('../../../engine/src/', import.meta.url);
@@ -94,6 +100,8 @@ function scanEngineSource(): Scan {
   }
   return scan;
 }
+
+const ENGLISH: EngineDictionary = ENGINE_EN;
 
 const sorted = (values: Iterable<string>): string[] => [...values].sort();
 
@@ -242,17 +250,18 @@ describe('runtime sweep over the real model (D-12)', () => {
       const rendered = conclusionText(conclusion, { host, lang: 'en', data });
       expect(rendered).toEqual({ text: conclusion.statement, lang: 'en', marker: null });
       expect(
-        ENGINE_EN.conclusions[conclusion.key as keyof typeof ENGINE_EN.conclusions]?.render(
-          conclusion,
-          { host, data, label: (text) => text.en },
-        ),
+        ENGLISH.conclusions[conclusion.key as ConclusionKey].render(conclusion, {
+          host,
+          data,
+          label: (text) => text.en,
+        }),
       ).toBe(conclusion.statement);
     }
     for (const { warning, data } of seen.warnings) {
       const rendered = warningText(warning, { host, lang: 'en', data });
       expect(rendered).toEqual({ text: warning.message, lang: 'en', marker: null });
       expect(
-        ENGINE_EN.warnings[warning.code as keyof typeof ENGINE_EN.warnings]?.render(warning, {
+        ENGLISH.warnings[warning.code as WarningCode].render(warning, {
           host,
           data,
           label: (text) => text.en,
