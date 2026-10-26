@@ -9,7 +9,15 @@ import { UI_EN } from '../i18n/ui.en.ts';
 import { UI_NL } from '../i18n/ui.nl.ts';
 import { parseRoute, routeHref } from '../router.ts';
 import { loadDistJson } from '../testing/load-model.ts';
-import { CHIPS, type Chip, CONTRAST_VALUE, EORI_VALUE, RSIN_VALUE, VAT_VALUE } from './guide.ts';
+import {
+  CHIPS,
+  type Chip,
+  CONTRAST_VALUE,
+  EORI_VALUE,
+  RSIN_VALUE,
+  VAT_VALUE,
+  WALKTHROUGH,
+} from './guide.ts';
 import { runPaste } from './paste.ts';
 
 const host = createHost(loadDistJson());
@@ -42,7 +50,15 @@ function pasteChip(id: string) {
 
 /** Every value any guide entry puts in the box. */
 function guideValues(): string[] {
-  return CHIPS.flatMap((each) => (each.kind === 'paste' ? [...each.lines] : []));
+  return [
+    ...CHIPS.flatMap((each) => (each.kind === 'paste' ? [...each.lines] : [])),
+    ...WALKTHROUGH.flatMap((each) => [...each.lines]),
+  ];
+}
+
+/** The declared map of a guide entry, as the page builds it. */
+function declaredOf(declare?: { position: number; scheme: string }): Map<number, string> {
+  return new Map(declare === undefined ? [] : [[declare.position, declare.scheme]]);
 }
 
 /** The text of a guide string must not hold a digit or one of the DEC-050 terms. */
@@ -66,7 +82,7 @@ describe('example chips (WEB-04, D-06)', () => {
     expect(new Set(CHIPS.map((each) => each.id)).size).toBe(CHIPS.length);
   });
 
-  test('every value in a chip is one of the four SPEC section 10 values, and the only nine-digit run is the allow-listed RSIN (T-07-17)', () => {
+  test('every value in a chip or walkthrough step is one of the four SPEC section 10 values, and the only nine-digit run is the allow-listed RSIN (T-07-17)', () => {
     for (const value of guideValues()) {
       expect(SPEC_VALUES.has(value), `${value.length} chars`).toBe(true);
       for (const run of value.match(/\d+/g) ?? []) {
@@ -119,6 +135,62 @@ describe('example chips (WEB-04, D-06)', () => {
     for (const each of CHIPS) {
       expectNoFacts(`en ${each.id}`, UI_EN[each.question]);
       expectNoFacts(`nl ${each.id}`, UI_NL[each.question]);
+    }
+  });
+});
+
+describe('EORI walkthrough (WEB-05, D-07, D-08)', () => {
+  test('four steps in the order one value, an RSIN treated as RSIN, the contrast, all three together', () => {
+    expect(WALKTHROUGH.map((step) => [step.lines, step.declare, step.section])).toEqual([
+      [[EORI_VALUE], undefined, 'recognition'],
+      [[RSIN_VALUE], { position: 1, scheme: 'rsin' }, 'derivations'],
+      [[CONTRAST_VALUE], undefined, 'derivations'],
+      [[EORI_VALUE, VAT_VALUE, RSIN_VALUE], undefined, 'consistency'],
+    ]);
+    expect(new Set(WALKTHROUGH.map((step) => step.id)).size).toBe(WALKTHROUGH.length);
+  });
+
+  test('each step runs to a non-empty target section of live engine output', () => {
+    expect(WALKTHROUGH).toHaveLength(4);
+    for (const step of WALKTHROUGH) {
+      const run = runPaste(engine, step.lines, declaredOf(step.declare));
+      if (step.section === 'recognition') {
+        expect(
+          run.values.some((value) => value.recognise.conclusions.length > 0),
+          step.id,
+        ).toBe(true);
+      } else if (step.section === 'derivations') {
+        expect(
+          run.values.some(
+            (value) => value.derivations.length > 0 || value.derive.conclusions.length > 0,
+          ),
+          step.id,
+        ).toBe(true);
+      } else {
+        expect(run.pairs.length, step.id).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  test('step 3 gives no derivation row for rsin or vat-nl (DEC-071)', () => {
+    const step = WALKTHROUGH.at(2);
+    expect(step?.lines).toEqual([CONTRAST_VALUE]);
+    const run = runPaste(engine, step?.lines ?? [], declaredOf(step?.declare));
+    const rows = (run.values.at(0)?.derivations ?? []).filter(
+      (row) => row.conclusion.key === 'derive.derivation',
+    );
+    const schemes = rows.map((row) => row.conclusion.params.scheme);
+    expect(schemes).not.toContain('rsin');
+    expect(schemes).not.toContain('vat-nl');
+  });
+
+  test('every walkthrough title and body, in English and in Dutch, holds no digit and no DEC-050 term (T-07-18)', () => {
+    expect(WALKTHROUGH.length).toBeGreaterThan(0);
+    for (const step of WALKTHROUGH) {
+      for (const key of [step.title, step.body]) {
+        expectNoFacts(`en ${step.id} ${key}`, UI_EN[key]);
+        expectNoFacts(`nl ${step.id} ${key}`, UI_NL[key]);
+      }
     }
   });
 });

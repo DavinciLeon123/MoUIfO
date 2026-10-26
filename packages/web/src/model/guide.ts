@@ -57,3 +57,18 @@ export const CHIPS: readonly Chip[] = [
     route: { view: 'relate', a: 'rsin', b: 'eori' },
   },
 ];
+
+/** The result section a walkthrough step marks and scrolls to (D-07). */
+export type WalkthroughSection = 'recognition' | 'derivations' | 'consistency';
+
+/** One step of the EORI walkthrough: copy keys, the lines it runs and the section it points at. */
+export type Step = {
+  id: string;
+  title: UiKey;
+  body: UiKey;
+  lines: readonly string[];
+  declare?: Declare;
+  section: WalkthroughSection;
+};
+
+export const WALKTHROUGH: readonly Step[] = [];
