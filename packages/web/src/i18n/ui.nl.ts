@@ -43,6 +43,7 @@ export const UI_NL = {
   stepKind: 'Soort',
   stepCondition: 'Voorwaarde',
   stepSource: 'Bron',
+  sourceTitlesNote: 'Brontitels staan in het Engels, zoals het model ze geeft.',
   stepNoSource: 'Voor een aanname geldt geen bron.',
   howToVerify: 'Zo controleert u het',
   registerLink: '{label} ({host}), opent extern register',

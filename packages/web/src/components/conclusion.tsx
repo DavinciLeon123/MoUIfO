@@ -1,7 +1,8 @@
 import type { ComponentChildren } from 'preact';
 import { useApp, useUi } from '../context.ts';
-import type { Certainty, Conclusion, Step } from '../engine-host.ts';
+import type { Certainty, Conclusion, Source, Step } from '../engine-host.ts';
 import { certaintyLabel, conclusionText, fill, modelText, type Rendered } from '../i18n/text.ts';
+import type { Ui } from '../i18n/ui.en.ts';
 import { safeHref, verifyTargets } from '../model/verify.ts';
 
 /** One shape per certainty, so certainty is never carried by colour alone (WEB-08). */
@@ -42,13 +43,52 @@ export function MarkedText({ rendered }: { rendered: Rendered }) {
 }
 
 /** D-14: new tab, noopener noreferrer, the host shown and visible text that the site is external. */
-function ExternalLink({ href, text }: { href: string; text: string }) {
+function ExternalLink({ href, children }: { href: string; children: ComponentChildren }) {
   return (
     <a href={href} target="_blank" rel="noopener noreferrer">
-      {text}
+      {children}
     </a>
   );
 }
+
+/**
+ * A source title: model text with no Dutch (D-10), so in Dutch mode it sits in an element that
+ * names its language (WCAG 3.1.2). The "EN" marker is shown once per step list, not per title.
+ */
+function SourceTitle({ title }: { title: string }) {
+  const { lang } = useApp();
+  return lang === 'nl' ? <span lang="en">{title}</span> : <span>{title}</span>;
+}
+
+/** The link text of a source: the template with the title, the host and the external notice. */
+function SourceLinkText({ title, host }: { title: string; host: string }) {
+  const ui = useUi();
+  const [before = '', after = ''] = ui.sourceLink.split('{title}');
+  return (
+    <>
+      {fill(before, { host })}
+      <SourceTitle title={title} />
+      {fill(after, { host })}
+    </>
+  );
+}
+
+const STEP_KIND: Readonly<Record<Step['kind'], keyof Ui>> = {
+  fact: 'stepKindFact',
+  rule: 'stepKindRule',
+  pattern: 'stepKindPattern',
+  checksum: 'stepKindChecksum',
+  assumption: 'stepKindAssumption',
+  component: 'stepKindComponent',
+};
+
+const SOURCE_TYPE: Readonly<Record<Source['type'], keyof Ui>> = {
+  law: 'sourceTypeLaw',
+  standard: 'sourceTypeStandard',
+  'register-doc': 'sourceTypeRegisterDoc',
+  expert: 'sourceTypeExpert',
+  analysis: 'sourceTypeAnalysis',
+};
 
 function ConditionText({ condition }: { condition: NonNullable<Step['condition']> }) {
   const ui = useUi();
@@ -68,14 +108,13 @@ function StepSource({ source }: { source: Step['source'] }) {
     <span>
       {ui.stepSource}:{' '}
       {link === null ? (
-        source.title
+        <SourceTitle title={source.title} />
       ) : (
-        <ExternalLink
-          href={link.href}
-          text={fill(ui.sourceLink, { title: source.title, host: link.host })}
-        />
+        <ExternalLink href={link.href}>
+          <SourceLinkText title={source.title} host={link.host} />
+        </ExternalLink>
       )}
-      , {source.type}, {source.date}
+      , {ui[SOURCE_TYPE[source.type]]}, {source.date}
     </span>
   );
 }
@@ -85,7 +124,7 @@ function StepItem({ step }: { step: Step }) {
   return (
     <li>
       <span>
-        {ui.stepKind}: {step.kind}
+        {ui.stepKind}: {ui[STEP_KIND[step.kind]]}
       </span>{' '}
       <code>{step.ref}</code> <CertaintyBadge certainty={step.certainty} />{' '}
       {step.condition === undefined ? null : <ConditionText condition={step.condition} />}{' '}
@@ -111,10 +150,9 @@ function VerifyLine({ conclusion }: { conclusion: Conclusion }) {
             if (entry !== null && link !== null) {
               return (
                 <span key={id} class="verify-target">
-                  <ExternalLink
-                    href={link.href}
-                    text={fill(ui.registerLink, { label: entry.label, host: link.host })}
-                  />{' '}
+                  <ExternalLink href={link.href}>
+                    {fill(ui.registerLink, { label: entry.label, host: link.host })}
+                  </ExternalLink>{' '}
                 </span>
               );
             }
@@ -148,6 +186,8 @@ export function ConclusionView({ conclusion, data, extra }: ConclusionViewProps)
   const ui = useUi();
   const text = conclusionText(conclusion, { host, lang, data });
   const first = conclusion.explanation.find((step) => step.source !== null)?.source ?? null;
+  // D-10: in Dutch mode the titles of the sources are English; the marker is shown once per list.
+  const englishTitles = lang === 'nl' && first !== null;
   return (
     <div class="conclusion" data-key={conclusion.key} data-scheme={conclusion.params.scheme}>
       <details>
@@ -156,9 +196,19 @@ export function ConclusionView({ conclusion, data, extra }: ConclusionViewProps)
             <MarkedText rendered={text} />
           </span>{' '}
           <CertaintyBadge certainty={conclusion.certainty} />
-          {first === null ? null : <span class="first-source"> {first.title}</span>}
+          {first === null ? null : (
+            <span class="first-source">
+              {' '}
+              <SourceTitle title={first.title} />
+            </span>
+          )}
         </summary>
         <h4>{ui.stepsHeading}</h4>
+        {englishTitles ? (
+          <p class="note">
+            <small class="marker">{ui.markerEn}</small> {ui.sourceTitlesNote}
+          </p>
+        ) : null}
         <ol class="steps">
           {conclusion.explanation.map((step, index) => (
             <StepItem key={`${step.ref}/${index}`} step={step} />

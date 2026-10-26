@@ -169,6 +169,12 @@ header {
   margin: 0.5rem 0;
 }
 
+.note {
+  margin: 0.25rem 0;
+  color: var(--muted);
+  font-size: 0.9em;
+}
+
 .verify {
   margin-top: 0.75rem;
 }

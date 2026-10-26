@@ -41,6 +41,7 @@ export const UI_EN = {
   stepKind: 'Kind',
   stepCondition: 'Condition',
   stepSource: 'Source',
+  sourceTitlesNote: 'Source titles are shown in English, as the model gives them.',
   stepNoSource: 'No source applies to an assumption.',
   howToVerify: 'How to verify',
   registerLink: '{label} ({host}), opens external register',
