@@ -20,7 +20,7 @@ export function parseRoute(hash: string, model: Pick<Model, 'schemes'>): Route {
   if (path === '' || path === '/') return { view: 'paste' };
   const parts = path.split('/');
   if (parts[0] !== '' || parts[1] !== 'schemes') return { view: 'unknown' };
-  if (parts.length === 2) return { view: 'schemes' };
+  if (parts.length === 2 || (parts.length === 3 && parts[2] === '')) return { view: 'schemes' };
   const id = parts[2];
   if (parts.length === 3 && id !== undefined && Object.hasOwn(model.schemes, id)) {
     return { view: 'scheme', id };

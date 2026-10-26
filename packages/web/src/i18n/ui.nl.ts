@@ -89,6 +89,13 @@ export const UI_NL = {
   notInModelText: 'Het model heeft geen pagina op dit adres.',
   backToSchemes: "Terug naar de lijst met schema's",
 
+  navLabel: 'Hoofdnavigatie',
+  navPaste: 'Identificatienummers plakken',
+  navSchemes: "Schema's",
+  credit:
+    'UID table v1.2 — Davinci Conclusion, as produced for the CoE-DSC. Licensed under CC BY 4.0.',
+  licenceLead: 'Licentietekst:',
+
   markerEn: 'EN',
   markerUntranslated: 'niet vertaald',
 } as const satisfies Record<UiKey, string>;

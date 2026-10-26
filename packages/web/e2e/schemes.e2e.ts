@@ -2,10 +2,15 @@
 // applicability of every jurisdiction), WEB-06 and D-13 (How to verify is the sourced
 // validation_source link or an honest sentence, never an invented register URL) and DEC-041 (a data
 // gap reads "no data in the model" and is never turned into a claim). Task 1 covers the EORI page,
-// the page of a scheme without a sourced register link and an id that is not in the model.
+// the page of a scheme without a sourced register link and an id that is not in the model. Task 2
+// covers the scheme list, the header navigation, focus and title on every route, the DEC-024
+// credit line and axe (WEB-08) on the list and a scheme page in both languages.
 import { expect, test } from '@playwright/test';
+import { expectNoAxeViolations } from './support.ts';
 
 const EORI_LABEL = 'Economic Operators Registration and Identification number';
+const CREDIT =
+  'UID table v1.2 — Davinci Conclusion, as produced for the CoE-DSC. Licensed under CC BY 4.0.';
 
 test('#/schemes/eori shows the sourced description, How to verify and seven jurisdictions', async ({
   page,
@@ -82,5 +87,117 @@ test('an id that is not in the model gives the not-in-the-model page and never e
     await page.goto(`./#/schemes/${id}`);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Not in the model');
     expect(await page.locator('body').innerText()).not.toContain(id);
+  }
+});
+
+test('#/schemes lists the 16 schemes and following the eori link focuses its h1 and sets the title', async ({
+  page,
+}) => {
+  await page.goto('./#/schemes');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Schemes');
+  await expect(page).toHaveTitle('Schemes | UIO knowledge model');
+  const links = page.locator('.scheme-list a');
+  await expect(links).toHaveCount(16);
+  const hrefs = await links.evaluateAll((all) =>
+    all.map((each) => each.getAttribute('href')?.replace(/^.*#/, '#')),
+  );
+  expect(new Set(hrefs).size).toBe(16);
+  for (const href of hrefs) expect(href).toMatch(/^#\/schemes\/[a-z0-9-]+$/);
+
+  await page.locator('.scheme-list a[href$="#/schemes/eori"]').click();
+  const heading = page.getByRole('heading', { level: 1 });
+  await expect(heading).toContainText(EORI_LABEL);
+  await expect(heading).toBeFocused();
+  await expect(page).toHaveTitle(`${EORI_LABEL} | UIO knowledge model`);
+
+  await page.goBack();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Schemes');
+  await expect(page.getByRole('heading', { level: 1 })).toBeFocused();
+  await expect(page.locator('.scheme-list a')).toHaveCount(16);
+});
+
+test('the title of a view never holds an unknown id and the paste view keeps the site name', async ({
+  page,
+}) => {
+  await page.goto('./');
+  await expect(page).toHaveTitle('UIO knowledge model');
+  await page.goto('./#/schemes/__proto__');
+  await expect(page).toHaveTitle('Not in the model | UIO knowledge model');
+});
+
+test('the header navigation reaches both views and marks the current one', async ({ page }) => {
+  await page.goto('./');
+  const nav = page.getByRole('navigation', { name: 'Main navigation' });
+  const paste = nav.getByRole('link', { name: 'Paste identifiers' });
+  const schemes = nav.getByRole('link', { name: 'Schemes' });
+  await expect(paste).toHaveAttribute('aria-current', 'page');
+  await expect(schemes).not.toHaveAttribute('aria-current', /.+/);
+
+  await schemes.click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Schemes');
+  await expect(schemes).toHaveAttribute('aria-current', 'page');
+  await expect(paste).not.toHaveAttribute('aria-current', /.+/);
+
+  await page.locator('.scheme-list a[href$="#/schemes/eori"]').click();
+  await expect(schemes).toHaveAttribute('aria-current', 'true');
+
+  await paste.click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('UIO knowledge model');
+  await expect(paste).toHaveAttribute('aria-current', 'page');
+});
+
+test('what was pasted survives a visit to the scheme pages, and the URL holds no value', async ({
+  page,
+}) => {
+  const typed = 'KEEP ME';
+  await page.goto('./');
+  await page.getByRole('textbox', { name: 'Identifiers, one per line' }).fill(typed);
+  await page.getByRole('navigation').getByRole('link', { name: 'Schemes' }).click();
+  await page.locator('.scheme-list a[href$="#/schemes/eori"]').click();
+  expect(page.url()).not.toContain('KEEP');
+  await page.getByRole('navigation').getByRole('link', { name: 'Paste identifiers' }).click();
+  await expect(page.getByRole('textbox', { name: 'Identifiers, one per line' })).toHaveValue(typed);
+});
+
+test('the DEC-024 credit line is in the footer of the paste view and of a scheme page', async ({
+  page,
+}) => {
+  for (const address of ['./', './#/schemes/eori']) {
+    await page.goto(address);
+    const footer = page.getByRole('contentinfo');
+    await expect(footer).toContainText(CREDIT);
+    const licence = footer.getByRole('link', { name: 'CC BY 4.0' });
+    await expect(licence).toHaveAttribute('href', 'https://creativecommons.org/licenses/by/4.0/');
+    await expect(licence).toHaveAttribute('target', '_blank');
+    await expect(licence).toHaveAttribute('rel', 'noopener noreferrer');
+    await expect(licence).toContainText('creativecommons.org');
+    await expect(licence).toContainText('opens external site');
+  }
+  // The credit is a fixed English wording, so it is tagged as English in the Dutch page too.
+  await page.goto('./?lang=nl#/schemes/eori');
+  await expect(page.getByRole('contentinfo')).toContainText(CREDIT);
+  await expect(page.getByRole('contentinfo').locator('[lang="en"]')).toContainText(CREDIT);
+  await expect(page.getByRole('contentinfo').getByRole('link')).toContainText('opent externe site');
+});
+
+test.describe('WEB-08: axe on the scheme views', () => {
+  for (const scheme of ['light', 'dark'] as const) {
+    test.describe(`${scheme} colour scheme`, () => {
+      test.use({ colorScheme: scheme });
+
+      test('the list and the EORI page in English and Dutch', async ({ page }) => {
+        for (const [address, label] of [
+          ['./#/schemes', 'the English scheme list'],
+          ['./#/schemes/eori', 'the English EORI page'],
+          ['./?lang=nl#/schemes', 'the Dutch scheme list'],
+          ['./?lang=nl#/schemes/eori', 'the Dutch EORI page'],
+        ] as const) {
+          await page.goto(address);
+          await page.reload();
+          await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+          await expectNoAxeViolations(page, `${label}, ${scheme}`);
+        }
+      });
+    });
   }
 });

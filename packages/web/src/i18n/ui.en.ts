@@ -86,6 +86,13 @@ export const UI_EN = {
   notInModelText: 'The model has no page at this address.',
   backToSchemes: 'Back to the list of schemes',
 
+  navLabel: 'Main navigation',
+  navPaste: 'Paste identifiers',
+  navSchemes: 'Schemes',
+  credit:
+    'UID table v1.2 — Davinci Conclusion, as produced for the CoE-DSC. Licensed under CC BY 4.0.',
+  licenceLead: 'Licence text:',
+
   markerEn: 'EN',
   markerUntranslated: 'not translated',
 } as const;

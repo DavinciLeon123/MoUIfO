@@ -1,17 +1,20 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { ExternalLink } from './components/conclusion.tsx';
 import { AppContext, useApp, useUi } from './context.ts';
 import type { Host } from './engine-host.ts';
-import { fill, type Lang } from './i18n/text.ts';
-import { UI_EN } from './i18n/ui.en.ts';
-import { UI_NL } from './i18n/ui.nl.ts';
+import { fill, type Lang, modelText } from './i18n/text.ts';
 import { langSearch, resolveLang } from './lang.ts';
 import { normalise } from './model/normalise.ts';
 import { type PasteRun, runPaste } from './model/paste.ts';
 import { createVerifyIndex } from './model/verify.ts';
-import { parseRoute, type Route } from './router.ts';
+import { parseRoute, type Route, routeHref } from './router.ts';
 import { PasteView } from './views/paste.tsx';
 import { NotInModelView, SchemeDetailView } from './views/scheme-detail.tsx';
 import { SchemesView } from './views/schemes.tsx';
+
+/** DEC-024: the licence of the model content the bundle carries. */
+const LICENCE_URL = 'https://creativecommons.org/licenses/by/4.0/';
+const LICENCE_HOST = new URL(LICENCE_URL).host;
 
 type Session = { lines: readonly string[]; declared: ReadonlyMap<number, string> };
 
@@ -59,15 +62,62 @@ function Page({ route, onLang }: { route: Route; onLang: (lang: Lang) => void })
     execute({ lines: session.lines, declared });
   };
 
+  // The title of the view plus the site name in the page language; never a pasted value, and an
+  // unknown address is not echoed (T-07-13).
+  const scheme =
+    route.view === 'scheme' && Object.hasOwn(host.model.schemes, route.id)
+      ? host.model.schemes[route.id]
+      : undefined;
+  const viewTitle =
+    route.view === 'schemes'
+      ? ui.schemesHeading
+      : route.view === 'unknown'
+        ? ui.notInModelTitle
+        : scheme === undefined
+          ? null
+          : modelText(scheme.label, lang).text;
+  const documentTitle = viewTitle === null ? ui.title : `${viewTitle} | ${ui.title}`;
+  useEffect(() => {
+    document.documentElement.lang = lang;
+    document.title = documentTitle;
+  }, [lang, documentTitle]);
+
+  // WCAG 2.4.3: after a navigation focus moves to the new view's h1 (not on the first load, so the
+  // browser's own focus handling of a fresh page is left alone).
+  const mainRef = useRef<HTMLElement>(null);
+  const routeKey = route.view === 'scheme' ? `scheme/${route.id}` : route.view;
+  const shown = useRef(routeKey);
+  useEffect(() => {
+    if (shown.current === routeKey) return;
+    shown.current = routeKey;
+    mainRef.current?.querySelector('h1')?.focus();
+  }, [routeKey]);
+
   const other: Lang = lang === 'nl' ? 'en' : 'nl';
   return (
     <>
       <header>
+        <nav aria-label={ui.navLabel}>
+          <a
+            href={routeHref({ view: 'paste' })}
+            aria-current={route.view === 'paste' ? 'page' : undefined}
+          >
+            {ui.navPaste}
+          </a>
+          <a
+            href={routeHref({ view: 'schemes' })}
+            aria-current={
+              route.view === 'schemes' ? 'page' : route.view === 'scheme' ? 'true' : undefined
+            }
+          >
+            {ui.navSchemes}
+          </a>
+        </nav>
         <button type="button" lang={other} onClick={() => onLang(other)}>
           {other === 'nl' ? 'Nederlands' : 'English'}
         </button>
       </header>
-      <main>
+      <main ref={mainRef}>
         {route.view === 'paste' ? (
           <PasteView
             text={text}
@@ -84,6 +134,14 @@ function Page({ route, onLang }: { route: Route; onLang: (lang: Lang) => void })
           <NotInModelView />
         )}
       </main>
+      <footer>
+        <p>
+          <span lang="en">{ui.credit}</span> {ui.licenceLead}{' '}
+          <ExternalLink href={LICENCE_URL}>
+            {fill(ui.sourceLink, { title: 'CC BY 4.0', host: LICENCE_HOST })}
+          </ExternalLink>
+        </p>
+      </footer>
       <p role="status" aria-live="polite" class="visually-hidden">
         {status}
       </p>
@@ -112,11 +170,6 @@ export function App({ host }: { host: Host }) {
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
   }, [host]);
-  const title = lang === 'nl' ? UI_NL.title : UI_EN.title;
-  useEffect(() => {
-    document.documentElement.lang = lang;
-    document.title = title;
-  }, [lang, title]);
   return (
     <AppContext.Provider value={{ host, lang, verify }}>
       <Page route={route} onLang={switchTo} />

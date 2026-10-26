@@ -135,10 +135,42 @@ summary {
 }
 
 header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
   max-width: 70ch;
   margin: 0 auto;
   padding: 0.5rem 1rem 0;
-  text-align: right;
+}
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+}
+
+nav a[aria-current] {
+  color: var(--fg);
+  font-weight: bold;
+}
+
+footer {
+  max-width: 70ch;
+  margin: 1.5rem auto 0;
+  padding: 1rem;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.9em;
+}
+
+footer p {
+  margin: 0;
+}
+
+footer a {
+  color: var(--link);
 }
 
 .badge {
@@ -224,4 +256,34 @@ button[aria-pressed="true"] {
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
+}
+
+.scheme-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.scheme-list li {
+  margin: 0.25rem 0;
+}
+
+.jurisdiction {
+  margin: 0.75rem 0;
+}
+
+.jurisdiction h3 {
+  margin-bottom: 0.25rem;
+}
+
+.jurisdiction ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.jurisdiction li {
+  margin: 0.25rem 0;
+}
+
+.trust-scores {
+  margin: 0.25rem 0;
 }
