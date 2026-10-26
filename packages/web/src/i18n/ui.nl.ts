@@ -68,6 +68,27 @@ export const UI_NL = {
   sourceTypeExpert: 'expertbron',
   sourceTypeAnalysis: 'analyse',
 
+  schemesHeading: "Schema's",
+  schemesIntro:
+    "De identificatieschema's van het model. Kies er een voor de beschrijving met bronnen.",
+  schemeDescriptionHeading: 'Beschrijving',
+  scopeLabel: 'Reikwijdte',
+  notesLabel: 'Opmerkingen',
+  trustHeading: 'Deelscores voor vertrouwen',
+  trustLegalBasis: 'Wettelijke grondslag',
+  trustRegistrationQuality: 'Kwaliteit van de registratie',
+  trustVerifiability: 'Controleerbaarheid',
+  trustCrosswalks: 'Koppelingen',
+  trustLifecycle: 'Levenscyclus',
+  notAssessed: 'niet beoordeeld',
+  applicabilityHeading: 'Toepasselijkheid',
+  applicabilityStated: 'vermeld',
+  applicabilityInherited: 'overgeërfd van {from}',
+  applicabilityNoData: 'geen gegevens in het model',
+  notInModelTitle: 'Niet in het model',
+  notInModelText: 'Het model heeft geen pagina op dit adres.',
+  backToSchemes: "Terug naar de lijst met schema's",
+
   markerEn: 'EN',
   markerUntranslated: 'niet vertaald',
 } as const satisfies Record<UiKey, string>;

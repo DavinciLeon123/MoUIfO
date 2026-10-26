@@ -8,7 +8,10 @@ import { langSearch, resolveLang } from './lang.ts';
 import { normalise } from './model/normalise.ts';
 import { type PasteRun, runPaste } from './model/paste.ts';
 import { createVerifyIndex } from './model/verify.ts';
+import { parseRoute, type Route } from './router.ts';
 import { PasteView } from './views/paste.tsx';
+import { NotInModelView, SchemeDetailView } from './views/scheme-detail.tsx';
+import { SchemesView } from './views/schemes.tsx';
 
 type Session = { lines: readonly string[]; declared: ReadonlyMap<number, string> };
 
@@ -16,7 +19,7 @@ type Session = { lines: readonly string[]; declared: ReadonlyMap<number, string>
  * The page itself: in-memory state only, so no web storage, cookie or history entry, and the URL
  * carries nothing but the language (D-11).
  */
-function Page({ onLang }: { onLang: (lang: Lang) => void }) {
+function Page({ route, onLang }: { route: Route; onLang: (lang: Lang) => void }) {
   const { host, lang } = useApp();
   const ui = useUi();
   const [text, setText] = useState('');
@@ -64,7 +67,23 @@ function Page({ onLang }: { onLang: (lang: Lang) => void }) {
           {other === 'nl' ? 'Nederlands' : 'English'}
         </button>
       </header>
-      <PasteView text={text} run={run} onText={setText} onExplain={explain} onTreatAs={treatAs} />
+      <main>
+        {route.view === 'paste' ? (
+          <PasteView
+            text={text}
+            run={run}
+            onText={setText}
+            onExplain={explain}
+            onTreatAs={treatAs}
+          />
+        ) : route.view === 'schemes' ? (
+          <SchemesView />
+        ) : route.view === 'scheme' ? (
+          <SchemeDetailView id={route.id} />
+        ) : (
+          <NotInModelView />
+        )}
+      </main>
       <p role="status" aria-live="polite" class="visually-hidden">
         {status}
       </p>
@@ -86,6 +105,13 @@ export function App({ host }: { host: Host }) {
     );
     setLang(next);
   };
+  // The route lives in the hash (D-11): a hashchange re-parses it, the paste state stays in Page.
+  const [route, setRoute] = useState<Route>(() => parseRoute(location.hash, host.model));
+  useEffect(() => {
+    const onHash = () => setRoute(parseRoute(location.hash, host.model));
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, [host]);
   const title = lang === 'nl' ? UI_NL.title : UI_EN.title;
   useEffect(() => {
     document.documentElement.lang = lang;
@@ -93,7 +119,7 @@ export function App({ host }: { host: Host }) {
   }, [lang, title]);
   return (
     <AppContext.Provider value={{ host, lang, verify }}>
-      <Page onLang={switchTo} />
+      <Page route={route} onLang={switchTo} />
     </AppContext.Provider>
   );
 }

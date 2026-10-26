@@ -43,7 +43,7 @@ export function MarkedText({ rendered }: { rendered: Rendered }) {
 }
 
 /** D-14: new tab, noopener noreferrer, the host shown and visible text that the site is external. */
-function ExternalLink({ href, children }: { href: string; children: ComponentChildren }) {
+export function ExternalLink({ href, children }: { href: string; children: ComponentChildren }) {
   return (
     <a href={href} target="_blank" rel="noopener noreferrer">
       {children}

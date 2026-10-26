@@ -1,4 +1,5 @@
 import type { Certainty, Conclusion, Host, Text, Warning } from '../engine-host.ts';
+import { ENGINE_EN } from './engine.en.ts';
 import { ENGINE_NL } from './engine.nl.ts';
 import type { ConclusionKey, EngineContext, EngineDictionary, WarningCode } from './engine-keys.ts';
 
@@ -70,6 +71,17 @@ export function modelText(text: Text, lang: Lang): Rendered {
     return { text: text.en, lang: 'en', marker: 'en' };
   }
   return { text: text.en, lang: 'en', marker: null };
+}
+
+/**
+ * The short field label of a conclusion key (a row heading) from the engine dictionary of the page
+ * language, so a scheme page names its groups without any wording in the view (D-09). A key the
+ * dictionary lacks is shown as the key itself.
+ */
+export function fieldLabel(key: string, lang: Lang): string {
+  const dictionary: EngineDictionary = lang === 'nl' ? DUTCH : ENGINE_EN;
+  if (!Object.hasOwn(dictionary.conclusions, key)) return key;
+  return dictionary.conclusions[key as ConclusionKey].label;
 }
 
 /** The certainty word of the model's certainty vocabulary; the id itself when it is missing. */

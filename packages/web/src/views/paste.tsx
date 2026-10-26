@@ -115,8 +115,8 @@ export function PasteView({ text, run, onText, onExplain, onTreatAs }: Props) {
     fill(ui.valueHeading, { position: value.position, value: value.value });
   const empty = run !== null && run.values.length === 0;
   return (
-    <main>
-      <h1>{ui.title}</h1>
+    <>
+      <h1 tabIndex={-1}>{ui.title}</h1>
       <label for="values">{ui.inputLabel}</label>
       <textarea
         id="values"
@@ -204,6 +204,6 @@ export function PasteView({ text, run, onText, onExplain, onTreatAs }: Props) {
           </section>
         </>
       )}
-    </main>
+    </>
   );
 }
