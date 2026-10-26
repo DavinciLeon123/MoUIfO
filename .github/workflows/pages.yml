@@ -1,0 +1,77 @@
+name: Pages
+
+# DEC-077 (D-18): test, deploy packages/web/dist to GitHub Pages from main, then smoke-test the live URL.
+# Job-level permissions are banned (DEC-027), so the three grants below apply to every job.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install
+        run: npm ci
+      - name: Build dist
+        run: npm run build:dist
+      - name: Build website
+        run: npm run build -w packages/web
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Browser tests (gate)
+        run: npm run e2e -w packages/web
+      - name: Configure Pages
+        uses: actions/configure-pages@v6
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: packages/web/dist
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v5
+
+  live-smoke:
+    name: Live smoke
+    needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install
+        run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: EORI and privacy tests against the live site
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ needs.deploy.outputs.page_url }}
+        run: npm run e2e -w packages/web -- --project=desktop e2e/eori.e2e.ts e2e/privacy.e2e.ts
