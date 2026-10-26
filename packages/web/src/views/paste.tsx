@@ -2,10 +2,12 @@ import type { ComponentChildren } from 'preact';
 import { AmbiguityPanel, useSchemeName } from '../components/ambiguity.tsx';
 import { ExampleChips } from '../components/chips.tsx';
 import { ConclusionView } from '../components/conclusion.tsx';
+import { Walkthrough, WalkthroughOpener } from '../components/walkthrough.tsx';
 import { WarningList } from '../components/warnings.tsx';
 import { useUi } from '../context.ts';
 import type { Conclusion } from '../engine-host.ts';
 import { fill } from '../i18n/text.ts';
+import { WALKTHROUGH, type WalkthroughSection } from '../model/guide.ts';
 import type { DerivationRow, PasteRun, PasteValue } from '../model/paste.ts';
 
 type Props = {
@@ -16,6 +18,17 @@ type Props = {
   onTreatAs: (position: number, scheme: string) => void;
   /** A paste chip: fill the box with the lines, declare as given, and run (D-02, D-06). */
   onPreset: (lines: readonly string[], declared: ReadonlyMap<number, string>) => void;
+  /** D-07: the walkthrough state the page holds in memory. */
+  walkthrough: {
+    /** 0-based index of the open step, or null while the panel is closed. */
+    step: number | null;
+    /** True once the panel has been opened, so the opener stays after Skip. */
+    used: boolean;
+    onOpen: () => void;
+    onBack: () => void;
+    onNext: () => void;
+    onSkip: () => void;
+  };
 };
 
 /** One conclusion as a list item holding the expandable ConclusionView. */
@@ -112,17 +125,42 @@ function DerivationResult({ value }: { value: PasteValue }) {
   );
 }
 
-export function PasteView({ text, run, onText, onExplain, onTreatAs, onPreset }: Props) {
+export function PasteView({
+  text,
+  run,
+  onText,
+  onExplain,
+  onTreatAs,
+  onPreset,
+  walkthrough,
+}: Props) {
   const ui = useUi();
   const heading = (value: PasteValue) =>
     fill(ui.valueHeading, { position: value.position, value: value.value });
   const empty = run !== null && run.values.length === 0;
   // The empty state: no run yet, or the last run had no values (D-06).
   const showGuide = run === null || empty;
+  // The section the open walkthrough step points at (D-07): marked, with a visible label.
+  const marked: { section: WalkthroughSection; step: number } | null =
+    walkthrough.step === null
+      ? null
+      : {
+          section: WALKTHROUGH[walkthrough.step]?.section ?? 'recognition',
+          step: walkthrough.step + 1,
+        };
+  const sectionClass = (section: WalkthroughSection) =>
+    marked?.section === section ? 'walkthrough-target' : undefined;
+  const targetLabel = (section: WalkthroughSection) =>
+    marked?.section === section ? (
+      <p class="walkthrough-label">{fill(ui.walkthroughTarget, { step: marked.step })}</p>
+    ) : null;
   return (
     <>
       <h1 tabIndex={-1}>{ui.title}</h1>
       {showGuide ? <ExampleChips onPaste={onPreset} /> : null}
+      {walkthrough.step === null && (showGuide || walkthrough.used) ? (
+        <WalkthroughOpener onOpen={walkthrough.onOpen} />
+      ) : null}
       <label for="values">{ui.inputLabel}</label>
       <textarea
         id="values"
@@ -135,6 +173,14 @@ export function PasteView({ text, run, onText, onExplain, onTreatAs, onPreset }:
       <button type="button" onClick={onExplain}>
         {ui.explain}
       </button>
+      {walkthrough.step === null ? null : (
+        <Walkthrough
+          step={walkthrough.step}
+          onBack={walkthrough.onBack}
+          onNext={walkthrough.onNext}
+          onSkip={walkthrough.onSkip}
+        />
+      )}
       {run === null ? null : (
         <>
           <WarningList warnings={run.runWarnings} level={3} />
@@ -157,8 +203,9 @@ export function PasteView({ text, run, onText, onExplain, onTreatAs, onPreset }:
             ) : null}
           </section>
 
-          <section aria-labelledby="recognition-heading">
+          <section aria-labelledby="recognition-heading" class={sectionClass('recognition')}>
             <h2 id="recognition-heading">{ui.recognitionHeading}</h2>
+            {targetLabel('recognition')}
             {empty ? <p>{ui.nothingToShow}</p> : null}
             {run.values.map((value) => (
               <div key={value.position}>
@@ -169,8 +216,9 @@ export function PasteView({ text, run, onText, onExplain, onTreatAs, onPreset }:
             ))}
           </section>
 
-          <section aria-labelledby="derivations-heading">
+          <section aria-labelledby="derivations-heading" class={sectionClass('derivations')}>
             <h2 id="derivations-heading">{ui.derivationsHeading}</h2>
+            {targetLabel('derivations')}
             {empty ? <p>{ui.nothingToShow}</p> : null}
             {run.values.map((value) => (
               <div key={value.position}>
@@ -180,8 +228,9 @@ export function PasteView({ text, run, onText, onExplain, onTreatAs, onPreset }:
             ))}
           </section>
 
-          <section aria-labelledby="consistency-heading">
+          <section aria-labelledby="consistency-heading" class={sectionClass('consistency')}>
             <h2 id="consistency-heading">{ui.consistencyHeading}</h2>
+            {targetLabel('consistency')}
             {run.check === null ? (
               <p>{ui.needTwoValues}</p>
             ) : run.pairs.length === 0 ? (

@@ -3,7 +3,8 @@
 // questions), D-07 (a stepped panel, no modal), D-08 (narration is copy, facts are engine output)
 // and D-17 (chip 2 passes rsin and promises no VAT number). Every value is a public value of
 // SPEC section 10; the only nine-digit run is the allow-listed example RSIN.
-import { expect, test } from '@playwright/test';
+import { expect, type Page, test } from '@playwright/test';
+import { expectNoAxeViolations } from './support.ts';
 
 const INPUT = 'Identifiers, one per line';
 const VAT_VALUE = 'NL001469630B01';
@@ -103,4 +104,180 @@ test('after a paste chip the page URL holds no SPEC section 10 value', async ({ 
     for (const value of [EORI_VALUE, VAT_VALUE, RSIN_VALUE])
       expect(page.url()).not.toContain(value);
   }
+});
+
+const CONTRAST_VALUE = 'DE123456789012345';
+const MODAL = '[role="dialog"], [role="alertdialog"], dialog, [aria-modal]';
+
+/** Tab from the top of the page until the control with this accessible name has focus. */
+async function tabTo(page: Page, name: string) {
+  const target = page.getByRole('button', { name });
+  for (let presses = 0; presses < 40; presses += 1) {
+    await page.keyboard.press('Tab');
+    if (await target.evaluate((element) => element === document.activeElement)) return;
+  }
+  throw new Error(`Tab never reached "${name}"`);
+}
+
+test('WEB-05 and D-07: the walkthrough steps through the SPEC section 10 case by keyboard and can be skipped', async ({
+  page,
+}) => {
+  await page.goto('./');
+  await expect(page.getByRole('button', { name: 'Take the EORI walkthrough' })).toBeVisible();
+  await tabTo(page, 'Take the EORI walkthrough');
+  await page.keyboard.press('Enter');
+
+  const panel = page.getByRole('region', { name: 'EORI walkthrough' });
+  const box = page.getByRole('textbox', { name: INPUT_NAME });
+  const recognition = page.getByRole('region', { name: 'Recognition' });
+  const derivations = page.getByRole('region', { name: 'Derivations' });
+  const consistency = page.getByRole('region', { name: 'Consistency' });
+
+  // Step 1: one value, Recognition marked and in view; focus is on the panel, not lost.
+  await expect(panel).toContainText('Step 1 of 4');
+  await expect(page.getByRole('heading', { name: 'EORI walkthrough' })).toBeFocused();
+  await expect(box).toHaveValue(EORI_VALUE);
+  await expect(recognition).toHaveClass(/walkthrough-target/);
+  await expect(recognition).toContainText('Walkthrough step 1');
+  await expect(recognition.locator('[data-scheme="eori"]').first()).toBeVisible();
+  await expect(recognition.getByRole('heading', { name: 'Recognition' })).toBeInViewport();
+  await expect(page.locator(MODAL)).toHaveCount(0);
+  await expect(panel.getByRole('button', { name: 'Back' })).toBeDisabled();
+
+  // Step 2: the RSIN treated as an RSIN, Derivations marked, an eori derivation line.
+  await page.keyboard.press('Tab');
+  await expect(panel.getByRole('button', { name: 'Next' })).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(panel).toContainText('Step 2 of 4');
+  await expect(box).toHaveValue(RSIN_VALUE);
+  await expect(derivations).toHaveClass(/walkthrough-target/);
+  await expect(recognition).not.toHaveClass(/walkthrough-target/);
+  await expect(
+    derivations.locator('[data-key="derive.derivation"][data-scheme="eori"]'),
+  ).toBeVisible();
+  await expect(recognition.getByRole('button', { name: /\(rsin\)$/ })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  await expect(page.locator(MODAL)).toHaveCount(0);
+
+  // Back returns to step 1; Back is then disabled, so focus goes to Next instead of being lost.
+  await page.keyboard.press('Shift+Tab');
+  await expect(panel.getByRole('button', { name: 'Back' })).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(panel).toContainText('Step 1 of 4');
+  await expect(box).toHaveValue(EORI_VALUE);
+  await expect(panel.getByRole('button', { name: 'Next' })).toBeFocused();
+
+  // Next twice: step 3 is the contrast, with no rsin and no vat-nl derivation line.
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Enter');
+  await expect(panel).toContainText('Step 3 of 4');
+  await expect(box).toHaveValue(CONTRAST_VALUE);
+  await expect(derivations).toHaveClass(/walkthrough-target/);
+  await expect(derivations.locator('[data-key="derive.derivation"]')).toHaveCount(0);
+  await expect(derivations.locator('[data-scheme="rsin"], [data-scheme="vat-nl"]')).toHaveCount(0);
+  await expect(page.locator(MODAL)).toHaveCount(0);
+
+  // Step 4: all three together, three consistent pairs, and Next now reads Finish.
+  await page.keyboard.press('Enter');
+  await expect(panel).toContainText('Step 4 of 4');
+  await expect(box).toHaveValue(`${EORI_VALUE}\n${VAT_VALUE}\n${RSIN_VALUE}`);
+  await expect(consistency).toHaveClass(/walkthrough-target/);
+  const pairs = consistency.locator('[data-pair]');
+  await expect(pairs).toHaveCount(3);
+  for (const pair of await pairs.all()) await expect(pair).toContainText('consistent');
+  await expect(panel.getByRole('button', { name: 'Finish' })).toBeFocused();
+  await expect(page.locator(MODAL)).toHaveCount(0);
+
+  // Skip closes the panel and puts focus back on the opener; the results and the box stay.
+  await page.keyboard.press('Tab');
+  await expect(panel.getByRole('button', { name: 'Skip' })).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(panel).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Take the EORI walkthrough' })).toBeFocused();
+  await expect(consistency).not.toHaveClass(/walkthrough-target/);
+  await expect(box).toHaveValue(`${EORI_VALUE}\n${VAT_VALUE}\n${RSIN_VALUE}`);
+  for (const value of [EORI_VALUE, VAT_VALUE, RSIN_VALUE, CONTRAST_VALUE]) {
+    expect(page.url()).not.toContain(value);
+  }
+});
+
+test('D-07: Skip on the first step and Finish on the last both close the panel and return focus to the opener', async ({
+  page,
+}) => {
+  await page.goto('./');
+  const opener = page.getByRole('button', { name: 'Take the EORI walkthrough' });
+  await opener.click();
+  const panel = page.getByRole('region', { name: 'EORI walkthrough' });
+  await panel.getByRole('button', { name: 'Skip' }).click();
+  await expect(panel).toHaveCount(0);
+  await expect(opener).toBeFocused();
+
+  await opener.click();
+  for (let next = 0; next < 3; next += 1) await panel.getByRole('button', { name: 'Next' }).click();
+  await panel.getByRole('button', { name: 'Finish' }).click();
+  await expect(panel).toHaveCount(0);
+  await expect(opener).toBeFocused();
+});
+
+test('D-02: a walkthrough step announces itself and its results once, in the one live region', async ({
+  page,
+}) => {
+  await page.goto('./');
+  await page.getByRole('button', { name: 'Take the EORI walkthrough' }).click();
+  const status = page.locator('[role="status"]');
+  await expect(status).toHaveCount(1);
+  await expect(status).toHaveText('Step 1 of 4: One value. Results ready for 1 value.');
+  await page.getByRole('button', { name: 'Next' }).click();
+  await expect(status).toHaveText(
+    'Step 2 of 4: An RSIN treated as an RSIN. Results ready for 1 value.',
+  );
+  await expect(page.locator('[aria-live]')).toHaveCount(1);
+});
+
+for (const scheme of ['light', 'dark'] as const) {
+  test.describe(`WEB-08: axe with the walkthrough open, ${scheme} colour scheme`, () => {
+    test.beforeEach(async ({ page }) => {
+      await page.emulateMedia({ colorScheme: scheme });
+    });
+
+    test('English, every step', async ({ page }) => {
+      await page.goto('./');
+      await expectNoAxeViolations(page, 'the empty state with chips and the walkthrough opener');
+      await page.getByRole('button', { name: 'Take the EORI walkthrough' }).click();
+      const panel = page.getByRole('region', { name: 'EORI walkthrough' });
+      for (let step = 1; step <= 4; step += 1) {
+        await expect(panel).toContainText(`Step ${step} of 4`);
+        await expectNoAxeViolations(page, `the English walkthrough, step ${step}`);
+        if (step < 4) await panel.getByRole('button', { name: 'Next' }).click();
+      }
+    });
+
+    test('Dutch, every step', async ({ page }) => {
+      await page.goto('./?lang=nl');
+      await page.getByRole('button', { name: 'Volg de EORI-rondleiding' }).click();
+      const panel = page.getByRole('region', { name: 'EORI-rondleiding' });
+      await expect(page.locator('html')).toHaveAttribute('lang', 'nl');
+      for (let step = 1; step <= 4; step += 1) {
+        await expect(panel).toContainText(`Stap ${step} van 4`);
+        await expectNoAxeViolations(page, `the Dutch walkthrough, step ${step}`);
+        if (step < 4) await panel.getByRole('button', { name: 'Volgende' }).click();
+      }
+    });
+  });
+}
+
+test('the Dutch empty state shows the five questions in Dutch', async ({ page }) => {
+  await page.goto('./?lang=nl');
+  await expect(
+    page.getByRole('list', { name: 'Voorbeeldvragen' }).getByRole('listitem'),
+  ).toHaveText([
+    'Wat is dit nummer?',
+    'Welk EORI-nummer hoort bij dit RSIN?',
+    'Horen deze nummers bij elkaar?',
+    'Wie geeft een EORI-nummer uit en waar controleer ik het?',
+    'Hoe hangen een RSIN en een EORI-nummer samen?',
+  ]);
+  await expectNoAxeViolations(page, 'the Dutch empty state');
 });

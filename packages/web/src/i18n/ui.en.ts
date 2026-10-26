@@ -124,6 +124,26 @@ export const UI_EN = {
   chipConsistency: 'Do these belong together?',
   chipDescribe: 'Who issues an EORI and where do I verify it?',
   chipRelate: 'How are an RSIN and an EORI related?',
+  walkthroughOpen: 'Take the EORI walkthrough',
+  walkthroughHeading: 'EORI walkthrough',
+  walkthroughStepOf: 'Step {step} of {total}',
+  walkthroughBack: 'Back',
+  walkthroughNext: 'Next',
+  walkthroughFinish: 'Finish',
+  walkthroughSkip: 'Skip',
+  walkthroughTarget: 'Walkthrough step {step}',
+  walkthroughStep1Title: 'One value',
+  walkthroughStep1Body:
+    'The box holds one value from the EORI example. Recognition lists every scheme whose format it matches, with certainty and source.',
+  walkthroughStep2Title: 'An RSIN treated as an RSIN',
+  walkthroughStep2Body:
+    "A bare number of nine digits may be a personal number, so the walkthrough tells the engine to treat it as an RSIN. Derivations lists what the model's rules derive from it.",
+  walkthroughStep3Title: 'A value from another country',
+  walkthroughStep3Body:
+    'Compare what the rules derive for a value from another country with what they derived in the previous step.',
+  walkthroughStep4Title: 'All three together',
+  walkthroughStep4Body:
+    "Consistency compares every pair of values through the model's rules. Each conclusion ends with How to verify.",
 
   markerEn: 'EN',
   markerUntranslated: 'not translated',

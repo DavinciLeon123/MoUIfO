@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { ExternalLink } from './components/conclusion.tsx';
+import { WALKTHROUGH_IDS } from './components/walkthrough.tsx';
 import { AppContext, useApp, useUi } from './context.ts';
 import type { Host } from './engine-host.ts';
 import { fill, type Lang, modelText } from './i18n/text.ts';
 import { langSearch, resolveLang } from './lang.ts';
+import { WALKTHROUGH } from './model/guide.ts';
 import { normalise } from './model/normalise.ts';
 import { type PasteRun, runPaste } from './model/paste.ts';
 import { createVerifyIndex } from './model/verify.ts';
@@ -35,25 +37,29 @@ function Page({ route, onLang }: { route: Route; onLang: (lang: Lang) => void })
   useEffect(() => () => clearTimeout(timer.current), []);
 
   /** Clear first so that two runs with the same sentence are both announced. */
-  const announce = (count: number) => {
+  const announce = (count: number, lead: string) => {
     clearTimeout(timer.current);
     setStatus('');
     timer.current = setTimeout(
-      () => setStatus(fill(count === 1 ? ui.resultsReadyOne : ui.resultsReady, { count })),
+      () =>
+        setStatus(`${lead}${fill(count === 1 ? ui.resultsReadyOne : ui.resultsReady, { count })}`),
       50,
     );
   };
 
   /** The engine runs only here, on Explain or on a Treat as press, never while typing. */
-  const execute = (next: Session) => {
+  const execute = (next: Session, lead = '') => {
     setSession(next);
     const result = runPaste(host.engine, next.lines, next.declared);
     setRun(result);
-    announce(result.values.length);
+    announce(result.values.length, lead);
   };
   /** The one run action (D-02): Explain, a Treat as press, a chip and a walkthrough step all run here. */
-  const runLines = (lines: readonly string[], declared: ReadonlyMap<number, string> = new Map()) =>
-    execute({ lines, declared });
+  const runLines = (
+    lines: readonly string[],
+    declared: ReadonlyMap<number, string> = new Map(),
+    lead = '',
+  ) => execute({ lines, declared }, lead);
   // Explain starts from nothing declared (D-17): every gated value must be chosen again.
   const explain = () => runLines(normalise(text));
   // A paste chip fills the box with its lines and runs at once. The chips vanish with the empty
@@ -63,6 +69,58 @@ function Page({ route, onLang }: { route: Route; onLang: (lang: Lang) => void })
     document.getElementById('values')?.focus();
     runLines(lines, declared);
   };
+
+  // D-07: the walkthrough lives in memory only (no address, no storage). `step` is the 0-based
+  // index into WALKTHROUGH, or null while the panel is closed; `walkthroughUsed` keeps the opener
+  // on the page once the panel has been open, so Skip has an opener to return focus to.
+  const [step, setStep] = useState<number | null>(null);
+  const [walkthroughUsed, setWalkthroughUsed] = useState(false);
+  const pendingFocus = useRef<string | null>(null);
+  /**
+   * Show a step: fill the box, declare as the step says and run through the same action as
+   * Explain. The single live region says which step it is and then that the results are ready.
+   */
+  const goToStep = (index: number, focusId: string | null) => {
+    const data = WALKTHROUGH[index];
+    if (data === undefined) return;
+    pendingFocus.current = focusId;
+    setWalkthroughUsed(true);
+    setStep(index);
+    setText(data.lines.join('\n'));
+    const declared = new Map(
+      data.declare === undefined ? [] : [[data.declare.position, data.declare.scheme]],
+    );
+    const lead = `${fill(ui.walkthroughStepOf, { step: index + 1, total: WALKTHROUGH.length })}: ${ui[data.title]}. `;
+    runLines(data.lines, declared, lead);
+  };
+  const closeWalkthrough = () => {
+    pendingFocus.current = WALKTHROUGH_IDS.open;
+    setStep(null);
+  };
+  const nextStep = () =>
+    step === null || step >= WALKTHROUGH.length - 1
+      ? closeWalkthrough()
+      : goToStep(step + 1, WALKTHROUGH_IDS.next);
+  // Back is disabled on step 1, so a press that lands there hands focus to Next.
+  const backStep = () => {
+    if (step === null || step === 0) return;
+    goToStep(step - 1, step - 1 === 0 ? WALKTHROUGH_IDS.next : WALKTHROUGH_IDS.back);
+  };
+  // After the render that opened, moved or closed the panel, focus goes where the press left it:
+  // the panel's heading on opening, the pressed control otherwise, the opener on closing.
+  const stepShown = step;
+  useEffect(() => {
+    const id = pendingFocus.current;
+    pendingFocus.current = null;
+    if (id !== null) document.getElementById(id)?.focus();
+    if (stepShown === null) return;
+    const section = WALKTHROUGH[stepShown]?.section;
+    // 'nearest' moves the page as little as possible, so the panel stays in view when it can.
+    if (section !== undefined) {
+      document.getElementById(`${section}-heading`)?.scrollIntoView({ block: 'nearest' });
+    }
+  }, [stepShown]);
+
   // Treat as reruns the same lines (the textarea may have changed since) with the choice added;
   // pressing the chosen scheme again takes the choice back.
   const treatAs = (position: number, scheme: string) => {
@@ -145,6 +203,14 @@ function Page({ route, onLang }: { route: Route; onLang: (lang: Lang) => void })
             onExplain={explain}
             onTreatAs={treatAs}
             onPreset={runPreset}
+            walkthrough={{
+              step,
+              used: walkthroughUsed,
+              onOpen: () => goToStep(0, WALKTHROUGH_IDS.heading),
+              onBack: backStep,
+              onNext: nextStep,
+              onSkip: closeWalkthrough,
+            }}
           />
         ) : route.view === 'schemes' ? (
           <SchemesView />

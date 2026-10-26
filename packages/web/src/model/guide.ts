@@ -71,4 +71,39 @@ export type Step = {
   section: WalkthroughSection;
 };
 
-export const WALKTHROUGH: readonly Step[] = [];
+/**
+ * D-07 and SPEC section 10 step by step: one value, an RSIN treated as an RSIN (declared, as Treat
+ * as does), the contrast of another country, all three together. The copy behind `title` and `body`
+ * says what to look at, never what the answer is (D-08).
+ */
+export const WALKTHROUGH: readonly Step[] = [
+  {
+    id: 'one-value',
+    title: 'walkthroughStep1Title',
+    body: 'walkthroughStep1Body',
+    lines: [EORI_VALUE],
+    section: 'recognition',
+  },
+  {
+    id: 'rsin-as-rsin',
+    title: 'walkthroughStep2Title',
+    body: 'walkthroughStep2Body',
+    lines: [RSIN_VALUE],
+    declare: { position: 1, scheme: 'rsin' },
+    section: 'derivations',
+  },
+  {
+    id: 'contrast',
+    title: 'walkthroughStep3Title',
+    body: 'walkthroughStep3Body',
+    lines: [CONTRAST_VALUE],
+    section: 'derivations',
+  },
+  {
+    id: 'all-three',
+    title: 'walkthroughStep4Title',
+    body: 'walkthroughStep4Body',
+    lines: [EORI_VALUE, VAT_VALUE, RSIN_VALUE],
+    section: 'consistency',
+  },
+];

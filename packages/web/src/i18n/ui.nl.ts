@@ -127,6 +127,26 @@ export const UI_NL = {
   chipConsistency: 'Horen deze nummers bij elkaar?',
   chipDescribe: 'Wie geeft een EORI-nummer uit en waar controleer ik het?',
   chipRelate: 'Hoe hangen een RSIN en een EORI-nummer samen?',
+  walkthroughOpen: 'Volg de EORI-rondleiding',
+  walkthroughHeading: 'EORI-rondleiding',
+  walkthroughStepOf: 'Stap {step} van {total}',
+  walkthroughBack: 'Terug',
+  walkthroughNext: 'Volgende',
+  walkthroughFinish: 'Voltooien',
+  walkthroughSkip: 'Overslaan',
+  walkthroughTarget: 'Rondleiding, stap {step}',
+  walkthroughStep1Title: 'Eén waarde',
+  walkthroughStep1Body:
+    'Het vak bevat één waarde uit het EORI-voorbeeld. Herkenning toont elk schema waarvan het formaat past, met zekerheid en bron.',
+  walkthroughStep2Title: 'Een RSIN als RSIN behandeld',
+  walkthroughStep2Body:
+    'Een kaal nummer van negen cijfers kan een persoonlijk nummer zijn, daarom laat de rondleiding de engine het als RSIN behandelen. Afleidingen toont wat de regels van het model eruit afleiden.',
+  walkthroughStep3Title: 'Een waarde uit een ander land',
+  walkthroughStep3Body:
+    'Vergelijk wat de regels afleiden voor een waarde uit een ander land met wat ze in de vorige stap afleidden.',
+  walkthroughStep4Title: 'Alle drie samen',
+  walkthroughStep4Body:
+    'Consistentie vergelijkt elk paar waarden via de regels van het model. Elke conclusie eindigt met Zo controleert u het.',
 
   markerEn: 'EN',
   markerUntranslated: 'niet vertaald',
