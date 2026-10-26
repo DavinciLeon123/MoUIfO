@@ -128,3 +128,55 @@ describe('runPaste edge cases', () => {
     expect(schemes).toContain('eori');
   });
 });
+
+describe('runPaste and the personal-number gate (D-03, D-17)', () => {
+  test('a bare value is ambiguous: candidates in engine order, no derivation, no repeated warning', () => {
+    const run = runPaste(engine, [RSIN]);
+    const value = run.values[0];
+    const engineOrder = engine.recognise(RSIN).data.map((candidate) => candidate.scheme);
+    expect(engineOrder).toEqual(['bsn', 'duns', 'fi-number', 'rsin']);
+    expect(value?.ambiguity?.candidates.map((candidate) => candidate.scheme)).toEqual(engineOrder);
+    expect(value?.derivations).toEqual([]);
+    expect(value?.declared).toBeNull();
+    expect(value?.warnings.map((warning) => warning.code)).not.toContain(
+      'possible-personal-identifier',
+    );
+  });
+
+  test('declaring rsin derives eori and oin for that value and keeps the banner', () => {
+    const run = runPaste(engine, [RSIN], new Map([[1, 'rsin']]));
+    const value = run.values[0];
+    const schemes = (value?.derivations ?? []).map((row) => row.derivation?.scheme);
+    expect(schemes).toContain('eori');
+    expect(schemes).toContain('oin');
+    expect(value?.ambiguity).not.toBeNull();
+    expect(value?.declared).toBe('rsin');
+  });
+
+  test('a declared scheme names one position only', () => {
+    const run = runPaste(engine, [RSIN, EORI], new Map([[1, 'rsin']]));
+    expect(run.values[0]?.declared).toBe('rsin');
+    expect(run.values[1]?.declared).toBeNull();
+  });
+
+  test('in the EORI triple only the bare value is ambiguous', () => {
+    const run = runPaste(engine, [EORI, VAT, RSIN]);
+    expect(run.values.map((value) => value.ambiguity !== null)).toEqual([false, false, true]);
+  });
+});
+
+describe('runPaste warnings in words', () => {
+  test('the same value twice carries duplicate-value on the repeat', () => {
+    const run = runPaste(engine, [VAT, VAT]);
+    expect(run.check?.warnings.map((warning) => warning.code)).toContain('duplicate-value');
+    const shown = [...run.runWarnings, ...run.values.flatMap((value) => value.warnings)];
+    expect(shown.map((warning) => warning.code)).toContain('duplicate-value');
+  });
+
+  test('a 300-character line gets input-too-long and no candidate', () => {
+    const run = runPaste(engine, ['a'.repeat(300)]);
+    expect(run.values[0]?.warnings.map((warning) => warning.code)).toContain('input-too-long');
+    expect(run.values[0]?.recognise.data).toEqual([]);
+    expect(run.values[0]?.ambiguity).toBeNull();
+  });
+});

@@ -27,6 +27,10 @@ export const UI_EN = {
   outcomeInconsistent: 'inconsistent',
   outcomeNoRule: 'no rule in the model connects these two values',
 
+  warningsHeading: 'Notes from the engine',
+  resultsReady: 'Results ready for {count} values.',
+  resultsReadyOne: 'Results ready for 1 value.',
+
   ambiguityHeading: 'Possible personal identifier',
   cannotTellApart: 'These schemes cannot be told apart by checksum.',
   treatAs: 'Treat as {scheme}',

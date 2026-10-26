@@ -15,7 +15,10 @@ export default defineConfig({
           globalSetup: ['./src/testing/global-setup.ts'],
         },
       },
-      { extends: true, test: { name: 'web', root: 'packages/web' } },
+      {
+        extends: true,
+        test: { name: 'web', root: 'packages/web', include: ['src/**/*.test.ts'] },
+      },
       { extends: true, test: { name: 'tools', root: 'tools', include: ['*/src/**/*.test.ts'] } },
     ],
   },

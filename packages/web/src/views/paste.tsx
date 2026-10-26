@@ -1,9 +1,10 @@
 import type { ComponentChildren } from 'preact';
 import { AmbiguityPanel, useSchemeName } from '../components/ambiguity.tsx';
 import { ConclusionView } from '../components/conclusion.tsx';
-import { useApp, useUi } from '../context.ts';
+import { WarningList } from '../components/warnings.tsx';
+import { useUi } from '../context.ts';
 import type { Conclusion } from '../engine-host.ts';
-import { fill, warningText } from '../i18n/text.ts';
+import { fill } from '../i18n/text.ts';
 import type { DerivationRow, PasteRun, PasteValue } from '../model/paste.ts';
 
 type Props = {
@@ -26,20 +27,6 @@ function ConclusionLine({
     <li>
       <ConclusionView conclusion={conclusion} extra={extra} />
     </li>
-  );
-}
-
-function Warnings({ value }: { value: PasteValue }) {
-  const { host, lang } = useApp();
-  if (value.warnings.length === 0) return null;
-  return (
-    <ul>
-      {value.warnings.map((warning) => (
-        <li key={`${warning.code}/${warning.ref ?? ''}`}>
-          {warningText(warning, { host, lang }).text}
-        </li>
-      ))}
-    </ul>
   );
 }
 
@@ -141,6 +128,8 @@ export function PasteView({ text, run, onText, onExplain, onTreatAs }: Props) {
       </button>
       {run === null ? null : (
         <>
+          <WarningList warnings={run.runWarnings} level={3} />
+
           <section aria-labelledby="normalised-heading">
             <h2 id="normalised-heading">{ui.normalisedHeading}</h2>
             {empty ? (
@@ -166,7 +155,7 @@ export function PasteView({ text, run, onText, onExplain, onTreatAs }: Props) {
               <div key={value.position}>
                 <h3>{heading(value)}</h3>
                 <RecognitionResult value={value} onTreatAs={onTreatAs} />
-                <Warnings value={value} />
+                <WarningList warnings={value.warnings} level={4} />
               </div>
             ))}
           </section>
@@ -209,24 +198,9 @@ export function PasteView({ text, run, onText, onExplain, onTreatAs }: Props) {
                 ))}
               </ul>
             )}
-            <RunWarnings run={run} />
           </section>
         </>
       )}
     </main>
-  );
-}
-
-function RunWarnings({ run }: { run: PasteRun }) {
-  const { host, lang } = useApp();
-  if (run.runWarnings.length === 0) return null;
-  return (
-    <ul>
-      {run.runWarnings.map((warning) => (
-        <li key={`${warning.code}/${warning.ref ?? ''}`}>
-          {warningText(warning, { host, lang }).text}
-        </li>
-      ))}
-    </ul>
   );
 }
