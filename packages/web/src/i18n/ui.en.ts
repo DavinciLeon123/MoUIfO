@@ -52,6 +52,21 @@ export const UI_EN = {
   certaintyCertain: 'Certain',
   certaintyLikely: 'Likely',
   certaintyPossible: 'Possible',
+
+  stepKindFact: 'fact',
+  stepKindRule: 'rule',
+  stepKindPattern: 'pattern',
+  stepKindChecksum: 'checksum',
+  stepKindAssumption: 'assumption',
+  stepKindComponent: 'component',
+  sourceTypeLaw: 'law',
+  sourceTypeStandard: 'standard',
+  sourceTypeRegisterDoc: 'register documentation',
+  sourceTypeExpert: 'expert source',
+  sourceTypeAnalysis: 'analysis',
+
+  markerEn: 'EN',
+  markerUntranslated: 'not translated',
 } as const;
 
 export type UiKey = keyof typeof UI_EN;

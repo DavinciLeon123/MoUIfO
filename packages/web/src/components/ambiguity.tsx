@@ -2,7 +2,7 @@ import { useApp, useUi } from '../context.ts';
 import type { Candidate, Conclusion } from '../engine-host.ts';
 import { fill, modelText, warningText } from '../i18n/text.ts';
 import type { PasteValue } from '../model/paste.ts';
-import { ConclusionView } from './conclusion.tsx';
+import { ConclusionView, MarkedText } from './conclusion.tsx';
 
 type Props = {
   value: PasteValue;
@@ -36,7 +36,9 @@ export function AmbiguityPanel({ value, onTreatAs }: Props) {
     <>
       <div class="banner">
         <h4>{ui.ambiguityHeading}</h4>
-        <p>{warningText(ambiguity.warning, { host, lang }).text}</p>
+        <p>
+          <MarkedText rendered={warningText(ambiguity.warning, { host, lang })} />
+        </p>
       </div>
       <ul class="candidates">
         {ambiguity.candidates.map((candidate) => {

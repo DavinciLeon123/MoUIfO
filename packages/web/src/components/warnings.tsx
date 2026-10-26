@@ -1,6 +1,7 @@
 import { useApp, useUi } from '../context.ts';
 import type { Warning } from '../engine-host.ts';
 import { warningText } from '../i18n/text.ts';
+import { MarkedText } from './conclusion.tsx';
 
 type Props = {
   warnings: readonly Warning[];
@@ -20,7 +21,7 @@ export function WarningList({ warnings, level }: Props) {
       <ul>
         {warnings.map((warning) => (
           <li key={`${warning.code}/${warning.ref ?? ''}`}>
-            {warningText(warning, { host, lang }).text}
+            <MarkedText rendered={warningText(warning, { host, lang })} />
           </li>
         ))}
       </ul>

@@ -124,6 +124,23 @@ summary {
   font-size: 0.9em;
 }
 
+.marker {
+  display: inline-block;
+  padding: 0 0.35em;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--muted);
+  font-size: 0.75em;
+  white-space: nowrap;
+}
+
+header {
+  max-width: 70ch;
+  margin: 0 auto;
+  padding: 0.5rem 1rem 0;
+  text-align: right;
+}
+
 .badge {
   display: inline-block;
   padding: 0 0.5em;

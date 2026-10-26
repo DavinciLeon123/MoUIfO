@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { AppContext, useApp, useUi } from './context.ts';
 import type { Host } from './engine-host.ts';
-import { fill } from './i18n/text.ts';
+import { fill, type Lang } from './i18n/text.ts';
+import { UI_EN } from './i18n/ui.en.ts';
+import { UI_NL } from './i18n/ui.nl.ts';
+import { langSearch, resolveLang } from './lang.ts';
 import { normalise } from './model/normalise.ts';
 import { type PasteRun, runPaste } from './model/paste.ts';
 import { createVerifyIndex } from './model/verify.ts';
@@ -9,9 +12,12 @@ import { PasteView } from './views/paste.tsx';
 
 type Session = { lines: readonly string[]; declared: ReadonlyMap<number, string> };
 
-/** The page itself: in-memory state only, so no web storage, cookie, URL or history entry. */
-function Page() {
-  const { host } = useApp();
+/**
+ * The page itself: in-memory state only, so no web storage, cookie or history entry, and the URL
+ * carries nothing but the language (D-11).
+ */
+function Page({ onLang }: { onLang: (lang: Lang) => void }) {
+  const { host, lang } = useApp();
   const ui = useUi();
   const [text, setText] = useState('');
   const [session, setSession] = useState<Session | null>(null);
@@ -50,8 +56,14 @@ function Page() {
     execute({ lines: session.lines, declared });
   };
 
+  const other: Lang = lang === 'nl' ? 'en' : 'nl';
   return (
     <>
+      <header>
+        <button type="button" lang={other} onClick={() => onLang(other)}>
+          {other === 'nl' ? 'Nederlands' : 'English'}
+        </button>
+      </header>
       <PasteView text={text} run={run} onText={setText} onExplain={explain} onTreatAs={treatAs} />
       <p role="status" aria-live="polite" class="visually-hidden">
         {status}
@@ -60,11 +72,28 @@ function Page() {
   );
 }
 
+/** D-11: the language from `?lang=` or the browser, once; the toggle then switches it in memory. */
 export function App({ host }: { host: Host }) {
   const verify = useMemo(() => createVerifyIndex(host), [host]);
+  const [lang, setLang] = useState<Lang>(() => resolveLang(location.search, navigator.language));
+  // Switching writes only `?lang=` and keeps the path and the hash; the page is not reloaded, so
+  // the typed text and the results stay.
+  const switchTo = (next: Lang) => {
+    history.replaceState(
+      history.state,
+      '',
+      `${location.pathname}${langSearch(next)}${location.hash}`,
+    );
+    setLang(next);
+  };
+  const title = lang === 'nl' ? UI_NL.title : UI_EN.title;
+  useEffect(() => {
+    document.documentElement.lang = lang;
+    document.title = title;
+  }, [lang, title]);
   return (
-    <AppContext.Provider value={{ host, lang: 'en', verify }}>
-      <Page />
+    <AppContext.Provider value={{ host, lang, verify }}>
+      <Page onLang={switchTo} />
     </AppContext.Provider>
   );
 }

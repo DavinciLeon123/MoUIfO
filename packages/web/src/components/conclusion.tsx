@@ -1,7 +1,7 @@
 import type { ComponentChildren } from 'preact';
 import { useApp, useUi } from '../context.ts';
 import type { Certainty, Conclusion, Step } from '../engine-host.ts';
-import { certaintyLabel, conclusionText, fill, modelText } from '../i18n/text.ts';
+import { certaintyLabel, conclusionText, fill, modelText, type Rendered } from '../i18n/text.ts';
 import { safeHref, verifyTargets } from '../model/verify.ts';
 
 /** One shape per certainty, so certainty is never carried by colour alone (WEB-08). */
@@ -18,6 +18,26 @@ export function CertaintyBadge({ certainty }: { certainty: Certainty }) {
     <span class={`badge certainty-${certainty}`}>
       <span aria-hidden="true">{GLYPH[certainty]}</span> {certaintyLabel(certainty, { host, lang })}
     </span>
+  );
+}
+
+/**
+ * A rendered engine or model text with its marker (D-09, D-10). Text in another language than the
+ * page is wrapped in an element that names its language (WCAG 3.1.2) and is followed by a small
+ * visible marker: "EN" for English model text, "niet vertaald" for an engine line without a
+ * Dutch entry. Nothing is hidden and nothing is translated by machine.
+ */
+export function MarkedText({ rendered }: { rendered: Rendered }) {
+  const { lang } = useApp();
+  const ui = useUi();
+  const body =
+    rendered.lang === lang ? rendered.text : <span lang={rendered.lang}>{rendered.text}</span>;
+  if (rendered.marker === null) return <>{body}</>;
+  return (
+    <>
+      {body}{' '}
+      <small class="marker">{rendered.marker === 'en' ? ui.markerEn : ui.markerUntranslated}</small>
+    </>
   );
 }
 
@@ -132,7 +152,9 @@ export function ConclusionView({ conclusion, data, extra }: ConclusionViewProps)
     <div class="conclusion" data-key={conclusion.key} data-scheme={conclusion.params.scheme}>
       <details>
         <summary>
-          <span class="statement">{text.text}</span>{' '}
+          <span class="statement">
+            <MarkedText rendered={text} />
+          </span>{' '}
           <CertaintyBadge certainty={conclusion.certainty} />
           {first === null ? null : <span class="first-source"> {first.title}</span>}
         </summary>

@@ -3,11 +3,12 @@ import { useContext } from 'preact/hooks';
 import type { Host } from './engine-host.ts';
 import type { Lang } from './i18n/text.ts';
 import { UI_EN, type Ui } from './i18n/ui.en.ts';
+import { UI_NL } from './i18n/ui.nl.ts';
 import type { VerifyIndex } from './model/verify.ts';
 
 /**
- * What every component may read: the engine host, the language (always `en` until plan 07-04) and
- * the sourced register links, built once per host.
+ * What every component may read: the engine host, the language (D-11, in memory only) and the
+ * sourced register links, built once per host.
  */
 export type AppValue = { host: Host; lang: Lang; verify: VerifyIndex };
 
@@ -21,6 +22,5 @@ export function useApp(): AppValue {
 
 /** The UI dictionary of the current language. */
 export function useUi(): Ui {
-  useApp();
-  return UI_EN;
+  return useApp().lang === 'nl' ? UI_NL : UI_EN;
 }
