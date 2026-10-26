@@ -107,6 +107,16 @@ export const UI_NL = {
   edgeComponent: 'onderdeel {prefix}',
   edgeInverse: 'omgekeerd',
 
+  navRelate: 'Relatie',
+  relateHeading: "Relatie tussen twee schema's",
+  relateIntro:
+    "Kies twee schema's om elke kortste keten van relaties, regels en onderdelen met bron te zien die ze verbindt.",
+  relateA: 'Schema A',
+  relateB: 'Schema B',
+  relateResultHeading: 'Verbindingen',
+  relateHopsLabel: 'Stappen van deze verbinding',
+  relateAlsoVia: 'Ook via',
+
   markerEn: 'EN',
   markerUntranslated: 'niet vertaald',
 } as const satisfies Record<UiKey, string>;

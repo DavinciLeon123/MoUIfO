@@ -104,6 +104,16 @@ export const UI_EN = {
   edgeComponent: 'component {prefix}',
   edgeInverse: 'inverse',
 
+  navRelate: 'Relation',
+  relateHeading: 'Relation between two schemes',
+  relateIntro:
+    'Choose two schemes to see every shortest chain of sourced relations, rules and components that connects them.',
+  relateA: 'Scheme A',
+  relateB: 'Scheme B',
+  relateResultHeading: 'Chains',
+  relateHopsLabel: 'Steps of this chain',
+  relateAlsoVia: 'Also via',
+
   markerEn: 'EN',
   markerUntranslated: 'not translated',
 } as const;

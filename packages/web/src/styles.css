@@ -346,3 +346,56 @@ button[aria-pressed="true"] {
 .relation-list li {
   margin: 0.5rem 0;
 }
+
+.relate-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem 1rem;
+  margin: 1rem 0;
+}
+
+.relate-field {
+  display: flex;
+  flex: 1 1 14rem;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+select {
+  width: 100%;
+  max-width: 100%;
+  padding: 0.5rem;
+  font: inherit;
+  color: inherit;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.chains {
+  list-style: none;
+  padding-left: 0;
+}
+
+.chain {
+  margin: 1rem 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.hops {
+  margin: 0.5rem 0 0;
+}
+
+.hops .hop {
+  margin: 0.5rem 0;
+}
+
+.also-via {
+  margin-top: 0.25rem;
+  color: var(--muted);
+  font-size: 0.9em;
+}

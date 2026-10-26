@@ -119,7 +119,7 @@ function StepSource({ source }: { source: Step['source'] }) {
   );
 }
 
-function StepItem({ step }: { step: Step }) {
+export function StepItem({ step }: { step: Step }) {
   const ui = useUi();
   return (
     <li>

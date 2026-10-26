@@ -9,6 +9,7 @@ import { type PasteRun, runPaste } from './model/paste.ts';
 import { createVerifyIndex } from './model/verify.ts';
 import { parseRoute, type Route, routeHref } from './router.ts';
 import { PasteView } from './views/paste.tsx';
+import { RelateView } from './views/relate.tsx';
 import { NotInModelView, SchemeDetailView } from './views/scheme-detail.tsx';
 import { SchemesView } from './views/schemes.tsx';
 
@@ -71,11 +72,13 @@ function Page({ route, onLang }: { route: Route; onLang: (lang: Lang) => void })
   const viewTitle =
     route.view === 'schemes'
       ? ui.schemesHeading
-      : route.view === 'unknown'
-        ? ui.notInModelTitle
-        : scheme === undefined
-          ? null
-          : modelText(scheme.label, lang).text;
+      : route.view === 'relate'
+        ? ui.relateHeading
+        : route.view === 'unknown'
+          ? ui.notInModelTitle
+          : scheme === undefined
+            ? null
+            : modelText(scheme.label, lang).text;
   const documentTitle = viewTitle === null ? ui.title : `${viewTitle} | ${ui.title}`;
   useEffect(() => {
     document.documentElement.lang = lang;
@@ -130,6 +133,8 @@ function Page({ route, onLang }: { route: Route; onLang: (lang: Lang) => void })
           <SchemesView />
         ) : route.view === 'scheme' ? (
           <SchemeDetailView id={route.id} />
+        ) : route.view === 'relate' ? (
+          <RelateView a={route.a} b={route.b} />
         ) : (
           <NotInModelView />
         )}
