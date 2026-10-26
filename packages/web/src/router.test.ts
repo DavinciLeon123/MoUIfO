@@ -37,7 +37,57 @@ describe('parseRoute', () => {
   });
 });
 
+describe('parseRoute: relation view (WEB-03, D-16, T-07-15)', () => {
+  test.for([['#/relate'], ['#/relate/']])(
+    '%j gives the relation view with nothing chosen',
+    ([hash]) => {
+      expect(parseRoute(hash as string, model)).toEqual({ view: 'relate', a: null, b: null });
+    },
+  );
+
+  test('two schemes of the model give the relation view of that pair', () => {
+    expect(parseRoute('#/relate/rsin/eori', model)).toEqual({
+      view: 'relate',
+      a: 'rsin',
+      b: 'eori',
+    });
+  });
+
+  test('the same scheme twice is a valid route, the engine warns about it', () => {
+    expect(parseRoute('#/relate/eori/eori', model)).toEqual({
+      view: 'relate',
+      a: 'eori',
+      b: 'eori',
+    });
+  });
+
+  test.for([
+    ['#/relate/rsin'],
+    ['#/relate/rsin/'],
+    ['#/relate//eori'],
+    ['#/relate/rsin/__proto__'],
+    ['#/relate/__proto__/eori'],
+    ['#/relate/constructor/eori'],
+    ['#/relate/rsin/nope'],
+    ['#/relate/rsin/eori/'],
+    ['#/relate/rsin/eori/extra'],
+    ['#/relate/RSIN/eori'],
+  ])('%j gives the unknown route', ([hash]) => {
+    expect(parseRoute(hash as string, model)).toEqual({ view: 'unknown' });
+  });
+});
+
 describe('routeHref', () => {
+  test('round-trips through parseRoute for the relation view, chosen or not', () => {
+    expect(routeHref({ view: 'relate', a: 'rsin', b: 'eori' })).toBe('#/relate/rsin/eori');
+    expect(parseRoute(routeHref({ view: 'relate', a: 'rsin', b: 'eori' }), model)).toEqual({
+      view: 'relate',
+      a: 'rsin',
+      b: 'eori',
+    });
+    expect(routeHref(parseRoute('#/relate', model))).toBe('#/relate');
+  });
+
   test('round-trips through parseRoute for paste, the list and every scheme of the model', () => {
     const routes: Route[] = [
       { view: 'paste' },

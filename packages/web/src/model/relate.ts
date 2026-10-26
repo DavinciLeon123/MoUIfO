@@ -6,6 +6,7 @@ import type {
   RelationPath,
   Step,
   Text,
+  Warning,
 } from '../engine-host.ts';
 import { type Lang, modelText, type Rendered } from '../i18n/text.ts';
 
@@ -43,7 +44,7 @@ export type PathView = {
   data: RelationPath;
 };
 
-export type RelateViewModel = { paths: PathView[] };
+export type RelateViewModel = { paths: PathView[]; warnings: Warning[] };
 
 /** The kind of edge a step records; relate always sets it, the step kind is the fallback. */
 function edgeTypeOf(step: Step): EdgeKind {
@@ -108,7 +109,7 @@ export function relateView(host: Host, a: string, b: string): RelateViewModel {
       }),
     };
   });
-  return { paths };
+  return { paths, warnings: [] };
 }
 
 /** A scheme for a select: its id and its label in the page language. */
