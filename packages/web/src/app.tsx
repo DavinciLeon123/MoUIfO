@@ -115,6 +115,12 @@ function Page({ route, onLang }: { route: Route; onLang: (lang: Lang) => void })
           >
             {ui.navSchemes}
           </a>
+          <a
+            href={routeHref({ view: 'relate', a: null, b: null })}
+            aria-current={route.view === 'relate' ? 'page' : undefined}
+          >
+            {ui.navRelate}
+          </a>
         </nav>
         <button type="button" lang={other} onClick={() => onLang(other)}>
           {other === 'nl' ? 'Nederlands' : 'English'}

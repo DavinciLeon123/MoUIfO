@@ -109,7 +109,7 @@ export function relateView(host: Host, a: string, b: string): RelateViewModel {
       }),
     };
   });
-  return { paths, warnings: [] };
+  return { paths, warnings: result.warnings };
 }
 
 /** A scheme for a select: its id and its label in the page language. */
