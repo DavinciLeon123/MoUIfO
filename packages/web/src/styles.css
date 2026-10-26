@@ -287,3 +287,62 @@ button[aria-pressed="true"] {
 .trust-scores {
   margin: 0.25rem 0;
 }
+
+.graph {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0.5rem 0;
+}
+
+.graph .edge {
+  stroke: var(--fg);
+  stroke-width: 1.5;
+}
+
+.graph .arrow-head {
+  fill: var(--fg);
+}
+
+.graph .edge-label {
+  fill: var(--fg);
+  font-size: 12px;
+  paint-order: stroke;
+  stroke: var(--bg);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+.graph .node rect {
+  fill: var(--bg);
+  stroke: var(--border);
+  stroke-width: 1.5;
+}
+
+.graph .node text {
+  fill: var(--fg);
+  font-size: 14px;
+}
+
+.graph .node-centre rect {
+  stroke: var(--fg);
+  stroke-width: 2.5;
+}
+
+.graph .node-link rect {
+  stroke: var(--link);
+}
+
+.graph .node-link text {
+  fill: var(--link);
+  text-decoration: underline;
+}
+
+.relation-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.relation-list li {
+  margin: 0.5rem 0;
+}

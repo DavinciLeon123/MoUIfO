@@ -96,6 +96,17 @@ export const UI_NL = {
     'UID table v1.2 — Davinci Conclusion, as produced for the CoE-DSC. Licensed under CC BY 4.0.',
   licenceLead: 'Licentietekst:',
 
+  relationsHeading: 'Relaties',
+  relationsGraphTitle: 'Relaties van {scheme}',
+  relationsNone:
+    'Het model bevat geen relaties, regels of onderdelen die dit schema met een ander verbinden.',
+  relationsLegend:
+    'Een pijl loopt van het eerste naar het tweede schema van de modelbewering. Een gestreepte pijl is omgekeerd: het model stelt hem vast vanuit het andere schema naar dit schema.',
+  relationsListLabel: 'Relaties als lijst',
+  edgeRule: 'regel {id}',
+  edgeComponent: 'onderdeel {prefix}',
+  edgeInverse: 'omgekeerd',
+
   markerEn: 'EN',
   markerUntranslated: 'niet vertaald',
 } as const satisfies Record<UiKey, string>;

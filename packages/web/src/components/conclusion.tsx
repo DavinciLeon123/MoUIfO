@@ -55,7 +55,7 @@ export function ExternalLink({ href, children }: { href: string; children: Compo
  * A source title: model text with no Dutch (D-10), so in Dutch mode it sits in an element that
  * names its language (WCAG 3.1.2). The "EN" marker is shown once per step list, not per title.
  */
-function SourceTitle({ title }: { title: string }) {
+export function SourceTitle({ title }: { title: string }) {
   const { lang } = useApp();
   return lang === 'nl' ? <span lang="en">{title}</span> : <span>{title}</span>;
 }

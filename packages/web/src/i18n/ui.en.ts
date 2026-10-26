@@ -93,6 +93,17 @@ export const UI_EN = {
     'UID table v1.2 — Davinci Conclusion, as produced for the CoE-DSC. Licensed under CC BY 4.0.',
   licenceLead: 'Licence text:',
 
+  relationsHeading: 'Relations',
+  relationsGraphTitle: 'Relations of {scheme}',
+  relationsNone:
+    'The model holds no relations, rules or components that connect this scheme to another.',
+  relationsLegend:
+    'An arrow runs from the first to the second scheme of the model statement. A dashed arrow is inverse: the model states it from the other scheme to this one.',
+  relationsListLabel: 'Relations as a list',
+  edgeRule: 'rule {id}',
+  edgeComponent: 'component {prefix}',
+  edgeInverse: 'inverse',
+
   markerEn: 'EN',
   markerUntranslated: 'not translated',
 } as const;

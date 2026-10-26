@@ -1,4 +1,5 @@
 import { ConclusionView, ExternalLink, MarkedText } from '../components/conclusion.tsx';
+import { RelationGraph } from '../components/relation-graph.tsx';
 import { useApp, useUi } from '../context.ts';
 import type { SchemeDescription } from '../engine-host.ts';
 import { fieldLabel, fill, modelText } from '../i18n/text.ts';
@@ -166,6 +167,11 @@ export function SchemeDetailView({ id }: { id: string }) {
       </section>
 
       <HowToVerify id={id} />
+
+      <section aria-labelledby="relations-heading">
+        <h2 id="relations-heading">{ui.relationsHeading}</h2>
+        <RelationGraph id={id} />
+      </section>
 
       <section aria-labelledby="applicability-heading">
         <h2 id="applicability-heading">{ui.applicabilityHeading}</h2>

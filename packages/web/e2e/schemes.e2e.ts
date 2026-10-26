@@ -4,7 +4,9 @@
 // gap reads "no data in the model" and is never turned into a claim). Task 1 covers the EORI page,
 // the page of a scheme without a sourced register link and an id that is not in the model. Task 2
 // covers the scheme list, the header navigation, focus and title on every route, the DEC-024
-// credit line and axe (WEB-08) on the list and a scheme page in both languages.
+// credit line and axe (WEB-08) on the list and a scheme page in both languages. Task 3 covers the
+// relation graph (D-15): an SVG with a title, a visible text list with the same edges, node links
+// and the page of a scheme without relations.
 import { expect, test } from '@playwright/test';
 import { expectNoAxeViolations } from './support.ts';
 
@@ -191,6 +193,8 @@ test.describe('WEB-08: axe on the scheme views', () => {
           ['./#/schemes/eori', 'the English EORI page'],
           ['./?lang=nl#/schemes', 'the Dutch scheme list'],
           ['./?lang=nl#/schemes/eori', 'the Dutch EORI page'],
+          ['./#/schemes/kvk-number', 'the English kvk-number page (many neighbours)'],
+          ['./?lang=nl#/schemes/peppol-id', 'the Dutch peppol-id page (parallel edges)'],
         ] as const) {
           await page.goto(address);
           await page.reload();
@@ -200,4 +204,85 @@ test.describe('WEB-08: axe on the scheme views', () => {
       });
     });
   }
+});
+
+test('D-15: the EORI graph is an SVG with a title and the same edges as a visible text list', async ({
+  page,
+}) => {
+  await page.goto('./#/schemes/eori');
+  const relations = page.getByRole('region', { name: 'Relations' });
+  const svg = relations.locator('svg.graph');
+  await expect(svg).toBeVisible();
+  await expect(svg.locator('title')).toHaveText(/^Relations of .*\(eori\)$/);
+  await expect(svg).toHaveAttribute('aria-labelledby', 'relation-graph-title');
+
+  const items = relations.locator('.relation-list > li');
+  const edges = svg.locator('path.edge');
+  await expect(items).toHaveCount(3);
+  await expect(edges).toHaveCount(await items.count());
+
+  // The text alternative names the neighbour and the relation kind, and marks the inverse edge.
+  const text = await items.allInnerTexts();
+  expect(text.some((each) => each.includes('(rsin)') && each.includes('Derived from'))).toBe(true);
+  const inverse = relations.locator('.relation-list > li[data-inverse="true"]');
+  await expect(inverse).toHaveCount(1);
+  await expect(inverse).toContainText('rule eori-nl-from-rsin');
+  await expect(inverse).toContainText('(inverse)');
+  await expect(svg.locator('path.edge-inverse')).toHaveCount(1);
+  await expect(svg.locator('[data-node="eori"]')).toHaveCount(1);
+
+  // The edges of the SVG are exactly those of the list.
+  const drawn = await edges.evaluateAll((all) => all.map((each) => each.getAttribute('data-edge')));
+  const listed = await items.evaluateAll((all) =>
+    all.map((each) => each.getAttribute('data-edge')),
+  );
+  expect(drawn).toEqual(listed);
+
+  // A neighbour node links to its scheme page.
+  await svg.locator('a[data-node="rsin"]').click();
+  await expect(page).toHaveURL(/#\/schemes\/rsin$/);
+  await expect(page.getByRole('heading', { level: 1 })).toContainText(
+    'Legal Entities and Partnerships Information Number',
+  );
+  await expect(page.getByRole('heading', { level: 1 })).toBeFocused();
+});
+
+test('D-15: a scheme without relations says so in the Relations section and draws no graph', async ({
+  page,
+}) => {
+  await page.goto('./#/schemes/bsn');
+  const relations = page.getByRole('region', { name: 'Relations' });
+  await expect(relations).toContainText('The model holds no relations, rules or components');
+  await expect(relations.locator('svg')).toHaveCount(0);
+  await expect(relations.locator('.relation-list')).toHaveCount(0);
+});
+
+test('D-15: for every scheme the SVG edges and the list items are the same, and the page does not scroll sideways', async ({
+  page,
+}) => {
+  await page.goto('./#/schemes');
+  const hrefs = await page
+    .locator('.scheme-list a')
+    .evaluateAll((all) => all.map((each) => each.getAttribute('href')));
+  expect(hrefs.length).toBe(16);
+  for (const href of hrefs) {
+    await page.goto(`./${href}`);
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    const items = await page.locator('.relation-list > li').count();
+    await expect(page.locator('svg.graph path.edge'), String(href)).toHaveCount(items);
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflow, `${href} overflows by ${overflow}px`).toBeLessThanOrEqual(0);
+  }
+});
+
+test('D-15, D-10: in Dutch the graph labels use the model and rule or component words are Dutch', async ({
+  page,
+}) => {
+  await page.goto('./?lang=nl#/schemes/peppol-id');
+  const relations = page.getByRole('region', { name: 'Relaties' });
+  await expect(relations.locator('svg.graph title')).toHaveText(/^Relaties van /);
+  await expect(relations.locator('.relation-list')).toContainText('onderdeel 0106');
+  await expect(relations.locator('.relation-list')).not.toContainText('component 0106');
 });
