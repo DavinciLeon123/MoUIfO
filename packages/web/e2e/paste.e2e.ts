@@ -116,3 +116,73 @@ test('the CSP meta comes first, requests stay same-origin and the URL never hold
   expect(origins.every((entry) => entry === origin)).toBe(true);
   expect(page.url()).not.toContain(VALUE);
 });
+
+const TRIPLE = `${EORI_VALUE}\n${VALUE}\n${RSIN_VALUE}`;
+
+test('a conclusion opens by keyboard to its sourced steps and ends with How to verify', async ({
+  page,
+}) => {
+  await page.goto('./');
+  await page.getByRole('textbox', { name: INPUT }).fill(TRIPLE);
+  await page.getByRole('button', { name: 'Explain' }).click();
+  const conclusion = page
+    .getByRole('region', { name: 'Consistency' })
+    .locator('.conclusion')
+    .first();
+  const summary = conclusion.locator('summary');
+  await summary.focus();
+  await page.keyboard.press('Enter');
+  await expect(conclusion.locator('details')).toHaveAttribute('open', '');
+  const steps = conclusion.locator('ol.steps > li');
+  expect(await steps.count()).toBeGreaterThan(0);
+  await expect(steps.filter({ hasText: 'Source:' }).first()).toBeVisible();
+  const verify = conclusion.locator('p.verify');
+  await expect(verify).toContainText('How to verify');
+  expect(await verify.locator('a').count()).toBeGreaterThan(0);
+});
+
+test('external links are safe, show their host and never hold a pasted value', async ({ page }) => {
+  await page.goto('./');
+  await page.getByRole('textbox', { name: INPUT }).fill(TRIPLE);
+  await page.getByRole('button', { name: 'Explain' }).click();
+  const links = await page.locator('a[target="_blank"]').evaluateAll((anchors) =>
+    anchors.map((anchor) => ({
+      rel: anchor.getAttribute('rel') ?? '',
+      text: anchor.textContent ?? '',
+      href: (anchor as HTMLAnchorElement).href,
+    })),
+  );
+  expect(links.length).toBeGreaterThan(0);
+  for (const link of links) {
+    const url = new URL(link.href);
+    expect(link.rel).toContain('noopener');
+    expect(link.rel).toContain('noreferrer');
+    expect(['http:', 'https:']).toContain(url.protocol);
+    expect(link.text).toContain(url.host);
+    expect(link.text.toLowerCase()).toMatch(/opens external (site|register)/);
+    for (const pasted of [EORI_VALUE, VALUE, RSIN_VALUE]) expect(link.href).not.toContain(pasted);
+  }
+});
+
+test('every certainty badge shows a word and a value derived as eori leads to its register', async ({
+  page,
+}) => {
+  await page.goto('./');
+  await page.getByRole('textbox', { name: INPUT }).fill(TRIPLE);
+  await page.getByRole('button', { name: 'Explain' }).click();
+  const badges = await page.locator('.badge').allTextContents();
+  expect(badges.length).toBeGreaterThan(0);
+  for (const badge of badges) expect(badge).toMatch(/\b(Certain|Likely|Possible)\b/);
+
+  const verify = page
+    .getByRole('region', { name: 'Derivations' })
+    .locator('div')
+    .first()
+    .locator('[data-key="derive.verify-through"][data-scheme="eori"]')
+    .locator('p.verify');
+  const host = await verify
+    .locator('a[target="_blank"]')
+    .first()
+    .evaluate((anchor) => new URL((anchor as HTMLAnchorElement).href).host);
+  expect(host).toBe('ec.europa.eu');
+});

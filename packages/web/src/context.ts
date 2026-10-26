@@ -3,9 +3,13 @@ import { useContext } from 'preact/hooks';
 import type { Host } from './engine-host.ts';
 import type { Lang } from './i18n/text.ts';
 import { UI_EN, type Ui } from './i18n/ui.en.ts';
+import type { VerifyIndex } from './model/verify.ts';
 
-/** What every component may read: the engine host and the language (always `en` until plan 07-04). */
-export type AppValue = { host: Host; lang: Lang };
+/**
+ * What every component may read: the engine host, the language (always `en` until plan 07-04) and
+ * the sourced register links, built once per host.
+ */
+export type AppValue = { host: Host; lang: Lang; verify: VerifyIndex };
 
 export const AppContext = createContext<AppValue | null>(null);
 

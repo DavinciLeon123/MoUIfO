@@ -1,0 +1,151 @@
+/* Same-origin stylesheet (the CSP allows style-src 'self' only): no inline styles, no data URIs. */
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --fg: #1a1a1a;
+  --muted: #4a4a4a;
+  --border: #b8b8b8;
+  --link: #0b4fa8;
+  --focus: #b35c00;
+  --certain-bg: #d9f2e0;
+  --certain-fg: #0b3d1c;
+  --likely-bg: #fff0c2;
+  --likely-fg: #4d3500;
+  --possible-bg: #e9e9ee;
+  --possible-fg: #26262e;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14161a;
+    --fg: #ececec;
+    --muted: #c4c4c4;
+    --border: #5a5f68;
+    --link: #8ec1ff;
+    --focus: #ffb454;
+    --certain-bg: #123d22;
+    --certain-fg: #d3f5dd;
+    --likely-bg: #4a3a05;
+    --likely-fg: #ffeab0;
+    --possible-bg: #34363f;
+    --possible-fg: #e6e6ee;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.5;
+}
+
+main {
+  max-width: 70ch;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  line-height: 1.25;
+}
+
+textarea {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 0.25rem 0;
+  padding: 0.5rem;
+  font: inherit;
+  color: inherit;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  font: inherit;
+  color: inherit;
+  background: var(--bg);
+  border: 1px solid var(--fg);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+a {
+  color: var(--link);
+}
+
+code,
+.statement,
+li,
+p {
+  overflow-wrap: anywhere;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+section {
+  margin-top: 1.5rem;
+}
+
+ul,
+ol {
+  padding-left: 1.25rem;
+}
+
+summary {
+  cursor: pointer;
+}
+
+.conclusion {
+  margin: 0.25rem 0;
+}
+
+.first-source {
+  color: var(--muted);
+  font-size: 0.9em;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0 0.5em;
+  border: 1px solid currentcolor;
+  border-radius: 1em;
+  font-size: 0.85em;
+  white-space: nowrap;
+}
+
+.certainty-certain {
+  background: var(--certain-bg);
+  color: var(--certain-fg);
+}
+
+.certainty-likely {
+  background: var(--likely-bg);
+  color: var(--likely-fg);
+}
+
+.certainty-possible {
+  background: var(--possible-bg);
+  color: var(--possible-fg);
+}
+
+.steps li {
+  margin: 0.5rem 0;
+}
+
+.verify {
+  margin-top: 0.75rem;
+}

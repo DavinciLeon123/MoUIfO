@@ -1,6 +1,8 @@
+import type { ComponentChildren } from 'preact';
+import { ConclusionView } from '../components/conclusion.tsx';
 import { useApp, useUi } from '../context.ts';
 import type { Conclusion } from '../engine-host.ts';
-import { certaintyLabel, conclusionText, fill, warningText } from '../i18n/text.ts';
+import { fill, warningText } from '../i18n/text.ts';
 import { normalise } from '../model/normalise.ts';
 import { type DerivationRow, type PasteRun, type PasteValue, runPaste } from '../model/paste.ts';
 
@@ -11,21 +13,17 @@ type Props = {
   onRun: (run: PasteRun) => void;
 };
 
-/** One conclusion as a line: the engine's statement and its certainty word. */
+/** One conclusion as a list item holding the expandable ConclusionView. */
 function ConclusionLine({
   conclusion,
   extra,
 }: {
   conclusion: Conclusion;
-  extra?: preact.ComponentChildren;
+  extra?: ComponentChildren;
 }) {
-  const { host, lang } = useApp();
-  const ctx = { host, lang };
   return (
-    <li data-key={conclusion.key} data-scheme={conclusion.params.scheme}>
-      {conclusionText(conclusion, ctx).text}{' '}
-      <span>{certaintyLabel(conclusion.certainty, ctx)}</span>
-      {extra}
+    <li>
+      <ConclusionView conclusion={conclusion} extra={extra} />
     </li>
   );
 }
