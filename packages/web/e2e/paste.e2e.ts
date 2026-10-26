@@ -3,6 +3,7 @@
 // same-origin requests). The only nine-digit run used is inside the public example value of
 // SPEC section 10.
 import { expect, test } from '@playwright/test';
+import { expectNoAxeViolations } from './support.ts';
 
 const VALUE = 'NL001469630B01';
 const SENTENCE = 'Values are processed in your browser only and never stored or sent.';
@@ -231,4 +232,66 @@ test('D-03 and D-17: a bare nine-digit value shows its candidates, and Treat as 
 
   await expect(input).toHaveValue(RSIN_VALUE);
   expect(page.url()).not.toContain(RSIN_VALUE);
+});
+
+for (const scheme of ['light', 'dark'] as const) {
+  test.describe(`WEB-08: axe on the paste view, ${scheme} colour scheme`, () => {
+    test.beforeEach(async ({ page }) => {
+      await page.emulateMedia({ colorScheme: scheme });
+    });
+
+    test('empty', async ({ page }) => {
+      await page.goto('./');
+      await expect(page.getByRole('button', { name: 'Explain' })).toBeVisible();
+      await expectNoAxeViolations(page, 'the empty paste view');
+    });
+
+    test('the EORI triple explained with one conclusion expanded', async ({ page }) => {
+      await page.goto('./');
+      await page.getByRole('textbox', { name: INPUT }).fill(TRIPLE);
+      await page.getByRole('button', { name: 'Explain' }).click();
+      const first = page
+        .getByRole('region', { name: 'Consistency' })
+        .locator('.conclusion')
+        .first();
+      await first.locator('summary').click();
+      await expect(first.locator('details')).toHaveAttribute('open', '');
+      await expectNoAxeViolations(page, 'the explained EORI triple');
+    });
+
+    test('the ambiguity set, before and after Treat as', async ({ page }) => {
+      await page.goto('./');
+      await page.getByRole('textbox', { name: INPUT }).fill(RSIN_VALUE);
+      await page.getByRole('button', { name: 'Explain' }).click();
+      await expect(
+        page.getByRole('heading', { name: 'Possible personal identifier' }),
+      ).toBeVisible();
+      await expectNoAxeViolations(page, 'the ambiguity set');
+      await page.getByRole('button', { name: /\(rsin\)$/ }).click();
+      await expect(
+        page.locator('[data-key="derive.derivation"][data-scheme="eori"]'),
+      ).toBeVisible();
+      await expectNoAxeViolations(page, 'the ambiguity set after Treat as rsin');
+    });
+  });
+}
+
+test('D-02: one polite live region that speaks once per run and never while typing', async ({
+  page,
+}) => {
+  await page.goto('./');
+  const status = page.locator('[role="status"]');
+  await expect(status).toHaveCount(1);
+  await expect(status).toHaveAttribute('aria-live', 'polite');
+  await expect(page.locator('[role="alert"], [aria-live="assertive"]')).toHaveCount(0);
+  const input = page.getByRole('textbox', { name: INPUT });
+  await input.fill(TRIPLE);
+  await input.pressSequentially(' more');
+  await expect(status).toHaveText('');
+  await page.getByRole('button', { name: 'Explain' }).click();
+  await expect(status).toHaveText('Results ready for 3 values.');
+  await input.pressSequentially('x');
+  await input.pressSequentially('y');
+  await page.waitForTimeout(300);
+  await expect(status).toHaveText('Results ready for 3 values.');
 });
