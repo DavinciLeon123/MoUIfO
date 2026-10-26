@@ -123,6 +123,10 @@ export const UI_NL = {
 
   chipsLabel: 'Voorbeeldvragen',
   chipRecognise: 'Wat is dit nummer?',
+  chipDerive: 'Welk EORI-nummer hoort bij dit RSIN?',
+  chipConsistency: 'Horen deze nummers bij elkaar?',
+  chipDescribe: 'Wie geeft een EORI-nummer uit en waar controleer ik het?',
+  chipRelate: 'Hoe hangen een RSIN en een EORI-nummer samen?',
 
   markerEn: 'EN',
   markerUntranslated: 'niet vertaald',

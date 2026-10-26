@@ -120,6 +120,10 @@ export const UI_EN = {
 
   chipsLabel: 'Example questions',
   chipRecognise: 'What is this number?',
+  chipDerive: 'Which EORI number belongs to this RSIN?',
+  chipConsistency: 'Do these belong together?',
+  chipDescribe: 'Who issues an EORI and where do I verify it?',
+  chipRelate: 'How are an RSIN and an EORI related?',
 
   markerEn: 'EN',
   markerUntranslated: 'not translated',

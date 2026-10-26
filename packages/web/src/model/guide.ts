@@ -29,4 +29,31 @@ export type Chip =
 
 export const CHIPS: readonly Chip[] = [
   { id: 'recognise', question: 'chipRecognise', kind: 'paste', lines: [VAT_VALUE] },
+  // D-17: the RSIN is declared as rsin, so the run derives from it at once. No VAT number is
+  // promised (DEC-050): the rules derive an EORI and an OIN from an RSIN and no VAT number.
+  {
+    id: 'derive',
+    question: 'chipDerive',
+    kind: 'paste',
+    lines: [RSIN_VALUE],
+    declare: { position: 1, scheme: 'rsin' },
+  },
+  {
+    id: 'consistency',
+    question: 'chipConsistency',
+    kind: 'paste',
+    lines: [EORI_VALUE, VAT_VALUE, RSIN_VALUE],
+  },
+  {
+    id: 'describe',
+    question: 'chipDescribe',
+    kind: 'view',
+    route: { view: 'scheme', id: 'eori' },
+  },
+  {
+    id: 'relate',
+    question: 'chipRelate',
+    kind: 'view',
+    route: { view: 'relate', a: 'rsin', b: 'eori' },
+  },
 ];
