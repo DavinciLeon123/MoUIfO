@@ -118,6 +118,9 @@ export const UI_EN = {
   relateHopsLabel: 'Steps of this chain',
   relateAlsoVia: 'Also via',
 
+  chipsLabel: 'Example questions',
+  chipRecognise: 'What is this number?',
+
   markerEn: 'EN',
   markerUntranslated: 'not translated',
 } as const;

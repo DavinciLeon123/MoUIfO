@@ -399,3 +399,24 @@ select {
   color: var(--muted);
   font-size: 0.9em;
 }
+
+.guide-chips {
+  margin: 1rem 0;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chips a {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  color: var(--fg);
+  border: 1px solid var(--fg);
+  border-radius: 4px;
+}

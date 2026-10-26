@@ -121,6 +121,9 @@ export const UI_NL = {
   relateHopsLabel: 'Stappen van deze verbinding',
   relateAlsoVia: 'Ook via',
 
+  chipsLabel: 'Voorbeeldvragen',
+  chipRecognise: 'Wat is dit nummer?',
+
   markerEn: 'EN',
   markerUntranslated: 'niet vertaald',
 } as const satisfies Record<UiKey, string>;

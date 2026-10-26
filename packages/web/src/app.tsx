@@ -51,8 +51,18 @@ function Page({ route, onLang }: { route: Route; onLang: (lang: Lang) => void })
     setRun(result);
     announce(result.values.length);
   };
+  /** The one run action (D-02): Explain, a Treat as press, a chip and a walkthrough step all run here. */
+  const runLines = (lines: readonly string[], declared: ReadonlyMap<number, string> = new Map()) =>
+    execute({ lines, declared });
   // Explain starts from nothing declared (D-17): every gated value must be chosen again.
-  const explain = () => execute({ lines: normalise(text), declared: new Map() });
+  const explain = () => runLines(normalise(text));
+  // A paste chip fills the box with its lines and runs at once. The chips vanish with the empty
+  // state, so focus moves to the box now, before the button it was on is removed.
+  const runPreset = (lines: readonly string[], declared: ReadonlyMap<number, string>) => {
+    setText(lines.join('\n'));
+    document.getElementById('values')?.focus();
+    runLines(lines, declared);
+  };
   // Treat as reruns the same lines (the textarea may have changed since) with the choice added;
   // pressing the chosen scheme again takes the choice back.
   const treatAs = (position: number, scheme: string) => {
@@ -134,6 +144,7 @@ function Page({ route, onLang }: { route: Route; onLang: (lang: Lang) => void })
             onText={setText}
             onExplain={explain}
             onTreatAs={treatAs}
+            onPreset={runPreset}
           />
         ) : route.view === 'schemes' ? (
           <SchemesView />

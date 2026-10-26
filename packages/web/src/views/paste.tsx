@@ -1,5 +1,6 @@
 import type { ComponentChildren } from 'preact';
 import { AmbiguityPanel, useSchemeName } from '../components/ambiguity.tsx';
+import { ExampleChips } from '../components/chips.tsx';
 import { ConclusionView } from '../components/conclusion.tsx';
 import { WarningList } from '../components/warnings.tsx';
 import { useUi } from '../context.ts';
@@ -13,6 +14,8 @@ type Props = {
   onText: (text: string) => void;
   onExplain: () => void;
   onTreatAs: (position: number, scheme: string) => void;
+  /** A paste chip: fill the box with the lines, declare as given, and run (D-02, D-06). */
+  onPreset: (lines: readonly string[], declared: ReadonlyMap<number, string>) => void;
 };
 
 /** One conclusion as a list item holding the expandable ConclusionView. */
@@ -109,14 +112,17 @@ function DerivationResult({ value }: { value: PasteValue }) {
   );
 }
 
-export function PasteView({ text, run, onText, onExplain, onTreatAs }: Props) {
+export function PasteView({ text, run, onText, onExplain, onTreatAs, onPreset }: Props) {
   const ui = useUi();
   const heading = (value: PasteValue) =>
     fill(ui.valueHeading, { position: value.position, value: value.value });
   const empty = run !== null && run.values.length === 0;
+  // The empty state: no run yet, or the last run had no values (D-06).
+  const showGuide = run === null || empty;
   return (
     <>
       <h1 tabIndex={-1}>{ui.title}</h1>
+      {showGuide ? <ExampleChips onPaste={onPreset} /> : null}
       <label for="values">{ui.inputLabel}</label>
       <textarea
         id="values"
