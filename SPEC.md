@@ -395,6 +395,8 @@ interface Step {
 
 > Amended by DECISIONS.md DEC-068: check tries every accepted candidate of each value and calls a pair consistent when a rule chain turns one value into the other, inconsistent when a chain reaches the other's scheme with another value, and no-rule otherwise.
 
+> Amended by DECISIONS.md DEC-072: a checksum entry whose condition the context makes false does not apply, so a candidate whose every checksum entry is conditioned out has checksum result none, is accepted on its format alone and carries the warning no-applicable-checksum.
+
 - **Weakest link:** the certainty of a conclusion is the minimum over all steps in `explanation`. A condition that is not established counts as an `assumption` step with certainty `likely`.
 - **`recognise`:** try all patterns of all schemes and check the checksum. Return all candidates, sorted by certainty and then by specificity (length of the regex match without wildcards). Multiple candidates are normal; 9 digits can be RSIN, BSN or DUNS.
 - **`relate`:** a direct relation, otherwise the shortest chain (BFS) over `relations` and `rules`, with at most 4 steps. All chains of equal length are returned.
@@ -445,6 +447,10 @@ interface Step {
 
 > Amended by DECISIONS.md DEC-010: the package name derives from the npm scope set once in `config.yaml` (`npm_scope`), so `npx @uio/mcp-server` holds only while the scope is `@uio`.
 
+> Amended by DECISIONS.md DEC-073: the six tools are named uio_recognise, uio_describe, uio_applicability, uio_relate, uio_derive and uio_check, and their input schemas mirror the engine signatures with a ctx limited to issuing_country, entity_form and context.
+
+> Amended by DECISIONS.md DEC-075: the README configuration examples for Claude Desktop and VS Code hold the package name of the MCP server as a literal copy of the name derived from the npm scope in config.yaml, and a test fails when the two differ.
+
 - `@modelcontextprotocol/sdk`, stdio transport, startable with `npx @uio/mcp-server`.
 - Six tools, one per engine function, with the same names and a JSON schema for the input. The output is the full `Result`, including `explanation`.
 - Every tool description ends with: *"Report conclusions with their certainty and source exactly as returned. Do not add facts about identifiers that are not in the result."*
@@ -466,6 +472,10 @@ REST API, a dedicated chat with a language model (for example Jev by TypeSafe AI
 > Amended by DECISIONS.md DEC-022: a personal-number guard (`tools/guards`) also runs in CI over the tree and over every commit of a pull request.
 
 > Amended by DECISIONS.md DEC-062: the byte-identical double build runs as a Vitest test inside the CI Test step, building twice in two processes with another locale and time zone, so ci.yml gets no separate double-build step.
+
+> Amended by DECISIONS.md DEC-076: npm run check also type-checks the website with tsc -p packages/web, and the website's base path is read from pages_base_path in config.yaml.
+
+> Amended by DECISIONS.md DEC-077: pages.yml deploys the website to GitHub Pages on every push to main and tests it before and after the deploy, web-e2e.yml runs the browser tests on every pull request, and ci.yml is unchanged.
 
 - **Unit:** checksums, transformations, certainty combination, the five behaviour rules of §6.2.
 - **Model-driven:** generate the tests from all `examples_valid`, `examples_invalid` and rule `examples`.
@@ -525,6 +535,8 @@ REST API, a dedicated chat with a language model (for example Jev by TypeSafe AI
 > Amended by DECISIONS.md DEC-068: the three check pairs of the acceptance case are consistent through the rules from the VAT number and from the EORI to the RSIN and from the RSIN to the EORI.
 
 > Amended by DECISIONS.md DEC-071: the reverse rule from the EORI to the RSIN applies only to an EORI of the form NL plus nine digits issued in the Netherlands, so a value with another prefix, such as the DE contrast value, yields no RSIN and no Dutch VAT number.
+
+> Amended by DECISIONS.md DEC-074: the relation from the EORI to the RSIN holds only for a Dutch legal person, and relate can still link a foreign EORI context to the RSIN through the inverse of the rule from the RSIN to the EORI.
 
 **Input:** `derive("NL001469630", "eori")` and `check(["NL001469630", "NL001469630B01", "001469630"])`.
 

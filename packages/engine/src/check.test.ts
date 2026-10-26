@@ -399,6 +399,18 @@ describe('check: context', () => {
     expect(result.conclusions).toEqual([]);
   });
 
+  test('entity_form fiscal-unit conditions out the vat-nl checksum: one warning, no value in it (D-01, DEC-072)', () => {
+    const result = engine.check(TRIPLE, { entity_form: 'fiscal-unit' });
+    expect(result.data.map((each) => each.outcome)).toEqual(['no-rule', 'no-rule', 'no-rule']);
+    expect(result.data[0]?.tried.b).toEqual(['eori', 'vat', 'vat-nl']);
+    const applicability = result.warnings.filter((each) => each.code === 'no-applicable-checksum');
+    expect(applicability).toHaveLength(1);
+    expect(applicability[0]?.ref).toBe('vat-nl');
+    for (const warning of result.warnings) {
+      for (const value of TRIPLE) expect(warning.message.includes(value)).toBe(false);
+    }
+  });
+
   test('an unknown context key is ignored with a warning that names no input', () => {
     const result = engine.check(TRIPLE, { colour: 'red' } as never);
     expect(codesOf(result)).toContain('unknown-context-key');

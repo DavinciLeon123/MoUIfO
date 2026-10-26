@@ -81,7 +81,10 @@ function decide(compiled: CompiledModel, options: readonly Option[]): Option | n
  * of the matching patterns and of the checksum entries against the known context merged with the
  * issuing country the value carries. Returns null when no pattern that applies matches. Only the
  * deciding pattern and the deciding checksum entry enter the explanation, because both lists are
- * any-of. A context conflict between `known` and the value is added to `warnings`.
+ * any-of. A context conflict between `known` and the value is added to `warnings`. A scheme that
+ * declares checksum entries whose conditions the context all makes false has no checksum to check:
+ * the candidate is accepted on its format alone with checksum result `none` and the warning
+ * `no-applicable-checksum` is added (DEC-072, the scheme id only, never the value).
  */
 export function evaluateCandidate(
   compiled: CompiledModel,
@@ -190,7 +193,13 @@ function evaluate(
   let checksumResult: Candidate['checksum']['result'] = 'none';
   let decidingChecksum: Option | null = null;
   let explanation = [...decidingPattern.steps];
-  if (declared.length > 0) {
+  if (declared.length > 0 && checksums.length === 0) {
+    warnings.push({
+      code: 'no-applicable-checksum',
+      message: `no checksum entry of ${schemeId} applies in the given context, so the value is accepted on its format alone`,
+      ref: schemeId,
+    });
+  } else if (declared.length > 0) {
     decidingChecksum = decide(
       compiled,
       checksums.filter((each) => result.checksums[each.index] === 'pass'),

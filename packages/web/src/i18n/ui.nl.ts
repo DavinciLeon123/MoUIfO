@@ -1,0 +1,153 @@
+import type { UiKey } from './ui.en.ts';
+
+/**
+ * The Dutch counterpart of UI_EN (D-09, D-11). `satisfies Record<UiKey, string>` makes a missing or
+ * an extra string a type error. Wording is a proposal for the owner's end-of-phase check (A2).
+ */
+export const UI_NL = {
+  title: 'UIO-kennismodel',
+  inputLabel: 'Identificatienummers, één per regel',
+  privacy: 'Waarden worden alleen in uw browser verwerkt en nooit opgeslagen of verzonden.',
+  explain: 'Uitleggen',
+
+  normalisedHeading: 'Genormaliseerde invoer',
+  recognitionHeading: 'Herkenning',
+  derivationsHeading: 'Afleidingen',
+  consistencyHeading: 'Consistentie',
+
+  nothingToShow: 'Plak minstens één identificatienummer en kies Uitleggen.',
+  omitted: '{count} regels na de eerste {max} zijn weggelaten.',
+  valueHeading: 'Waarde {position}: {value}',
+  noSchemeFormat: 'Geen schema in het model heeft dit formaat.',
+  deriveNothing: 'De regels van het model leiden hieruit niets af.',
+  derivedValue: 'Afgeleide waarde',
+  needTwoValues: 'Er zijn minstens twee waarden nodig.',
+  noPairs: 'Er zijn geen paren om te vergelijken.',
+  pairLine: 'Waarden {a} en {b}',
+  outcomeConsistent: 'consistent',
+  outcomeInconsistent: 'inconsistent',
+  outcomeNoRule: 'geen regel in het model verbindt deze twee waarden',
+
+  warningsHeading: 'Opmerkingen van de engine',
+  resultsReady: 'Resultaten klaar voor {count} waarden.',
+  resultsReadyOne: 'Resultaten klaar voor 1 waarde.',
+
+  ambiguityHeading: 'Mogelijk een persoonlijk identificatienummer',
+  cannotTellApart: "Deze schema's zijn met de controlesom niet van elkaar te onderscheiden.",
+  treatAs: 'Behandel als {scheme}',
+  deriveGated:
+    'Deze waarde kan een persoonlijk identificatienummer zijn. Kies hierboven Behandel als om eruit af te leiden.',
+  treatedAs: 'Behandeld als {scheme}, uw keuze',
+
+  stepsHeading: 'Stappen',
+  stepKind: 'Soort',
+  stepCondition: 'Voorwaarde',
+  stepSource: 'Bron',
+  sourceTitlesNote: 'Brontitels staan in het Engels, zoals het model ze geeft.',
+  stepNoSource: 'Voor een aanname geldt geen bron.',
+  howToVerify: 'Zo controleert u het',
+  registerLink: '{label} ({host}), opent extern register',
+  sourceLink: '{title} ({host}), opent externe site',
+  noRegisterLink: 'Het model bevat geen bronvermelde registerlink voor {scheme}.',
+  schemePage: 'Schemapagina voor {scheme}',
+  noVerifyTarget: 'Deze conclusie noemt geen schema om te controleren.',
+
+  certaintyCertain: 'Zeker',
+  certaintyLikely: 'Waarschijnlijk',
+  certaintyPossible: 'Mogelijk',
+
+  stepKindFact: 'feit',
+  stepKindRule: 'regel',
+  stepKindPattern: 'patroon',
+  stepKindChecksum: 'controlesom',
+  stepKindAssumption: 'aanname',
+  stepKindComponent: 'onderdeel',
+  sourceTypeLaw: 'wet',
+  sourceTypeStandard: 'norm',
+  sourceTypeRegisterDoc: 'registerdocumentatie',
+  sourceTypeExpert: 'expertbron',
+  sourceTypeAnalysis: 'analyse',
+
+  schemesHeading: "Schema's",
+  schemesIntro:
+    "De identificatieschema's van het model. Kies er een voor de beschrijving met bronnen.",
+  schemeDescriptionHeading: 'Beschrijving',
+  scopeLabel: 'Reikwijdte',
+  notesLabel: 'Opmerkingen',
+  trustHeading: 'Deelscores voor vertrouwen',
+  trustLegalBasis: 'Wettelijke grondslag',
+  trustRegistrationQuality: 'Kwaliteit van de registratie',
+  trustVerifiability: 'Controleerbaarheid',
+  trustCrosswalks: 'Koppelingen',
+  trustLifecycle: 'Levenscyclus',
+  notAssessed: 'niet beoordeeld',
+  applicabilityHeading: 'Toepasselijkheid',
+  applicabilityStated: 'vermeld',
+  applicabilityInherited: 'overgeërfd van {from}',
+  applicabilityNoData: 'geen gegevens in het model',
+  notInModelTitle: 'Niet in het model',
+  notInModelText: 'Het model heeft geen pagina op dit adres.',
+  backToSchemes: "Terug naar de lijst met schema's",
+
+  navLabel: 'Hoofdnavigatie',
+  navPaste: 'Identificatienummers plakken',
+  navSchemes: "Schema's",
+  credit:
+    'UID table v1.2 — Davinci Conclusion, as produced for the CoE-DSC. Licensed under CC BY 4.0.',
+  licenceLead: 'Licentietekst:',
+
+  relationsHeading: 'Relaties',
+  relationsGraphTitle: 'Relaties van {scheme}',
+  relationsNone:
+    'Het model bevat geen relaties, regels of onderdelen die dit schema met een ander verbinden.',
+  relationsLegend:
+    'Een pijl loopt van het eerste naar het tweede schema van de modelbewering. Een gestreepte pijl is omgekeerd: het model stelt hem vast vanuit het andere schema naar dit schema.',
+  relationsListLabel: 'Relaties als lijst',
+  edgeRule: 'regel {id}',
+  edgeComponent: 'onderdeel {prefix}',
+  edgeInverse: 'omgekeerd',
+
+  navRelate: 'Relatie',
+  relateHeading: "Relatie tussen twee schema's",
+  relateIntro:
+    "Kies twee schema's om elke kortste keten van relaties, regels en onderdelen met bron te zien die ze verbindt.",
+  relateA: 'Schema A',
+  relateB: 'Schema B',
+  relateSwap: 'A en B omwisselen',
+  relateChoose: "Kies twee schema's.",
+  relateChoosePlaceholder: 'Kies een schema',
+  relateNoChain: "Geen relatie met bron gevonden tussen deze schema's.",
+  relateResultHeading: 'Verbindingen',
+  relateHopsLabel: 'Stappen van deze verbinding',
+  relateAlsoVia: 'Ook via',
+
+  chipsLabel: 'Voorbeeldvragen',
+  chipRecognise: 'Wat is dit nummer?',
+  chipDerive: 'Welk EORI-nummer hoort bij dit RSIN?',
+  chipConsistency: 'Horen deze nummers bij elkaar?',
+  chipDescribe: 'Wie geeft een EORI-nummer uit en waar controleer ik het?',
+  chipRelate: 'Hoe hangen een RSIN en een EORI-nummer samen?',
+  walkthroughOpen: 'Volg de EORI-rondleiding',
+  walkthroughHeading: 'EORI-rondleiding',
+  walkthroughStepOf: 'Stap {step} van {total}',
+  walkthroughBack: 'Terug',
+  walkthroughNext: 'Volgende',
+  walkthroughFinish: 'Voltooien',
+  walkthroughSkip: 'Overslaan',
+  walkthroughTarget: 'Rondleiding, stap {step}',
+  walkthroughStep1Title: 'Eén waarde',
+  walkthroughStep1Body:
+    'Het vak bevat één waarde uit het EORI-voorbeeld. Herkenning toont elk schema waarvan het formaat past, met zekerheid en bron.',
+  walkthroughStep2Title: 'Een RSIN als RSIN behandeld',
+  walkthroughStep2Body:
+    'Een kaal nummer van negen cijfers kan een persoonlijk nummer zijn, daarom laat de rondleiding de engine het als RSIN behandelen. Afleidingen toont wat de regels van het model eruit afleiden.',
+  walkthroughStep3Title: 'Een waarde uit een ander land',
+  walkthroughStep3Body:
+    'Vergelijk wat de regels afleiden voor een waarde uit een ander land met wat ze in de vorige stap afleidden.',
+  walkthroughStep4Title: 'Alle drie samen',
+  walkthroughStep4Body:
+    'Consistentie vergelijkt elk paar waarden via de regels van het model. Elke conclusie eindigt met Zo controleert u het.',
+
+  markerEn: 'EN',
+  markerUntranslated: 'niet vertaald',
+} as const satisfies Record<UiKey, string>;

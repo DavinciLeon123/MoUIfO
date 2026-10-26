@@ -1437,7 +1437,8 @@
                 "certainty": "certain",
                 "source": "douane-eori-nl",
                 "condition": {
-                  "entity_form": "legal-person"
+                  "entity_form": "legal-person",
+                  "issuing_country": "NL"
                 },
                 "edge": "relation",
                 "inverse": true
@@ -1477,10 +1478,20 @@
               "certainty": "certain",
               "source": "douane-eori-nl",
               "condition": {
-                "entity_form": "legal-person"
+                "entity_form": "legal-person",
+                "issuing_country": "NL"
               },
               "edge": "relation",
               "inverse": true
+            },
+            {
+              "kind": "assumption",
+              "ref": "eori/relations/0/condition/issuing_country",
+              "certainty": "likely",
+              "condition": {
+                "issuing_country": "NL"
+              },
+              "source": null
             },
             {
               "kind": "assumption",
@@ -1511,10 +1522,20 @@
               "certainty": "certain",
               "source": "douane-eori-nl",
               "condition": {
-                "entity_form": "legal-person"
+                "entity_form": "legal-person",
+                "issuing_country": "NL"
               },
               "edge": "relation",
               "inverse": true
+            },
+            {
+              "kind": "assumption",
+              "ref": "eori/relations/0/condition/issuing_country",
+              "certainty": "likely",
+              "condition": {
+                "issuing_country": "NL"
+              },
+              "source": null
             },
             {
               "kind": "assumption",
@@ -1576,7 +1597,8 @@
                 "certainty": "certain",
                 "source": "douane-eori-nl",
                 "condition": {
-                  "entity_form": "legal-person"
+                  "entity_form": "legal-person",
+                  "issuing_country": "NL"
                 },
                 "edge": "relation",
                 "inverse": true
@@ -1636,10 +1658,20 @@
               "certainty": "certain",
               "source": "douane-eori-nl",
               "condition": {
-                "entity_form": "legal-person"
+                "entity_form": "legal-person",
+                "issuing_country": "NL"
               },
               "edge": "relation",
               "inverse": true
+            },
+            {
+              "kind": "assumption",
+              "ref": "eori/relations/0/condition/issuing_country",
+              "certainty": "likely",
+              "condition": {
+                "issuing_country": "NL"
+              },
+              "source": null
             },
             {
               "kind": "assumption",
@@ -1690,10 +1722,20 @@
               "certainty": "certain",
               "source": "douane-eori-nl",
               "condition": {
-                "entity_form": "legal-person"
+                "entity_form": "legal-person",
+                "issuing_country": "NL"
               },
               "edge": "relation",
               "inverse": true
+            },
+            {
+              "kind": "assumption",
+              "ref": "eori/relations/0/condition/issuing_country",
+              "certainty": "likely",
+              "condition": {
+                "issuing_country": "NL"
+              },
+              "source": null
             },
             {
               "kind": "assumption",

@@ -201,6 +201,35 @@ describe('derive: the declared scheme and the input', () => {
   });
 });
 
+describe('derive: a checksum that does not apply (D-01, DEC-072)', () => {
+  const VAT = 'NL001469630B01';
+
+  test('a fiscal unit has no applicable vat-nl checksum: accepted on format, warned, nothing derived', () => {
+    const result = engine.derive(VAT, 'vat-nl', { entity_form: 'fiscal-unit' });
+    expect(result.warnings).toEqual([
+      {
+        code: 'no-applicable-checksum',
+        message:
+          'no checksum entry of vat-nl applies in the given context, so the value is accepted on its format alone',
+        ref: 'vat-nl',
+      },
+    ]);
+    expect(codes(result)).not.toContain('value-not-accepted');
+    expect(result.data).toEqual([]);
+    expect(result.conclusions.map((each) => each.key)).toContain('derive.issued-by');
+    const text = JSON.stringify(result.warnings);
+    expect(text.includes(VAT)).toBe(false);
+    expect(text.includes('001469630')).toBe(false);
+  });
+
+  test('a legal person has an applicable checksum: data is derived and no such warning appears', () => {
+    const result = engine.derive(VAT, 'vat-nl', { entity_form: 'legal-person' });
+    expect(result.data.length).toBeGreaterThan(0);
+    expect(codes(result)).not.toContain('no-applicable-checksum');
+    expect(codes(result)).not.toContain('value-not-accepted');
+  });
+});
+
 describe('derive: the personal-identifier gate (ENG-09, DEC-005, DEC-067)', () => {
   test('a declared rsin gives the eori and the oin, never an rsin, with the gate warning', () => {
     const result = engine.derive('001469630', 'rsin');
@@ -426,6 +455,39 @@ describe('derive on fixtures: limits and ordering', () => {
     expect(result.conclusions.filter((each) => each.key === 'derive.derivation')).toHaveLength(100);
     expect(codes(result)).toEqual(['too-many-results']);
     expect(wide.derive('A1', 'hub').data).toEqual(result.data);
+  });
+
+  test('an output scheme whose checksum entries the context conditions out is validated on its format (D-01, DEC-072)', () => {
+    const guarded = fixtureEngine([
+      accepting('g1', [ruleOf('g1-g2', 'g1', 'g2')]),
+      fixtureScheme('g2', {
+        format: {
+          patterns: [{ regex: '^[A-Z0-9]+$', certainty: 'certain', source: 'fx-law' }],
+          checksum: [
+            {
+              algorithm: 'elfproef',
+              condition: { entity_form: 'legal-person' },
+              certainty: 'certain',
+              source: 'fx-law',
+            },
+          ],
+        },
+      }),
+    ]);
+    const conditionedOut = guarded.derive('A1', 'g1', { entity_form: 'fiscal-unit' });
+    expect(conditionedOut.data.map((each) => [each.scheme, each.value])).toEqual([['g2', 'XA1']]);
+    expect(codes(conditionedOut)).not.toContain('output-failed-validation');
+    expect(conditionedOut.warnings).toEqual([
+      {
+        code: 'no-applicable-checksum',
+        message:
+          'no checksum entry of g2 applies in the given context, so the value is accepted on its format alone',
+        ref: 'g2',
+      },
+    ]);
+    const applicable = guarded.derive('A1', 'g1', { entity_form: 'legal-person' });
+    expect(applicable.data).toEqual([]);
+    expect(codes(applicable)).toEqual(['output-failed-validation']);
   });
 
   test('a condition the context does not establish is an assumption at likely', () => {

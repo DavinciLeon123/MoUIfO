@@ -1,0 +1,33 @@
+name: Web e2e
+
+# DEC-077 (D-18): the website's Playwright suite on every pull request, read-only token.
+on: pull_request
+
+permissions:
+  contents: read
+
+concurrency:
+  group: web-e2e-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: Web e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install
+        run: npm ci
+      - name: Build dist
+        run: npm run build:dist
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Browser tests
+        run: npm run e2e -w packages/web

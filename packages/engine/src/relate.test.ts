@@ -39,9 +39,16 @@ describe('relate: the rsin-eori tracer on the real model', () => {
   test('without a context the condition is an assumption, so the path is likely', () => {
     const path = engine.relate('rsin', 'eori').data[0];
     expect(path?.certainty).toBe('likely');
-    const assumption = path?.explanation.find((step) => step.kind === 'assumption');
-    expect(assumption?.condition).toEqual({ entity_form: 'legal-person' });
-    expect(assumption?.source).toBeNull();
+    const assumptions = path?.explanation.filter((step) => step.kind === 'assumption') ?? [];
+    expect(assumptions.map((step) => step.ref)).toEqual([
+      'eori/relations/0/condition/issuing_country',
+      'eori/relations/0/condition/entity_form',
+    ]);
+    expect(assumptions.map((step) => step.condition)).toEqual([
+      { issuing_country: 'NL' },
+      { entity_form: 'legal-person' },
+    ]);
+    expect(assumptions.every((step) => step.source === null)).toBe(true);
   });
 
   test('the conclusion reads the stored relation and marks it inverse', () => {
@@ -66,6 +73,39 @@ describe('relate: the rsin-eori tracer on the real model', () => {
     expect(result.data).toEqual([]);
     expect(result.conclusions).toEqual([]);
     expect(result.warnings.map((warning) => warning.code)).toEqual(['no-chain']);
+  });
+});
+
+describe('relate: eori and rsin by issuing country (D-02, DEC-074)', () => {
+  test('a Dutch legal-person context gives one certain path through the relation with the ctx facts', () => {
+    const result = engine.relate('eori', 'rsin', {
+      issuing_country: 'NL',
+      entity_form: 'legal-person',
+    });
+    expect(result.data).toHaveLength(1);
+    const path = result.data[0];
+    expect(path?.certainty).toBe('certain');
+    expect(path?.hops[0]?.step).toMatchObject({
+      edge: 'relation',
+      ref: 'eori/relations/0',
+      inverse: false,
+    });
+    const refs = path?.explanation.map((step) => step.ref) ?? [];
+    expect(refs).toContain('ctx/issuing_country');
+    expect(refs).toContain('ctx/entity_form');
+  });
+
+  test('a Belgian legal-person context no longer takes the relation: the hop is the inverse rule', () => {
+    const result = engine.relate('eori', 'rsin', {
+      issuing_country: 'BE',
+      entity_form: 'legal-person',
+    });
+    expect(result.data).toHaveLength(1);
+    expect(result.data[0]?.hops[0]?.step).toMatchObject({
+      edge: 'rule',
+      ref: 'eori-nl-from-rsin',
+      inverse: true,
+    });
   });
 });
 

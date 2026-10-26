@@ -7,8 +7,18 @@ export default defineConfig({
     environment: 'node',
     projects: [
       { extends: true, test: { name: 'engine', root: 'packages/engine' } },
-      { extends: true, test: { name: 'mcp', root: 'packages/mcp' } },
-      { extends: true, test: { name: 'web', root: 'packages/web' } },
+      {
+        extends: true,
+        test: {
+          name: 'mcp',
+          root: 'packages/mcp',
+          globalSetup: ['./src/testing/global-setup.ts'],
+        },
+      },
+      {
+        extends: true,
+        test: { name: 'web', root: 'packages/web', include: ['src/**/*.test.ts'] },
+      },
       { extends: true, test: { name: 'tools', root: 'tools', include: ['*/src/**/*.test.ts'] } },
     ],
   },

@@ -15,7 +15,7 @@
     "fsevents": false
   },
   "scripts": {
-    "check": "biome check --error-on-warnings . && tsc",
+    "check": "biome check --error-on-warnings . && tsc && tsc -p packages/web",
     "fix": "biome check --write .",
     "guard": "node tools/guards/src/personal-numbers.ts",
     "validate": "node --conditions=uio-source tools/validate/src/index.ts",

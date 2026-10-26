@@ -74,6 +74,7 @@ const ALLOWED_CODES = new Set([
   'same-scheme',
   'no-chain',
   'value-not-accepted',
+  'no-applicable-checksum',
   'output-failed-validation',
   'too-many-results',
   'duplicate-value',

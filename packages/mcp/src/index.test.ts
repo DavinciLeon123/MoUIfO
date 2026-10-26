@@ -1,9 +1,14 @@
 import { readFileSync } from 'node:fs';
 import { expect, test } from 'vitest';
-import { MCP_PACKAGE_DIR } from './index.ts';
+import { CLOSING_SENTENCE, createServer, TOOL_ANNOTATIONS, TOOL_NAMES } from './index.ts';
+import * as tools from './tools.ts';
 
-test('MCP_PACKAGE_DIR names the package directory', () => {
-  expect(MCP_PACKAGE_DIR).toBe('packages/mcp');
+test('the package entry re-exports createServer, the closing sentence, the tool names and the annotations', () => {
+  expect(typeof createServer).toBe('function');
+  expect(CLOSING_SENTENCE).toBe(tools.CLOSING_SENTENCE);
+  expect(TOOL_NAMES).toBe(tools.TOOL_NAMES);
+  expect(TOOL_ANNOTATIONS).toBe(tools.TOOL_ANNOTATIONS);
+  expect(TOOL_NAMES).toHaveLength(6);
 });
 
 test('the engine resolves from source through its workspace package name, without a build', async () => {
