@@ -27,6 +27,12 @@ export const UI_EN = {
   outcomeInconsistent: 'inconsistent',
   outcomeNoRule: 'no rule in the model connects these two values',
 
+  ambiguityHeading: 'Possible personal identifier',
+  cannotTellApart: 'These schemes cannot be told apart by checksum.',
+  treatAs: 'Treat as {scheme}',
+  deriveGated: 'This value may be a personal identifier. Choose Treat as above to derive from it.',
+  treatedAs: 'Treated as {scheme}, your choice',
+
   stepsHeading: 'Steps',
   stepKind: 'Kind',
   stepCondition: 'Condition',

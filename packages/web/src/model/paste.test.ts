@@ -62,9 +62,11 @@ describe('runPaste call plan (WEB-01)', () => {
       ...(run.check?.warnings ?? []),
     ].filter((warning) => warning.code === 'possible-personal-identifier');
     expect(reported.length).toBeGreaterThanOrEqual(3);
+    // The banner shows the one warning (D-03); the general warning list no longer repeats it.
+    expect(run.values[2]?.ambiguity?.warning.code).toBe('possible-personal-identifier');
     expect(
       run.values[2]?.warnings.filter((warning) => warning.code === 'possible-personal-identifier'),
-    ).toHaveLength(1);
+    ).toEqual([]);
     expect(run.runWarnings).toEqual([]);
   });
 

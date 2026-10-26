@@ -20,6 +20,15 @@ const VALUE_REF = /^values\/(\d+)$/;
 /** One derive conclusion; a `derive.derivation` one is paired with its Derivation from the data. */
 export type DerivationRow = { conclusion: Conclusion; derivation: Derivation | null };
 
+/** Code of the engine warning that gates a bare personal-number-shaped value (DEC-005, DEC-022). */
+export const PERSONAL_IDENTIFIER = 'possible-personal-identifier';
+
+/**
+ * D-03: a value that may be a personal identifier. `candidates` are the recognise candidates in the
+ * engine's order (nothing sorted, filtered or promoted); `warning` is the banner's engine sentence.
+ */
+export type Ambiguity = { warning: Warning; candidates: Candidate[] };
+
 export type PasteValue = {
   /** 1-based, the number shown under Normalised input and used by the engine's "Values 1 and 2". */
   position: number;
@@ -29,6 +38,9 @@ export type PasteValue = {
   /** The scheme the user declared for this value, or null. */
   declared: string | null;
   derivations: DerivationRow[];
+  /** Set when the value is gated; its warning is then shown by the banner, not in `warnings`. */
+  ambiguity: Ambiguity | null;
+  /** The remaining warnings of the value, in words under it. */
   warnings: Warning[];
 };
 
@@ -120,6 +132,8 @@ export function runPaste(
     const fromCheck = (check?.warnings ?? []).filter(
       (warning) => positionOfRef(warning.ref) === position,
     );
+    const warnings = dedupe([...recognise.warnings, ...derive.warnings, ...fromCheck]);
+    const gate = warnings.find((warning) => warning.code === PERSONAL_IDENTIFIER) ?? null;
     return {
       position,
       value,
@@ -127,7 +141,11 @@ export function runPaste(
       derive,
       declared: scheme,
       derivations: derivationRows(derive),
-      warnings: dedupe([...recognise.warnings, ...derive.warnings, ...fromCheck]),
+      ambiguity: gate === null ? null : { warning: gate, candidates: [...recognise.data] },
+      warnings:
+        gate === null
+          ? warnings
+          : warnings.filter((warning) => warning.code !== PERSONAL_IDENTIFIER),
     };
   });
 

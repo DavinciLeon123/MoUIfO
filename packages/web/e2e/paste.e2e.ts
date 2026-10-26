@@ -186,3 +186,49 @@ test('every certainty badge shows a word and a value derived as eori leads to it
     .evaluate((anchor) => new URL((anchor as HTMLAnchorElement).href).host);
   expect(host).toBe('ec.europa.eu');
 });
+
+test('D-03 and D-17: a bare nine-digit value shows its candidates, and Treat as derives only after the choice', async ({
+  page,
+}) => {
+  await page.goto('./');
+  const input = page.getByRole('textbox', { name: INPUT });
+  await input.fill(RSIN_VALUE);
+  await page.getByRole('button', { name: 'Explain' }).click();
+
+  const recognition = page.getByRole('region', { name: 'Recognition' });
+  await expect(
+    recognition.getByRole('heading', { name: 'Possible personal identifier' }),
+  ).toBeVisible();
+  await expect(recognition).toContainText('cannot be told apart by checksum');
+  const buttons = recognition.getByRole('button', { name: /^Treat as / });
+  await expect(buttons).toHaveCount(4);
+  const names = await buttons.evaluateAll((all) =>
+    all.map((each) => (each.textContent ?? '').replace(/^.*\((.*)\)$/, '$1')),
+  );
+  expect(names).toEqual(['bsn', 'duns', 'fi-number', 'rsin']);
+  for (const button of await buttons.all())
+    await expect(button).toHaveAttribute('aria-pressed', 'false');
+
+  const derivations = page.getByRole('region', { name: 'Derivations' });
+  await expect(derivations).toContainText(
+    'This value may be a personal identifier. Choose Treat as above to derive from it.',
+  );
+  await expect(derivations.locator('[data-key="derive.derivation"]')).toHaveCount(0);
+
+  const rsin = recognition.getByRole('button', { name: /\(rsin\)$/ });
+  await rsin.click();
+  await expect(rsin).toHaveAttribute('aria-pressed', 'true');
+  await expect(
+    derivations.locator('[data-key="derive.derivation"][data-scheme="eori"]'),
+  ).toBeVisible();
+  await expect(
+    derivations.locator('[data-key="derive.derivation"][data-scheme="oin"]'),
+  ).toBeVisible();
+  await expect(derivations).toContainText('your choice');
+  await expect(
+    recognition.getByRole('heading', { name: 'Possible personal identifier' }),
+  ).toBeVisible();
+
+  await expect(input).toHaveValue(RSIN_VALUE);
+  expect(page.url()).not.toContain(RSIN_VALUE);
+});
