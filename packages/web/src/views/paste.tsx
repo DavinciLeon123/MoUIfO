@@ -9,6 +9,7 @@ import type { Conclusion } from '../engine-host.ts';
 import { fill } from '../i18n/text.ts';
 import { WALKTHROUGH, type WalkthroughSection } from '../model/guide.ts';
 import type { DerivationRow, PasteRun, PasteValue } from '../model/paste.ts';
+import { routeHref } from '../router.ts';
 
 type Props = {
   text: string;
@@ -135,6 +136,7 @@ export function PasteView({
   walkthrough,
 }: Props) {
   const ui = useUi();
+  const name = useSchemeName();
   const heading = (value: PasteValue) =>
     fill(ui.valueHeading, { position: value.position, value: value.value });
   const empty = run !== null && run.values.length === 0;
@@ -247,6 +249,20 @@ export function PasteView({
                           ? ui.outcomeInconsistent
                           : ui.outcomeNoRule}
                     </p>
+                    {pair.relate.length === 0 ? null : (
+                      <>
+                        <p>{ui.noRuleRelateLead}</p>
+                        <ul>
+                          {pair.relate.map((link) => (
+                            <li key={`${link.a}/${link.b}`}>
+                              <a href={routeHref({ view: 'relate', a: link.a, b: link.b })}>
+                                {fill(ui.noRuleRelateLink, { a: name(link.a), b: name(link.b) })}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    )}
                     {pair.conclusion === null ? null : (
                       <ul>
                         <ConclusionLine conclusion={pair.conclusion} data={pair.finding} />

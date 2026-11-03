@@ -25,7 +25,11 @@ export const UI_EN = {
   pairLine: 'Values {a} and {b}',
   outcomeConsistent: 'consistent',
   outcomeInconsistent: 'inconsistent',
-  outcomeNoRule: 'no rule in the model connects these two values',
+  outcomeNoRule:
+    'no rule in the model derives one value from the other, so the tool cannot say whether they belong together',
+  noRuleRelateLead:
+    'The model may still relate their schemes, but a relation alone does not show whether the values belong together:',
+  noRuleRelateLink: 'Relation between {a} and {b}',
 
   warningsHeading: 'Notes from the engine',
   resultsReady: 'Results ready for {count} values.',

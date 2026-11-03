@@ -15,6 +15,38 @@ import type {
  */
 export const MAX_VALUES = 50;
 
+/**
+ * The most relation-view links shown under one no-rule pair. It bounds the page for up to 50
+ * ambiguous values; the shipped example values never produce more than three combinations.
+ */
+export const MAX_RELATE_LINKS = 3;
+
+/** Two scheme ids to preset in the relation view. Ids only, never a value. */
+export type SchemePair = { a: string; b: string };
+
+/**
+ * The relation-view links for a no-rule pair, from the schemes the engine tried (ConsistencyFinding
+ * `tried`, which by DEC-068 never holds a value). Every combination of the two lists in the
+ * engine's order, skipping identical ids and reversed duplicates, at most MAX_RELATE_LINKS. The
+ * site does not rank candidates (that is engine knowledge) and DEC-068 is unchanged: a relation
+ * alone does not connect a pair.
+ */
+export function relateLinks(tried: ConsistencyFinding['tried']): SchemePair[] {
+  const links: SchemePair[] = [];
+  const taken = new Set<string>();
+  for (const a of tried.a) {
+    for (const b of tried.b) {
+      if (links.length >= MAX_RELATE_LINKS) return links;
+      if (a === b) continue;
+      const key = [a, b].sort().join('\u0000');
+      if (taken.has(key)) continue;
+      taken.add(key);
+      links.push({ a, b });
+    }
+  }
+  return links;
+}
+
 const VALUE_REF = /^values\/(\d+)$/;
 
 /** One derive conclusion; a `derive.derivation` one is paired with its Derivation from the data. */
@@ -51,6 +83,8 @@ export type PastePair = {
   outcome: ConsistencyFinding['outcome'];
   conclusion: Conclusion | null;
   finding: ConsistencyFinding;
+  /** Relation-view links for a no-rule pair; empty for consistent and inconsistent pairs. */
+  relate: SchemePair[];
 };
 
 export type PasteRun = {
@@ -154,7 +188,14 @@ export function runPaste(
       check?.conclusions.find(
         (each) => each.params.a === String(finding.a) && each.params.b === String(finding.b),
       ) ?? null;
-    return { a: finding.a + 1, b: finding.b + 1, outcome: finding.outcome, conclusion, finding };
+    return {
+      a: finding.a + 1,
+      b: finding.b + 1,
+      outcome: finding.outcome,
+      conclusion,
+      finding,
+      relate: finding.outcome === 'no-rule' ? relateLinks(finding.tried) : [],
+    };
   });
 
   const runWarnings = dedupe(
