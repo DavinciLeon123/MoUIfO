@@ -2,8 +2,26 @@
 // privacy sentence directly under the input), WEB-01 (paste and recognition) and WEB-10 (CSP,
 // same-origin requests). The only nine-digit run used is inside the public example value of
 // SPEC section 10.
+import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
+import { UI_EN } from '../src/i18n/ui.en.ts';
+import { UI_NL } from '../src/i18n/ui.nl.ts';
 import { expectNoAxeViolations } from './support.ts';
+
+type RuntimeModel = { schemes: Record<string, { format?: { examples_valid?: string[] } }> };
+const MODEL = JSON.parse(
+  readFileSync(new URL('../../../dist/model.json', import.meta.url), 'utf8'),
+) as RuntimeModel;
+
+function example(id: string): string {
+  const value = MODEL.schemes[id]?.format?.examples_valid?.[0];
+  if (value === undefined) throw new Error(`no examples_valid for ${id}`);
+  return value;
+}
+
+// The model's public examples, read at runtime: no identifier digits are committed here (DEC-025).
+const KVK_EXAMPLE = example('kvk-number');
+const VAT_NL_EXAMPLE = example('vat-nl');
 
 const VALUE = 'NL001469630B01';
 const SENTENCE = 'Values are processed in your browser only and never stored or sent.';
@@ -295,3 +313,74 @@ test('D-02: one polite live region that speaks once per run and never while typi
   await page.waitForTimeout(300);
   await expect(status).toHaveText('Results ready for 3 values.');
 });
+
+const NO_RULE_CASES = [
+  {
+    lang: 'en',
+    start: './',
+    input: 'Identifiers, one per line',
+    button: 'Explain',
+    ui: UI_EN,
+    prefix: 'Relation between',
+    a: 'Scheme A',
+    b: 'Scheme B',
+  },
+  {
+    lang: 'nl',
+    start: './?lang=nl',
+    input: 'Identificatienummers, één per regel',
+    button: 'Uitleggen',
+    ui: UI_NL,
+    prefix: 'Relatie tussen',
+    a: 'Schema A',
+    b: 'Schema B',
+  },
+] as const;
+
+for (const item of NO_RULE_CASES) {
+  test(`a no-rule pair says only rules decide and links to the relation view with scheme ids only (${item.lang})`, async ({
+    page,
+  }) => {
+    await page.goto(item.start);
+    await page.getByRole('textbox', { name: item.input }).fill(`${KVK_EXAMPLE}\n${VAT_NL_EXAMPLE}`);
+    await page.getByRole('button', { name: item.button }).click();
+
+    const pair = page.locator('section[aria-labelledby="consistency-heading"] [data-pair="1-2"]');
+    await expect(pair).toContainText(item.ui.outcomeNoRule);
+    await expect(pair).toContainText(item.ui.noRuleRelateLead);
+
+    const links = pair.locator('a');
+    await expect(links).toHaveCount(3);
+    const hrefs = await links.evaluateAll((all) => all.map((a) => a.getAttribute('href') ?? ''));
+    expect(hrefs).toEqual([
+      '#/relate/kvk-number/eori',
+      '#/relate/kvk-number/vat',
+      '#/relate/kvk-number/vat-nl',
+    ]);
+    const digitRuns = [KVK_EXAMPLE, VAT_NL_EXAMPLE].flatMap(
+      (value) => value.match(/\d{8,}/g) ?? [],
+    );
+    for (const href of hrefs) {
+      expect(href).toMatch(/^#\/relate\/[a-z0-9-]+\/[a-z0-9-]+$/);
+      for (const id of href.split('/').slice(2))
+        expect(Object.hasOwn(MODEL.schemes, id)).toBe(true);
+      const lower = href.toLowerCase();
+      for (const value of [KVK_EXAMPLE, VAT_NL_EXAMPLE])
+        expect(lower).not.toContain(value.toLowerCase());
+      for (const run of digitRuns) expect(lower).not.toContain(run);
+    }
+    expect(((await links.nth(2).textContent()) ?? '').startsWith(item.prefix)).toBe(true);
+
+    const status = await page.locator('[role="status"]').textContent();
+    for (const value of [KVK_EXAMPLE, VAT_NL_EXAMPLE]) expect(status ?? '').not.toContain(value);
+
+    await expectNoAxeViolations(page, `the no-rule pair (${item.lang})`);
+
+    await links.nth(2).click();
+    await expect(page.getByLabel(item.a)).toHaveValue('kvk-number');
+    await expect(page.getByLabel(item.b)).toHaveValue('vat-nl');
+    expect(new URL(page.url()).hash).toBe('#/relate/kvk-number/vat-nl');
+    for (const value of [KVK_EXAMPLE, VAT_NL_EXAMPLE])
+      expect(page.url().toLowerCase()).not.toContain(value.toLowerCase());
+  });
+}

@@ -26,7 +26,11 @@ export const UI_NL = {
   pairLine: 'Waarden {a} en {b}',
   outcomeConsistent: 'consistent',
   outcomeInconsistent: 'inconsistent',
-  outcomeNoRule: 'geen regel in het model verbindt deze twee waarden',
+  outcomeNoRule:
+    'geen regel in het model leidt de ene waarde af uit de andere, dus de tool kan niet zeggen of ze bij elkaar horen',
+  noRuleRelateLead:
+    "Het model kan hun schema's wel met elkaar in verband brengen, maar een relatie alleen laat niet zien of de waarden bij elkaar horen:",
+  noRuleRelateLink: 'Relatie tussen {a} en {b}',
 
   warningsHeading: 'Opmerkingen van de engine',
   resultsReady: 'Resultaten klaar voor {count} waarden.',

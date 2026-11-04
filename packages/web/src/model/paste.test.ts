@@ -4,11 +4,19 @@
 // runtime from non-numeric strings.
 import { describe, expect, test } from 'vitest';
 import { createHost } from '../engine-host.ts';
+import { parseRoute, routeHref } from '../router.ts';
 import { loadDistJson } from '../testing/load-model.ts';
 import { normalise } from './normalise.ts';
-import { MAX_VALUES, runPaste } from './paste.ts';
+import { MAX_RELATE_LINKS, MAX_VALUES, relateLinks, runPaste } from './paste.ts';
 
-const { engine } = createHost(loadDistJson());
+const { engine, model } = createHost(loadDistJson());
+
+/** The model's own first valid example of a scheme, so no identifier digits are committed here. */
+function example(id: string): string {
+  const value = model.schemes[id]?.format?.examples_valid?.[0];
+  if (value === undefined) throw new Error(`no examples_valid for ${id}`);
+  return value;
+}
 
 const EORI = 'NL001469630';
 const VAT = 'NL001469630B01';
@@ -91,6 +99,7 @@ describe('runPaste edge cases', () => {
     expect(run.pairs).toHaveLength(1);
     expect(run.pairs[0]?.outcome).toBe('no-rule');
     expect(run.pairs[0]?.conclusion).toBeNull();
+    expect(run.pairs[0]?.relate).toEqual([{ a: 'eori', b: 'vat' }]);
     const schemes = (run.values[1]?.derivations ?? []).map((row) => row.derivation?.scheme);
     expect(schemes).not.toContain('rsin');
     expect(schemes).not.toContain('vat-nl');
@@ -178,5 +187,82 @@ describe('runPaste warnings in words', () => {
     expect(run.values[0]?.warnings.map((warning) => warning.code)).toContain('input-too-long');
     expect(run.values[0]?.recognise.data).toEqual([]);
     expect(run.values[0]?.ambiguity).toBeNull();
+  });
+});
+
+describe('relate links of a no-rule pair', () => {
+  test('one tried scheme on each side gives one link', () => {
+    expect(relateLinks({ a: ['x'], b: ['y'] })).toEqual([{ a: 'x', b: 'y' }]);
+  });
+
+  test('identical ids are skipped', () => {
+    expect(relateLinks({ a: ['eori'], b: ['eori'] })).toEqual([]);
+  });
+
+  test('a reversed duplicate is skipped', () => {
+    expect(relateLinks({ a: ['eori', 'vat'], b: ['eori', 'vat'] })).toEqual([
+      { a: 'eori', b: 'vat' },
+    ]);
+  });
+
+  test('an empty side gives no link', () => {
+    expect(relateLinks({ a: [], b: ['x'] })).toEqual([]);
+    expect(relateLinks({ a: ['x'], b: [] })).toEqual([]);
+  });
+
+  test('links are capped at MAX_RELATE_LINKS in the engine order', () => {
+    const links = relateLinks({ a: ['s1', 's2'], b: ['s3', 's4'] });
+    expect(links).toEqual([
+      { a: 's1', b: 's3' },
+      { a: 's1', b: 's4' },
+      { a: 's2', b: 's3' },
+    ]);
+    expect(links).toHaveLength(MAX_RELATE_LINKS);
+  });
+
+  test('a KvK number plus a Dutch VAT number links kvk-number to eori, vat and vat-nl by id only', () => {
+    const kvk = example('kvk-number');
+    const vatNl = example('vat-nl');
+    const run = runPaste(engine, [kvk, vatNl]);
+    expect(run.pairs).toHaveLength(1);
+    const pair = run.pairs[0];
+    expect(pair?.outcome).toBe('no-rule');
+    expect(pair?.relate).toEqual([
+      { a: 'kvk-number', b: 'eori' },
+      { a: 'kvk-number', b: 'vat' },
+      { a: 'kvk-number', b: 'vat-nl' },
+    ]);
+    for (const link of pair?.relate ?? []) {
+      expect(Object.hasOwn(model.schemes, link.a)).toBe(true);
+      expect(Object.hasOwn(model.schemes, link.b)).toBe(true);
+      const href = routeHref({ view: 'relate', a: link.a, b: link.b });
+      expect(parseRoute(href, model)).toEqual({ view: 'relate', a: link.a, b: link.b });
+      for (const value of [kvk, vatNl]) {
+        expect(href.toLowerCase()).not.toContain(value.toLowerCase());
+        for (const digits of value.match(/\d{8,}/g) ?? []) expect(href).not.toContain(digits);
+      }
+    }
+  });
+
+  test('a gated bare value that no partner derives gets no link', () => {
+    const run = runPaste(engine, [example('kvk-number'), RSIN]);
+    expect(run.pairs[0]?.outcome).toBe('no-rule');
+    expect(run.pairs[0]?.relate).toEqual([]);
+  });
+
+  test('an unrecognised value gets no link', () => {
+    const run = runPaste(engine, [example('vat-nl'), 'not-an-id']);
+    expect(run.pairs[0]?.outcome).toBe('no-rule');
+    expect(run.pairs[0]?.relate).toEqual([]);
+  });
+
+  test('the EORI triple is consistent throughout and shows no links', () => {
+    const run = runPaste(engine, [EORI, VAT, RSIN]);
+    expect(run.pairs.map((pair) => pair.outcome)).toEqual([
+      'consistent',
+      'consistent',
+      'consistent',
+    ]);
+    for (const pair of run.pairs) expect(pair.relate).toEqual([]);
   });
 });
