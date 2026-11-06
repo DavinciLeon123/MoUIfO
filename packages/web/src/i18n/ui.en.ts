@@ -20,7 +20,7 @@ export const UI_EN = {
   noSchemeFormat: 'No scheme in the model has this format.',
   deriveNothing: "The model's rules derive nothing from this value.",
   derivedValue: 'Derived value',
-  needTwoValues: 'Needs at least two values.',
+  needTwoValues: 'Paste at least two values to compare them with each other.',
   noPairs: 'There are no pairs to compare.',
   pairLine: 'Values {a} and {b}',
   outcomeConsistent: 'consistent',
@@ -42,7 +42,7 @@ export const UI_EN = {
   treatedAs: 'Treated as {scheme}, your choice',
 
   stepsHeading: 'Steps',
-  stepKind: 'Kind',
+  stepKind: 'Type',
   stepCondition: 'Condition',
   stepSource: 'Source',
   sourceTitlesNote: 'Source titles are shown in English, as the model gives them.',

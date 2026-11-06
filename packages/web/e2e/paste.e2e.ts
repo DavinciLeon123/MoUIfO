@@ -100,7 +100,7 @@ test('one value gives the reason that consistency needs two', async ({ page }) =
   await page.getByRole('textbox', { name: INPUT }).fill(VALUE);
   await page.getByRole('button', { name: 'Explain' }).click();
   await expect(page.getByRole('region', { name: 'Consistency' })).toContainText(
-    'Needs at least two values.',
+    'Paste at least two values to compare them with each other.',
   );
 });
 

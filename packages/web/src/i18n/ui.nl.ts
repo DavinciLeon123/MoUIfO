@@ -21,7 +21,7 @@ export const UI_NL = {
   noSchemeFormat: 'Geen schema in het model heeft dit formaat.',
   deriveNothing: 'De regels van het model leiden hieruit niets af.',
   derivedValue: 'Afgeleide waarde',
-  needTwoValues: 'Er zijn minstens twee waarden nodig.',
+  needTwoValues: 'Plak minstens twee waarden om ze met elkaar te vergelijken.',
   noPairs: 'Er zijn geen paren om te vergelijken.',
   pairLine: 'Waarden {a} en {b}',
   outcomeConsistent: 'consistent',
@@ -44,7 +44,7 @@ export const UI_NL = {
   treatedAs: 'Behandeld als {scheme}, uw keuze',
 
   stepsHeading: 'Stappen',
-  stepKind: 'Soort',
+  stepKind: 'Type',
   stepCondition: 'Voorwaarde',
   stepSource: 'Bron',
   sourceTitlesNote: 'Brontitels staan in het Engels, zoals het model ze geeft.',

@@ -14,6 +14,33 @@ const EORI_LABEL = 'Economic Operators Registration and Identification number';
 const CREDIT =
   'UID table v1.2 — Davinci Conclusion, as produced for the CoE-DSC. Licensed under CC BY 4.0.';
 
+test('a scheme page says Type and Identifies, in Dutch Type and Identificeert (handover findings)', async ({
+  page,
+}) => {
+  await page.goto('./#/schemes/vat');
+  await expect(page.getByRole('heading', { level: 3, name: 'Type', exact: true })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { level: 3, name: 'Identifies', exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText('The type of VAT identification number (vat) is identifier.'),
+  ).toBeVisible();
+  await expect(
+    page.getByText('VAT identification number (vat) identifies a taxpayer.'),
+  ).toBeVisible();
+  await expect(page.getByRole('heading', { level: 3, name: 'Kind', exact: true })).toHaveCount(0);
+
+  await page.goto('./?lang=nl#/schemes/vat');
+  await expect(page.getByRole('heading', { level: 3, name: 'Type', exact: true })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { level: 3, name: 'Identificeert', exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText('Het type van Btw-identificatienummer (vat) is identificatienummer.'),
+  ).toBeVisible();
+  await expect(page.getByText('identificeert een').first()).toBeVisible();
+});
+
 test('#/schemes/eori shows the sourced description, How to verify and seven jurisdictions', async ({
   page,
 }) => {
