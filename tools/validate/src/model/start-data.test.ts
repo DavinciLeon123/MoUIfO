@@ -1372,10 +1372,13 @@ describe('docs/gaps.md entries of plan 03-11 (DAT-02, DAT-05, DEC-019, DEC-049)'
     }
   });
 
-  test('the ISO 17442 entry records that the LEI format and check are not confirmed by the standard, and names the Peppol list as the source', () => {
+  test('the ISO 17442 entry records the LEI format and check at certain on the owner reading of the GLEIF pages (DEC-079), still not confirmed by the standard, with the Peppol list as the earlier source', () => {
     const section = gapSection('## ISO 17442 not read');
     expect(section).toContain('ISO 17442');
     expect(section).toContain('not confirmed');
+    expect(section).toContain('gleif-lei');
+    expect(section).toContain('DEC-079');
+    expect(section).toContain('at certain');
     expect(section).toContain('peppol-code-lists-9-7');
     expect(section).toContain('724500G3PJTYPL2L9M11');
   });
