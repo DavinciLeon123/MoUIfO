@@ -155,6 +155,10 @@ test('a conclusion opens by keyboard to its sourced steps and ends with How to v
   const steps = conclusion.locator('ol.steps > li');
   expect(await steps.count()).toBeGreaterThan(0);
   await expect(steps.filter({ hasText: 'Source:' }).first()).toBeVisible();
+  const firstStep = steps.first();
+  await expect(firstStep.locator('.step-phrase')).not.toBeEmpty();
+  await expect(firstStep.locator('.step-ref')).toContainText('Type:');
+  await expect(firstStep.locator('.step-ref')).toContainText('Reference:');
   const verify = conclusion.locator('p.verify');
   await expect(verify).toContainText('How to verify');
   expect(await verify.locator('a').count()).toBeGreaterThan(0);

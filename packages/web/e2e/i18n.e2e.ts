@@ -147,6 +147,7 @@ test('the Dutch EORI triple reads in Dutch, with English source titles tagged an
   expect(await titles.count()).toBeGreaterThan(0);
   await expect(open.locator('.marker', { hasText: /^EN$/ })).toHaveCount(1);
   await expect(open.locator('.steps')).toContainText('Bron:');
+  await expect(open.locator('.steps')).toContainText('Verwijzing:');
   await expect(open.locator('.verify')).toContainText('Zo controleert u het');
 });
 

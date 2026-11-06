@@ -85,7 +85,7 @@ describe('stepPhrase (handover findings, item 3)', () => {
     const authority = host.model.authorities[authorityId ?? ''];
     if (authorityId === undefined || authority === undefined) throw new Error('no authority');
     expect(phrase(step('fact', `authorities/${authorityId}`), 'en').text).toBe(
-      `Issuing authority ${modelText(authority.label, 'en').text} (${authorityId})`,
+      `Issuing authority ${modelText(authority.label, 'en').text}`,
     );
     const nl = host.model.jurisdictions.NL;
     if (nl === undefined) throw new Error('no NL');
