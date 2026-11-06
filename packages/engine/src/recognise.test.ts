@@ -436,3 +436,84 @@ describe('recognise ordering, hint grade and rank groups (D-05, D-06, DEC-063)',
     }
   });
 });
+
+describe('DEC-080: an NL-prefixed value of another shape is no EORI (real model)', () => {
+  // Every value is read from the model at runtime; digit runs are never committed here.
+  const vatNlValues = model.schemes['vat-nl']?.format?.examples_valid ?? [];
+  const eoriValues = model.schemes.eori?.format?.examples_valid ?? [];
+  const nlEori = eoriValues.find((value) => value.startsWith('NL'));
+  const deEori = eoriValues.find((value) => value.startsWith('DE'));
+  const mappedPrefixes = (model.vocab['country-prefix']?.values ?? []).map(
+    (member) => member.prefix,
+  );
+
+  test('the model examples exist', () => {
+    expect(vatNlValues.length).toBeGreaterThan(0);
+    expect(nlEori).toBeDefined();
+    expect(deEori).toBeDefined();
+  });
+
+  test.for(vatNlValues)('the vat-nl example %s is vat-nl first and no eori candidate', (value) => {
+    for (const hint of [undefined, { country: 'NL' }]) {
+      const { data } = hint ? engine.recognise(value, hint) : engine.recognise(value);
+      expect(schemesOf(data)).toEqual(['vat-nl', 'vat']);
+      expect(data[0]?.accepted).toBe(true);
+      expect(data[0]?.rank_group).toBe(1);
+      expect(data.some((candidate) => candidate.scheme === 'eori')).toBe(false);
+    }
+  });
+
+  test('the DE eori example stays eori certain through pattern 0 with one step', () => {
+    const eori = engine.recognise(deEori ?? '').data[0];
+    expect(eori?.scheme).toBe('eori');
+    expect(eori?.accepted).toBe(true);
+    expect(eori?.certainty).toBe('certain');
+    expect(eori?.format.pattern).toBe(0);
+    expect(eori?.explanation).toHaveLength(1);
+    expect(eori?.explanation[0]).toMatchObject({ kind: 'pattern', ref: 'eori/patterns/0' });
+    expect(eori?.explanation[0]?.source?.id).toBe('commission-eori');
+    expect(eori?.explanation.some((step) => step.kind === 'assumption')).toBe(false);
+  });
+
+  test('the NL eori example, and it plus one digit, stay eori certain through pattern 0', () => {
+    const eori = engine.recognise(nlEori ?? '').data[0];
+    expect(eori?.scheme).toBe('eori');
+    expect(eori?.certainty).toBe('certain');
+    expect(eori?.format).toEqual({ patterns: [true, true, false], pattern: 0 });
+    expect(eori?.explanation).toHaveLength(1);
+    expect(eori?.explanation.some((step) => step.kind === 'assumption')).toBe(false);
+    const sole = engine.recognise(`${nlEori ?? ''}0`).data[0];
+    expect(sole?.scheme).toBe('eori');
+    expect(sole?.certainty).toBe('certain');
+    expect(sole?.format).toEqual({ patterns: [true, false, true], pattern: 0 });
+  });
+
+  test.for(['ZZ', 'NA', 'NK', 'NM', 'NO', 'NZ', 'BE', 'GB', 'XI'])(
+    'prefix %s plus the DE example tail is eori certain through pattern 0',
+    (prefix) => {
+      if (['BE', 'GB', 'XI'].includes(prefix)) {
+        expect(mappedPrefixes).toContain(prefix);
+      } else {
+        expect(mappedPrefixes).not.toContain(prefix);
+      }
+      const eori = engine.recognise(`${prefix}${(deEori ?? '').slice(2)}`).data[0];
+      expect(eori?.scheme).toBe('eori');
+      expect(eori?.accepted).toBe(true);
+      expect(eori?.certainty).toBe('certain');
+      expect(eori?.format.pattern).toBe(0);
+      expect(eori?.explanation).toHaveLength(1);
+      expect(eori?.explanation.some((step) => step.kind === 'assumption')).toBe(false);
+    },
+  );
+
+  test('NL plus the DE example tail (15 digits) fits neither Dutch shape and is no eori', () => {
+    const { data } = engine.recognise(`NL${(deEori ?? '').slice(2)}`);
+    expect(data.some((candidate) => candidate.scheme === 'eori')).toBe(false);
+  });
+
+  test('the specificity of eori pattern 0 is 3 and is carried by its candidate', () => {
+    const regex = model.schemes.eori?.format?.patterns?.[0]?.regex ?? '';
+    expect(specificity(regex)).toBe(3);
+    expect(engine.recognise(deEori ?? '').data[0]?.specificity).toBe(3);
+  });
+});
