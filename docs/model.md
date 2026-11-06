@@ -90,11 +90,11 @@ Open questions in docs/gaps.md: [ICD codes stated only by the Peppol code list](
 - Abbreviation: EORI (certainty: certain, source: [commission-eori](https://taxation-customs.ec.europa.eu/customs-4/customs-procedures-import-and-export/customs-procedures/economic-operators-registration-and-identification-number-eori_en))
 - Availability: `public-restricted-details` (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
 - Format patterns:
-  - `^[A-Z]{2}[A-Z0-9]{1,15}$` (certainty: certain, source: [commission-eori](https://taxation-customs.ec.europa.eu/customs-4/customs-procedures-import-and-export/customs-procedures/economic-operators-registration-and-identification-number-eori_en))
+  - `^(?:[A-MO-Z][A-Z][A-Z0-9]{1,15}|N[A-KM-Z][A-Z0-9]{1,15}|NL[0-9]{9,10})$`; note: EU-wide form for every prefix except NL. For NL only the two Dutch shapes: NL + 9 digits (legal person, NL + RSIN, douane-eori-nl) and NL + 10 digits (sole proprietor, workbook, DEC-046), so an NL-prefixed value of another shape, such as a Dutch VAT number, is not read as an EORI (DEC-080). (certainty: certain, source: [commission-eori](https://taxation-customs.ec.europa.eu/customs-4/customs-procedures-import-and-export/customs-procedures/economic-operators-registration-and-identification-number-eori_en))
   - `^NL[0-9]{9}$`; condition: `entity_form legal-person`, `issuing_country NL` (certainty: certain, source: [douane-eori-nl](https://www.douane.nl/onderwerpen/invoer-en-uitvoer/nodig-bij-aangifte/eori-nummer/eori-nummer-aanvragen/))
   - `^NL[0-9]{10}$`; condition: `entity_form sole-proprietorship`, `issuing_country NL`; note: Workbook only (DEC-046), owner-accepted at likely on 2026-10-12. No rule derives it from the RSIN (D-08). (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
 - Valid examples: `NL001469630`, `DE123456789012345`
-- Invalid examples: `001469630`, `NL1469630123456789`, `nl001469630`
+- Invalid examples: `001469630`, `NL1469630123456789`, `nl001469630`, `NL001469630B01`
 - Roles:
   - `economic-operator` (certainty: certain, source: [commission-eori](https://taxation-customs.ec.europa.eu/customs-4/customs-procedures-import-and-export/customs-procedures/economic-operators-registration-and-identification-number-eori_en))
 - Applicability:
@@ -125,7 +125,7 @@ Open questions in docs/gaps.md: [ICD codes stated only by the Peppol code list](
 - Scope (en): required for international trade with EU and UK involving customs; for legal persons as well as single person enterprises
 - Notes (en): not a general business ID, often derived from one.
 
-Open questions in docs/gaps.md: [GB means the United Kingdom, but the GB EORI prefix covers Great Britain only](gaps.md#gb-means-the-united-kingdom-but-the-gb-eori-prefix-covers-great-britain-only); [EORI level claims of SPEC §10 (DEC-050)](gaps.md#eori-level-claims-of-spec-10-dec-050); [Dutch sole-proprietor EORI and the non-Dutch NL plus fi-number form](gaps.md#dutch-sole-proprietor-eori-and-the-non-dutch-nl-plus-fi-number-form); [Union Customs Code succession (Regulation (EU) 2026/2108)](gaps.md#union-customs-code-succession-regulation-eu-20262108); [Foreign EORI context and the inverse of eori-nl-from-rsin in relate (DEC-074)](gaps.md#foreign-eori-context-and-the-inverse-of-eori-nl-from-rsin-in-relate-dec-074)
+Open questions in docs/gaps.md: [GB means the United Kingdom, but the GB EORI prefix covers Great Britain only](gaps.md#gb-means-the-united-kingdom-but-the-gb-eori-prefix-covers-great-britain-only); [EORI level claims of SPEC §10 (DEC-050)](gaps.md#eori-level-claims-of-spec-10-dec-050); [Dutch sole-proprietor EORI and the non-Dutch NL plus fi-number form](gaps.md#dutch-sole-proprietor-eori-and-the-non-dutch-nl-plus-fi-number-form); [Union Customs Code succession (Regulation (EU) 2026/2108)](gaps.md#union-customs-code-succession-regulation-eu-20262108); [Foreign EORI context and the inverse of eori-nl-from-rsin in relate (DEC-074)](gaps.md#foreign-eori-context-and-the-inverse-of-eori-nl-from-rsin-in-relate-dec-074); [Generic EU EORI pattern excluded for NL-prefixed values](gaps.md#generic-eu-eori-pattern-excluded-for-nl-prefixed-values)
 
 ## euid
 
@@ -589,4 +589,4 @@ Open questions in docs/gaps.md: [Levels and roles without a source](gaps.md#leve
   - `move-to-other-country`: Always new (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
 - Scope (en): required for tax payments
 
-Open questions in docs/gaps.md: [Mod 97 check of the Dutch sole-proprietor VAT number](gaps.md#mod-97-check-of-the-dutch-sole-proprietor-vat-number); [Suffix after the B of the Dutch VAT number, and no RSIN-to-VAT rule (DEC-050)](gaps.md#suffix-after-the-b-of-the-dutch-vat-number-and-no-rsin-to-vat-rule-dec-050); [ICD codes stated only by the Peppol code list](gaps.md#icd-codes-stated-only-by-the-peppol-code-list); [IBAN component of the Peppol participant identifier](gaps.md#iban-component-of-the-peppol-participant-identifier)
+Open questions in docs/gaps.md: [Mod 97 check of the Dutch sole-proprietor VAT number](gaps.md#mod-97-check-of-the-dutch-sole-proprietor-vat-number); [Suffix after the B of the Dutch VAT number, and no RSIN-to-VAT rule (DEC-050)](gaps.md#suffix-after-the-b-of-the-dutch-vat-number-and-no-rsin-to-vat-rule-dec-050); [ICD codes stated only by the Peppol code list](gaps.md#icd-codes-stated-only-by-the-peppol-code-list); [IBAN component of the Peppol participant identifier](gaps.md#iban-component-of-the-peppol-participant-identifier); [Generic EU EORI pattern excluded for NL-prefixed values](gaps.md#generic-eu-eori-pattern-excluded-for-nl-prefixed-values)

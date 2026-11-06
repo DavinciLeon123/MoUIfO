@@ -388,3 +388,10 @@ These checks need a browser or a human reading, because the build environment ca
 - **Why it is not in the model:** no scope text was written for `bsn`, and the Phase 6 decision D-10 forbids the server from inventing a description, so the item shows only what the model holds.
 - **Open question:** should the model gain a scope text for `bsn`? DEC-029 states that `label`, `notes` and `scope` are descriptive text that no rule reasons on and need no source, so such a text needs no new source.
 - **Owner or next step:** the owner.
+
+## Generic EU EORI pattern excluded for NL-prefixed values
+
+- **Item:** the first `eori` pattern (EU-wide, `commission-eori`, certain) admits the prefix NL only as NL followed by 9 digits or NL followed by 10 digits (DEC-080). An NL-prefixed value of another shape, such as the Dutch VAT number of `vat-nl`, is not an `eori` candidate.
+- **Why it is not in the model:** the exclusion rests on two sources that each state one form: `douane-eori-nl` (the EORI of a legal person is NL followed by the RSIN, certain) and the workbook `landscape-v1-2` (the sole-proprietor form NL followed by 10 digits, likely, DEC-046). `commission-eori` states only the generic EU form, and no source read states that an NL-prefixed EORI can never take another form. The workbook's NL plus fi-number form has the 9-digit shape and is still admitted.
+- **Open question:** does Douane or the Commission state that every EORI issued with the prefix NL has one of these two shapes, or is another form in use?
+- **Owner or next step:** the owner. A Douane statement either confirms the exclusion or adds a pattern at its own certainty under a new DECISIONS row.
