@@ -1,7 +1,8 @@
 // Browser test of the bilingual site: D-05 and WEB-10 (the privacy sentence in both languages),
-// D-09 (a Dutch engine line without a dictionary entry falls back visibly), D-11 (language from
-// ?lang= or the browser, a toggle without reload, nothing stored, only lang in the URL) and WEB-09.
-// D-10 is checked on the sources of an opened step list. The only nine-digit run used is inside the public example value of SPEC section 10.
+// D-09 (a Dutch engine line without a dictionary entry falls back visibly), D-11 as amended by
+// DEC-078 (English unless ?lang=nl, whatever the browser language, a toggle without reload, nothing
+// stored, only lang in the URL) and WEB-09. D-10 is checked on the sources of an opened step list.
+// The only nine-digit run used is inside the public example value of SPEC section 10.
 import { expect, test } from '@playwright/test';
 import { expectNoAxeViolations } from './support.ts';
 
@@ -32,16 +33,16 @@ test('?lang=nl gives the Dutch page, the Dutch privacy sentence, html lang and t
 test.describe('a Dutch browser', () => {
   test.use({ locale: 'nl-NL' });
 
-  test('without a parameter the page is Dutch, and ?lang=en still gives English', async ({
+  test('without a parameter the page is English, and ?lang=nl gives Dutch (DEC-078)', async ({
     page,
   }) => {
     await page.goto('./');
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('UIO-kennismodel');
-    await expect(page.locator('html')).toHaveAttribute('lang', 'nl');
-    await page.goto('./?lang=en');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('UIO knowledge model');
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
-    await expect(page).toHaveTitle('UIO knowledge model');
+    await page.goto('./?lang=nl');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('UIO-kennismodel');
+    await expect(page.locator('html')).toHaveAttribute('lang', 'nl');
+    await expect(page).toHaveTitle('UIO-kennismodel');
   });
 });
 
