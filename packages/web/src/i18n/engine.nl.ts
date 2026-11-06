@@ -320,8 +320,8 @@ export const ENGINE_NL = {
       render: (c, ctx) =>
         `Het niveau van ${schemeName(ctx, param(c, 'scheme'))} is ${vocabWord(ctx, 'level', param(c, 'level'))}.`,
     },
-    // The role word falls back to the English label (marked EN) until part 2 of the handover test
-    // findings adds the Dutch role labels to model/vocab/role.yaml.
+    // The role word is the member's Dutch label (drafts, DEC-081), lowercased; a member without
+    // Dutch falls back to its English label and marks the sentence EN.
     'describe.role': {
       label: 'Identificeert',
       render: (c, ctx) => {

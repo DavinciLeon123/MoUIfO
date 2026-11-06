@@ -10,6 +10,7 @@ values:
       nl: Zeker
     definition:
       en: "The highest level (rank 3) in the ranking certain > likely > possible of SPEC section 5.1. It is the default certainty of a statement that follows from law or a standard (SPEC section 5.4)."
+      nl: "Het hoogste niveau (rang 3) in de rangorde zeker > waarschijnlijk > mogelijk van SPEC §5.1. Het is de standaardzekerheid van een uitspraak die volgt uit de wet of een standaard (SPEC §5.4)."
     rank: 3
   - id: likely
     label:
@@ -17,6 +18,7 @@ values:
       nl: Waarschijnlijk
     definition:
       en: "The middle level (rank 2) in the ranking certain > likely > possible of SPEC section 5.1. A statement that does not follow from law or a standard gets its certainty filled in explicitly (SPEC section 5.4)."
+      nl: "Het middelste niveau (rang 2) in de rangorde zeker > waarschijnlijk > mogelijk van SPEC §5.1. Bij een uitspraak die niet volgt uit de wet of een standaard wordt de zekerheid expliciet ingevuld (SPEC §5.4)."
     rank: 2
   - id: possible
     label:
@@ -24,4 +26,5 @@ values:
       nl: Mogelijk
     definition:
       en: "The lowest level (rank 1) in the ranking certain > likely > possible of SPEC section 5.1. A statement that does not follow from law or a standard gets its certainty filled in explicitly (SPEC section 5.4)."
+      nl: "Het laagste niveau (rang 1) in de rangorde zeker > waarschijnlijk > mogelijk van SPEC §5.1. Bij een uitspraak die niet volgt uit de wet of een standaard wordt de zekerheid expliciet ingevuld (SPEC §5.4)."
     rank: 1

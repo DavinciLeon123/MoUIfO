@@ -7,20 +7,28 @@ values:
   - id: taxpayer
     label:
       en: Taxpayer
+      nl: belastingbetaler
     definition:
       en: "The party acts as a taxpayer, for example a VAT or income tax subject (SPEC section 5.1)."
+      nl: "De partij treedt op als belastingbetaler, bijvoorbeeld als belastingplichtige voor de btw of de inkomstenbelasting (SPEC §5.1)."
   - id: economic-operator
     label:
       en: Economic operator
+      nl: marktdeelnemer
     definition:
       en: "The party acts as an economic operator, for example in cross-border trade involving customs (SPEC section 5.1)."
+      nl: "De partij treedt op als marktdeelnemer, bijvoorbeeld in grensoverschrijdende handel waarbij de douane betrokken is (SPEC §5.1)."
   - id: e-invoicing-participant
     label:
       en: E-invoicing participant
+      nl: deelnemer aan e-facturatie
     definition:
       en: "The party takes part in electronic invoicing, as sender or receiver (SPEC section 5.1)."
+      nl: "De partij neemt deel aan elektronische facturatie, als verzender of ontvanger (SPEC §5.1)."
   - id: financial-counterparty
     label:
       en: Financial counterparty
+      nl: financiële tegenpartij
     definition:
       en: "The party acts as a counterparty in a financial transaction or report (SPEC section 5.1)."
+      nl: "De partij treedt op als tegenpartij in een financiële transactie of rapportage (SPEC §5.1)."

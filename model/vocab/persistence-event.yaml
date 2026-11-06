@@ -7,30 +7,42 @@ values:
   - id: merger
     label:
       en: Merger
+      nl: fusie
     definition:
       en: "Two or more entities merge into one (SPEC section 5.1). Matches the workbook row \"Behaviour on merger\" of the persistence tab."
+      nl: "Twee of meer entiteiten fuseren tot één (SPEC §5.1). Komt overeen met de rij \"Behaviour on merger\" van het tabblad over persistentie in de werkmap."
   - id: acquisition-without-merger
     label:
       en: Acquisition without legal merger
+      nl: overname zonder juridische fusie
     definition:
       en: "One entity is acquired and no legal merger follows (SPEC section 5.1). Matches the workbook row \"Behaviour on acquisition no legal merger\"."
+      nl: "Eén entiteit wordt overgenomen en er volgt geen juridische fusie (SPEC §5.1). Komt overeen met de rij \"Behaviour on acquisition no legal merger\" van de werkmap."
   - id: split
     label:
       en: Split
+      nl: splitsing
     definition:
       en: "One entity is split into two or more entities (SPEC section 5.1). Matches the workbook row \"Behaviour on split\"."
+      nl: "Eén entiteit wordt gesplitst in twee of meer entiteiten (SPEC §5.1). Komt overeen met de rij \"Behaviour on split\" van de werkmap."
   - id: dissolution
     label:
       en: Dissolution
+      nl: ontbinding
     definition:
       en: "An entity is dissolved and ceases to exist (SPEC section 5.1). Matches the workbook row \"Behaviour on dissolution\"."
+      nl: "Een entiteit wordt ontbonden en houdt op te bestaan (SPEC §5.1). Komt overeen met de rij \"Behaviour on dissolution\" van de werkmap."
   - id: move-within-country
     label:
       en: Move within the country
+      nl: verhuizing binnen het land
     definition:
       en: "An entity moves to another address in the same country (SPEC section 5.1). Matches the workbook row \"Move within country\"."
+      nl: "Een entiteit verhuist naar een ander adres in hetzelfde land (SPEC §5.1). Komt overeen met de rij \"Move within country\" van de werkmap."
   - id: move-to-other-country
     label:
       en: Move to another country
+      nl: verhuizing naar een ander land
     definition:
       en: "An entity moves to another country (SPEC section 5.1). Matches the workbook row \"Move to other country\"."
+      nl: "Een entiteit verhuist naar een ander land (SPEC §5.1). Komt overeen met de rij \"Move to other country\" van de werkmap."
