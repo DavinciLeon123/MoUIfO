@@ -7,9 +7,9 @@ import { expect, test } from '@playwright/test';
 import { expectNoAxeViolations } from './support.ts';
 
 const EORI_VALUE = 'NL001469630';
-const EORI_FULL = 'NL001469630B01';
+const VAT_VALUE = 'NL001469630B01';
 const RSIN_VALUE = '001469630';
-const TRIPLE = `${EORI_VALUE}\n${EORI_FULL}\n${RSIN_VALUE}`;
+const TRIPLE = `${EORI_VALUE}\n${VAT_VALUE}\n${RSIN_VALUE}`;
 
 const EN_INPUT = 'Identifiers, one per line';
 const NL_INPUT = 'Identificatienummers, één per regel';
@@ -86,7 +86,7 @@ test('the toggle switches language in place and keeps the text and the results, 
   expect(stored.local).toBe(0);
   expect(stored.session).toBe(0);
   expect(stored.cookie).toBe('');
-  for (const value of [EORI_VALUE, EORI_FULL, RSIN_VALUE]) expect(stored.url).not.toContain(value);
+  for (const value of [EORI_VALUE, VAT_VALUE, RSIN_VALUE]) expect(stored.url).not.toContain(value);
 
   await page.getByRole('button', { name: 'English' }).click();
   expect(await page.evaluate(() => location.search)).toBe('?lang=en');
@@ -101,7 +101,7 @@ test('the toggle switches language in place and keeps the text and the results, 
 
 test('a Dutch engine line is Dutch and carries no not-translated marker', async ({ page }) => {
   await page.goto('./?lang=nl');
-  await page.getByRole('textbox', { name: NL_INPUT }).fill(EORI_FULL);
+  await page.getByRole('textbox', { name: NL_INPUT }).fill(EORI_VALUE);
   await page.getByRole('button', { name: 'Uitleggen' }).click();
   const line = page
     .getByRole('region', { name: 'Herkenning' })

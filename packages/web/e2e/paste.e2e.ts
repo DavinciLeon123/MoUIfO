@@ -33,9 +33,11 @@ test('a pasted value is recognised after Explain, with each certainty in words',
   await page.getByRole('textbox', { name: 'Identifiers, one per line' }).fill(VALUE);
   await page.getByRole('button', { name: 'Explain' }).click();
   const recognition = page.getByRole('region', { name: 'Recognition' });
-  await expect(recognition.getByRole('listitem').filter({ hasText: '(eori)' })).toContainText(
-    'Certain',
+  await expect(recognition.locator('[data-key="recognise.candidate"]').first()).toHaveAttribute(
+    'data-scheme',
+    'vat-nl',
   );
+  await expect(recognition.locator('[data-scheme="eori"]')).toHaveCount(0);
   await expect(recognition.getByRole('listitem').filter({ hasText: '(vat-nl)' })).toContainText(
     'Likely',
   );
@@ -127,7 +129,7 @@ test('the CSP meta comes first, requests stay same-origin and the URL never hold
   await page.goto('./');
   await page.getByRole('textbox', { name: 'Identifiers, one per line' }).fill(VALUE);
   await page.getByRole('button', { name: 'Explain' }).click();
-  await expect(page.getByRole('region', { name: 'Recognition' })).toContainText('(eori)');
+  await expect(page.getByRole('region', { name: 'Recognition' })).toContainText('(vat-nl)');
   const first = page.locator('head > *').first();
   await expect(first).toHaveAttribute('http-equiv', 'Content-Security-Policy');
   expect(await first.getAttribute('content')).toContain("connect-src 'none'");
@@ -354,13 +356,9 @@ for (const item of NO_RULE_CASES) {
     await expect(pair).toContainText(item.ui.noRuleRelateLead);
 
     const links = pair.locator('a');
-    await expect(links).toHaveCount(3);
+    await expect(links).toHaveCount(2);
     const hrefs = await links.evaluateAll((all) => all.map((a) => a.getAttribute('href') ?? ''));
-    expect(hrefs).toEqual([
-      '#/relate/kvk-number/eori',
-      '#/relate/kvk-number/vat',
-      '#/relate/kvk-number/vat-nl',
-    ]);
+    expect(hrefs).toEqual(['#/relate/kvk-number/vat', '#/relate/kvk-number/vat-nl']);
     const digitRuns = [KVK_EXAMPLE, VAT_NL_EXAMPLE].flatMap(
       (value) => value.match(/\d{8,}/g) ?? [],
     );
@@ -373,14 +371,14 @@ for (const item of NO_RULE_CASES) {
         expect(lower).not.toContain(value.toLowerCase());
       for (const run of digitRuns) expect(lower).not.toContain(run);
     }
-    expect(((await links.nth(2).textContent()) ?? '').startsWith(item.prefix)).toBe(true);
+    expect(((await links.nth(1).textContent()) ?? '').startsWith(item.prefix)).toBe(true);
 
     const status = await page.locator('[role="status"]').textContent();
     for (const value of [KVK_EXAMPLE, VAT_NL_EXAMPLE]) expect(status ?? '').not.toContain(value);
 
     await expectNoAxeViolations(page, `the no-rule pair (${item.lang})`);
 
-    await links.nth(2).click();
+    await links.nth(1).click();
     await expect(page.getByLabel(item.a)).toHaveValue('kvk-number');
     await expect(page.getByLabel(item.b)).toHaveValue('vat-nl');
     expect(new URL(page.url()).hash).toBe('#/relate/kvk-number/vat-nl');

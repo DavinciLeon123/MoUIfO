@@ -18,7 +18,11 @@ test('D-02 and D-06: the "What is this number?" chip fills the box and shows the
   await chip.click();
   await expect(page.getByRole('textbox', { name: INPUT })).toHaveValue(VAT_VALUE);
   const recognition = page.getByRole('region', { name: 'Recognition' });
-  await expect(recognition.locator('[data-scheme="eori"]').first()).toBeVisible();
+  await expect(recognition.locator('[data-key="recognise.candidate"]').first()).toHaveAttribute(
+    'data-scheme',
+    'vat-nl',
+  );
+  await expect(recognition.locator('[data-scheme="eori"]')).toHaveCount(0);
   expect(page.url()).not.toContain(VAT_VALUE);
 });
 
