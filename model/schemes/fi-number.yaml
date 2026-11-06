@@ -23,8 +23,10 @@ sources:
   default: landscape-v1-2
 scope:
   en: "all parties being assigned an RSIN now were assigned a fi-nummer in the past.\nForeign parties are assigned a fi-nummer if they:\n- apply for an EORI in NL\n- must pay VAT in NL"
+  nl: "alle partijen die nu een RSIN krijgen, kregen vroeger een fi-nummer.\nBuitenlandse partijen krijgen een fi-nummer als zij:\n- in NL een EORI aanvragen\n- in NL btw moeten betalen"
 notes:
   en: "Issued by the Tax Service until 2010, when the CoC (chamber of commerce) started issuing the RSIN instead."
+  nl: "Tot 2010 uitgegeven door de Belastingdienst; toen begon de KVK (Kamer van Koophandel) in plaats daarvan het RSIN uit te geven."
 format:
   patterns:
     - regex: "^[0-9]{9}$"

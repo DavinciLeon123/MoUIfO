@@ -468,3 +468,9 @@ button:disabled {
   border-color: var(--border);
   cursor: not-allowed;
 }
+
+/* The raw model reference of an explanation step: a small secondary detail after the phrase. */
+.step-ref {
+  color: var(--muted);
+  font-size: 0.85em;
+}

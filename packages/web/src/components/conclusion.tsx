@@ -1,6 +1,7 @@
 import type { ComponentChildren } from 'preact';
 import { useApp, useUi } from '../context.ts';
 import type { Certainty, Conclusion, Source, Step } from '../engine-host.ts';
+import { stepPhrase } from '../i18n/step.ts';
 import { certaintyLabel, conclusionText, fill, modelText, type Rendered } from '../i18n/text.ts';
 import type { Ui } from '../i18n/ui.en.ts';
 import { safeHref, verifyTargets } from '../model/verify.ts';
@@ -119,16 +120,24 @@ function StepSource({ source }: { source: Step['source'] }) {
   );
 }
 
+/**
+ * One explanation step: a plain phrase first, then certainty, condition and source, and last the
+ * step type and raw model reference as a small secondary detail.
+ */
 export function StepItem({ step }: { step: Step }) {
+  const { host, lang } = useApp();
   const ui = useUi();
   return (
     <li>
-      <span>
-        {ui.stepKind}: {ui[STEP_KIND[step.kind]]}
+      <span class="step-phrase">
+        <MarkedText rendered={stepPhrase(step, ui, { host, lang })} />
       </span>{' '}
-      <code>{step.ref}</code> <CertaintyBadge certainty={step.certainty} />{' '}
+      <CertaintyBadge certainty={step.certainty} />{' '}
       {step.condition === undefined ? null : <ConditionText condition={step.condition} />}{' '}
-      <StepSource source={step.source} />
+      <StepSource source={step.source} />{' '}
+      <small class="step-ref">
+        {ui.stepKind}: {ui[STEP_KIND[step.kind]]}; {ui.stepRef}: <code>{step.ref}</code>
+      </small>
     </li>
   );
 }

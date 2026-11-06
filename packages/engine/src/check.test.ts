@@ -394,7 +394,7 @@ describe('check: context', () => {
   test('entity_form sole-proprietorship makes every pair no-rule', () => {
     const result = engine.check(TRIPLE, { entity_form: 'sole-proprietorship' });
     expect(result.data.map((each) => each.outcome)).toEqual(['no-rule', 'no-rule', 'no-rule']);
-    expect(result.data[0]?.tried.b).toEqual(['eori', 'vat']);
+    expect(result.data[0]?.tried.b).toEqual(['vat']);
     expect(result.data[2]?.tried.b).toEqual([]);
     expect(result.conclusions).toEqual([]);
   });
@@ -402,7 +402,7 @@ describe('check: context', () => {
   test('entity_form fiscal-unit conditions out the vat-nl checksum: one warning, no value in it (D-01, DEC-072)', () => {
     const result = engine.check(TRIPLE, { entity_form: 'fiscal-unit' });
     expect(result.data.map((each) => each.outcome)).toEqual(['no-rule', 'no-rule', 'no-rule']);
-    expect(result.data[0]?.tried.b).toEqual(['eori', 'vat', 'vat-nl']);
+    expect(result.data[0]?.tried.b).toEqual(['vat', 'vat-nl']);
     const applicability = result.warnings.filter((each) => each.code === 'no-applicable-checksum');
     expect(applicability).toHaveLength(1);
     expect(applicability[0]?.ref).toBe('vat-nl');

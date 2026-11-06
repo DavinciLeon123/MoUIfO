@@ -7,40 +7,56 @@ values:
   - id: legal-entity
     label:
       en: Legal entity
+      nl: juridische entiteit
     definition:
       en: "The identifier identifies a legal entity, an organisation with legal personality (SPEC section 5.1)."
+      nl: "Het identificatienummer identificeert een juridische entiteit, een organisatie met rechtspersoonlijkheid (SPEC §5.1)."
   - id: legal-entity-top-level
     label:
       en: Legal entity, top level
+      nl: juridische entiteit, hoogste niveau
     definition:
       en: "The identifier identifies the top-level legal entity of a group or hierarchy (SPEC section 5.1)."
+      nl: "Het identificatienummer identificeert de juridische entiteit op het hoogste niveau van een groep of hiërarchie (SPEC §5.1)."
   - id: enterprise
     label:
       en: Enterprise
+      nl: onderneming
     definition:
       en: "The identifier identifies an enterprise, the economic unit that carries out activities (SPEC section 5.1)."
+      nl: "Het identificatienummer identificeert een onderneming, de economische eenheid die activiteiten uitvoert (SPEC §5.1)."
   - id: establishment
     label:
       en: Establishment
+      nl: vestiging
     definition:
       en: "The identifier identifies an establishment, a physical or operational unit of an enterprise (SPEC section 5.1)."
+      nl: "Het identificatienummer identificeert een vestiging, een fysieke of operationele eenheid van een onderneming (SPEC §5.1)."
   - id: natural-person
     label:
       en: Natural person
+      nl: natuurlijk persoon
     definition:
       en: "The identifier identifies a natural person (SPEC section 5.1)."
+      nl: "Het identificatienummer identificeert een natuurlijk persoon (SPEC §5.1)."
   - id: government-organisation
     label:
       en: Government organisation
+      nl: overheidsorganisatie
     definition:
       en: "The identifier identifies a government organisation (SPEC section 5.1)."
+      nl: "Het identificatienummer identificeert een overheidsorganisatie (SPEC §5.1)."
   - id: location
     label:
       en: Location
+      nl: locatie
     definition:
       en: "The identifier identifies a location, not necessarily a legal entity (SPEC section 5.1)."
+      nl: "Het identificatienummer identificeert een locatie, niet noodzakelijk een juridische entiteit (SPEC §5.1)."
   - id: declaring-entity
     label:
       en: Declaring entity
+      nl: aangever
     definition:
       en: "The identifier identifies the entity that makes a declaration, for example in a customs or tax context (SPEC section 5.1)."
+      nl: "Het identificatienummer identificeert de entiteit die een aangifte doet, bijvoorbeeld in een douane- of belastingcontext (SPEC §5.1)."

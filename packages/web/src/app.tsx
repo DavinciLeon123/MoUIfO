@@ -237,10 +237,10 @@ function Page({ route, onLang }: { route: Route; onLang: (lang: Lang) => void })
   );
 }
 
-/** D-11: the language from `?lang=` or the browser, once; the toggle then switches it in memory. */
+/** D-11 as amended by DEC-078: English unless `?lang=nl`, once; the toggle then switches it in memory. */
 export function App({ host }: { host: Host }) {
   const verify = useMemo(() => createVerifyIndex(host), [host]);
-  const [lang, setLang] = useState<Lang>(() => resolveLang(location.search, navigator.language));
+  const [lang, setLang] = useState<Lang>(() => resolveLang(location.search));
   // Switching writes only `?lang=` and keeps the path and the hash; the page is not reloaded, so
   // the typed text and the results stay.
   const switchTo = (next: Lang) => {

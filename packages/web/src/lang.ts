@@ -1,15 +1,16 @@
 import type { Lang } from './i18n/text.ts';
 
 /**
- * D-11: the language of the page. `?lang=` counts only when it is exactly `en` or `nl` (the first
- * value when it is repeated); otherwise a browser language that starts with `nl` gives Dutch and
- * anything else, including no language at all, gives English. The raw parameter is never returned,
- * rendered or echoed, so a shared link cannot put its own text on the page.
+ * D-11 as amended by DEC-078: the language of the page is English unless the query string has an
+ * explicit `?lang=nl`, whatever the browser language, until the Dutch model text is complete.
+ * `lang` counts only when it is exactly `en` or `nl` (the first value when it is repeated) in a
+ * query string that starts with `?`, as `location.search` does. The raw parameter is never
+ * returned, rendered or echoed, so a shared link cannot put its own text on the page.
  */
-export function resolveLang(search: string, navigatorLanguage: string | undefined): Lang {
+export function resolveLang(search: string): Lang {
+  if (!search.startsWith('?')) return 'en';
   const asked = new URLSearchParams(search).get('lang');
-  if (asked === 'en' || asked === 'nl') return asked;
-  return navigatorLanguage?.toLowerCase().startsWith('nl') === true ? 'nl' : 'en';
+  return asked === 'nl' ? 'nl' : 'en';
 }
 
 /** The query string that carries the language: the only parameter the site ever writes (D-11). */

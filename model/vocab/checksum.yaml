@@ -10,19 +10,25 @@ values:
       nl: Elfproef
     definition:
       en: "The Dutch 11-proof with weights 9 down to 2 and -1 for the last digit. It applies to BSN and RSIN, which therefore cannot be told apart by checksum (SPEC section 6.4)."
+      nl: "De Nederlandse elfproef (11-proef) met gewichten van 9 aflopend tot 2 en -1 voor het laatste cijfer. Hij geldt voor het BSN en het RSIN, die daardoor niet met de controlesom van elkaar te onderscheiden zijn (SPEC §6.4)."
   - id: iso7064-mod97-10
     label:
       en: ISO 7064 mod 97-10
+      nl: ISO 7064 mod 97-10
     definition:
       en: "The ISO 7064 mod 97-10 check, used for the LEI and for the VAT id of sole proprietorships (SPEC section 6.4)."
+      nl: "De controle volgens ISO 7064 mod 97-10, gebruikt voor de LEI en voor het btw-identificatienummer van eenmanszaken (SPEC §6.4)."
   - id: gs1-mod10
     label:
       en: GS1 mod 10
+      nl: GS1 mod 10
     definition:
       en: "The GS1 mod 10 check digit, used for the GLN (SPEC section 6.4)."
+      nl: "Het controlecijfer volgens GS1 mod 10, gebruikt voor de GLN (SPEC §6.4)."
   - id: none
     label:
       en: None
       nl: Geen
     definition:
       en: "No checksum applies. A scheme that names this id claims, with a source, that its values carry no check digit (SPEC section 6.4)."
+      nl: "Er geldt geen controlesom. Een schema dat dit id noemt, stelt met een bron dat zijn waarden geen controlecijfer bevatten (SPEC §6.4)."

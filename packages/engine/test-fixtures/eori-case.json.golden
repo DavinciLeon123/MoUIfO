@@ -27,7 +27,7 @@
               "source": "commission-eori"
             }
           ],
-          "specificity": 0,
+          "specificity": 3,
           "hint_grade": 1,
           "rank_group": 1
         },
@@ -98,35 +98,6 @@
     {
       "data": [
         {
-          "scheme": "eori",
-          "accepted": true,
-          "certainty": "certain",
-          "format": {
-            "patterns": [
-              true,
-              false,
-              false
-            ],
-            "pattern": 0
-          },
-          "checksum": {
-            "outcomes": [],
-            "result": "none",
-            "entry": null
-          },
-          "explanation": [
-            {
-              "kind": "pattern",
-              "ref": "eori/patterns/0",
-              "certainty": "certain",
-              "source": "commission-eori"
-            }
-          ],
-          "specificity": 0,
-          "hint_grade": 1,
-          "rank_group": 1
-        },
-        {
           "scheme": "vat-nl",
           "accepted": true,
           "certainty": "likely",
@@ -172,7 +143,7 @@
           ],
           "specificity": 3,
           "hint_grade": 2,
-          "rank_group": 2
+          "rank_group": 1
         },
         {
           "scheme": "vat",
@@ -199,26 +170,10 @@
           ],
           "specificity": 0,
           "hint_grade": 1,
-          "rank_group": 3
+          "rank_group": 2
         }
       ],
       "conclusions": [
-        {
-          "key": "recognise.candidate",
-          "params": {
-            "scheme": "eori"
-          },
-          "statement": "The value has the format of Economic Operators Registration and Identification number (eori).",
-          "certainty": "certain",
-          "explanation": [
-            {
-              "kind": "pattern",
-              "ref": "eori/patterns/0",
-              "certainty": "certain",
-              "source": "commission-eori"
-            }
-          ]
-        },
         {
           "key": "recognise.candidate",
           "params": {
@@ -948,7 +903,6 @@
             "vat"
           ],
           "b": [
-            "eori",
             "vat",
             "vat-nl"
           ]
@@ -1119,7 +1073,6 @@
         ],
         "tried": {
           "a": [
-            "eori",
             "vat",
             "vat-nl"
           ],

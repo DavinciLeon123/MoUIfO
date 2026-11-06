@@ -15,8 +15,10 @@ sources:
   default: commission-eori
 scope:
   en: "required for international trade with EU and UK involving customs; for legal persons as well as single person enterprises"
+  nl: "vereist voor internationale handel met de EU en het VK waarbij de douane betrokken is; zowel voor rechtspersonen als voor eenmanszaken"
 notes:
   en: "not a general business ID, often derived from one."
+  nl: "geen algemeen identificatienummer voor bedrijven, vaak afgeleid van zo'n nummer."
 context_from:
   issuing_country:
     capture:
@@ -27,9 +29,10 @@ context_from:
     source: commission-eori
 format:
   patterns:
-    - regex: "^[A-Z]{2}[A-Z0-9]{1,15}$"
+    - regex: "^(?:[A-MO-Z][A-Z][A-Z0-9]{1,15}|N[A-KM-Z][A-Z0-9]{1,15}|NL[0-9]{9,10})$"
       certainty: certain
       source: commission-eori
+      note: "EU-wide form for every prefix except NL. For NL only the two Dutch shapes: NL + 9 digits (legal person, NL + RSIN, douane-eori-nl) and NL + 10 digits (sole proprietor, workbook, DEC-046), so an NL-prefixed value of another shape, such as a Dutch VAT number, is not read as an EORI (DEC-080)."
     - regex: "^NL[0-9]{9}$"
       certainty: certain
       source: douane-eori-nl
@@ -50,6 +53,7 @@ format:
     - "001469630"
     - "NL1469630123456789"
     - "nl001469630"
+    - "NL001469630B01"
 roles:
   - value: economic-operator
     certainty: certain

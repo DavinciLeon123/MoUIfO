@@ -1,13 +1,56 @@
 import type { Conclusion, Warning } from '../engine-host.ts';
-import type { EngineDictionary } from './engine-keys.ts';
+import type { EngineContext, EngineDictionary } from './engine-keys.ts';
 
-/** English is the engine's own text: a sentence is shown exactly as the engine wrote it (D-09). */
+/*
+ * English is the engine's own text: a sentence is shown exactly as the engine wrote it (D-09), except
+ * describe.kind and describe.role, which the web words itself (handover test findings, owner
+ * 2026-11-06) while the engine source stays unchanged.
+ */
+type Own<T> = Readonly<Record<string, T>>;
+
+/** A table lookup that never resolves `constructor` or `__proto__`. */
+function own<T>(record: Own<T>, id: string): T | undefined {
+  return Object.hasOwn(record, id) ? record[id] : undefined;
+}
+
+/** The scheme's English label followed by its id, as the engine writes it; the id when unknown. */
+function schemeName(ctx: EngineContext, id: string): string {
+  const scheme = own(ctx.host.model.schemes, id);
+  return scheme === undefined ? id : `${ctx.label(scheme.label)} (${id})`;
+}
+
+/** The role vocabulary member as a lower-case word; the code when the member is missing. */
+function roleWord(ctx: EngineContext, role: string): string {
+  const member = own(ctx.host.model.vocab, 'role')?.values.find((each) => each.id === role);
+  const word = member?.label === undefined ? role : ctx.label(member.label);
+  return word.charAt(0).toLowerCase() + word.slice(1);
+}
+
+const KIND_WORD: Readonly<Record<string, string>> = {
+  identifier: 'identifier',
+  register: 'register',
+  composite: 'composite identifier',
+};
+
+const kindSentence = (conclusion: Conclusion, ctx: EngineContext): string => {
+  const kind = conclusion.params.kind ?? '';
+  const word = own(KIND_WORD, kind) ?? kind;
+  return `The type of ${schemeName(ctx, conclusion.params.scheme ?? '')} is ${word}.`;
+};
+
+const roleSentence = (conclusion: Conclusion, ctx: EngineContext): string => {
+  const word = roleWord(ctx, conclusion.params.role ?? '');
+  const article = /^[aeiou]/.test(word) ? 'an' : 'a';
+  return `${schemeName(ctx, conclusion.params.scheme ?? '')} identifies ${article} ${word}.`;
+};
+
 const statement = (conclusion: Conclusion): string => conclusion.statement;
 const message = (warning: Warning): string => warning.message;
 
 /**
  * The English dictionary. `label` is the short field label (a row heading); `render` returns the
- * engine's `statement` or `message` unchanged, so English never drifts from the engine.
+ * engine's `statement` or `message` unchanged, so English never drifts from the engine, except the
+ * two keys the web words itself.
  */
 export const ENGINE_EN = {
   conclusions: {
@@ -24,7 +67,7 @@ export const ENGINE_EN = {
     'recognise.component-not-accepted': { label: 'Component not accepted', render: statement },
     'relate.path': { label: 'Connection', render: statement },
     'describe.issuer-instance': { label: 'Issuer instance', render: statement },
-    'describe.kind': { label: 'Kind', render: statement },
+    'describe.kind': { label: 'Type', render: kindSentence },
     'describe.issuer': { label: 'Issuer', render: statement },
     'describe.jurisdiction': { label: 'Jurisdiction', render: statement },
     'describe.abbreviation': { label: 'Abbreviation', render: statement },
@@ -35,7 +78,7 @@ export const ENGINE_EN = {
     'describe.validation-source': { label: 'Validation source', render: statement },
     'describe.mandatory': { label: 'Mandatory use', render: statement },
     'describe.level': { label: 'Level', render: statement },
-    'describe.role': { label: 'Role', render: statement },
+    'describe.role': { label: 'Identifies', render: roleSentence },
     'describe.applicability': { label: 'Applicability', render: statement },
     'describe.persistence': { label: 'Persistence', render: statement },
     'describe.trust': { label: 'Trust scores', render: statement },

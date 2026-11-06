@@ -2,6 +2,7 @@
 id: gln
 label:
   en: Global Location Number
+  nl: Global Location Number
 abbreviation: GLN
 kind: identifier
 issuer: gs1
@@ -22,8 +23,10 @@ sources:
   default: gs1-gln-allocation-rules
 scope:
   en: "legal entities, locations, functions; mainly for EDI and e-invoicing"
+  nl: "juridische entiteiten, locaties, functies; vooral voor EDI en e-facturatie"
 notes:
   en: "not relevant for identification, but possibly for search purposes"
+  nl: "niet relevant voor identificatie, maar mogelijk voor zoekdoeleinden"
 format:
   patterns:
     - regex: "^[0-9]{13}$"

@@ -17,7 +17,7 @@ import {
   WARNING_CODES,
   type WarningCode,
 } from './engine-keys.ts';
-import { conclusionText, warningText } from './text.ts';
+import { conclusionText, fieldLabel, warningText } from './text.ts';
 
 const ENGINE_SRC = new URL('../../../engine/src/', import.meta.url);
 const KEY_SHAPE = /^(?:recognise|derive|check|relate|applicability|describe)\.[a-z0-9-]+$/;
@@ -102,6 +102,9 @@ function scanEngineSource(): Scan {
 }
 
 const ENGLISH: EngineDictionary = ENGINE_EN;
+
+/** The two keys the web words itself in English; every other English sentence is the engine's. */
+const WEB_WORDED = new Set(['describe.kind', 'describe.role']);
 
 const sorted = (values: Iterable<string>): string[] => [...values].sort();
 
@@ -245,8 +248,9 @@ describe('runtime sweep over the real model (D-12)', () => {
     expect(codes.size).toBeGreaterThanOrEqual(15);
   });
 
-  test('English renders the engine sentence exactly', () => {
+  test('English renders the engine sentence exactly for every key except the two web-worded ones', () => {
     for (const { conclusion, data } of seen.conclusions) {
+      if (WEB_WORDED.has(conclusion.key)) continue;
       const rendered = conclusionText(conclusion, { host, lang: 'en', data });
       expect(rendered).toEqual({ text: conclusion.statement, lang: 'en', marker: null });
       expect(
@@ -268,6 +272,34 @@ describe('runtime sweep over the real model (D-12)', () => {
         }),
       ).toBe(warning.message);
     }
+  });
+
+  test('describe.kind and describe.role are worded by the web in both languages (handover findings)', () => {
+    const text = (id: string, key: string, lang: 'en' | 'nl') => {
+      const conclusion = host.engine.describe(id).conclusions.find((each) => each.key === key);
+      if (conclusion === undefined) throw new Error(`${id} has no ${key}`);
+      return conclusionText(conclusion, { host, lang });
+    };
+    expect(text('vat', 'describe.kind', 'en').text).toBe(
+      'The type of VAT identification number (vat) is identifier.',
+    );
+    expect(text('vat', 'describe.role', 'en').text).toBe(
+      'VAT identification number (vat) identifies a taxpayer.',
+    );
+    expect(text('eori', 'describe.role', 'en').text).toBe(
+      'Economic Operators Registration and Identification number (eori) identifies an economic operator.',
+    );
+    expect(text('vat', 'describe.kind', 'nl').text).toBe(
+      'Het type van Btw-identificatienummer (vat) is identificatienummer.',
+    );
+    const member = host.model.vocab.role?.values.find((each) => each.id === 'taxpayer');
+    const word = member?.label?.nl ?? member?.label?.en ?? '';
+    const lower = word.charAt(0).toLowerCase() + word.slice(1);
+    const role = text('vat', 'describe.role', 'nl');
+    expect(role.text).toBe(`Btw-identificatienummer (vat) identificeert een ${lower}.`);
+    expect(role.marker).toBe(member?.label?.nl === undefined ? 'en' : null);
+    expect(fieldLabel('describe.kind', 'en')).toBe('Type');
+    expect(fieldLabel('describe.role', 'nl')).toBe('Identificeert');
   });
 
   test('every conclusion the sweep saw renders in Dutch: filled, not marked untranslated, no placeholder', () => {

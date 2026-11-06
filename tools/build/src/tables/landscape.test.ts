@@ -50,7 +50,7 @@ describe('landscapeRows', () => {
     expect(eori.availability).toBe('public-restricted-details [likely]');
     expect(eori.format).toBe(
       [
-        '^[A-Z]{2}[A-Z0-9]{1,15}$ [certain]',
+        '^(?:[A-MO-Z][A-Z][A-Z0-9]{1,15}|N[A-KM-Z][A-Z0-9]{1,15}|NL[0-9]{9,10})$ [certain]',
         '^NL[0-9]{9}$ [certain]',
         '^NL[0-9]{10}$ [likely]',
       ].join('; '),
