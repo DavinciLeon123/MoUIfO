@@ -14,6 +14,7 @@ sources:
   default: dir-2017-1132
 scope:
   en: "only applicable for \"companies\" (in Dutch: vennootschappen); main use: communication between national registers about structural changes in the company"
+  nl: "alleen van toepassing op \"vennootschappen\" (in het Engels: companies); voornaamste gebruik: communicatie tussen nationale registers over structurele wijzigingen in de vennootschap"
 format:
   patterns:
     - regex: '^NL\.KVK\.[0-9]{8}$'

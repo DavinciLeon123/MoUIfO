@@ -3,5 +3,7 @@ id: dun-bradstreet
 kind: class
 label:
   en: Dun & Bradstreet
+  nl: Dun & Bradstreet
 definition:
   en: The company that assigns D-U-N-S numbers.
+  nl: Het bedrijf dat D-U-N-S-nummers toekent.

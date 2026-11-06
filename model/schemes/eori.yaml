@@ -15,8 +15,10 @@ sources:
   default: commission-eori
 scope:
   en: "required for international trade with EU and UK involving customs; for legal persons as well as single person enterprises"
+  nl: "vereist voor internationale handel met de EU en het VK waarbij de douane betrokken is; zowel voor rechtspersonen als voor eenmanszaken"
 notes:
   en: "not a general business ID, often derived from one."
+  nl: "geen algemeen identificatienummer voor bedrijven, vaak afgeleid van zo'n nummer."
 context_from:
   issuing_country:
     capture:

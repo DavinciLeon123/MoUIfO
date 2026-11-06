@@ -76,7 +76,9 @@ Open questions in docs/gaps.md: [Elfproef of RSIN, BSN and fi-number rests on th
   - `move-within-country`: Unchanged (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
   - `move-to-other-country`: Can persist (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
 - Scope (en): international trading, government assignments, app development, credit checks
+- Scope (nl): internationale handel, overheidsopdrachten, app-ontwikkeling, kredietcontroles
 - Notes (en): Workbook remarks: the number is intentionally permanent and not to be reused; the prerequisite is proof of existence (for example a CoC number); the workbook rates validation as very limited (US only). The Peppol list's structure text still describes a check digit (docs/gaps.md).
+- Notes (nl): Opmerkingen in de werkmap: het nummer is bewust permanent en wordt niet hergebruikt; het vereiste is een bewijs van bestaan (bijvoorbeeld een KVK-nummer); de werkmap beoordeelt de validatie als zeer beperkt (alleen VS). De structuurtekst van de Peppol-lijst beschrijft nog een controlecijfer (docs/gaps.md).
 
 Open questions in docs/gaps.md: [ICD codes stated only by the Peppol code list](gaps.md#icd-codes-stated-only-by-the-peppol-code-list); [Levels and roles without a source](gaps.md#levels-and-roles-without-a-source); [D-U-N-S check digit stated both ways by the Peppol list](gaps.md#d-u-n-s-check-digit-stated-both-ways-by-the-peppol-list)
 
@@ -123,7 +125,9 @@ Open questions in docs/gaps.md: [ICD codes stated only by the Peppol code list](
   - `move-within-country`: Unchanged (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
   - `move-to-other-country`: New EORI (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
 - Scope (en): required for international trade with EU and UK involving customs; for legal persons as well as single person enterprises
+- Scope (nl): vereist voor internationale handel met de EU en het VK waarbij de douane betrokken is; zowel voor rechtspersonen als voor eenmanszaken
 - Notes (en): not a general business ID, often derived from one.
+- Notes (nl): geen algemeen identificatienummer voor bedrijven, vaak afgeleid van zo'n nummer.
 
 Open questions in docs/gaps.md: [GB means the United Kingdom, but the GB EORI prefix covers Great Britain only](gaps.md#gb-means-the-united-kingdom-but-the-gb-eori-prefix-covers-great-britain-only); [EORI level claims of SPEC §10 (DEC-050)](gaps.md#eori-level-claims-of-spec-10-dec-050); [Dutch sole-proprietor EORI and the non-Dutch NL plus fi-number form](gaps.md#dutch-sole-proprietor-eori-and-the-non-dutch-nl-plus-fi-number-form); [Union Customs Code succession (Regulation (EU) 2026/2108)](gaps.md#union-customs-code-succession-regulation-eu-20262108); [Foreign EORI context and the inverse of eori-nl-from-rsin in relate (DEC-074)](gaps.md#foreign-eori-context-and-the-inverse-of-eori-nl-from-rsin-in-relate-dec-074); [Generic EU EORI pattern excluded for NL-prefixed values](gaps.md#generic-eu-eori-pattern-excluded-for-nl-prefixed-values)
 
@@ -160,6 +164,7 @@ Open questions in docs/gaps.md: [GB means the United Kingdom, but the GB EORI pr
   - `move-within-country`: Unchanged (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
   - `move-to-other-country`: New EUID (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
 - Scope (en): only applicable for "companies" (in Dutch: vennootschappen); main use: communication between national registers about structural changes in the company
+- Scope (nl): alleen van toepassing op "vennootschappen" (in het Engels: companies); voornaamste gebruik: communicatie tussen nationale registers over structurele wijzigingen in de vennootschap
 
 Open questions in docs/gaps.md: [Dutch EUID register identifier (Implementing Regulation (EU) 2021/1042 annex)](gaps.md#dutch-euid-register-identifier-implementing-regulation-eu-20211042-annex); [Levels and roles without a source](gaps.md#levels-and-roles-without-a-source); [EUID participating countries (BRIS)](gaps.md#euid-participating-countries-bris); [EUID abbreviation and the issuing-country condition of its prerequisite (plan 03-08)](gaps.md#euid-abbreviation-and-the-issuing-country-condition-of-its-prerequisite-plan-03-08); [DAT-05 reading: two primary workbook URLs not registered (DEC-051)](gaps.md#dat-05-reading-two-primary-workbook-urls-not-registered-dec-051)
 
@@ -186,13 +191,16 @@ Open questions in docs/gaps.md: [Dutch EUID register identifier (Implementing Re
   - `move-within-country`: Unchanged (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
   - `move-to-other-country`: New number (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
 - Scope (en): all parties being assigned an RSIN now were assigned a fi-nummer in the past. Foreign parties are assigned a fi-nummer if they: - apply for an EORI in NL - must pay VAT in NL
+- Scope (nl): alle partijen die nu een RSIN krijgen, kregen vroeger een fi-nummer. Buitenlandse partijen krijgen een fi-nummer als zij: - in NL een EORI aanvragen - in NL btw moeten betalen
 - Notes (en): Issued by the Tax Service until 2010, when the CoC (chamber of commerce) started issuing the RSIN instead.
+- Notes (nl): Tot 2010 uitgegeven door de Belastingdienst; toen begon de KVK (Kamer van Koophandel) in plaats daarvan het RSIN uit te geven.
 
 Open questions in docs/gaps.md: [Elfproef of RSIN, BSN and fi-number rests on the workbook](gaps.md#elfproef-of-rsin-bsn-and-fi-number-rests-on-the-workbook); [BSN and fi-number have no valid example](gaps.md#bsn-and-fi-number-have-no-valid-example); [No rule from the fi-number to the RSIN or the OIN](gaps.md#no-rule-from-the-fi-number-to-the-rsin-or-the-oin); [Levels and roles without a source](gaps.md#levels-and-roles-without-a-source); [Persistence summary ratings and not-assessed cells (DAT-08, plan 03-14)](gaps.md#persistence-summary-ratings-and-not-assessed-cells-dat-08-plan-03-14)
 
 ## gln
 
 - English label: Global Location Number
+- Dutch label: Global Location Number
 - Issuer: GS1 (`gs1`) (certainty: certain, source: [gs1-gln-allocation-rules](https://ref.gs1.org/standards/gln-allocation/))
 - Jurisdiction: Worldwide (`GLOBAL`) (certainty: certain, source: [gs1-gln-allocation-rules](https://ref.gs1.org/standards/gln-allocation/))
 - Kind: `identifier` (certainty: certain, source: [gs1-gln-allocation-rules](https://ref.gs1.org/standards/gln-allocation/))
@@ -222,7 +230,9 @@ Open questions in docs/gaps.md: [Elfproef of RSIN, BSN and fi-number rests on th
   - `move-within-country`: Unchanged (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
   - `move-to-other-country`: New GLN (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
 - Scope (en): legal entities, locations, functions; mainly for EDI and e-invoicing
+- Scope (nl): juridische entiteiten, locaties, functies; vooral voor EDI en e-facturatie
 - Notes (en): not relevant for identification, but possibly for search purposes
+- Notes (nl): niet relevant voor identificatie, maar mogelijk voor zoekdoeleinden
 
 Open questions in docs/gaps.md: [ICD codes stated only by the Peppol code list](gaps.md#icd-codes-stated-only-by-the-peppol-code-list); [IBAN component of the Peppol participant identifier](gaps.md#iban-component-of-the-peppol-participant-identifier); [GS1 check digit text](gaps.md#gs1-check-digit-text)
 
@@ -245,7 +255,9 @@ Open questions in docs/gaps.md: [ICD codes stated only by the Peppol code list](
   - `BE`: `verifiable` (certainty: certain, source: [kbo-public-search](https://kbopub.economie.fgov.be/kbopub/zoeknummerform.html?lang=en))
 - Validation source: [KBO Public Search (FOD Economie)](https://kbopub.economie.fgov.be/kbopub/zoeknummerform.html?lang=en) (certainty: certain, source: [kbo-public-search](https://kbopub.economie.fgov.be/kbopub/zoeknummerform.html?lang=en))
 - Scope (en): the enterprise number of an entity registered in the Belgian Crossroads Bank for Enterprises (CBE); the CBE Public Search displays the public data of all registered entities, including their establishment units
+- Scope (nl): het ondernemingsnummer van een entiteit die is ingeschreven in de Belgische Kruispuntbank van Ondernemingen (KBO); KBO Public Search toont de openbare gegevens van alle ingeschreven entiteiten, inclusief hun vestigingseenheden
 - Notes (en): The workbook has no column for this scheme. The owner decided on 2026-10-12 to omit the equivalent-in relation to kvk-number and the Belgian check digit (DEC-048); both are logged in docs/gaps.md.
+- Notes (nl): De werkmap heeft geen kolom voor dit schema. De eigenaar besloot op 2026-10-12 de relatie equivalent-in met kvk-number en het Belgische controlecijfer weg te laten (DEC-048); beide zijn vastgelegd in docs/gaps.md.
 
 Open questions in docs/gaps.md: [ICD codes stated only by the Peppol code list](gaps.md#icd-codes-stated-only-by-the-peppol-code-list); [Levels and roles without a source](gaps.md#levels-and-roles-without-a-source); [KBO equivalent-in relation to the KVK number (DEC-048)](gaps.md#kbo-equivalent-in-relation-to-the-kvk-number-dec-048); [Belgian enterprise-number check digit (DEC-048)](gaps.md#belgian-enterprise-number-check-digit-dec-048); [Official Belgian KBO sources not readable](gaps.md#official-belgian-kbo-sources-not-readable); [KBO trust and persistence](gaps.md#kbo-trust-and-persistence); [KBO availability and applicability rest on an inference (plan 03-12)](gaps.md#kbo-availability-and-applicability-rest-on-an-inference-plan-03-12)
 
@@ -279,7 +291,9 @@ Open questions in docs/gaps.md: [ICD codes stated only by the Peppol code list](
   - `dissolution`: Ceases (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
   - `move-within-country`: New number (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
 - Scope (en): multiple branches of one business in different locations
+- Scope (nl): meerdere vestigingen van één onderneming op verschillende locaties
 - Notes (en): Each branch has its own number. The workbook says it is not searchable in itself.
+- Notes (nl): Elke vestiging heeft een eigen nummer. Volgens de werkmap is het op zichzelf niet doorzoekbaar.
 
 Open questions in docs/gaps.md: [Persistence summary ratings and not-assessed cells (DAT-08, plan 03-14)](gaps.md#persistence-summary-ratings-and-not-assessed-cells-dat-08-plan-03-14)
 
@@ -318,12 +332,14 @@ Open questions in docs/gaps.md: [Persistence summary ratings and not-assessed ce
   - `move-within-country`: Unchanged (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
   - `move-to-other-country`: New number (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
 - Scope (en): required in many formal activities
+- Scope (nl): vereist bij veel formele activiteiten
 
 Open questions in docs/gaps.md: [Dutch EUID register identifier (Implementing Regulation (EU) 2021/1042 annex)](gaps.md#dutch-euid-register-identifier-implementing-regulation-eu-20211042-annex); [ICD codes stated only by the Peppol code list](gaps.md#icd-codes-stated-only-by-the-peppol-code-list); [Levels and roles without a source](gaps.md#levels-and-roles-without-a-source); [One validation source per scheme](gaps.md#one-validation-source-per-scheme); [IBAN component of the Peppol participant identifier](gaps.md#iban-component-of-the-peppol-participant-identifier); [KBO equivalent-in relation to the KVK number (DEC-048)](gaps.md#kbo-equivalent-in-relation-to-the-kvk-number-dec-048); [EUID abbreviation and the issuing-country condition of its prerequisite (plan 03-08)](gaps.md#euid-abbreviation-and-the-issuing-country-condition-of-its-prerequisite-plan-03-08)
 
 ## lei
 
 - English label: Legal Entity Identifier
+- Dutch label: Legal Entity Identifier
 - Issuer: LEI issuing organisation (Local Operating Unit) (`local-operating-unit`) (certainty: certain, source: [gleif-lei-issuers](https://www.gleif.org/en/organizational-identity/get-an-lei-vlei/get-an-lei-find-lei-issuing-organizations))
 - Jurisdiction: Worldwide (`GLOBAL`) (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
 - Kind: `identifier` (certainty: certain, source: [peppol-code-lists-9-7](https://docs.peppol.eu/edelivery/codelists/))
@@ -354,7 +370,9 @@ Open questions in docs/gaps.md: [Dutch EUID register identifier (Implementing Re
   - `move-within-country`: Unchanged (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
   - `move-to-other-country`: New registration (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
 - Scope (en): entities involved in financial transactions (stocks, bonds etc.), for risk assessment purposes (AML, CTF); natural persons are not required to have an LEI
+- Scope (nl): entiteiten die betrokken zijn bij financiële transacties (aandelen, obligaties enz.), ten behoeve van risicobeoordeling (AML, CTF); natuurlijke personen zijn niet verplicht een LEI te hebben
 - Notes (en): Workbook remarks: costly and cumbersome for SMEs; the workbook gives the validity as limited to 1 year, which the model has no field for. The workbook has one LEI column.
+- Notes (nl): Opmerkingen in de werkmap: kostbaar en omslachtig voor het mkb; de werkmap geeft de geldigheid op als beperkt tot 1 jaar, waarvoor het model geen veld heeft. De werkmap heeft één kolom voor de LEI.
 
 Open questions in docs/gaps.md: [ICD codes stated only by the Peppol code list](gaps.md#icd-codes-stated-only-by-the-peppol-code-list); [Levels and roles without a source](gaps.md#levels-and-roles-without-a-source); [ISO 17442 not read](gaps.md#iso-17442-not-read); [LEI validation page not readable](gaps.md#lei-validation-page-not-readable); [LEI columns of the workbook](gaps.md#lei-columns-of-the-workbook); [Workbook references row has no scheme field (plan 03-15)](gaps.md#workbook-references-row-has-no-scheme-field-plan-03-15)
 
@@ -398,7 +416,9 @@ Open questions in docs/gaps.md: [ICD codes stated only by the Peppol code list](
   - `move-within-country`: Unchanged (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
   - `move-to-other-country`: New OIN (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
 - Scope (en): Everyone engaged in digital communication with the Dutch government (eHerkenning)
+- Scope (nl): Iedereen die digitaal communiceert met de Nederlandse overheid (eHerkenning)
 - Notes (en): Based on the RSIN if there is no KvK number. OINs assigned by a TSP are not publicly searchable.
+- Notes (nl): Gebaseerd op het RSIN als er geen KVK-nummer is. OIN's die door een TSP zijn toegekend, zijn niet openbaar doorzoekbaar.
 
 Open questions in docs/gaps.md: [No rule from the fi-number to the RSIN or the OIN](gaps.md#no-rule-from-the-fi-number-to-the-rsin-or-the-oin); [ICD codes stated only by the Peppol code list](gaps.md#icd-codes-stated-only-by-the-peppol-code-list); [Levels and roles without a source](gaps.md#levels-and-roles-without-a-source); [IBAN component of the Peppol participant identifier](gaps.md#iban-component-of-the-peppol-participant-identifier); [Certainty of the OIN forward rules (plan 03-09)](gaps.md#certainty-of-the-oin-forward-rules-plan-03-09); [DAT-05 reading: two primary workbook URLs not registered (DEC-051)](gaps.md#dat-05-reading-two-primary-workbook-urls-not-registered-dec-051)
 
@@ -438,7 +458,9 @@ Open questions in docs/gaps.md: [No rule from the fi-number to the RSIN or the O
   - `move-within-country`: Unchanged (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
   - `move-to-other-country`: New ID (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
 - Scope (en): (inter)national e-invoicing through the Peppol network
+- Scope (nl): (inter)nationale e-facturatie via het Peppol-netwerk
 - Notes (en): not relevant for identification
+- Notes (nl): niet relevant voor identificatie
 
 Open questions in docs/gaps.md: [ICD codes stated only by the Peppol code list](gaps.md#icd-codes-stated-only-by-the-peppol-code-list); [Levels and roles without a source](gaps.md#levels-and-roles-without-a-source); [IBAN component of the Peppol participant identifier](gaps.md#iban-component-of-the-peppol-participant-identifier); [Peppol participant identifier wrapper syntax](gaps.md#peppol-participant-identifier-wrapper-syntax); [DAT-06 reading: items in the model without a primary confirmation (DEC-051)](gaps.md#dat-06-reading-items-in-the-model-without-a-primary-confirmation-dec-051)
 
@@ -469,7 +491,9 @@ Open questions in docs/gaps.md: [ICD codes stated only by the Peppol code list](
   - `dissolution`: Ceases (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
   - `move-within-country`: Unchanged (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
 - Scope (en): information on governmental organisations only
+- Scope (nl): alleen informatie over overheidsorganisaties
 - Notes (en): A register, not an identifier: a URL is used for identification.
+- Notes (nl): Een register, geen identificatienummer: voor identificatie wordt een URL gebruikt.
 
 Open questions in docs/gaps.md: [Levels and roles without a source](gaps.md#levels-and-roles-without-a-source); [Persistence summary ratings and not-assessed cells (DAT-08, plan 03-14)](gaps.md#persistence-summary-ratings-and-not-assessed-cells-dat-08-plan-03-14)
 
@@ -514,6 +538,7 @@ Open questions in docs/gaps.md: [Levels and roles without a source](gaps.md#leve
   - `move-within-country`: Unchanged (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
   - `move-to-other-country`: New RSIN (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
 - Scope (en): legal person equivalent of BSN; used for digital communication with Dutch government
+- Scope (nl): tegenhanger van het BSN voor rechtspersonen; gebruikt voor digitale communicatie met de Nederlandse overheid
 
 Open questions in docs/gaps.md: [Elfproef of RSIN, BSN and fi-number rests on the workbook](gaps.md#elfproef-of-rsin-bsn-and-fi-number-rests-on-the-workbook); [No rule from the fi-number to the RSIN or the OIN](gaps.md#no-rule-from-the-fi-number-to-the-rsin-or-the-oin); [Foreign EORI context and the inverse of eori-nl-from-rsin in relate (DEC-074)](gaps.md#foreign-eori-context-and-the-inverse-of-eori-nl-from-rsin-in-relate-dec-074)
 
@@ -548,6 +573,7 @@ Open questions in docs/gaps.md: [Elfproef of RSIN, BSN and fi-number rests on th
   - `move-within-country`: Sometimes new (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
   - `move-to-other-country`: Always new (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
 - Scope (en): required for tax payments
+- Scope (nl): vereist voor belastingbetalingen
 
 Open questions in docs/gaps.md: [Levels and roles without a source](gaps.md#levels-and-roles-without-a-source)
 
@@ -588,5 +614,6 @@ Open questions in docs/gaps.md: [Levels and roles without a source](gaps.md#leve
   - `move-within-country`: Sometimes new (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
   - `move-to-other-country`: Always new (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
 - Scope (en): required for tax payments
+- Scope (nl): vereist voor belastingbetalingen
 
 Open questions in docs/gaps.md: [Mod 97 check of the Dutch sole-proprietor VAT number](gaps.md#mod-97-check-of-the-dutch-sole-proprietor-vat-number); [Suffix after the B of the Dutch VAT number, and no RSIN-to-VAT rule (DEC-050)](gaps.md#suffix-after-the-b-of-the-dutch-vat-number-and-no-rsin-to-vat-rule-dec-050); [ICD codes stated only by the Peppol code list](gaps.md#icd-codes-stated-only-by-the-peppol-code-list); [IBAN component of the Peppol participant identifier](gaps.md#iban-component-of-the-peppol-participant-identifier); [Generic EU EORI pattern excluded for NL-prefixed values](gaps.md#generic-eu-eori-pattern-excluded-for-nl-prefixed-values)

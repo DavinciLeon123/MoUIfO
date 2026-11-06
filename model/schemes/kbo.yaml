@@ -20,8 +20,10 @@ sources:
   default: kbo-public-search
 scope:
   en: "the enterprise number of an entity registered in the Belgian Crossroads Bank for Enterprises (CBE); the CBE Public Search displays the public data of all registered entities, including their establishment units"
+  nl: "het ondernemingsnummer van een entiteit die is ingeschreven in de Belgische Kruispuntbank van Ondernemingen (KBO); KBO Public Search toont de openbare gegevens van alle ingeschreven entiteiten, inclusief hun vestigingseenheden"
 notes:
   en: "The workbook has no column for this scheme. The owner decided on 2026-10-12 to omit the equivalent-in relation to kvk-number and the Belgian check digit (DEC-048); both are logged in docs/gaps.md."
+  nl: "De werkmap heeft geen kolom voor dit schema. De eigenaar besloot op 2026-10-12 de relatie equivalent-in met kvk-number en het Belgische controlecijfer weg te laten (DEC-048); beide zijn vastgelegd in docs/gaps.md."
 format:
   patterns:
     - regex: "^[01][0-9]{9}$"

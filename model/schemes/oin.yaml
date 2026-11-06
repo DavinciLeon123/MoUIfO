@@ -20,8 +20,10 @@ sources:
   default: oin-stelsel-2-1-0
 scope:
   en: "Everyone engaged in digital communication with the Dutch government (eHerkenning)"
+  nl: "Iedereen die digitaal communiceert met de Nederlandse overheid (eHerkenning)"
 notes:
   en: "Based on the RSIN if there is no KvK number. OINs assigned by a TSP are not publicly searchable."
+  nl: "Gebaseerd op het RSIN als er geen KVK-nummer is. OIN's die door een TSP zijn toegekend, zijn niet openbaar doorzoekbaar."
 format:
   patterns:
     - regex: "^[0-9]{20}$"

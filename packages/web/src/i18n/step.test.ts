@@ -109,10 +109,25 @@ describe('stepPhrase (handover findings, item 3)', () => {
     }
   });
 
-  test('in Dutch a scheme without a Dutch label uses its English label, marked en', () => {
+  test('in Dutch a scheme with a Dutch label uses it, unmarked (DEC-081)', () => {
     const lei = host.model.schemes.lei;
-    if (lei === undefined || lei.label.nl !== undefined) return;
+    expect(lei).toBeDefined();
+    const nl = lei?.label.nl;
+    expect(nl).toBeDefined();
     const rendered = phrase(step('fact', 'lei/kind'), 'nl');
+    expect(rendered.marker).toBeNull();
+    expect(rendered.text).toContain(nl);
+  });
+
+  test('in Dutch a scheme without a Dutch label falls back to its English label, marked en', () => {
+    const copy = structuredClone(loadDistJson()) as {
+      schemes: Record<string, { label: { en: string; nl?: string } } | undefined>;
+    };
+    const lei = copy.schemes.lei;
+    if (lei === undefined) throw new Error('no scheme lei');
+    delete lei.label.nl;
+    const without = createHost(copy);
+    const rendered = stepPhrase(step('fact', 'lei/kind'), UI_NL, { host: without, lang: 'nl' });
     expect(rendered.marker).toBe('en');
     expect(rendered.text).toContain(lei.label.en);
   });

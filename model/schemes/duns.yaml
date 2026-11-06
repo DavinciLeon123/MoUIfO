@@ -26,8 +26,10 @@ sources:
   default: dnb-duns
 scope:
   en: "international trading, government assignments, app development, credit checks"
+  nl: "internationale handel, overheidsopdrachten, app-ontwikkeling, kredietcontroles"
 notes:
   en: "Workbook remarks: the number is intentionally permanent and not to be reused; the prerequisite is proof of existence (for example a CoC number); the workbook rates validation as very limited (US only). The Peppol list's structure text still describes a check digit (docs/gaps.md)."
+  nl: "Opmerkingen in de werkmap: het nummer is bewust permanent en wordt niet hergebruikt; het vereiste is een bewijs van bestaan (bijvoorbeeld een KVK-nummer); de werkmap beoordeelt de validatie als zeer beperkt (alleen VS). De structuurtekst van de Peppol-lijst beschrijft nog een controlecijfer (docs/gaps.md)."
 format:
   patterns:
     - regex: "^[0-9]{9}$"

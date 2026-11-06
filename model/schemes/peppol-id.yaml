@@ -16,8 +16,10 @@ sources:
   default: peppol-code-lists-9-7
 scope:
   en: "(inter)national e-invoicing through the Peppol network"
+  nl: "(inter)nationale e-facturatie via het Peppol-netwerk"
 notes:
   en: "not relevant for identification"
+  nl: "niet relevant voor identificatie"
 components:
   - prefix: "0106"
     scheme: kvk-number

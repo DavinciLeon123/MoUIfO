@@ -22,6 +22,7 @@ sources:
   default: kvk-numbers
 scope:
   en: "required in many formal activities"
+  nl: "vereist bij veel formele activiteiten"
 format:
   patterns:
     - regex: "^[0-9]{8}$"

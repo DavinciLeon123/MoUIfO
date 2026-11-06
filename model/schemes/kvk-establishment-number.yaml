@@ -14,8 +14,10 @@ sources:
   default: kvk-establishment
 scope:
   en: "multiple branches of one business in different locations"
+  nl: "meerdere vestigingen van één onderneming op verschillende locaties"
 notes:
   en: "Each branch has its own number. The workbook says it is not searchable in itself."
+  nl: "Elke vestiging heeft een eigen nummer. Volgens de werkmap is het op zichzelf niet doorzoekbaar."
 format:
   patterns:
     - regex: "^[0-9]{12}$"

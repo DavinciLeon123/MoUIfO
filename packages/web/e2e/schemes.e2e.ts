@@ -6,9 +6,33 @@
 // covers the scheme list, the header navigation, focus and title on every route, the DEC-024
 // credit line and axe (WEB-08) on the list and a scheme page in both languages. Task 3 covers the
 // relation graph (D-15): an SVG with a title, a visible text list with the same edges, node links
-// and the page of a scheme without relations.
-import { expect, test } from '@playwright/test';
+// and the page of a scheme without relations. DEC-081 covers the Dutch model texts (drafts): every
+// expectation is read from dist/model.json, so a text without nl expects the English text with the
+// EN marker and no test fails when a future text lacks nl.
+import { readFileSync } from 'node:fs';
+import { expect, type Locator, test } from '@playwright/test';
+import { UI_NL } from '../src/i18n/ui.nl.ts';
 import { expectNoAxeViolations } from './support.ts';
+
+type Text = { en: string; nl?: string };
+type RuntimeModel = {
+  schemes: Record<string, { label: Text; scope?: Text; notes?: Text } | undefined>;
+};
+const MODEL = JSON.parse(
+  readFileSync(new URL('../../../dist/model.json', import.meta.url), 'utf8'),
+) as RuntimeModel;
+
+/** A model text on the Dutch page: its nl unmarked when present, else its en with one EN marker. */
+async function expectDutchModelText(element: Locator, text: Text): Promise<void> {
+  if (text.nl !== undefined) {
+    await expect(element).toContainText(text.nl);
+    await expect(element.locator('.marker')).toHaveCount(0);
+  } else {
+    await expect(element).toContainText(text.en);
+    await expect(element.locator('.marker')).toHaveCount(1);
+    await expect(element.locator('.marker')).toHaveText(UI_NL.markerEn);
+  }
+}
 
 const EORI_LABEL = 'Economic Operators Registration and Identification number';
 const CREDIT =
@@ -312,4 +336,17 @@ test('D-15, D-10: in Dutch the graph labels use the model and rule or component 
   await expect(relations.locator('svg.graph title')).toHaveText(/^Relaties van /);
   await expect(relations.locator('.relation-list')).toContainText('onderdeel 0106');
   await expect(relations.locator('.relation-list')).not.toContainText('component 0106');
+});
+
+test("D-10, DEC-081: in Dutch the lei page shows the model's Dutch label, scope and notes", async ({
+  page,
+}) => {
+  const lei = MODEL.schemes.lei;
+  if (lei === undefined) throw new Error('no scheme lei in dist/model.json');
+  await page.goto('./?lang=nl#/schemes/lei');
+  await expectDutchModelText(page.getByRole('heading', { level: 1 }), lei.label);
+  const paragraph = (label: string) =>
+    page.locator('p').filter({ has: page.locator('strong', { hasText: label }) });
+  if (lei.scope !== undefined) await expectDutchModelText(paragraph(UI_NL.scopeLabel), lei.scope);
+  if (lei.notes !== undefined) await expectDutchModelText(paragraph(UI_NL.notesLabel), lei.notes);
 });
