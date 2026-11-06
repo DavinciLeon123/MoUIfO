@@ -67,9 +67,9 @@ describe('recognise candidate rules on the real model (DEC-063, Pitfalls 3 and 1
     expect(eori?.explanation.some((step) => step.kind === 'assumption')).toBe(false);
   });
 
-  test('the value with a B suffix gives eori, vat and vat-nl, all accepted', () => {
+  test('the value with a B suffix gives vat and vat-nl, both accepted, and no eori (DEC-080)', () => {
     const { data } = engine.recognise(EORI_B01);
-    expect([...schemesOf(data)].sort()).toEqual(['eori', 'vat', 'vat-nl']);
+    expect([...schemesOf(data)].sort()).toEqual(['vat', 'vat-nl']);
     expect(data.every((candidate) => candidate.accepted)).toBe(true);
   });
 
@@ -330,6 +330,7 @@ describe('specificity of a regex source (DEC-064)', () => {
   test.for([
     ['^NL[0-9]{9}B[0-9]{2}$', 3],
     ['^[A-Z]{2}[A-Z0-9]{1,15}$', 0],
+    ['^(?:[A-MO-Z][A-Z][A-Z0-9]{1,15}|N[A-KM-Z][A-Z0-9]{1,15}|NL[0-9]{9,10})$', 3],
     ['^NL\\.KVK\\.[0-9]{8}$', 7],
     ['^iso6523-actorid-upis::[0-9]{4}:[A-Za-z0-9]+$', 23],
     ['^NL[0-9]{9}$', 2],
@@ -367,12 +368,12 @@ describe('recognise ordering, hint grade and rank groups (D-05, D-06, DEC-063)',
     expect(warnings.map((w) => w.code)).toEqual(['possible-personal-identifier']);
   });
 
-  test('the value prefix NL ranks eori, vat-nl and vat in three rank groups', () => {
+  test('the value prefix NL ranks vat-nl before vat in two rank groups (DEC-080)', () => {
     const { data } = engine.recognise(EORI_B01);
-    expect(schemesOf(data)).toEqual(['eori', 'vat-nl', 'vat']);
-    expect(data.map((c) => c.certainty)).toEqual(['certain', 'likely', 'likely']);
-    expect(data.map((c) => c.hint_grade)).toEqual([1, 2, 1]);
-    expect(data.map((c) => c.rank_group)).toEqual([1, 2, 3]);
+    expect(schemesOf(data)).toEqual(['vat-nl', 'vat']);
+    expect(data.map((c) => c.certainty)).toEqual(['likely', 'likely']);
+    expect(data.map((c) => c.hint_grade)).toEqual([2, 1]);
+    expect(data.map((c) => c.rank_group)).toEqual([1, 2]);
   });
 
   test('every candidate carries the specificity of its deciding pattern', () => {

@@ -199,8 +199,8 @@ const COLLISIONS: Collision[] = [
   {
     scheme: 'vat-nl',
     index: 0,
-    candidates: ['eori', 'vat', 'vat-nl'],
-    accepted: ['eori', 'vat', 'vat-nl'],
+    candidates: ['vat', 'vat-nl'],
+    accepted: ['vat', 'vat-nl'],
   },
   { scheme: 'euid', index: 0, candidates: ['euid'], accepted: ['euid'] },
   { scheme: 'peppol-id', index: 0, candidates: ['peppol-id'], accepted: ['peppol-id'] },
