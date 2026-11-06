@@ -1108,26 +1108,53 @@ describe('lei, the LEI with ISO 7064 mod 97-10 and its registration-authority re
     expect(checkValue(formatOf(lei), '724500G3PJTYPL2L9M12').accepted).toBe(false);
   });
 
-  test('its pattern and its iso7064-mod97-10 entry are both likely and sourced to the Peppol list (ISO 17442 not read, DEC-049)', () => {
+  test('its pattern and its iso7064-mod97-10 entry are both certain on the GLEIF LEI page, by the owner reading of 2026-11-06 (DEC-079; ISO 17442 not read)', () => {
     const format = formatOf(scheme('lei'));
     expect(listOf(format.patterns)).toEqual([
       expect.objectContaining({
         regex: '^[A-Z0-9]{18}[0-9]{2}$',
-        certainty: 'likely',
-        source: 'peppol-code-lists-9-7',
+        certainty: 'certain',
+        source: 'gleif-lei',
+        note: expect.stringContaining('DEC-079'),
       }),
     ]);
     expect(listOf(format.checksum)).toEqual([
       expect.objectContaining({
         algorithm: 'iso7064-mod97-10',
-        certainty: 'likely',
-        source: 'peppol-code-lists-9-7',
+        certainty: 'certain',
+        source: 'gleif-lei',
+        note: expect.stringContaining('DEC-079'),
       }),
     ]);
   });
 
-  test('is a GLOBAL identifier issued by the local-operating-unit class, with its ICD 0199 and EAS 0199 at likely in the long form (DEC-052)', () => {
+  test('both GLEIF sources exist as register-doc entries dated by the read date (DEC-042, DEC-079)', () => {
+    expect(load('model/sources/gleif-lei.yaml')).toEqual({
+      id: 'gleif-lei',
+      title:
+        'The Legal Entity Identifier (LEI) - LEI & vLEI - Organizational Identity \u2013 GLEIF',
+      type: 'register-doc',
+      date: '2026-11-06',
+      url: 'https://www.gleif.org/en/organizational-identity/lei-vlei/the-legal-entity-identifier-lei',
+      publisher: 'GLEIF',
+    });
+    expect(load('model/sources/gleif-lei-issuers.yaml')).toEqual({
+      id: 'gleif-lei-issuers',
+      title: 'Get an LEI - Get an LEI/vLEI - Organizational Identity \u2013 GLEIF',
+      type: 'register-doc',
+      date: '2026-11-06',
+      url: 'https://www.gleif.org/en/organizational-identity/get-an-lei-vlei/get-an-lei-find-lei-issuing-organizations',
+      publisher: 'GLEIF',
+    });
+  });
+
+  test('is a GLOBAL identifier issued by the local-operating-unit class, certain on the GLEIF issuers page (DEC-079), with its ICD 0199 and EAS 0199 at likely in the long form (DEC-052)', () => {
     const lei = scheme('lei');
+    expect(lei.issuer).toEqual({
+      value: 'local-operating-unit',
+      source: 'gleif-lei-issuers',
+      certainty: 'certain',
+    });
     expect(lei.jurisdiction).toEqual({
       value: 'GLOBAL',
       source: 'landscape-v1-2',

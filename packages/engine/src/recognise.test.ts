@@ -109,6 +109,24 @@ describe('recognise candidate rules on the real model (DEC-063, Pitfalls 3 and 1
     for (const each of conclusions) expect(each.statement).not.toContain(example);
   });
 
+  test('the LEI workbook example is recognised as lei, accepted and certain through the GLEIF pattern and check (DEC-079)', () => {
+    const example = model.schemes.lei?.format?.examples_valid?.[0] ?? '';
+    expect(example).not.toBe('');
+    const { data, conclusions } = engine.recognise(example);
+    expect(schemesOf(data)).toEqual(['lei']);
+    const lei = data[0];
+    expect(lei?.accepted).toBe(true);
+    expect(lei?.certainty).toBe('certain');
+    expect(lei?.checksum.result).toBe('pass');
+    expect(lei?.explanation.map((step) => step.ref)).toEqual(['lei/patterns/0', 'lei/checksum/0']);
+    for (const step of lei?.explanation ?? []) {
+      expect(step.certainty).toBe('certain');
+      expect(step.source?.id).toBe('gleif-lei');
+    }
+    expect(conclusions[0]?.key).toBe('recognise.candidate');
+    expect(conclusions[0]?.certainty).toBe('certain');
+  });
+
   test('format and checksum flags equal the kernel for every example of the model', () => {
     let compared = 0;
     for (const id of Object.keys(model.schemes)) {

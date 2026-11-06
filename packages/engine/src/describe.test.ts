@@ -105,6 +105,15 @@ function expectedConclusions(id: string): number {
   );
 }
 
+suite('describe on the real model: the LEI issuer (DEC-079)', () => {
+  test('the issuer statement is the local operating unit at certain, sourced to the GLEIF issuers page', () => {
+    const found = engine.describe('lei').conclusions.find((each) => each.key === 'describe.issuer');
+    expect(found?.params.authority).toBe('local-operating-unit');
+    expect(found?.certainty).toBe('certain');
+    expect(found?.explanation[0]?.source?.id).toBe('gleif-lei-issuers');
+  });
+});
+
 suite('describe is complete and sourced for every scheme', () => {
   test.for(Object.keys(model.schemes))('%s', (id) => {
     const result = engine.describe(id);

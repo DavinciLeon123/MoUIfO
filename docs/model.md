@@ -324,7 +324,7 @@ Open questions in docs/gaps.md: [Dutch EUID register identifier (Implementing Re
 ## lei
 
 - English label: Legal Entity Identifier
-- Issuer: LEI issuing organisation (Local Operating Unit) (`local-operating-unit`) (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
+- Issuer: LEI issuing organisation (Local Operating Unit) (`local-operating-unit`) (certainty: certain, source: [gleif-lei-issuers](https://www.gleif.org/en/organizational-identity/get-an-lei-vlei/get-an-lei-find-lei-issuing-organizations))
 - Jurisdiction: Worldwide (`GLOBAL`) (certainty: likely, source: [landscape-v1-2](https://github.com/DavinciLeon123/MoUIfO/tree/main/sources))
 - Kind: `identifier` (certainty: certain, source: [peppol-code-lists-9-7](https://docs.peppol.eu/edelivery/codelists/))
 - Abbreviation: LEI (certainty: certain, source: [peppol-code-lists-9-7](https://docs.peppol.eu/edelivery/codelists/))
@@ -332,9 +332,9 @@ Open questions in docs/gaps.md: [Dutch EUID register identifier (Implementing Re
 - ISO 6523 ICD: `0199` (certainty: likely, source: [peppol-code-lists-9-7](https://docs.peppol.eu/edelivery/codelists/))
 - Peppol EAS: `0199` (certainty: likely, source: [peppol-code-lists-9-7](https://docs.peppol.eu/edelivery/codelists/))
 - Format patterns:
-  - `^[A-Z0-9]{18}[0-9]{2}$`; note: Eighteen alphanumeric characters and two check digits (Peppol Code Lists v9.7, entry 0199, which quotes the ISO 17442 format). ISO 17442 itself was not read (docs/gaps.md). (certainty: likely, source: [peppol-code-lists-9-7](https://docs.peppol.eu/edelivery/codelists/))
+  - `^[A-Z0-9]{18}[0-9]{2}$`; note: Twenty alphanumeric characters: eighteen followed by two check digits. GLEIF's LEI page states a unique 20-character alphanumeric code under ISO 17442; the split into eighteen characters and two check digits is the project owner's reading of the GLEIF pages on 2026-11-06 (DEC-079). The Peppol Code Lists v9.7, entry 0199, quote the same format. ISO 17442 itself was not read (docs/gaps.md). (certainty: certain, source: [gleif-lei](https://www.gleif.org/en/organizational-identity/lei-vlei/the-legal-entity-identifier-lei))
 - Checksums:
-  - `iso7064-mod97-10`; note: The check digit scheme follows ISO/IEC 7064 (MOD 97-10), Peppol Code Lists v9.7, entry 0199. ISO 17442 was not read (docs/gaps.md). (certainty: likely, source: [peppol-code-lists-9-7](https://docs.peppol.eu/edelivery/codelists/))
+  - `iso7064-mod97-10`; note: ISO/IEC 7064 MOD 97-10 check digits, as the project owner read them on the GLEIF pages on 2026-11-06 (DEC-079). The automated read of GLEIF's LEI page did not show the check. The Peppol Code Lists v9.7, entry 0199, state the same check. ISO 17442 was not read (docs/gaps.md). (certainty: certain, source: [gleif-lei](https://www.gleif.org/en/organizational-identity/lei-vlei/the-legal-entity-identifier-lei))
 - Valid examples: `724500G3PJTYPL2L9M11`
 - Invalid examples: `724500G3PJTYPL2L9M12`
 - Roles:
