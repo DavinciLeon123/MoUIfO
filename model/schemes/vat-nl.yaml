@@ -18,6 +18,7 @@ sources:
   default: ondernemersplein-nummers-voor-de-btw
 scope:
   en: "required for tax payments"
+  nl: "vereist voor belastingbetalingen"
 format:
   patterns:
     - regex: "^NL[0-9]{9}B[0-9]{2}$"

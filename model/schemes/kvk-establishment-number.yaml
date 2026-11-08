@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=../../tools/validate/schemas/scheme.schema.json
 id: kvk-establishment-number
 label:
-  en: KVK establishment number
+  en: KVK branch number
   nl: Vestigingsnummer
 kind: identifier
 issuer: kvk
@@ -13,15 +13,17 @@ availability:
 sources:
   default: kvk-establishment
 scope:
-  en: "multiple subsidiaries of a company in different locations"
+  en: "multiple branches of one business in different locations"
+  nl: "meerdere vestigingen van één onderneming op verschillende locaties"
 notes:
-  en: "Each establishment has its own number. The workbook says it is not searchable in itself."
+  en: "Each branch has its own number. The workbook says it is not searchable in itself."
+  nl: "Elke vestiging heeft een eigen nummer. Volgens de werkmap is het op zichzelf niet doorzoekbaar."
 format:
   patterns:
     - regex: "^[0-9]{12}$"
       certainty: certain
       source: kvk-establishment
-      note: "A unique 12-digit establishment number (KVK branch-number page)."
+      note: "A unique 12-digit branch number (KVK branch-number page)."
   examples_valid:
     - "000019478445"
   examples_invalid:
@@ -30,9 +32,9 @@ level:
   - value: establishment
     certainty: certain
     source: kvk-establishment
-    note: "Each establishment (branch) of a business or legal entity has a unique 12-digit establishment number."
+    note: "Each branch of a business or legal entity has a unique 12-digit branch number."
 legal_basis:
-  - title: "Handelsregisterwet 2007 (the business register in which the establishments are registered)"
+  - title: "Handelsregisterwet 2007 (the business register in which the branches are registered)"
     url: "https://zoek.officielebekendmakingen.nl/stb-2007-153.pdf"
     certainty: certain
     source: handelsregisterwet-2007
@@ -84,4 +86,4 @@ relations:
     target: kvk-number
     certainty: likely
     source: kvk-establishment
-    note: "The KVK page says the establishment number does not look the same as the KVK number of an establishment."
+    note: "The KVK page says the branch number does not look the same as the KVK number of a branch."

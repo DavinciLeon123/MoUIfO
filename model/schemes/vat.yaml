@@ -17,6 +17,7 @@ sources:
   default: vat-directive-art-215
 scope:
   en: "required for tax payments"
+  nl: "vereist voor belastingbetalingen"
 context_from:
   issuing_country:
     capture:

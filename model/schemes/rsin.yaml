@@ -15,6 +15,7 @@ sources:
   default: kvk-rsin
 scope:
   en: "legal person equivalent of BSN; used for digital communication with Dutch government"
+  nl: "tegenhanger van het BSN voor rechtspersonen; gebruikt voor digitale communicatie met de Nederlandse overheid"
 format:
   patterns:
     - regex: "^[0-9]{9}$"

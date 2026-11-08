@@ -1,51 +1,43 @@
-// D-10 and D-11: how the page language is chosen and how model text follows it. resolveLang and
-// langSearch are pure, so the whitelist, the browser fallback and the odd or repeated values of a
-// shared link (T-07-10) are pinned here; the browser behaviour is in e2e/i18n.e2e.ts.
+// D-10 and D-11 (as amended by DEC-078): how the page language is chosen and how model text follows
+// it. resolveLang and langSearch are pure, so the whitelist (English unless an explicit ?lang=nl,
+// DEC-078) and the odd or repeated values of a shared link (T-07-10) are pinned here; the browser
+// behaviour is in e2e/i18n.e2e.ts.
 import { describe, expect, test } from 'vitest';
 import { modelText } from './i18n/text.ts';
 import { langSearch, resolveLang } from './lang.ts';
 
 describe('resolveLang', () => {
-  test('?lang=nl gives nl and ?lang=en gives en, whatever the browser says', () => {
-    for (const navigatorLanguage of ['en-US', 'nl-NL', 'de-DE', undefined]) {
-      expect(resolveLang('?lang=nl', navigatorLanguage)).toBe('nl');
-      expect(resolveLang('?lang=en', navigatorLanguage)).toBe('en');
-    }
+  test('?lang=nl gives nl and ?lang=en gives en', () => {
+    expect(resolveLang('?lang=nl')).toBe('nl');
+    expect(resolveLang('?lang=en')).toBe('en');
   });
 
-  test('a Dutch browser language gives nl, anything else gives en', () => {
-    for (const navigatorLanguage of ['nl', 'nl-NL', 'nl-BE', 'NL-nl']) {
-      expect(resolveLang('', navigatorLanguage)).toBe('nl');
-    }
-    for (const navigatorLanguage of ['en-US', 'de-DE', 'fr', '', undefined]) {
-      expect(resolveLang('', navigatorLanguage)).toBe('en');
-    }
+  test('no parameter gives en: the browser language is no input any more (DEC-078)', () => {
+    expect(resolveLang('')).toBe('en');
+    expect(resolveLang('?')).toBe('en');
   });
 
-  test('only an exact en or nl counts; any other value falls back to the browser', () => {
-    expect(resolveLang('?lang=NL', 'en-US')).toBe('en');
-    expect(resolveLang('?lang=NL', 'nl-NL')).toBe('nl');
-    expect(resolveLang('?lang=de', 'en-US')).toBe('en');
-    expect(resolveLang('?lang=de', 'nl-NL')).toBe('nl');
-    expect(resolveLang('?lang=', 'en-US')).toBe('en');
-    expect(resolveLang('?lang=%00nl', 'en-US')).toBe('en');
-    expect(resolveLang('?lang=nl%20', 'en-US')).toBe('en');
-    expect(resolveLang('?other=nl', 'en-US')).toBe('en');
-  });
-
-  test('a repeated parameter uses the first value, and the result is always en or nl', () => {
-    expect(resolveLang('?lang=nl&lang=en', 'en-US')).toBe('nl');
-    expect(resolveLang('?lang=en&lang=nl', 'nl-NL')).toBe('en');
-    expect(resolveLang('?lang=xx&lang=nl', 'en-US')).toBe('en');
+  test('only an exact en or nl counts; any other value gives en', () => {
     for (const search of [
-      '?lang=<script>',
+      '?lang=NL',
+      '?lang=de',
+      '?lang=',
+      '?lang=%00nl',
+      '?lang=nl%20',
+      '?other=nl',
       '?lang=__proto__',
       '?lang[]=nl',
       '??lang=nl',
       'lang=nl',
     ]) {
-      expect(['en', 'nl']).toContain(resolveLang(search, undefined));
+      expect(resolveLang(search), search).toBe('en');
     }
+  });
+
+  test('a repeated parameter uses the first value', () => {
+    expect(resolveLang('?lang=nl&lang=en')).toBe('nl');
+    expect(resolveLang('?lang=en&lang=nl')).toBe('en');
+    expect(resolveLang('?lang=xx&lang=nl')).toBe('en');
   });
 });
 

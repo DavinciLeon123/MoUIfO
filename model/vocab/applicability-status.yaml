@@ -7,32 +7,44 @@ values:
   - id: issued
     label:
       en: Issued
+      nl: uitgegeven
     definition:
       en: "The identifier is issued in this jurisdiction (SPEC section 5.1)."
+      nl: "Het identificatienummer wordt in dit rechtsgebied uitgegeven (SPEC §5.1)."
     inherits_down: false
     rationale:
       en: "Not inherited by a part of the jurisdiction: issuing is tied to the issuing authority of that jurisdiction. This value is a modelling decision (DEC-041) and no external source exists for it."
+      nl: "Wordt niet overgeërfd door een deel van het rechtsgebied: het uitgeven is gebonden aan de uitgevende instantie van dat rechtsgebied. Deze waarde is een modelleerbeslissing (DEC-041) en er bestaat geen externe bron voor."
   - id: recognised
     label:
       en: Recognised
+      nl: erkend
     definition:
       en: "The identifier is legally or formally recognised in this jurisdiction (SPEC section 5.1)."
+      nl: "Het identificatienummer is in dit rechtsgebied wettelijk of formeel erkend (SPEC §5.1)."
     inherits_down: true
     rationale:
       en: "Inherited by a part of the jurisdiction: recognition under a rule of the parent applies to its parts. This value is a modelling decision (DEC-041) and no external source exists for it."
+      nl: "Wordt overgeërfd door een deel van het rechtsgebied: erkenning op grond van een regel van het bovenliggende rechtsgebied geldt voor zijn delen. Deze waarde is een modelleerbeslissing (DEC-041) en er bestaat geen externe bron voor."
   - id: verifiable
     label:
       en: Verifiable
+      nl: controleerbaar
     definition:
       en: "The identifier can be verified from this jurisdiction (SPEC section 5.1)."
+      nl: "Het identificatienummer kan vanuit dit rechtsgebied worden gecontroleerd (SPEC §5.1)."
     inherits_down: true
     rationale:
       en: "Inherited by a part of the jurisdiction: a verification route of the parent is available to its parts. This value is a modelling decision (DEC-041) and no external source exists for it."
+      nl: "Wordt overgeërfd door een deel van het rechtsgebied: een controleroute van het bovenliggende rechtsgebied staat open voor zijn delen. Deze waarde is een modelleerbeslissing (DEC-041) en er bestaat geen externe bron voor."
   - id: not-applicable
     label:
       en: Not applicable
+      nl: niet van toepassing
     definition:
       en: "The identifier does not apply in this jurisdiction (SPEC section 5.1)."
+      nl: "Het identificatienummer is in dit rechtsgebied niet van toepassing (SPEC §5.1)."
     inherits_down: false
     rationale:
       en: "Not inherited by a part of the jurisdiction: a part may have its own arrangement, as with XI under GB. This value is a modelling decision (DEC-041) and no external source exists for it."
+      nl: "Wordt niet overgeërfd door een deel van het rechtsgebied: een deel kan een eigen regeling hebben, zoals XI onder GB. Deze waarde is een modelleerbeslissing (DEC-041) en er bestaat geen externe bron voor."

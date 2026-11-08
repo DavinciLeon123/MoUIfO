@@ -3,5 +3,7 @@ id: local-operating-unit
 kind: class
 label:
   en: LEI issuing organisation (Local Operating Unit)
+  nl: LEI-uitgevende organisatie (Local Operating Unit)
 definition:
   en: An organisation accredited by GLEIF to issue and maintain LEIs.
+  nl: Een door GLEIF geaccrediteerde organisatie die LEI's uitgeeft en bijhoudt.

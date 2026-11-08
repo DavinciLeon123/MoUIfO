@@ -109,6 +109,17 @@ describe('Appendix B verification (DEC-049)', () => {
     }
   });
 
+  test('the LEI row is not confirmed by ISO 17442, in the model at certain on the owner reading and the GLEIF page (DEC-079)', () => {
+    const row = tableRows(sectionBody(VERIFICATION)).find((each) =>
+      each.item.startsWith('LEI ISO 7064 mod 97-10'),
+    );
+    expect(row?.status.startsWith('not confirmed by ISO 17442')).toBe(true);
+    expect(row?.status).toContain('in the model at certain');
+    expect(row?.status).toContain('DEC-079');
+    expect(row?.source).toContain('gleif-lei');
+    expect(row?.date).toBe('2026-11-06');
+  });
+
   test('every row has four cells, a status that starts confirmed or not confirmed, a model statement and a date', () => {
     const rows = tableRows(sectionBody(VERIFICATION));
     expect(rows.length).toBeGreaterThan(0);

@@ -220,7 +220,7 @@ describe('relate links of a no-rule pair', () => {
     expect(links).toHaveLength(MAX_RELATE_LINKS);
   });
 
-  test('a KvK number plus a Dutch VAT number links kvk-number to eori, vat and vat-nl by id only', () => {
+  test('a KvK number plus a Dutch VAT number links kvk-number to vat and vat-nl by id only (DEC-080)', () => {
     const kvk = example('kvk-number');
     const vatNl = example('vat-nl');
     const run = runPaste(engine, [kvk, vatNl]);
@@ -228,7 +228,6 @@ describe('relate links of a no-rule pair', () => {
     const pair = run.pairs[0];
     expect(pair?.outcome).toBe('no-rule');
     expect(pair?.relate).toEqual([
-      { a: 'kvk-number', b: 'eori' },
       { a: 'kvk-number', b: 'vat' },
       { a: 'kvk-number', b: 'vat-nl' },
     ]);

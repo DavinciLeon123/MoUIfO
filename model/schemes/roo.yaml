@@ -15,8 +15,10 @@ sources:
   default: koop-roo
 scope:
   en: "information on governmental organisations only"
+  nl: "alleen informatie over overheidsorganisaties"
 notes:
   en: "A register, not an identifier: a URL is used for identification."
+  nl: "Een register, geen identificatienummer: voor identificatie wordt een URL gebruikt."
 level:
   - value: government-organisation
     certainty: certain

@@ -91,6 +91,16 @@ describe('example chips (WEB-04, D-06)', () => {
     }
   });
 
+  test('chip recognise shows the Dutch VAT number first and no eori (DEC-080)', () => {
+    const recognise = pasteChip('recognise');
+    expect([...recognise.lines]).toEqual([VAT_VALUE]);
+    const vatNlExamples = host.model.schemes['vat-nl']?.format?.examples_valid ?? [];
+    expect(vatNlExamples).toContain(VAT_VALUE);
+    const candidates = runPaste(engine, [...recognise.lines]).values[0]?.recognise.data ?? [];
+    expect(candidates[0]?.scheme).toBe('vat-nl');
+    expect(candidates.some((candidate) => candidate.scheme === 'eori')).toBe(false);
+  });
+
   test('chip derive declares the RSIN as rsin and derives an eori and no vat-nl (D-17, DEC-050)', () => {
     const derive = pasteChip('derive');
     expect(derive.lines).toEqual([RSIN_VALUE]);

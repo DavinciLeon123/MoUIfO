@@ -29,14 +29,28 @@ function untranslated(english: string): Rendered {
   return { text: english, lang: 'en', marker: 'untranslated' };
 }
 
+/** The English sentence: the dictionary entry when it has one, else the engine's own statement. */
+function englishConclusion(conclusion: Conclusion, ctx: TextContext): Rendered {
+  const plain: Rendered = { text: conclusion.statement, lang: 'en', marker: null };
+  if (!Object.hasOwn(ENGINE_EN.conclusions, conclusion.key)) return plain;
+  const entry = ENGINE_EN.conclusions[conclusion.key as ConclusionKey];
+  try {
+    const text = entry.render(conclusion, { host: ctx.host, data: ctx.data, label: (t) => t.en });
+    return { text, lang: 'en', marker: null };
+  } catch {
+    return plain;
+  }
+}
+
 /**
- * English shows the engine's own sentence, unchanged. Dutch (D-09) renders the dictionary entry of
+ * English shows the engine's own sentence, unchanged, except the keys the English dictionary words
+ * itself (describe.kind and describe.role, handover test findings). Dutch (D-09) renders the dictionary entry of
  * the conclusion's key from its params, the call's data and the model; a key without an entry, or
  * an entry that cannot render this conclusion, shows the English sentence marked as not translated.
  * A sentence that had to use an English model label is Dutch with the `en` marker (D-10).
  */
 export function conclusionText(conclusion: Conclusion, ctx: TextContext): Rendered {
-  if (ctx.lang === 'en') return { text: conclusion.statement, lang: 'en', marker: null };
+  if (ctx.lang === 'en') return englishConclusion(conclusion, ctx);
   if (!Object.hasOwn(DUTCH.conclusions, conclusion.key)) return untranslated(conclusion.statement);
   const entry = DUTCH.conclusions[conclusion.key as ConclusionKey];
   try {

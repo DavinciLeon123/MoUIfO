@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=../../tools/validate/schemas/source.schema.json
+id: gleif-lei-issuers
+title: "Get an LEI - Get an LEI/vLEI - Organizational Identity – GLEIF"
+type: register-doc
+date: 2026-11-06
+url: https://www.gleif.org/en/organizational-identity/get-an-lei-vlei/get-an-lei-find-lei-issuing-organizations
+publisher: GLEIF

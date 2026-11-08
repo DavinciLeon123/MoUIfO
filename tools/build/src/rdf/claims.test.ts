@@ -67,7 +67,9 @@ describe('conditional pattern Statements (tracer)', () => {
 
   test('a pattern without a condition has no def:condition and still has its position', () => {
     const iri = statementsOf('eori', 'pattern').find((statement) =>
-      valuesOf(statement, def('object')).includes('^[A-Z]{2}[A-Z0-9]{1,15}$'),
+      valuesOf(statement, def('object')).includes(
+        '^(?:[A-MO-Z][A-Z][A-Z0-9]{1,15}|N[A-KM-Z][A-Z0-9]{1,15}|NL[0-9]{9,10})$',
+      ),
     );
     expect(iri).toBeDefined();
     expect(valuesOf(iri ?? '', def('condition'))).toEqual([]);

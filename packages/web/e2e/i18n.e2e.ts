@@ -1,14 +1,15 @@
 // Browser test of the bilingual site: D-05 and WEB-10 (the privacy sentence in both languages),
-// D-09 (a Dutch engine line without a dictionary entry falls back visibly), D-11 (language from
-// ?lang= or the browser, a toggle without reload, nothing stored, only lang in the URL) and WEB-09.
-// D-10 is checked on the sources of an opened step list. The only nine-digit run used is inside the public example value of SPEC section 10.
+// D-09 (a Dutch engine line without a dictionary entry falls back visibly), D-11 as amended by
+// DEC-078 (English unless ?lang=nl, whatever the browser language, a toggle without reload, nothing
+// stored, only lang in the URL) and WEB-09. D-10 is checked on the sources of an opened step list.
+// The only nine-digit run used is inside the public example value of SPEC section 10.
 import { expect, test } from '@playwright/test';
 import { expectNoAxeViolations } from './support.ts';
 
 const EORI_VALUE = 'NL001469630';
-const EORI_FULL = 'NL001469630B01';
+const VAT_VALUE = 'NL001469630B01';
 const RSIN_VALUE = '001469630';
-const TRIPLE = `${EORI_VALUE}\n${EORI_FULL}\n${RSIN_VALUE}`;
+const TRIPLE = `${EORI_VALUE}\n${VAT_VALUE}\n${RSIN_VALUE}`;
 
 const EN_INPUT = 'Identifiers, one per line';
 const NL_INPUT = 'Identificatienummers, één per regel';
@@ -32,16 +33,16 @@ test('?lang=nl gives the Dutch page, the Dutch privacy sentence, html lang and t
 test.describe('a Dutch browser', () => {
   test.use({ locale: 'nl-NL' });
 
-  test('without a parameter the page is Dutch, and ?lang=en still gives English', async ({
+  test('without a parameter the page is English, and ?lang=nl gives Dutch (DEC-078)', async ({
     page,
   }) => {
     await page.goto('./');
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('UIO-kennismodel');
-    await expect(page.locator('html')).toHaveAttribute('lang', 'nl');
-    await page.goto('./?lang=en');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('UIO knowledge model');
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
-    await expect(page).toHaveTitle('UIO knowledge model');
+    await page.goto('./?lang=nl');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('UIO-kennismodel');
+    await expect(page.locator('html')).toHaveAttribute('lang', 'nl');
+    await expect(page).toHaveTitle('UIO-kennismodel');
   });
 });
 
@@ -85,7 +86,7 @@ test('the toggle switches language in place and keeps the text and the results, 
   expect(stored.local).toBe(0);
   expect(stored.session).toBe(0);
   expect(stored.cookie).toBe('');
-  for (const value of [EORI_VALUE, EORI_FULL, RSIN_VALUE]) expect(stored.url).not.toContain(value);
+  for (const value of [EORI_VALUE, VAT_VALUE, RSIN_VALUE]) expect(stored.url).not.toContain(value);
 
   await page.getByRole('button', { name: 'English' }).click();
   expect(await page.evaluate(() => location.search)).toBe('?lang=en');
@@ -100,7 +101,7 @@ test('the toggle switches language in place and keeps the text and the results, 
 
 test('a Dutch engine line is Dutch and carries no not-translated marker', async ({ page }) => {
   await page.goto('./?lang=nl');
-  await page.getByRole('textbox', { name: NL_INPUT }).fill(EORI_FULL);
+  await page.getByRole('textbox', { name: NL_INPUT }).fill(EORI_VALUE);
   await page.getByRole('button', { name: 'Uitleggen' }).click();
   const line = page
     .getByRole('region', { name: 'Herkenning' })
@@ -147,6 +148,7 @@ test('the Dutch EORI triple reads in Dutch, with English source titles tagged an
   expect(await titles.count()).toBeGreaterThan(0);
   await expect(open.locator('.marker', { hasText: /^EN$/ })).toHaveCount(1);
   await expect(open.locator('.steps')).toContainText('Bron:');
+  await expect(open.locator('.steps')).toContainText('Verwijzing:');
   await expect(open.locator('.verify')).toContainText('Zo controleert u het');
 });
 

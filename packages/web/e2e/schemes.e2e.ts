@@ -6,13 +6,83 @@
 // covers the scheme list, the header navigation, focus and title on every route, the DEC-024
 // credit line and axe (WEB-08) on the list and a scheme page in both languages. Task 3 covers the
 // relation graph (D-15): an SVG with a title, a visible text list with the same edges, node links
-// and the page of a scheme without relations.
-import { expect, test } from '@playwright/test';
+// and the page of a scheme without relations. DEC-081 covers the Dutch model texts (drafts): every
+// expectation is read from dist/model.json, so a text without nl expects the English text with the
+// EN marker and no test fails when a future text lacks nl.
+import { readFileSync } from 'node:fs';
+import { expect, type Locator, test } from '@playwright/test';
+import { UI_NL } from '../src/i18n/ui.nl.ts';
 import { expectNoAxeViolations } from './support.ts';
+
+type Text = { en: string; nl?: string };
+type RuntimeModel = {
+  schemes: Record<
+    string,
+    | {
+        label: Text;
+        scope?: Text;
+        notes?: Text;
+        roles?: { value: string }[];
+        applicability?: { jurisdiction: string; status: string[] }[];
+      }
+    | undefined
+  >;
+  jurisdictions: Record<string, { label: Text } | undefined>;
+  vocab: Record<string, { values: { id: string; label?: Text }[] } | undefined>;
+};
+const MODEL = JSON.parse(
+  readFileSync(new URL('../../../dist/model.json', import.meta.url), 'utf8'),
+) as RuntimeModel;
+
+/** The label of a vocabulary member in the model; throws when the model lacks the member. */
+function memberLabel(vocabulary: string, id: string): Text {
+  const label = MODEL.vocab[vocabulary]?.values.find((each) => each.id === id)?.label;
+  if (label === undefined) throw new Error(`no ${vocabulary} member ${id} in dist/model.json`);
+  return label;
+}
+
+/** A model text on the Dutch page: its nl unmarked when present, else its en with one EN marker. */
+async function expectDutchModelText(element: Locator, text: Text): Promise<void> {
+  if (text.nl !== undefined) {
+    await expect(element).toContainText(text.nl);
+    await expect(element.locator('.marker')).toHaveCount(0);
+  } else {
+    await expect(element).toContainText(text.en);
+    await expect(element.locator('.marker')).toHaveCount(1);
+    await expect(element.locator('.marker')).toHaveText(UI_NL.markerEn);
+  }
+}
 
 const EORI_LABEL = 'Economic Operators Registration and Identification number';
 const CREDIT =
   'UID table v1.2 — Davinci Conclusion, as produced for the CoE-DSC. Licensed under CC BY 4.0.';
+
+test('a scheme page says Type and Identifies, in Dutch Type and Identificeert (handover findings)', async ({
+  page,
+}) => {
+  await page.goto('./#/schemes/vat');
+  await expect(page.getByRole('heading', { level: 3, name: 'Type', exact: true })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { level: 3, name: 'Identifies', exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText('The type of VAT identification number (vat) is identifier.'),
+  ).toBeVisible();
+  await expect(
+    page.getByText('VAT identification number (vat) identifies a taxpayer.'),
+  ).toBeVisible();
+  await expect(page.getByRole('heading', { level: 3, name: 'Kind', exact: true })).toHaveCount(0);
+
+  await page.goto('./?lang=nl#/schemes/vat');
+  await expect(page.getByRole('heading', { level: 3, name: 'Type', exact: true })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { level: 3, name: 'Identificeert', exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText('Het type van Btw-identificatienummer (vat) is identificatienummer.'),
+  ).toBeVisible();
+  await expect(page.getByText('identificeert een').first()).toBeVisible();
+});
 
 test('#/schemes/eori shows the sourced description, How to verify and seven jurisdictions', async ({
   page,
@@ -285,4 +355,64 @@ test('D-15, D-10: in Dutch the graph labels use the model and rule or component 
   await expect(relations.locator('svg.graph title')).toHaveText(/^Relaties van /);
   await expect(relations.locator('.relation-list')).toContainText('onderdeel 0106');
   await expect(relations.locator('.relation-list')).not.toContainText('component 0106');
+});
+
+test("D-10, DEC-081: in Dutch the lei page shows the model's Dutch label, scope and notes", async ({
+  page,
+}) => {
+  const lei = MODEL.schemes.lei;
+  if (lei === undefined) throw new Error('no scheme lei in dist/model.json');
+  await page.goto('./?lang=nl#/schemes/lei');
+  await expectDutchModelText(page.getByRole('heading', { level: 1 }), lei.label);
+  const paragraph = (label: string) =>
+    page.locator('p').filter({ has: page.locator('strong', { hasText: label }) });
+  if (lei.scope !== undefined) await expectDutchModelText(paragraph(UI_NL.scopeLabel), lei.scope);
+  if (lei.notes !== undefined) await expectDutchModelText(paragraph(UI_NL.notesLabel), lei.notes);
+});
+
+test("DEC-081: the Dutch vat page reads the role and the applicability in the model's Dutch", async ({
+  page,
+}) => {
+  const vat = MODEL.schemes.vat;
+  const role = vat?.roles?.[0]?.value;
+  if (vat === undefined || role === undefined) throw new Error('no vat role in dist/model.json');
+  await page.goto('./?lang=nl#/schemes/vat');
+
+  // The role sentence: the Dutch scheme name and the member's label, its first letter lowercased.
+  const roleLabel = memberLabel('role', role);
+  const word = roleLabel.nl ?? roleLabel.en;
+  const sentence = `${vat.label.nl ?? vat.label.en} (vat) identificeert een ${word.charAt(0).toLowerCase()}${word.slice(1)}.`;
+  const roleStatement = page.locator('[data-key="describe.role"] summary .statement').first();
+  await expect(roleStatement).toContainText(sentence);
+  await expect(roleStatement.locator('.marker')).toHaveCount(
+    roleLabel.nl === undefined || vat.label.nl === undefined ? 1 : 0,
+  );
+  if (roleLabel.nl !== undefined && vat.label.nl !== undefined) {
+    await expect(roleStatement).toHaveText(sentence);
+  }
+
+  // The applicability lines: no EN marker when every status and jurisdiction of every entry has nl.
+  const entries = vat.applicability ?? [];
+  const allDutch = entries.every(
+    (entry) =>
+      MODEL.jurisdictions[entry.jurisdiction]?.label.nl !== undefined &&
+      entry.status.every((status) => memberLabel('applicability-status', status).nl !== undefined),
+  );
+  const statements = page.locator('[data-key="describe.applicability"] summary .statement');
+  expect(await statements.count()).toBeGreaterThan(0);
+  if (allDutch) {
+    for (const statement of await statements.all()) {
+      await expect(statement.locator('.marker')).toHaveCount(0);
+    }
+  }
+
+  // The GLOBAL block of the eori page lists the not-applicable member with the gap stated.
+  const notApplicable = memberLabel('applicability-status', 'not-applicable');
+  await page.goto('./?lang=nl#/schemes/eori');
+  const line = page.locator('[data-jurisdiction="GLOBAL"] [data-status="not-applicable"]');
+  if (notApplicable.nl !== undefined) {
+    await expect(line).toHaveText(`${notApplicable.nl}: ${UI_NL.applicabilityNoData}`);
+  } else {
+    await expect(line).toContainText(notApplicable.en);
+  }
 });

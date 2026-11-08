@@ -235,7 +235,7 @@ export const ENGINE_NL = {
       },
     },
     'describe.kind': {
-      label: 'Soort',
+      label: 'Type',
       render: (c, ctx) => {
         const kind = param(c, 'kind');
         const word =
@@ -246,7 +246,7 @@ export const ENGINE_NL = {
               : kind === 'composite'
                 ? 'samengesteld identificatienummer'
                 : kind;
-        return `Het soort van ${schemeName(ctx, param(c, 'scheme'))} is ${word}.`;
+        return `Het type van ${schemeName(ctx, param(c, 'scheme'))} is ${word}.`;
       },
     },
     'describe.issuer': {
@@ -320,10 +320,15 @@ export const ENGINE_NL = {
       render: (c, ctx) =>
         `Het niveau van ${schemeName(ctx, param(c, 'scheme'))} is ${vocabWord(ctx, 'level', param(c, 'level'))}.`,
     },
+    // The role word is the member's Dutch label (drafts, DEC-081), lowercased; a member without
+    // Dutch falls back to its English label and marks the sentence EN.
     'describe.role': {
-      label: 'Rol',
-      render: (c, ctx) =>
-        `De rol van ${schemeName(ctx, param(c, 'scheme'))} is ${vocabWord(ctx, 'role', param(c, 'role'))}.`,
+      label: 'Identificeert',
+      render: (c, ctx) => {
+        const word = vocabWord(ctx, 'role', param(c, 'role'));
+        const lower = word.charAt(0).toLowerCase() + word.slice(1);
+        return `${schemeName(ctx, param(c, 'scheme'))} identificeert een ${lower}.`;
+      },
     },
     'describe.applicability': {
       label: 'Toepasselijkheid',
